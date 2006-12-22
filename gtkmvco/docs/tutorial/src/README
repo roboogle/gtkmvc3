@@ -1,0 +1,8 @@
+To run the glade-based example:
+$> python main_glade.py 
+
+To run manually built example:
+$> python main_no_glade.py
+
+To run the mixed nice solution:
+$> python main_mixed.py

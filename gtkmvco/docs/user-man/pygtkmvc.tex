@@ -1,0 +1,72 @@
+\documentclass{article}
+
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{url}
+
+\newcommand{\kw}[1]{\emph{#1}\xspace}
+
+\newcommand{\appl}[1]{\textsl{#1}\xspace}
+
+\newcommand{\swig}{\appl{Swig}}
+
+\newcommand{\glade}{\appl{Glade}}
+
+\newcommand{\pygtk}{\appl{PyGTK}}
+
+\newcommand{\mvco}{\kw{MVC--O}}
+\newcommand{\mvc}{\kw{MVC} pattern\xspace}
+\newcommand{\obs}{\kw{Observer} pattern\xspace}
+\newcommand{\gui}{\kw{GUI}}
+\newcommand{\pygtkmvc}{\kw{pygtkmvc}}
+
+
+\newcommand{\file}[1]{\texttt{#1}\xspace}
+
+\newcommand{\codename}[1]{\texttt{\bfseries \small{#1}}\xspace}
+
+\newcommand{\codesize}{\small}
+
+\newcommand{\OP}{\kw{OP}}
+\newcommand{\OPS}{\kw{OPs}}
+\newcommand{\OPvar}{\codename{\_\_properties\_\_}}
+\newcommand{\OPdvar}{\codename{\_\_derived\_properties\_\_}}
+
+
+\begin{document}
+
+\title{Model-View-Controller and Observer patterns for \pygtk \\
+Version 1.0.0}
+
+\author{ Roberto Cavada \thanks{ITC-irst, Trento, Italy,
+ cavada@irst.itc.it} }
+
+\maketitle
+
+
+% ----------------------------------------------------------------------
+\input{intro}
+% ----------------------------------------------------------------------
+
+% ----------------------------------------------------------------------
+\input{motiv}
+% ----------------------------------------------------------------------
+
+% ----------------------------------------------------------------------
+\input{arch}
+% ----------------------------------------------------------------------
+
+% ----------------------------------------------------------------------
+\input{mvco}
+% ----------------------------------------------------------------------
+
+% ----------------------------------------------------------------------
+\input{impl}
+% ----------------------------------------------------------------------
+
+% ----------------------------------------------------------------------
+\input{exam}
+% ----------------------------------------------------------------------
+
+\end{document}

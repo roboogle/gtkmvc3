@@ -1,0 +1,95 @@
+\subsection{\label{MVC} Implementation of the \mvc}
+
+The implementation of the \mvc provided by \pygtkmvc is a simplified
+version of the ``official'' pattern generally described by Software
+Engineering Theory \footnote{For example, see
+  \url{http://www.object-arts.com/EducationCentre/Overviews/MVC.htm}}.
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=10cm]{eps/mvc.eps}
+\caption{\label{MVC_f}Simplified Model-View-Controller Pattern}
+\end{center}
+\end{figure}
+Simplification consists in the fact that in the more general pattern
+the Controller-View relationship allows a 1-N cardinality.
+Furthermore, the implementation is different as the view side cannot
+see the model part. The reasons behind this difference will be
+explained later, but we can anticipate here that this is due to the
+relationship between the view and the controller, that is stronger in
+\pygtkmvc than in the classic \mvc.
+
+\smallskip
+
+Figure \ref{MVC_f} shows three interconnected parts:
+
+\begin{description}
+\item[Model] Contains the \emph{state} of the application. Also it
+  provides support to access and modify the state, and knows how to
+  handle dependencies between different parts in the state. For
+  example the application logic could require that changing a
+  variable, causes a changing of another. It is not required the
+  model user to be aware about this dependency, because model
+  autonomously handles it.
+
+  Zero, one or more \emph{Controllers} can be connected to one Model
+  (see \emph{Controller}, below). Furthermore, one or more
+  \emph{Views} can be associated with parts of the state; for example
+  a numerical variable could be visualized as a number, as well as a
+  graphic bar. It is important to remark that \emph{a Model does not
+    know that a set of Views is possibly connected to its state
+    through a set of Controllers}.
+
+\item[View] shows parts of the Model state, and interactively
+  exchanges information with the User, via input/output devices.  View
+  also interacts with a \emph{Controller} (see below), sending to it
+  signals, and receiving information to visualize.
+
+  Furthermore, a View collects a set of widget trees built from a
+  \glade file, and/or constructed by hand. Since a Widget contains a
+  \emph{state}, this implementation differs from the standard \mvc,
+  where generally the View side is completely \emph{stateless}.
+
+  As for the Model, a View does not know the semantics concerning what
+  it visualizes, as well as the Model which it is connected to.
+
+\item[Controller] Realizes the connection between Models and Views.
+  A Controller contains the \gui logic: for example, it stores the
+  information about what happens when a button is clicked (e.g. 
+  handlers of signal are located inside a Controller.)
+
+  A Controller perfectly knows how the connected Model and View are
+  implemented, and knows both the state and presentation (\gui)
+  semantics. A Controller is associated to one Model (\emph{has a}
+  relationship), and in the current implementation is associated only
+  to one View.
+
+\end{description}
+
+
+Two particular mechanisms make the isolation between Model and
+Controller, and between View and Controller. To support the former,
+the \obs is provided (see \ref{OBS}), whereas latter mechanism is
+provided by the \mvc, and that is explained in \ref{VR}.
+
+
+\subsubsection{\label{VR} View Registration}
+Current implementation allows only a 1-1 relationship between
+Controller and View. Anyway a registration mechanism has been provided
+to connect those two parts, allowing for more generic relationship in
+the future, when a Controller could handle more than one Views, or a
+View can be shared among several Controllers.
+
+After the creation, a View must register itself with a Controller.
+From there on, the Controller can access the state (the set of
+contained widgets) and methods inside the View. When the view
+registers itself with a Controller, all signals are also automatically
+connected to the corresponding methods inside the Controller.
+Connection in this case is performed by means of an implicit syntax
+rule, which binds a signal name to a corresponding method name.
+
+In sections \ref{VR:D} and \ref{VR:EX} more details and an example are
+presented, to show how the View registration mechanism can be
+exploited by controllers to connect signals and handle the creation of
+particular widgets like for example TreeViews, TreeColumns,
+CellRenderers, etc.

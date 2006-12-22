@@ -1,0 +1,14 @@
+A minimal example of application. 
+
+The model contains a counter and a reset value.
+
+The view shows both, and provides the possibility of changing the
+reset value, increment the counter value, and reset the counter to the
+reset value.
+
+The view is loaded from a glade file, and the low coupling among the
+different values is guaranteed by the observable pattern.
+
+To execute:
+$> python main.py
+

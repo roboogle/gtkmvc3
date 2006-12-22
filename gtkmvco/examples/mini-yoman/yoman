@@ -1,0 +1,16 @@
+#!/usr/bin/python2.4
+
+# Test requirement for pygtk 2.0
+import pygtk
+pygtk.require("2.0")
+
+from yomanlib.models.appmodel import AppModel
+from yomanlib.controllers.appctl import AppCtl
+from yomanlib.views.appview import AppView
+
+model = AppModel()
+ctl = AppCtl(model)
+view = AppView(ctl)
+
+import gtk
+gtk.main()

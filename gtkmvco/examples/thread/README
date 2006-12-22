@@ -1,0 +1,14 @@
+In this example, a thread is run in the model as the button is
+pressed. The thread changes the model <i>busy</i> status, and
+increments 10 times the value of property <i>counter</i>. The
+controller observes the model properties and updates the view
+accordingly. The model uses the gtk idle function to notify the
+controller, so the thread changing the model and the controller/view
+are isolated, and the view got updated by the same thread running the
+gtk main loop.
+
+
+To run: 
+$> python main.py 
+
+... from within the directory where this file is located

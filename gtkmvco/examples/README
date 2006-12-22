@@ -1,0 +1,25 @@
+This directory contains several examples of usage of gtkmvc. 
+
+* basic 
+  A very basic example, start from here to learn basic usage of
+  the framework. Not all the features are presented.
+
+* basic_manual
+  Similar to basic, but no glade file is used. widgets are created
+  'manually'.
+
+* observable 
+  All kinds of supported observable properties are presented. 
+
+* thread 
+  A simple multi-threading example.  
+
+* converter
+  A complex example showing how a middle/lage application may be
+  organized to fit with the framework philosophy.
+
+* mini-yoman 
+  An example provided by Baruch Even <baruch@ev-en.org> as an
+  extracted part of a larger project. The original code has been
+  slightly modified to adapt it to version 1.0.0.
+  

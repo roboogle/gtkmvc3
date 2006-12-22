@@ -1,0 +1,16 @@
+A minimal example of application, like basic but with a view 
+build 'by hand' (not loaded from a glade file). 
+
+model is exactly the same as in basic, the controller is similar, but
+it handles gtk signal connections during view's registration.
+
+The view is the most important part in this example, as it builds the
+widgets completely by hand. Of course mxed solution are possible,
+where the view is partially constructed fromo one or more glade files,
+and some parts are still contructed by hand.
+
+See the 'basic' example for further information.
+
+To execute:
+$> python main.py
+

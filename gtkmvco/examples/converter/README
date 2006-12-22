@@ -1,0 +1,93 @@
+A simple currency converter.
+
+This is the most complex example presented here among the available
+examples. The code is even much more complex than what it would be
+actually required, as the idea is to present a sort of template which
+a middle and large application based on gtkmvc may follow.
+
+----------------------------------------------------------------------
+  HOW THE EXAMPLE CAN BE RUN 
+----------------------------------------------------------------------
+1. Run main1.py
+   
+   A simple window is shown, containing some widgets that allow for
+   choosing a source currency, a target currency, an amount of money,
+   and a button to send the money to the author. Ok, actually to
+   convert the amount from source currency to target currency. 
+   Available currencies are read from file 'currencies'.
+
+
+2. Run main2.py 
+
+   A richer window is presented, allowing for editing currencies, and
+   seeing a nice about window. Notice that the main feature is still
+   provided by the currency converter presented in main1, that is now
+   embedded into the main window. It is possible to have multiple
+   windows for editing currencies. All the windows are views on the
+   same model (try to edit one currency while looking at the same
+   currency from other editing windows).
+
+
+----------------------------------------------------------------------
+  HOW THE CODE IS STRUCTURED
+----------------------------------------------------------------------
+
+The application is split into several directories:
+- src: main source code
+- glade: glade files
+- current: main launchers, readme and other files
+
+
+* Glade files: There are two glade files. One contains the about
+  dialog, and the other contains a large set of windows (open it with
+  glade and have a look). Some of those windows are real top-level
+  windows to be used by the application (for example, 'window_app' and
+  'dialog_currencies'). Some other are simple containers for widgets
+  that will eventually be embedded into other views. 
+
+
+* Source code
+  Source code is split into three main packages, containing models,
+  views and controllers. To each model, correspond a controller and a
+  view. There is also a 'utils' package containing some utility
+  module.
+
+
+----------------------------------------------------------------------
+  HIERARCHICAL STRUCTURE
+----------------------------------------------------------------------
+
+The application structure has been split along two orthogonal
+directions:
+- horizontal direction
+- vertical direction
+
+The horizontal direction splits functionalities among the models, the
+views and the controllers. To each entity corresponds typically a
+triple MVC.The vertical direction splits the complex entities into
+sub-entities (children) that the parent entity owns and controls. For
+example, the application model contains sub models for the set of
+available currencies, the converter model, and the about
+model. Similar vertical splitting is repeated for the application
+controller and view.
+
+The idea is to find and isolate entities that can possibly live as
+stand-alone entities, or that can be re-used multiple times when
+needed, that is especially useful for Views. When an entity needs to
+communicate with another, an explicit strong relationship is created
+and the entities are connected each other by reference. This is for
+example the case of a single currency model, that needs to access the
+currencies model.  
+
+This is the example vertical hierarchy schema:
+
+application
+   |--- converter
+   |        |--- amount
+   |--- about
+   |--- currencies
+
+
+Have a look to the source code, starting from the higher levels, and
+reading horizontally first (through MVC), and then vertically by
+looking at entities children.

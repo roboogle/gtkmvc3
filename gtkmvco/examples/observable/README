@@ -1,0 +1,7 @@
+Some examples demonstrating new features provided by version 1.0.0 about
+observable properties:
+
+container.py : support for maps and lists
+existing_class.py : observation of already existing class instances
+new_class.py : definition and observation of ad-hoc observable classes
+signals.py : emitting and observation of signals

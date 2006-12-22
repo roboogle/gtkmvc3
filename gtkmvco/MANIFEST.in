@@ -1,0 +1,21 @@
+# Author: Ionutz Borcoman <borco@go.ro>
+
+include *.in
+global-include README COPYING INSTALL AUTHORS
+
+# examples
+recursive-include examples README *.py *.glade
+include examples/converter/about examples/converter/currencies
+include examples/mini-yoman/yoman examples/mini-yoman/LICENSE
+
+# docs
+recursive-include docs/user-man/eps *.eps
+recursive-include docs/user-man  *.tex
+
+# tutorial
+recursive-include docs/tutorial *.eps *.tex
+recursive-include docs/tutorial README *.py *.glade
+
+prune dist
+
+

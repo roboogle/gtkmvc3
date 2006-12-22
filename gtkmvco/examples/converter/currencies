@@ -1,0 +1,32 @@
+<currencies>
+	<currency>
+		<name> EUR </name>
+		<rate> 1.00 </rate>
+		<notes> Euro (reference currency) </notes>
+	</currency>
+
+	<currency>
+		<name> USD </name>
+		<rate> 1.31604 </rate>
+		<notes> U.S. Dollar </notes>
+	</currency>
+
+	<currency>
+		<name> GBP </name>
+		<rate>  0.670677  </rate>
+		<notes> British Pound </notes>
+	</currency>
+
+	<currency>
+		<name> JPY </name>
+		<rate>  155.497  </rate>
+		<notes> Japanese Yen  </notes>
+	</currency>
+
+	<currency>
+		<name> RUB </name>
+		<rate>  34.6400  </rate>
+		<notes> Russian Ruble  </notes>
+	</currency>
+
+</currencies>

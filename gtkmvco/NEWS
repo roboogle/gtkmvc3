@@ -1,0 +1,35 @@
+**********************************************************************
+*  May 18 2007                                                       * 
+**********************************************************************
+
+Released version 1.0.1
+This version brings some bug fixes and a new feature.
+
+* New features:
+ - Custom widgets into glade file are now supported by views
+
+* Bug fixes:
+ - Fixed access to properties in multi-threading models
+ - Fixed a bug in the observable properties registration mechanism
+
+
+* Many thanks to: 
+- Guillaume Libersat <glibersat AT linux62.org> for providing a
+ 	patch that enable reading custom widgets from glade files.
+
+- Phillip Calvin <phillipc AT toasterlogic.com> and 
+	Andreas Poisel <ap AT automatisch.cc> for reporting bugs
+
+- Jeffrey Barish <jeff_barish@earthlink.net> for providing feedback.
+
+- Kartik Mistry <kartik.mistry AT gmail.com> for his work on Debian
+  package.
+
+
+
+
+**********************************************************************
+*  Dec 21 2006                                                       * 
+**********************************************************************
+
+Released first stable version 1.0.0

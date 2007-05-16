@@ -117,8 +117,10 @@ class Model (object):
 
 
     def _reset_property_notification(self, prop_name):
-        """Called when it has done an assignment that changes the type
-        of a property, so it must be unregistered and registered again"""
+        """Called when it has be done an assignment that changes the
+        type of a property or the instance of the property has been
+        changed to a different instance. In this case it must be
+        unregistered and registered again"""
 
         self.register_property(prop_name)
 

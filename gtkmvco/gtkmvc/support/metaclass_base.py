@@ -148,6 +148,15 @@ class PropertyMeta (type):
         setattr(cls, name, cls.create_value(name, default_val))
         return
 
+    def check_value_change(cls, old, new):
+        """Checks whether the value of the property changed in type
+        or if the instance has been changed to a different instance.
+        If true, a call to model._reset_property_notification should
+        be called in order to re-register the new property instance
+        or type"""
+        return  type(old) != type(new) or \
+               isinstance(old, wrappers.ObsWrapperBase) and (old != new)
+    
     def create_value(cls, prop_name, val, model=None):
         """This is used to create a value to be assigned to a
         property. Depending on the type of the value, different values

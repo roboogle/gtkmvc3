@@ -1,10 +1,10 @@
 Metadata-Version: 1.0
 Name: pygtkmvc
-Version: 0.9.2
+Version: 1.0.1
 Summary: Model-View-Controller and Observer patterns implementation for PyGTK2
 Home-page: http://pygtkmvc.sourceforge.net/
 Author: Roberto Cavada
 Author-email: cavada@irst.itc.it
 License: LGPL
-Description: UNKNOWN
-Platform: UNKNOWN
+Description: This MVC for pygtk2 helps with writing well structured code by splitting the program's code into three distinctive sections. A program written using this MVC pattern usually contains four parts: The view (providing access to the Glade widget tree), the controller (providing glue functions), the model (providing the abstract logic) and the main program (simply connecting the three parts mentioned before). For more information please visit <http://pygtkmvc.sourceforge.net/>
+Platform: All

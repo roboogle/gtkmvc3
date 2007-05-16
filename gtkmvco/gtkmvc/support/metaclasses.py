@@ -33,9 +33,10 @@ class ObservablePropertyMeta (PropertyMeta):
     
     def get_setter_source(cls, setter_name, prop_name):
         return """def %(setter)s(self, val): 
- old = self._prop_%(prop)s 
- self._prop_%(prop)s = type(self).create_value('%(prop)s', val, self)
- if type(old) != type(self._prop_%(prop)s): self._reset_property_notification('%(prop)s')
+ old = self._prop_%(prop)s
+ new = type(self).create_value('%(prop)s', val, self)
+ self._prop_%(prop)s = new
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop)s')
  self.notify_property_value_change('%(prop)s', old, val)
  return
 """ % {'setter':setter_name, 'prop':prop_name}
@@ -43,12 +44,38 @@ class ObservablePropertyMeta (PropertyMeta):
     pass #end of class
 
 
+class ObservablePropertyMetaMT (ObservablePropertyMeta):
+    """This class provides multithreading support for accesing
+    properties, through a locking mechanism. It is assumed a lock is
+    owned by the class that uses it. A Lock object called _prop_lock
+    is assumed to be a member of the using class. see for example class
+    ModelMT"""
+    def __init__(cls, name, bases, dict):
+        ObservablePropertyMeta.__init__(cls, name, bases, dict)
+        return 
+    
+    def get_setter_source(cls, setter_name, prop_name):
+        return """def %(setter)s(self, val): 
+ old = self._prop_%(prop)s
+ new = type(self).create_value('%(prop)s', val, self)
+ self._prop_lock.acquire()
+ self._prop_%(prop)s = new
+ self._prop_lock.release()
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop)s')
+ self.notify_property_value_change('%(prop)s', old, val)
+ return
+""" % {'setter':setter_name, 'prop':prop_name}
+
+    pass #end of class
+
 
 try:
     from gobject import GObjectMeta
     class ObservablePropertyGObjectMeta (ObservablePropertyMeta, GObjectMeta): pass
+    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT, GObjectMeta): pass    
 except:
     class ObservablePropertyGObjectMeta (ObservablePropertyMeta): pass
+    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT): pass
     pass
 
 

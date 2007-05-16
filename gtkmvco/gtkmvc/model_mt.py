@@ -37,11 +37,15 @@ class ModelMT (Model):
     changed by threads different than gtk main thread. Notification is
     performed by exploiting the gtk idle loop only if needed,
     otherwise the standard notification system (direct method call) is
-    used."""
+    used. In this model, the observer is expected to run in the gtk
+    main loop thread."""
 
+    __metaclass__  = support.metaclasses.ObservablePropertyMetaMT
+    
     def __init__(self):
         Model.__init__(self)
         self.__observer_threads = {}
+        self._prop_lock = _threading.Lock()
         return
 
     def register_observer(self, observer):
@@ -84,7 +88,7 @@ import gtk
 class TreeStoreModelMT (ModelMT, gtk.TreeStore):
     """Use this class as base class for your model derived by
     gtk.TreeStore"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT   
     
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
@@ -97,7 +101,7 @@ class TreeStoreModelMT (ModelMT, gtk.TreeStore):
 class ListStoreModelMT (ModelMT, gtk.ListStore):
     """Use this class as base class for your model derived by
     gtk.ListStore"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT 
     
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
@@ -110,7 +114,7 @@ class ListStoreModelMT (ModelMT, gtk.ListStore):
 class TextBufferModelMT (ModelMT, gtk.TextBuffer):
     """Use this class as base class for your model derived by
     gtk.TextBuffer"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT 
     
     def __init__(self, table=None):
         ModelMT.__init__(self)

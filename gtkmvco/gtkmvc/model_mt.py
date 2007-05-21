@@ -69,7 +69,7 @@ class ModelMT (Model):
         if _threading.currentThread() == self.__observer_threads[observer]:
             # standard call
             return Model.__notify_observer__(self, observer, method,
-                                             args, kwargs)
+                                             *args, **kwargs)
 
         # multi-threading call
         gobject.idle_add(self.__idle_callback, observer, method, args, kwargs)

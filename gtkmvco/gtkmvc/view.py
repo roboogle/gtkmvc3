@@ -1,6 +1,8 @@
 #  Author: Roberto Cavada <cavada@irst.itc.it>
+#  Modified by: Guillaume Libersat <glibersat AT linux62.org>
 #
 #  Copyright (c) 2005 by Roberto Cavada
+#  Copyright (c) 2007 by Guillaume Libersat
 #
 #  pygtkmvc is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -36,6 +38,9 @@ class View (object):
         glade_top_widget_name can be either a string name or list of names."""
         self.manualWidgets = {}
         self.xmlWidgets = []
+
+        # Sets a callback for custom widgets
+        gtk.glade.set_custom_handler(self._custom_widget_create)
 
         if (( type(glade_top_widget_name) == types.StringType)
             or (glade_top_widget_name is None) ):
@@ -154,5 +159,12 @@ class View (object):
             transient_view.get_top_widget().set_transient_for(top)
             pass
         return
+
+    # Finds the right callback for custom widget creation and call it
+    def _custom_widget_create(self, glade, function_name, widget_name,
+                              str1, str2, int1, int2):
+        handler = getattr(self, function_name)
+        return handler(str1, str2, int1, int2)
+    
 
     pass # end of class View

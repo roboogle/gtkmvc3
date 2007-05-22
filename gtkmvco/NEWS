@@ -13,18 +13,17 @@ This version ships bug fixes and a new feature.
   - Fixed a bug in the observable properties registration mechanism
 
 * Many thanks to: 
-	- Guillaume Libersat <glibersat AT linux62.org> for providing a
- 		patch that enable reading custom widgets from glade files.
+  - Guillaume Libersat <glibersat AT linux62.org> for providing a
+    patch that enable reading custom widgets from glade files.
 
-	- Phillip Calvin <phillipc AT toasterlogic.com> and 
-	  Andreas Poisel <ap AT automatisch.cc> for reporting bugs.
+  - Phillip Calvin <phillipc AT toasterlogic.com> and Andreas Poisel
+    <ap AT automatisch.cc> for reporting bugs.
 
   - Jeffrey Barish <jeff_barish@earthlink.net> for providing
     feedback.
 
   - Kartik Mistry <kartik.mistry AT gmail.com> for his work on
     Debian package.
-
 
 
 

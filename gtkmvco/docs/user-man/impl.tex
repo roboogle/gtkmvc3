@@ -41,6 +41,8 @@ implementation which depends on the application semantics.
   accessed by using the name they have been defined from within
   \glade, at design time, or that have been specified when creating
   widgets by hand.
+\item (New in version 1.0.1) Support for custom widgets declared in
+  \glade files.
  \end{itemize}
 
 \end{description}
@@ -260,6 +262,24 @@ corresponding Controller instance for methods to associate with
 signals, and all methods found are automatically connected.
 
 
+\subsubsection{Custom widgets support}
+A basic support for Custom widgets is provided since version 1.0.1.
+Designers can specify custom widgets within a \glade file, and for
+each custom widget they may specify a function name to be called to
+build it. The specified function will be searched and invoked among
+the \codename{View} methods when the instance is
+created. \codename{View}'s method for custom widget creation
+has prototype:
+
+{ \codesize 
+\begin{verbatim}
+ def func_name(self, str1, str2, int1, int2)
+\end{verbatim}
+}
+
+Creation functions are expected to return a widget object.
+
+
 \subsubsection{\label{VR:EX}An example about View Registration}
 A typical example of exploitation of the view registration mechanism
 is the setup of a \codename{gtk.TreeView} chain: construction of
@@ -282,7 +302,7 @@ properties are set in \glade in a comfortable manner (see figure
 
 \begin{figure}[here]
 \begin{center}
-\includegraphics[width=12cm]{eps/treeview.eps}
+\includegraphics[width=12cm]{figs/png/treeview}
 \caption{\label{fig:VR}Designing a \codename{TreeView} by means of \glade }
 \end{center}
 \end{figure}

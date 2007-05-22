@@ -8,7 +8,7 @@ cavada@isrt.itc.it.
 New Versions
 ============
 New versions of this package can be found at:
- <http://sra.itc.it/people/cavada>
+ <http://pygtkmvc.sourceforge.net>
 
 
 Copyright Information
@@ -25,10 +25,10 @@ See the provided examples, read the documentation and tutorial
 Contacting the Author
 =====================
 You can contact me at the email address <cavada@irst.itc.it>.  I'll
-try to answer my email quickly, but occasionally there will be a bit
+try to answer quickly, but occasionally there will be a bit
 of a delay.  If you have an idea for a way to extend this framework,
-have found a problem with the code/doc, or would like to contribute
-some code/doc, please feel free to contact me.
+have found a problem with the code/docs, or would like to contribute
+some code/docs, please feel free to contact me.
 
 
 Many thanks to
@@ -39,3 +39,5 @@ Many thanks to
 * Tom Cato Amundsen, Philippe Bouige, Leon Darmawangsa, 
   Michal Pasternak, Christian Robottom Reis 
   for feedback they provided
+
+* All users that provided me with patches, feedback and bug reports.

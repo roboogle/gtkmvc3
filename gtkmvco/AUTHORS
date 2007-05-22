@@ -1,13 +1,17 @@
 Design, implementation and mainteinance:
-  * Roberto Cavada <cavada@irst.itc.it>  
+  * Roberto Cavada <cavada AT irst.itc.it>  
+
+Custom widgets support in views:
+  * Guillaume Libersat <glibersat AT linux62.org>
 
 Example 'mini-yoman':
-  * Baruch Even <baruch@ev-en.org> 
+  * Baruch Even <baruch AT ev-en.org> 
 
 Debian (and derivated) packages:
-  * Johannes Jordens <j.jordens@ucl.ac.uk>
-  * Robert Jordens <jordens@debian.org>
+  * Johannes Jordens <j.jordens AT ucl.ac.uk> (version 0.9.2)
+  * Robert Jordens <jordens AT debian.org> (version 0.9.2)
+	* Kartik Mistry <kartik.mistry AT gmail.com> (versions 1.0.[01])
 
 Script setup.sh, and setup 
-  * Ionutz Borcoman <borco@go.ro>
+  * Ionutz Borcoman <borco AT go.ro>
 

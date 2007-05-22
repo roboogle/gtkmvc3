@@ -1,7 +1,7 @@
 # Author: Ionutz Borcoman <borco@go.ro>
 
 include *.in
-global-include README COPYING INSTALL AUTHORS NEWS
+global-include README COPYING INSTALL AUTHORS NEWS PKG-INFO
 
 # examples
 recursive-include examples README *.py *.glade

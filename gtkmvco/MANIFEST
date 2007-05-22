@@ -2,6 +2,8 @@ AUTHORS
 COPYING
 INSTALL
 MANIFEST.in
+NEWS
+PKG-INFO
 README
 setup.py
 docs/tutorial/src/README

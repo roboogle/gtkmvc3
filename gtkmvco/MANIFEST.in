@@ -9,7 +9,7 @@ include examples/converter/about examples/converter/currencies
 include examples/mini-yoman/yoman examples/mini-yoman/LICENSE
 
 # docs
-recursive-include docs/user-man/eps *.eps
+recursive-include docs/user-man/figs/png *.png
 recursive-include docs/user-man  *.tex
 
 # tutorial

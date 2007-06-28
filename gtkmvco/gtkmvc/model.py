@@ -92,11 +92,16 @@ class Model (object):
             pass
                 
         return
-    
+
+    def has_property(self, name):
+        """Returns true if given property name refers an observable
+        property inside self or inside derived classes"""
+        return self.__properties__.has_key(name) or \
+               self.__derived_properties__.has_key(name)
 
     def register_observer(self, observer):
         if observer in self.__observers: return # not already registered
-        
+
         self.__observers.append(observer)
         for key in (self.__properties__.keys() + self.__derived_properties__.keys()):
             self.__add_observer_notification(observer, key)

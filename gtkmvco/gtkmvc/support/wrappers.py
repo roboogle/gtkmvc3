@@ -87,7 +87,7 @@ class ObsWrapper (ObsWrapperBase):
  return res""" % {'name' : name}
 
     # For all fall backs
-    def __getattr__(self, name): return self._obj.__getattr__(name)
+    def __getattr__(self, name): return getattr(self._obj, name)
     def __repr__(self): return self._obj.__repr__()
     def __str__(self): return self._obj.__str__()
     
@@ -104,13 +104,13 @@ class ObsSeqWrapper (ObsWrapper):
         
         self._notify_method_before(self._obj, "__setitem__", (key,val), {})
         res = self._obj.__setitem__(key, val)
-        self._notify_method_after(self._obj, res, "__setitem__", (key,val), {})
+        self._notify_method_after(self._obj, "__setitem__", res, (key,val), {})
         return res
 
     def __delitem__(self, key):
         self._notify_method_before(self._obj, "__delitem__", (key,), {})
         res = self._obj.__delitem__(key)
-        self._notify_method_after(self._obj, res, "__delitem__", (key,), {})
+        self._notify_method_after(self._obj, "__delitem__", res, (key,), {})
         return res
 
 

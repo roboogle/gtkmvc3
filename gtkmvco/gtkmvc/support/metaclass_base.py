@@ -26,6 +26,7 @@ import re
 import types
 
 import gtkmvc.support.wrappers as wrappers
+from gtkmvc.support.utils import get_function_from_source
 
 
 # ----------------------------------------------------------------------
@@ -53,7 +54,7 @@ class PropertyMeta (type):
 
     Customization:
     The base implementation of getter is to return the value stored in the
-    variable associate to the property. The setter simply sets its value.
+    variable associated to the property. The setter simply sets its value.
     Programmers can override basic behaviour for getters or setters simply by
     defining their getters and setters (see at the names convention above).
     The customized function can lie everywhere in the user classes hierarchy.
@@ -79,10 +80,10 @@ class PropertyMeta (type):
         for base in bases:
             maps = ( getattr(base, '__properties__', {}),
                      getattr(base, '__derived_properties__', {}) )
-            for map in maps:
-                for p in map.keys():
+            for _map in maps:
+                for p in _map.keys():
                     if not props.has_key(p) and not der_props.has_key(p):
-                        der_props[p] = map[p]
+                        der_props[p] = _map[p]
                         pass
                     pass
                 pass
@@ -114,8 +115,8 @@ class PropertyMeta (type):
         # checks if accessors are already defined:
         if getter_name not in members_names:
             src = type(cls).get_getter_source(cls, getter_name, prop_name)
-            code = type(cls).get_func_code_from_func_src(cls, src)
-            type(cls).add_method_from_func_code(cls, getter_name, code)
+            func = get_function_from_source(src)
+            setattr(cls, getter_name, func)
         else:
             cls.__msg__("Warning: Custom member '%s' overloads generated accessor of property '%s'" \
                         % (getter_name, prop_name), 2)
@@ -123,8 +124,8 @@ class PropertyMeta (type):
 
         if setter_name not in members_names:
             src = type(cls).get_setter_source(cls, setter_name, prop_name)
-            code = type(cls).get_func_code_from_func_src(cls, src)
-            type(cls).add_method_from_func_code(cls, setter_name, code)
+            func = get_function_from_source(src)
+            setattr(cls, setter_name, func)
         else:
             cls.__msg__("Warning: Custom member '%s' overloads generated accessor of property '%s'" \
                         % (setter_name, prop_name), 2)
@@ -133,7 +134,7 @@ class PropertyMeta (type):
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
 
         if prop_name in members_names:
-            cls.__msg__("Warning: automatic property builder is overriding property %s in class %s" \
+            cls.__msg__("Warning: automatic property builder overrids property %s in class %s" \
                         % (prop_name, cls.__name__), 2)
             pass
         setattr(cls, prop_name, prop)
@@ -187,26 +188,11 @@ class PropertyMeta (type):
             return res
 
         return val
-    
-    # Services:
-    def add_method_from_func_code(cls, meth_name, code):
-        """Use this to add a code that is a new method for the class"""
 
-        func = new.function(code, globals(), meth_name)
-        meth = new.instancemethod(func, cls, cls.__name__)
-        setattr(cls, meth_name, func)
-        return
-    
-    def get_func_code_from_func_src(cls, source):
-        """Public service that provided code object from function source"""
-        m = re.compile("def\s+(\w+)\s*\(.*\):").match(source)
-        if m is None: raise BadFuncSource(source)
-        
-        func_name = m.group(1)
-        exec source
-        code = eval("%s.func_code" % func_name)
-        return code
 
+    # ------------------------------------------------------------
+    #               Services    
+    # ------------------------------------------------------------
 
     # Override these:
     def get_getter_source(cls, getter_name, prop_name):

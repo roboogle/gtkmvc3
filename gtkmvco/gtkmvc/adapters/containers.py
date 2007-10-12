@@ -14,7 +14,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
 #  or email to the author Roberto Cavada <cavada@irst.itc.it>.
@@ -24,28 +24,39 @@
 import types
 import gtk
 
-import gtkmvc.adapters.basic as basic
+from gtkmvc.adapters.basic import UserClassAdapter
 
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
 from gtkmvc.support.wrappers import ObsMapWrapper
 
 # ----------------------------------------------------------------------
-class StaticContainerAdapter (basic.UserClassAdapter):
-    """This class can be used to bound a set of widgets to a
-    property that is a container, like a tuple, a list or a map, or
-    in general a class that implements __getitem__ and __setitem__
-    methods. From the other hand, the set of widgets can be a list
-    provided by the user, or a container widget like a Box, a
-    notebook, etc.  Widgets will be linked by their position when
-    the property is list-like, or by their name when the property is
-    map-like. This class supports only properties that are static
-    containers, i.e. those containers that do not change their
-    length dynamically. If the container grows up in length, no
-    change will occur in the view-side."""
+class StaticContainerAdapter (UserClassAdapter):
+    """
+    This class can be used to bound a set of widgets to a property
+    that is a container, like a tuple, a list or a map, or in
+    general a class that implements __getitem__ and __setitem__
+    methods.
+
+    From the other hand, the set of widgets can be a list provided
+    by the user, or a container widget like a Box, a notebook, etc.
+    Widgets will be linked by their position when the property is
+    list-like, or by their name when the property is map-like.
+
+    This class supports only properties that are static containers,
+    i.e. those containers that do not change their length
+    dynamically. If the container grows up in length, no change will
+    occur in the view-side.
+    """
 
     def __init__(self, model, prop_name,
                  prop_read=None, prop_write=None, value_error=None):
+
+        UserClassAdapter.__init__(self, model, prop_name,
+                                  lambda c,i: c.__getitem__(i),
+                                  lambda c,v,i: c.__setitem__(i,v),
+                                  prop_read, prop_write, 
+                                  value_error)
 
         prop = getattr(model, prop_name)
         if not (hasattr(prop, "__getitem__") and
@@ -53,11 +64,6 @@ class StaticContainerAdapter (basic.UserClassAdapter):
             raise TypeError("Property " + prop_name +
                             " is not a valid container")
 
-        basic.UserClassAdapter.__init__(self, model, prop_name,
-                                        lambda c,i: c.__getitem__(i),
-                                        lambda c,v,i: c.__setitem__(i,v),
-                                        prop_read=None, prop_write=None, 
-                                        value_error=None)
 
         self._prop_is_map = isinstance(prop, types.DictType) or \
                             isinstance(prop, ObsMapWrapper)
@@ -69,18 +75,19 @@ class StaticContainerAdapter (basic.UserClassAdapter):
         return
 
 
-
     def connect_widget(self, wid, getters=None, setters=None,
                        signals=None, arg=None):
-        """Called when the widget is instantiated, and the adapter
-        is ready to connect the widgets inside it (if a container)
-        or each widget if wid is a list of widgets. getters and
-        setters can be None, a function or a list or a map of
+        """
+        Called when the widget is instantiated, and the adapter is
+        ready to connect the widgets inside it (if a container) or
+        each widget if wid is a list of widgets. getters and setters
+        can be None, a function or a list or a map of
         functions. signals can be None, a signal name, or a list or
         a map of signal names. When maps are used, keys can be
         widgets or widget names. The length of the possible lists or
         maps must be lesser or equal to the number of widgets that
-        will be connected."""
+        will be connected.
+        """
 
         if isinstance(wid, gtk.Container): self._widgets = wid.get_children()
         elif isinstance(wid, types.ListType) or isinstance(wid, types.TupleType): self._widgets = wid
@@ -101,7 +108,7 @@ class StaticContainerAdapter (basic.UserClassAdapter):
         for wi,ge,se,si in zip(self._widgets, getters, setters, signals):
             if type(ge) == types.MethodType: ge = ge.im_func
             if type(se) == types.MethodType: se = se.im_func
-            basic.UserClassAdapter.connect_widget(self, wi, ge, se, si, arg, False)
+            UserClassAdapter.connect_widget(self, wi, ge, se, si, arg, False)
             pass
 
         self.update_widget()
@@ -113,7 +120,7 @@ class StaticContainerAdapter (basic.UserClassAdapter):
         """Updates the value of property at given index. If idx is
         None, all controlled indices will be updated. This method
         should be called directly by the user in very unusual
-        coditions."""
+        conditions."""
         if idx is None:
             for w in self._widgets:
                 idx = self._get_idx_from_widget(w)
@@ -128,7 +135,7 @@ class StaticContainerAdapter (basic.UserClassAdapter):
         property value. If index is not given, all controlled
         widgets will be updated. This method should be called
         directly by the user when the property is not observable, or
-        in very unusual coditions."""
+        in very unusual conditions."""
         if idx is None:
             for w in self._widgets:
                 idx = self._get_idx_from_widget(w)
@@ -155,14 +162,14 @@ class StaticContainerAdapter (basic.UserClassAdapter):
     def _read_widget(self, idx):
         sav = self._wid
         self._wid = self._get_widget_from_idx(idx)
-        val = basic.UserClassAdapter._read_widget(self)
+        val = UserClassAdapter._read_widget(self)
         self._wid = sav
         return val
         
     def _write_widget(self, val, idx):
         sav = self._wid
         self._wid = self._get_widget_from_idx(idx)
-        basic.UserClassAdapter._write_widget(self, val)
+        UserClassAdapter._write_widget(self, val)
         self._wid = sav
         return
 
@@ -194,7 +201,6 @@ class StaticContainerAdapter (basic.UserClassAdapter):
 
 
     # Callbacks:
-
     def _on_wid_changed(self, wid):
         """Called when the widget is changed"""
         if self._itsme: return
@@ -207,4 +213,4 @@ class StaticContainerAdapter (basic.UserClassAdapter):
         if  not self._itsme and meth_name == "__setitem__": self.update_widget(args[0])
         return    
 
-    pass # end of class ContainerAdapter
+    pass # end of class StaticContainerAdapter

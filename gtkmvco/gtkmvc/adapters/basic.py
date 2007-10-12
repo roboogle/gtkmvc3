@@ -14,7 +14,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
 #  or email to the author Roberto Cavada <cavada@irst.itc.it>.
@@ -23,6 +23,7 @@
 
 import types
 import gtk
+import time
 
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
@@ -34,7 +35,8 @@ class Adapter (Observer):
     def __init__(self, model, prop_name,
                  prop_read=None, prop_write=None, 
                  value_error=None):
-        """Creates a new adapter that handles setting of value of a
+        """
+        Creates a new adapter that handles setting of value of a
         model single model property when a corresponding widgets set
         is changed and viceversa when the property is also
         observable.
@@ -61,7 +63,7 @@ class Adapter (Observer):
         type of the property.
         
         value_error can be a function (or a method) to be called
-        when a ValueError exception occur while trying to set a
+        when a ValueError exception occurs while trying to set a
         wrong value for the property inside the model. The function
         will receive: the adapter, the property name and the value
         coming from the widget that offended the model.
@@ -75,13 +77,8 @@ class Adapter (Observer):
         self._prop_read = prop_read
         self._prop_write = prop_write
         self._value_error = value_error
-
         self._wid = None
         self._wid_info = {}
-
-        # this is to hold saved value, to be able to undo
-        self._saved = False
-        self._saved_val = None
         
         # this flag is set when self is changing the property or the
         # widget, in order to avoid infinite looping.
@@ -91,33 +88,35 @@ class Adapter (Observer):
         return
 
     def connect_widget(self, wid,
-                       wid_getter=None, wid_setter=None, 
+                       getter=None, setter=None, 
                        signal=None, arg=None, update=True):
 
-        """Called when the widget is instantiated, and the adapter
-        is ready to connect the widget and the property inside the
+        """
+        Called when the widget is instantiated, and the adapter is
+        ready to connect the widget and the property inside the
         observed model. arg is the (optional) argument that will be
         passed when connecting the signal.
 
-        wid_getter and wid_setter are the (optional) methods used
+        getter and setter are the (optional) methods used
         for reading and writing the widget's value. When not
         specified, default getter and setter will be guessed by
         looking at the widget type the adapter will be connected
         with. Guessing is carried out by querying information
         specified into module 'adapters.default'. 
 
-        Finally, if update is false, the widget will not be updated"""
+        Finally, if update is false, the widget will not be updated
+        """
 
         if self._wid_info.has_key(wid):
             raise ValueError("Widget " + str(wid) + " was already connected")
         
         wid_type = None
 
-        if None in (wid_getter, wid_setter, signal):
+        if None in (getter, setter, signal):
             w = search_adapter_info(wid)
-            if wid_getter is None: wid_getter = w[GETTER]
-            if wid_setter is None:
-                wid_setter = w[SETTER]
+            if getter is None: getter = w[GETTER]
+            if setter is None:
+                setter = w[SETTER]
                 wid_type = w[WIDTYPE]
                 pass
             
@@ -125,7 +124,7 @@ class Adapter (Observer):
             pass
 
         # saves information about the widget
-        self._wid_info[wid] = (wid_getter, wid_setter, wid_type)
+        self._wid_info[wid] = (getter, setter, wid_type)
 
         # connects the widget
         if signal:
@@ -147,20 +146,21 @@ class Adapter (Observer):
         return
     
     def update_widget(self):
-        """Forces the widget to be updated from the prperty
+        """Forces the widget to be updated from the property
         value. This method should be called directly by the user
         when the property is not observable, or in very unusual
         coditions."""
         self._write_widget(self._read_property())
         return
-    
+
 
     # ----------------------------------------------------------------------
     #  Private methods
     # ----------------------------------------------------------------------
     def _connect_model(self, model):
-        """Used internally to connect the property into the model,
-        and register self as a value observer for that property"""
+        """
+        Used internally to connect the property into the model, and
+        register self as a value observer for that property"""
 
         parts = self._prop_name.split(".")
         if len(parts) > 1:
@@ -216,11 +216,11 @@ class Adapter (Observer):
     def _get_property(self):
         """Private method that returns the value currently stored
         into the property"""
-        return getattr(self.get_model(), self._prop_name)
+        #return getattr(self.get_model(), self._prop_name)
+        return self._prop
 
     def _set_property(self, val):
         """Private method that sets the value currently of the property."""
-        if self._saved: self._saved_val = val; self._saved = True
         return setattr(self.get_model(), self._prop_name, val)
 
     def _read_property(self, *args):
@@ -235,6 +235,7 @@ class Adapter (Observer):
         construction-time. A try to cast the value to the property
         type is given."""
 
+        # 'finally' would be better here, but not supported in 2.4 :(
         try: 
             totype = type(self._get_property(*args))
             val_prop = self._cast_value(val, totype)
@@ -244,10 +245,14 @@ class Adapter (Observer):
             self._set_property(val_prop, *args)
 
         except ValueError:
+            self._itsme = False
             if self._value_error: self._value_error(self, self._prop_name, val)
             else: raise
-            
-        finally: self._itsme = False            
+            pass
+
+        except: self._itsme = False; raise
+
+        self._itsme = False
         return
 
     def _read_widget(self):
@@ -264,9 +269,11 @@ class Adapter (Observer):
             setter = self._wid_info[self._wid][1]
             wtype = self._wid_info[self._wid][2]            
             if wtype is not None: setter(self._wid, self._cast_value(val, wtype))
-            else: setter(self._wid, val)
-            
-        finally: self._itsme = False    
+            else: setter(self._wid, val)            
+        finally:
+            self._itsme = False
+            pass
+        
         return
          
     def _cast_value(self, val, totype):
@@ -306,10 +313,11 @@ class Adapter (Observer):
     pass # end of class Adapter
 
 
-# ----------------------------------------------------------------------
-class UserClassAdapter (Adapter):
 
-    """This class handles the communication between a widget and a
+#----------------------------------------------------------------------
+class UserClassAdapter (Adapter):
+    """
+    This class handles the communication between a widget and a
     class instance (possibly observable) that is a property inside
     the model. The value to be shown is taken and stored by using a
     getter and a setter. getter and setter can be: names of user
@@ -364,15 +372,56 @@ class UserClassAdapter (Adapter):
         Adapter._on_prop_changed(self)
         return
 
-
     def _get_property(self, *args):
         """Private method that returns the value currently stored
         into the property"""
-        return self._getter(Adapter._get_property(self), *args)
+        val = self._getter(Adapter._get_property(self), *args)
+        if self._prop_read: return self._prop_read(val, *args)
+        return val
 
     def _set_property(self, val, *args):
         """Private method that sets the value currently of the property"""
+        if self._prop_write: val = self._prop_write(val)
         return self._setter(Adapter._get_property(self), val, *args)
     
     pass # end of class UserClassAdapter
+# ----------------------------------------------------------------------
+
+
+
+#----------------------------------------------------------------------
+class RoUserClassAdapter (UserClassAdapter):
+    """
+    This class is for Read-Only user classes. RO classes are those
+    whose setting methods do not change the instance, but return a
+    new instance that has been changed accordingly to the setters
+    semantics. An example is python datetime class, whose replace
+    method does not change the instance it is invoked on, but
+    returns a new datetime instance.
+
+    This class is likely to be used very rarely. 
+    """
+    
+    def __init__(self, model, prop_name,
+                 getter, setter, 
+                 prop_read=None, prop_write=None,                   
+                 value_error=None):
+
+        UserClassAdapter.__init__(self, model, prop_name,
+                                  getter, setter,
+                                  prop_read, prop_write, value_error)
+
+        return
+
+    # ----------------------------------------------------------------------
+    # Private methods 
+    # ----------------------------------------------------------------------
+
+    def _set_property(self, val, *args):
+        """Private method that sets the value currently of the property"""
+        val = UserClassAdapter._set_property(self, val, *args)
+        if val: Adapter._set_property(self, val, *args)
+        return val
+    
+    pass # end of class RoUserClassAdapter
 # ----------------------------------------------------------------------

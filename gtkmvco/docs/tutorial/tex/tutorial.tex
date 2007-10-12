@@ -40,19 +40,21 @@
 
 \newcommand{\codename}[1]{\texttt{\bfseries \textcolor {codecolor}{#1}}\xspace}
 
-\newcommand{\codesize}{\small \color{codecolor}}
+\newcommand{\codesize}{\small } %%\color{codecolor}}
 \newcommand{\vc}{\kw{V\&C}}
 
 \begin{document}
 
 \title{A short tutorial for \pygtkmvc\\
-Version 1.0.0}
+Version 1.2.0}
 
 \author{ Roberto Cavada \thanks{ITC-irst, Trento, Italy,
  cavada@irst.itc.it} }
 
 \maketitle
 
+\tableofcontents
+\newpage
 
 \section{What is this?}
 \pygtkmvc is a practical implementation of \mvc and \obs. The goal of
@@ -64,8 +66,6 @@ The tutorial is thought to be minimal, meaning that many of provided
 features are not mentioned. For any further information the user
 should refer to the manual pages.
 
-A pdf version of this tutorial can be found in the distribution.
-
 
 \section{The example in few words}
 The sample application must provide a single window, with a label
@@ -74,7 +74,7 @@ button, which increments the counter by one every time it is pressed.
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=3cm]{eps/appl.eps}
+\includegraphics[width=3cm]{eps/appl}
 \caption{How the mini-application looks like}
 \end{center}
 \end{figure}
@@ -86,12 +86,13 @@ understand what \pygtkmvc can be used for.
 
 
 \section{The framework}
-The implementation of this example is split into two parts. In the
-first one, the \gui is automatically constructed from a \glade file.
-In the second one, the \gui is constructed \emph{by hand}, by creating
-and connecting manually all widgets.
+The implementation of this example is split into three distinct
+parts. First, the \gui is constructed from a \glade file. Second,
+the \gui is constructed \emph{by hand}, by creating and connecting
+manually all widgets. Third, adapters are applied to make the code
+much more easy.
 
-The latter solution is mainly presented to make this tutorial more
+Hand-made view is mainly presented to make this tutorial more
 complete, but the readers should keep in mind that they are going to
 adopt the former most of the times, or even more often a mixture of
 them, where many parts come from one or more glade files, and some
@@ -165,7 +166,7 @@ associated with a function called \codename{on\_button\_clicked}.
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=10cm]{eps/glade.eps}
+\includegraphics[width=10cm]{eps/glade}
 \caption{\label{fig:glade}\glade at work}
 \end{center}
 \end{figure}
@@ -200,7 +201,7 @@ class MyView (View):
 
     pass # end of class
 \end{verbatim}
-} 
+}
 
 Class \codename{MyView} calls simply \codename{View}'s class
 constructor from within its constructor, by passing the
@@ -237,7 +238,7 @@ class MyController (Controller):
         Controller.register_view(self, view)
 
         # connects the signals:
-        self.view['main_window'].connect('destroy', gtk.mainquit)
+        self.view['main_window'].connect('destroy', gtk.main_quit)
         
         # initializes the text of label:
         self.view['label'].set_text("%d" % self.model.counter)
@@ -264,21 +265,22 @@ instance belongs to. From that moment on, class member self.model will
 be accessible.
 
 \codename{Controller}'s base class \codename{Observer} calls method
-\codename{Model.register\_observer} in order to make the controller an
-observer for the observable property counter in the model. After this,
-every change applied to \codename{MyModel} class' member counter will
-make method \codename{property\_counter\_value\_change} of class
+\codename{Model.register\_observer} in order to make the controller
+an observer for the observable property \codename{counter} in the
+model. After this, every change applied to \codename{MyModel} class'
+member \codename{counter} will make method
+\codename{property\_counter\_value\_change} of class \\
 \codename{MyController} be called automatically.
 
 Method \codename{register\_view} is called when a class
 \codename{View} instance requires to be registered to the controller
 it belongs to.  This method is mainly used to connect signals and
-initialize the \gui side that depends on the application logic. In the
-example, signal destroy of the main window is connected to
-\codename{gtk.quit} to close the application when the user closes the
-window. Notice here the use of member \codename{self.view} and how a
-class \codename{View} can be used as a map to retrieve widgets from
-their names.
+initialize the \gui side that depends on the application logic. In
+the example, signal \codename{"destroy"} of the main window is
+connected to \codename{gtk.main\_quit} to close the application when
+the user closes the window. Notice here the use of member
+\codename{self.view} and how a class \codename{View} can be used as
+a map to retrieve widgets from their names.
 
 Also, the text label is initialized to the initial value of the
 counter.
@@ -288,13 +290,13 @@ time the user clicks the button. The corresponding signal is
 automatically connected to this method when class \codename{MyView}
 registers itself within the controller.
 
-Finally, method \codename{property\_counter\_value\_change} is called
-when the property counter in class \codename{MyModel} changes. The
-model containing the property, the old value and the new value are
-passed to this method.  Notice that the model is passed since the
-controller might be an observer for more than one models, even
-different from the model it is directly connected to in the \mvc
-chain.
+Finally, method \codename{property\_counter\_value\_change} is
+called when the property counter in class \codename{MyModel}
+changes. The model containing the property, the old value and the
+new value are passed to this method. Notice that the model is passed
+since the controller might be an observer for more than one model,
+even different from the model it is directly connected to in the
+\mvc chain.
 
 
 \subsection{The main code}
@@ -407,7 +409,6 @@ connect the button ``\codename{clicked}'' event to class method
 from ctrl_glade import MyController
 
 class MyControllerNoGlade (MyController):
-
     def __init__(self, model):
         MyController.__init__(self, model)
         return
@@ -439,13 +440,12 @@ from view_no_glade import MyViewNoGlade
 m = MyModel()
 c = MyControllerNoGlade(m)
 v = MyViewNoGlade(c)
-
 gtk.main()
 \end{verbatim}
 } 
 
 \section{Multiple views, one model}
-Finally, this example shows the powerful of the \obs.
+This example shows the powerful of the \obs.
 
 Here both the glade-based and manually built versions are being run at
 the same time, with a single instance of class \codename{MyModel}
@@ -465,20 +465,163 @@ from view_no_glade import MyViewNoGlade
 from view_glade import MyView
 
 m = MyModel()
-
 c1 = MyControllerNoGlade(m)
 c2 = MyController(m)
-
 v1 = MyViewNoGlade(c1)
 v2 =  MyView(c2)
-
 gtk.main()
+\end{verbatim}
+}
+
+
+\section{Using Adapters}
+Since version 1.2 adapters largely contribute to make the code
+simpler and so to reduce development costs and efforts.
+
+\smallskip
+Adapters \emph{adapt} some part of the model to some part of the
+view. In a simple version, one adapter makes one property (possibly
+observable) into the model communicate autonomously with a single
+widget into the view, and viceversa. Readers can find all
+information about adapters in the user manual.
+
+\bigskip
+We want to have an adapter to handle coordination between property
+\codename{counter} and the label. Model and View remain
+unchanged. It is the Controller that can be simplified as follows:
+
+{ \codesize 
+\begin{verbatim}   
+# This is file ctrl_glade_adap.py
+from gtkmvc import Controller
+import gtk
+
+class MyControllerAdap (Controller):
+    def register_view(self, view):
+        Controller.register_view(self, view)
+        # connects the signals:
+        self.view['main_window'].connect('destroy', gtk.main_quit)
+        return
+
+    def register_adapters(self):
+        self.adapt("counter", "label")
+        return
+       
+    # signals:
+    def on_button_clicked(self, button):
+        self.model.counter += 1  # changes the model
+        return    
+    pass # end of class
 \end{verbatim}
 } 
 
+Controller method \codename{register\_adapters} is called by the
+framework when adapters can be instantiated. The controller is no
+longer interested in observing property \codename{Counter} and to
+initialize the value shown in the label, as these activities are now
+transparently carried out by the adapter.
+
+Notice that if editable widget like a text entry were used instead
+of a label, the adapter would also have taken care about changes of
+the text entry reporting them to the property. 
+
+\bigskip
+Now suppose you want to apply some customization to the way the
+label shows the property's value. Method
+\codename{register\_adapters} might be:
+
+{ \codesize 
+\begin{verbatim}   
+    from gtkmvc import adapters
+    def register_adapters(self):
+        a = adapters.Adapter(self.model, "counter")
+        a.connect_widget(self.view['label'], 
+             setter=lambda w,v: 
+               w.set_markup("<big>Counter=<b>%02d</b></big>" % v))
+        self.adapt(a)
+        return
+\end{verbatim}
+} 
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=4cm]{eps/adap}
+\caption{\label{fig:adap}Adapter at work}
+\end{center}
+\end{figure}
+
+Here an adapter is created explicitly, and parameter
+\codename{setter} is used to custom the functional block that is in
+charge of writing to the widget.
+
+There are several types of adapters that can be used, depending on
+the property kind and the widget type they adapt. Adapter offer a
+very straight and simple default support, but they can be largely
+customized when needs get more advanced. See the user manual for
+further information.
+
+
+\section{Generating a standard project from scratch}
+
+Since version 1.2.0 a little application called \kw{gtkmvc-progen}
+is available to help setting up from scratch a new application based
+on \pygtkmvc. \kw{gtkmvc-progen} is available both as a command-line
+program and as a GUI application. 
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=8cm]{eps/progen}
+\caption{\label{fig:progen}\kw{gtkmvc-progen} GUI at work}
+\end{center}
+\end{figure}
+
+By the way, the source code of \kw{gtkmvc-progen} is simple and can
+be exploted to learn more about gtkmvc-based applications. A model
+carries out all the work, and a controller/view pair provides the
+GUI if needed.
+
+\kw{gtkmvc-progen} can be executed either locally from the script
+directory, or can be executed as any other program if \pygtkmvc has
+been officially installed on the hosting system.
+
+From the local script directory:
+\begin{verbatim}
+$> python gtkmvc-progen name=hello author="Roberto Cavada" gui=no
+\end{verbatim}
+
+If \pygtkmvc was installed:
+\begin{verbatim}
+$> gtkmvc-progen name=hello author="Roberto Cavada" gui=no
+\end{verbatim}
+
+``name=hello'' is an example of setting of a property that customizes the
+way \kw{gtkmvc-progen} works. See the user manual for a full list. 
+
+A new directory called \file{hello} will be created in the current
+directory (as property \kw{destdir} is ``.'' by default. 
+
+Let us run now the resulting application skeleton.
+
+\begin{verbatim}
+$> cd hello
+$> ls
+hello.py  resources  src
+
+$> python hello.py
+\end{verbatim}
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=6cm]{eps/hello}
+\caption{\label{fig:hello}The skeletal hello application}
+\end{center}
+\end{figure}
+
+
 \section{Conclusions}
 The author does hope that this tutorial will be useful to help those
-who are unsettled about whether pygtkmvc can fit their needs or not.
+who are unsettled about whether \pygtkmvc can fit their needs or not.
 
 Even if very simple, from this tutorial should result clear to the
 reader that both the MVC and Observer patterns can strongly improve
@@ -493,5 +636,7 @@ appreciated quality of the framework.
 
 For any further information, and a detailed list of supported
 features, please refer to the user manual. 
+
+
 
 \end{document}

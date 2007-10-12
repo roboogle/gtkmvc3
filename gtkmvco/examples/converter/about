@@ -7,7 +7,7 @@ The idea of this example is to design
 and develop a simple currency
 converter. The idea is to split 
 the logics and the presentation (<i>GUI</i>)
-of the application. 
+layers of the application. 
 This allows users to use the application 
 in both interactive and batch mode 
 (i.e. from a command line).

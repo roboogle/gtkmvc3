@@ -23,3 +23,8 @@ This directory contains several examples of usage of gtkmvc.
   extracted part of a larger project. The original code has been
   slightly modified to adapt it to version 1.0.0.
   
+* adapters 
+  Some simple examples of the usage of adapters, the most important
+  new feature appeared in version 1.2 Most of the examples derive
+  directly from internal tests, and are going to be extended in next
+  coming versions.

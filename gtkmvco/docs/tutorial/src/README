@@ -1,3 +1,5 @@
+This directory contains the examples presented in the tutorial.
+
 To run the glade-based example:
 $> python main_glade.py 
 
@@ -6,3 +8,6 @@ $> python main_no_glade.py
 
 To run the mixed nice solution:
 $> python main_mixed.py
+
+To run the glade-based that uses an adapter:
+$> python main_glade_adap.py

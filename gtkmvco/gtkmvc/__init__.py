@@ -14,7 +14,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
 #  or email to the author Roberto Cavada <cavada@irst.itc.it>.
@@ -23,7 +23,7 @@
 
 __all__ = ["model", "view", "controller", "observable", "observer"]
 
-__version = (1,0,1)
+__version = (1,2,0)
 
 from model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
 from model_mt import ModelMT
@@ -31,7 +31,7 @@ from controller import Controller
 from view import View
 from observer import Observer
 import observable
-
+import adapters
 
 def get_version(): return __version
 

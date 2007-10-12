@@ -15,7 +15,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
 #  or email to the author Roberto Cavada <cavada@irst.itc.it>.
@@ -26,8 +26,35 @@
 class Observer (object):
     """Use this class as base class of all observers"""
     
-    def __init__(self, model=None):
+    def __init__(self, model=None, spurious=False):
+        """
+        When parameter spurious is set to False
+        (default value) the observer declares that it is not
+        interested in receiving value-change notifications when
+        property's value does not really change. This happens when a
+        property got assigned to a value that is the same it had
+        before being assigned.
+
+        A notification was used to be sent to the observer even in
+        this particular condition, because spurious (non-changing)
+        assignments were used as signals when signals were not
+        supported by early version of the framework. The observer
+        was in charge of deciding what to do with spurious
+        assignments, by checking if the old and new values were
+        different at the beginning of the notification code. With
+        latest version providing new notification types like
+        signals, this requirement seems to be no longer needed, and
+        delivering a notification is no longer a sensible
+        behaviour.
+
+        This is the reason for providing parameter
+        spurious that changes the previous behaviour
+        but keeps availability of a possible backward compatible
+        feature.
+        """
+        
         self.model = None
+        self.__accepts_spurious__ = spurious
         self.register_model(model)
         return
 
@@ -36,6 +63,13 @@ class Observer (object):
         self.model = model
         if self.model: self.model.register_observer(self)
         return
+
+    def accepts_spurious_change(self):
+        """
+        Returns True if this observer is interested in receiving
+        spurious value changes. This is queried by the model when
+        notifying a value change."""
+        return self.__accepts_spurious__
 
     def unregister_model(self):
         if self.model:

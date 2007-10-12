@@ -14,7 +14,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA.
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
 #  or email to the author Roberto Cavada <cavada@irst.itc.it>.
@@ -26,23 +26,29 @@ from observable import Signal
 
 
 class Model (object):
-    """This class is the application model base class.
-    It handles a set of observable properties which you are interested
-    in showing by one ore more view - via one or more observers of course.
-    The mechanism is the following:
-    1. You are interested in showing a set of model property, that you can
-    declare in the __properties__ member map. 
-    2. You define one or more observers that observe one or more properties
-    you registered. When someone changes a property value the model notifies
-    the changing to each listening controller. The property-observer[s]
-    association is given by the implicit rule in observers method names: if
-    you want the model notified the changing event of the property 'p'
-    you must define the method called 'property_p_change_notification' in
-    each listening observer class.
-    Notice that tipically 'controllers' implement the observer pattern. 
-    The notification method gets the
-    emitting model, the old value for the property and the new one.
-    Properties functionalities are automatically provided by the
+    """
+    This class is the application model base class. It handles a set
+    of observable properties which you are interested in showing by
+    one ore more view - via one or more observers of course. The
+    mechanism is the following:
+
+    1. You are interested in showing a set of model property, that
+       you can declare in the __properties__ member map.
+
+    2. You define one or more observers that observe one or more
+       properties you registered. When someone changes a property
+       value the model notifies the changing to each observer.
+
+    The property-observer[s] association is given by the implicit
+    rule in observers method names: if you want the model notified
+    the changing event of the value of the property 'p' you have to
+    define the method called 'property_p_value_change' in each
+    listening observer class.
+
+    Notice that tipically 'controllers' implement the observer
+    pattern. The notification method gets the emitting model, the
+    old value for the property and the new one.  Properties
+    functionalities are automatically provided by the
     ObservablePropertyMeta meta-class."""
 
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
@@ -64,8 +70,8 @@ class Model (object):
         return
 
     def register_property(self, name):
-        """Registers an existing property to be monitored, and sets up
-        notifiers for notifications"""
+        """Registers an existing property to be monitored, and sets
+        up notifiers for notifications"""
         if not self.__value_notifications.has_key(name): 
             self.__value_notifications[name] = []
             pass
@@ -93,11 +99,13 @@ class Model (object):
                 
         return
 
+
     def has_property(self, name):
         """Returns true if given property name refers an observable
         property inside self or inside derived classes"""
         return self.__properties__.has_key(name) or \
                self.__derived_properties__.has_key(name)
+
 
     def register_observer(self, observer):
         if observer in self.__observers: return # not already registered
@@ -245,8 +253,12 @@ class Model (object):
     def notify_property_value_change(self, prop_name, old, new):
         assert(self.__value_notifications.has_key(prop_name))
         for method in self.__value_notifications[prop_name] :
-            self.__notify_observer__(method.im_self, method,
-                                     self, old, new) # notifies the change
+            obs = method.im_self
+            # notification occurs checking spuriousness of the observer
+            if old != new or obs.accepts_spurious_change():
+                self.__notify_observer__(obs, method,
+                                         self, old, new) # notifies the change
+                pass
             pass
         return                
 

@@ -1,4 +1,37 @@
 **********************************************************************
+*  Oct 8 2007                                                        * 
+**********************************************************************
+
+Released version 1.2.0
+
+* New features:
+
+  - Added adapters, new entities that largely simplify and reduce
+    costs and development efforts. Adapters handles autonomous
+    coordination between properties into models and widgets into
+    views. Adapters are in a way similar to proxies featured by
+    other frameworks like Kiwi.
+
+  - Added script gtkmvc-progen that aids developers in generating
+    gtkmvc-based projects from scratch. gtkmvc-progen can be run in
+    both batch and GUI modalities. For example:
+    $> gtkmvc-progen name=myproj author="Wil Shakespeare" gui=no
+
+    ... generates project "myproj" in batch mode. See the user
+    manual for a full list of available options.
+    
+* Other changes
+  
+  - Spurious value changes in observable properties are no longer
+    notified by default. A new optional parameter of class Observer
+    allows for a backward-compatible semantics.
+
+  - Widgets search into Views has been optimized.
+
+  - A few bug fixes and optimizations. 
+
+
+**********************************************************************
 *  May 22 2007                                                       * 
 **********************************************************************
 

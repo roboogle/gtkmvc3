@@ -7,14 +7,18 @@ global-include README COPYING INSTALL AUTHORS NEWS PKG-INFO
 recursive-include examples README *.py *.glade
 include examples/converter/about examples/converter/currencies
 include examples/mini-yoman/yoman examples/mini-yoman/LICENSE
+include examples/adapters
 
 # docs
 recursive-include docs/user-man/figs/png *.png
 recursive-include docs/user-man  *.tex
 
 # tutorial
-recursive-include docs/tutorial *.eps *.tex
-recursive-include docs/tutorial README *.py *.glade
+recursive-include docs/tutorial *.tex *.png
+recursive-include docs README *.py *.glade
+
+# glade
+include gtkmvc/progen/progen.glade
 
 prune dist
 

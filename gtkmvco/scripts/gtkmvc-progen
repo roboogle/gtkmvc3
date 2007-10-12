@@ -1,0 +1,133 @@
+#! python
+
+# ----------------------------------------------------------------------
+#  Author: Roberto Cavada <cavada@irst.itc.it>
+#
+#  Copyright (c) 2007 by Roberto Cavada
+#
+#  pygtkmvc is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2 of the License, or (at your option) any later version.
+#
+#  pygtkmvc is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  or email to the author Roberto Cavada <cavada@irst.itc.it>.
+#  Please report bugs to <cavada@irst.itc.it>.
+# ----------------------------------------------------------------------
+
+
+# checks for gtkmvc
+try: import gtkmvc
+except:
+    import os.path; import sys
+    top_dir = os.path.dirname(os.path.abspath("."))
+    sys.path = [top_dir] + sys.path
+    import gtkmvc
+    pass
+gtkmvc.require("1.2.0")
+
+from gtkmvc.progen.model import ProgenModel, set_gui_log, set_shell_log
+from gtkmvc.progen.templates import VERSION
+import sys
+# --------------------
+
+req_options = ("name",)
+def process_options(args):
+    m={}
+    for a in args:
+        kv = a.split("=")
+        if len(kv) > 2: raise ValueError("Invalid option: %s" % a)
+        if len(kv) == 1: k,v = (kv[0], "yes")
+        else: k,v = kv
+        if v.lower() == "no": v = False
+        elif v.lower() == "yes": v = True
+        m[k] = v
+        pass
+    return m
+
+
+def check_options(m):
+    if m.has_key("gui"): return
+    for o in req_options:
+        if not m.has_key(o): raise ValueError("Required option '%s' has not been specified" % o)
+        pass
+
+    return
+
+def fix_options(m): # fixes missing options
+    if not m.has_key("gui"): m['gui'] = "win32" in sys.platform.lower() 
+    if not (m.has_key("gui") or m.has_key('author')): m['author'] = "Bug Producer"
+    return
+
+def print_banner():
+    print "This is the gtkmvc Project Generator version %s" % ".".join(VERSION)
+    return
+
+def print_help():
+    print "Attributes can be specified in the form: attr=value"
+    print 'For example: author="Roberto Cavada"'
+    print "Boolean attributes can be specified in the form attr[=yes|no]"
+    print "For example: gui"
+    print "Attributes and their default values are:"
+
+    for a in ProgenModel.__properties__:
+        v = ProgenModel.__properties__[a]
+        if v is None: v=""
+        elif v is True: v="yes"
+        elif v is False: v="no"        
+        print '\t%s"%s"' % (a.ljust(20),v)
+        pass
+    
+    print "\nBoolean option 'gui' has a default value that depends on the hosting platform"
+    print "Required attributes are:"
+    print "\t", " ".join(req_options)    
+    print
+    return
+
+
+def run_gui(model):
+    import gtk
+    from gtkmvc.progen.ctrl import ProgenCtrl
+    from gtkmvc.progen.view import ProgenView
+
+    c = ProgenCtrl(model)
+    v = ProgenView(c)
+
+    set_gui_log(v['tv_res'].get_buffer())
+    gtk.main()
+    return
+
+def run_shell(model):
+    set_shell_log()
+    model.generate_project()
+    return
+
+def main(attributes):
+    pm = ProgenModel()
+
+    for k in attributes: setattr(pm, k, attributes[k])
+
+    if attributes['gui']: run_gui(pm)
+    else: run_shell(pm)
+    return
+
+
+if __name__ == "__main__":
+    print_banner()
+    attr = process_options(sys.argv[1:])
+    fix_options(attr)
+    check_options(attr)
+    if attr.has_key("help"): print_help(); sys.exit(1)
+
+    main(attr)
+    pass
+    

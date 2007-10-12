@@ -1,22 +1,20 @@
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters import StaticContainerAdapter
+from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import gtk
 
 
 class MyView (View):
     def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window4")
+        View.__init__(self, ctrl, "adapters.glade", "window8")
         return
     pass
 
 
 class MyModel (Model):
     __properties__ = {
-        'box' : { 'en4' : 0,
-                  'lbl4' : 1,
-                  'sb4' : 2 }
+        'dir' : gtk.ARROW_UP,
         }
 
     def __init__(self):
@@ -24,15 +22,19 @@ class MyModel (Model):
         return
     pass
 
-import random
+
 class MyCtrl (Controller):
     def __init__(self, m):
         Controller.__init__(self, m)
         return
 
-    def on_button4_clicked(self, button):
-        k = random.choice(self.model.box.keys())
-        self.model.box[k] += 1
+    def register_adapters(self):
+        self.adapt("dir")
+        return
+
+    def on_button5_clicked(self, button):
+        vals = [gtk.ARROW_UP, gtk.ARROW_RIGHT, gtk.ARROW_DOWN, gtk.ARROW_LEFT]
+        self.model.dir = vals[(vals.index(self.model.dir)+1) % len(vals)]
         return
     
     pass
@@ -42,11 +44,6 @@ class MyCtrl (Controller):
 m = MyModel()
 c = MyCtrl(m)
 v = MyView(c)
-
-a1 = StaticContainerAdapter(m, "box")
-a1.connect_widget(map(lambda x: v[x], "en4 lbl4 sb4".split()), 
-                  setters = {'lbl4': lambda w, v: w.set_markup("<big>Val: <b>%d</b></big>" % v),})
-
 
 gtk.main()
 

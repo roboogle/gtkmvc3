@@ -1,7 +1,6 @@
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
-from gtkmvc import observable
 
 import gtk
 
@@ -9,7 +8,7 @@ import gtk
 
 class MyView (View):
     def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window1")
+        View.__init__(self, ctrl, "adapters.glade", "window7")
         return
     pass
 
@@ -30,7 +29,12 @@ class MyCtrl (Controller):
         Controller.__init__(self, m)
         return
 
-    def on_button1_clicked(self, button):
+    def register_adapters(self):
+        self.adapt('en1', 'label7')        
+        self.adapt('en1')        
+        return
+    
+    def on_button7_clicked(self, button):
         self.model.en1 += 1
         return
     
@@ -38,21 +42,10 @@ class MyCtrl (Controller):
 
 # ----------------------------------------------------------------------
 
-def myerr(adapt, name, val):
-    print "Error from", adapt, ":", name, ",", val
-    adapt.update_widget()
     
 m = MyModel()
 c = MyCtrl(m)
 v = MyView(c)
-
-a1 = Adapter(m, "en1",
-             prop_read=lambda v: v/2.0, prop_write=lambda v: v*2,
-             value_error=myerr)
-a1.connect_widget(v["entry1"])
-
-a2 = Adapter(m, "en1")
-a2.connect_widget(v["label1"], setter=lambda w,v: w.set_markup("<big><b>%.2f</b></big>" % v))
 
 gtk.main()
 

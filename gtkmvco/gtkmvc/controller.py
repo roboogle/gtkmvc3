@@ -199,10 +199,6 @@ class Controller (Observer):
             res.append(ad) # day
             return res
 
-        elif isinstance(wid, gtk.TextView): # textview
-            ad = Adapter(self.model, prop_name)
-            
-
             
         try: # tries with StaticContainerAdapter
             ad = StaticContainerAdapter(self.model, prop_name)

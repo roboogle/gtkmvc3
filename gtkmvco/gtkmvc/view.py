@@ -156,11 +156,17 @@ class View (object):
             pass
         return
 
-    # Finds the right callback for custom widget creation and call it
+    # Finds the right callback for custom widget creation and calls it
+    # Returns None if an undefined or invalid  handler is found
     def _custom_widget_create(self, glade, function_name, widget_name,
                               str1, str2, int1, int2):
-        handler = getattr(self, function_name)
-        return handler(str1, str2, int1, int2)
+        # This code was kindly provided by Allan Douglas <zalguod at
+        # users.sourceforge.net>
+        if function_name is not None:
+            handler = getattr(self, function_name, None)
+            if handler is not None: return handler(str1, str2, int1, int2)
+            pass        
+        return None
 
     # implements the iteration protocol
     def __iter__(self):

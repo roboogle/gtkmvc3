@@ -30,6 +30,15 @@ Released version 1.2.0
 
   - A few bug fixes and optimizations. 
 
+    o Undefined handlers fr custom widgets are correctly
+      handled. Thanks to Allan Douglas <zalguod at
+      users.sourceforge.net> for providing a working patch.
+
+	  o Fixed a subtle bug in the observer pattern implementation.
+
+    o Searching widgets in View is now much faster. 
+
+
 
 **********************************************************************
 *  May 22 2007                                                       * 

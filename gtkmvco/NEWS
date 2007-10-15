@@ -35,7 +35,7 @@ Released version 1.2.0
       managed. Thanks to Allan Douglas <zalguod at
       users.sourceforge.net> for providing a working patch.
 
-	  o Fixed a subtle bug in the observer pattern implementation.
+    o Fixed a subtle bug in the observer pattern implementation.
 
     o A few other minor fixes and optimizations. 
 

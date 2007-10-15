@@ -11,7 +11,6 @@ docs/tutorial/src/README
 docs/tutorial/src/_importer.py
 docs/tutorial/src/ctrl_glade.py
 docs/tutorial/src/ctrl_glade_adap.py
-docs/tutorial/src/ctrl_glade_adapt.py
 docs/tutorial/src/ctrl_no_glade.py
 docs/tutorial/src/main_glade.py
 docs/tutorial/src/main_glade_adap.py
@@ -25,6 +24,8 @@ docs/tutorial/tex/tutorial.tex
 docs/tutorial/tex/eps/adap.png
 docs/tutorial/tex/eps/appl.png
 docs/tutorial/tex/eps/glade.png
+docs/tutorial/tex/eps/hello.png
+docs/tutorial/tex/eps/progen.png
 docs/tutorial/tex/tutorial/images.tex
 docs/tutorial/tex/tutorial/img1.png
 docs/tutorial/tex/tutorial/img2.png
@@ -37,6 +38,7 @@ docs/user-man/motiv.tex
 docs/user-man/mvc.tex
 docs/user-man/mvco.tex
 docs/user-man/obs.tex
+docs/user-man/progen.tex
 docs/user-man/pygtkmvc.tex
 docs/user-man/figs/png/adap.png
 docs/user-man/figs/png/adap1.png

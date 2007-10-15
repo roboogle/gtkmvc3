@@ -15,7 +15,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library; if not, write to the Free Software
-51 Franklin Street, Fifth Floor,
+#  51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.ridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>

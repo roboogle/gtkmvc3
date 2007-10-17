@@ -43,8 +43,8 @@ Released version 1.2.0
   - Bug fixes and optimizations. 
 
     o Undefined handlers for custom widgets are correctly
-      managed. Thanks to Allan Douglas <zalguod at
-      users.sourceforge.net> for providing a working patch.
+      managed. Thanks to Allan Douglas <zalguod TA users TOD
+      sourceforge TOD net> for providing a working patch.
 
     o Fixed a subtle bug in the observer pattern implementation.
 

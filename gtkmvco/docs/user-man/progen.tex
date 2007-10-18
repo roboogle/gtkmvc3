@@ -1,6 +1,6 @@
 \section{progen: A Project Generator}
 
-Since version 1.2.0 a little application called \kw{gtkmvc-progen}
+Since version 1.2 a little application called \kw{gtkmvc-progen}
 is provided. Goal of \kw{gtkmvc-progen} is to generate the skeleton
 of a project that can be used when starting up a new application
 based on gtkmvc.
@@ -15,7 +15,8 @@ The newly created project is constituted by:
 \item A simple application-level Controller
 \item The application main View containing the application main window. 
 \item A resources directory, containing for example the project
-  glade files
+  glade files, but also possibly images, styles, and other resources
+  loaded at runtime.
 \item A launching script, localized in the top-level directory
 \end{enumerate}
 
@@ -73,7 +74,7 @@ mode. Option \kw{help} can be used to print out an helping message.
 
 \kw{gtkmvc-progen} can be executed either locally from the script
 directory, or can be executed as any other program if \pygtkmvc has
-been officially installed on the hosting system.
+been properly installed on the hosting system.
 
 From the local script directory:
 \begin{verbatim}

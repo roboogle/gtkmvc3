@@ -26,13 +26,13 @@ designs. In particular \kw{Controllers} tend to blow up in size and
 complexity when handling a \kw{View} containing many widgets, and
 when observing many properties into the \kw{Model}. Also, since the
 framework can handle several kinds of observable properties (\OPS),
-developers are required to remember and to define some naming
-conventions for notifications methods defined inside \kw{Observers}
-that contributes to make things that would be easy too complex.
+developers are required to remember and use some naming conventions
+for notifications methods defined inside \kw{Observers}. Conventions
+contributes to make things that would be easy too complex.
 
 In particular, when a default behaviour is expected, the
 \kw{Controller} gets filled in with many methods whose code follows
-a template that is identically repeated all over again. 
+a template that is identically repeated all over again.
 
 \bigskip 
 
@@ -41,12 +41,13 @@ aligned with some part of the model. This would require to have a
 textual observable property into the model, a signal handler into
 the controller to handle the \codename{'changed'} signal, and a
 method to handle notification for observable property value
-changes. When a \codename{'changed'} signal arrives, the signal
-handle should read the text entry value and report it to the
-observable property into the model. Viceversa, when the observable
-property in the model get changed for any reason, the notification
-code into the controller should update the text entry value. This 
-code should also avoid to fall into a reciprocal loop. 
+changes. When a \codename{'changed'} signal arrives, the
+corresponding signal handler should read the text entry value and
+report it to the observable property into the model. Viceversa, when
+the observable property in the model get changed for any reason, the
+notification code into the controller should update the text entry
+value. The handlers' code should also avoid to fall into a
+reciprocal loop.
 
 \smallskip
 It is in this context that adapters become pretty nifty. 
@@ -68,16 +69,17 @@ keep low the complexity of controllers.
 
 In figure \ref{ADAP_f} is represented a simple adapter, where main
 internal functional blocks are shown. There exist functional blocks
-to control the way the property and the widget are read and written,
-and how errors are handled when exceptions occur when writing into
-the property.
+to control (and possibly customise) the way the property and the
+widget are read and written. Also, there is a functional block to
+manage how errors are handled when exceptions occur when writing
+into the property.
 
 An Adapter \emph{adapts} widgets and model's properties. Adapters
-offer strong customization, but in their simplest use their are
-pretty easy to be used. in this context, previous example might be
+offer strong customization, but in their simplest use they are
+pretty easy to be used. In this context, previous example might be
 handled as follows.
 
-We have a hand-made View with containing a button and a text
+We have a hand-made View containing a button and a text
 entry. Notice that the name of the text entry is
 \codename{entry\_text}.
 
@@ -101,7 +103,7 @@ class MyView (gtkmvc.View):
 }
 
 
-The model contains simply an observable properties that should
+The model contains an observable property that should always 
 reflect the content of the text entry \codename{entry\_text}.
 
 { \codesize
@@ -137,7 +139,7 @@ class MyCtrl (gtkmvc.Controller):
 \end{verbatim}
 }
 
-The idea of this example is to have ``\codename{button}''
+The idea in this example is to have ``\codename{button}''
 that when pressed makes model's observable property \codename{text}
 printed out to the standard output.
 
@@ -152,7 +154,7 @@ example, creation occurs through a call to another new method of
 class Controller: \codename{adapt}. 
 
 The new method is pretty complex and will be discussed in depth
-later. Enough to say now is that parameter \codename{"text"}
+later. Enough to say now that parameter \codename{"text"}
 represents the name of the observable property that we want to
 adapt. The corresponding widget is searched among all widgets in the
 view, and widget \codename{entry\_text} is found and connected
@@ -188,11 +190,14 @@ accordingly.
 
 If the user changes the text in the entry, the property
 \codename{text} will be changed accordingly, as it is easy to check
-by clicking the button.
+by clicking the button. Viceversa, if the property \codename{text}
+were changed by another model, observer, etc., the text entry would
+get updated accordingly.
 
 
 \subsection{Module \codename{adapters}}
-Currently, module \codename{adapters} contains a few adapters types.
+Currently, module \codename{adapters} contains a few adapters
+classes.
 
 \begin{description}
 \item [\codename{Adapter}] Connects a widget and a property. The
@@ -214,6 +219,15 @@ Currently, module \codename{adapters} contains a few adapters types.
   implements \codename{\_\_getitem\_\_} and
   \codename{\_\_setitem\_\_} methods.
 \end{description}
+
+
+\begin{figure}[here]
+\begin{center}
+\includegraphics[width=7cm]{figs/png/adapuml}
+\caption{\label{ADAPuml_f} Adapters class hierarchy}
+\end{center}
+\end{figure}
+
 
 
 \subsubsection{Class \codename{Adapter}}

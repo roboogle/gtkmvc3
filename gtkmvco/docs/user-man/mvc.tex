@@ -50,19 +50,19 @@ Figure \ref{MVC_f} shows three interconnected parts:
   \emph{state}, this implementation differs from the standard \mvc,
   where generally the View side is completely \emph{stateless}.
 
-  As for the Model, a View does not know the semantics concerning what
-  it visualizes, as well as the Model which it is connected to.
+  A View does not know the semantics concerning what it visualizes,
+  and neither knows that it is connected to a model. 
 
 \item[Controller] Realizes the connection between Models and Views.
   A Controller contains the \gui logic: for example, it stores the
   information about what happens when a button is clicked (e.g. 
   handlers of signal are located inside a Controller.)
 
-  A Controller perfectly knows how the connected Model and View are
-  implemented, and knows both the state and presentation (\gui)
-  semantics. A Controller is associated to one Model (\emph{has a}
-  relationship), and in the current implementation is associated only
-  to one View.
+  A Controller perfectly knows the interfaces of the connected Model
+  and View, and knows both the state and presentation (\gui)
+  semantics. A Controller is associated to one Model (\emph{use a}
+  relationship), and in the current implementation is associated
+  only to one View (\emph{has a} relationship).
 
 \end{description}
 
@@ -77,7 +77,7 @@ provided by the \mvc, and that is explained in \ref{VR}.
 Current implementation allows only a 1-1 relationship between
 Controller and View. Anyway a registration mechanism has been provided
 to connect those two parts, allowing for more generic relationship in
-the future, when a Controller could handle more than one Views, or a
+the future, when a Controller could handle more than one View, or a
 View can be shared among several Controllers.
 
 After the creation, a View must register itself with a Controller.

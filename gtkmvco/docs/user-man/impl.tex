@@ -8,7 +8,7 @@ This section presents some details regarding the implementation of the
 \subsection{Models, Controllers and Views in detail}
 The \mvco framework essentially supplies three base classes which
 implement respectively a View, a Model and a Controller.  Developers
-has to derive custom classes from the base classes set, adding the
+have to derive custom classes from the base classes set, adding the
 implementation which depends on the application semantics.
 
 \begin{description}
@@ -26,7 +26,8 @@ implementation which depends on the application semantics.
  \begin{itemize} 
  \item Automatic registration as observers of the associated Model.
  \item Easy access to the associated Model and View for any derived
- class.
+   class.
+ \item Instantiation of \emph{adapters}.
  \end{itemize}
 
 \item[View base class] Supplies servicing for:
@@ -41,8 +42,7 @@ implementation which depends on the application semantics.
   accessed by using the name they have been defined from within
   \glade, at design time, or that have been specified when creating
   widgets by hand.
-\item (New in version 1.0.1) Support for custom widgets declared in
-  \glade files.
+\item Support for custom widgets declared in \glade files.
  \end{itemize}
 
 \end{description}
@@ -52,8 +52,8 @@ implementation which depends on the application semantics.
 Models must be used to hold the \emph{data} of the application. They
 can be connected to observers (like Controllers) by a mechanism
 detailed by section \ref{OPD}.  It is important to note that apart
-from during the registration phase, the model do not know that there
-exists a set observers connected to it.
+from during the registration phase, the model does not know that
+there exists a set observers connected to it.
 
 All the code strictly related to the data of the application (i.e. not
 related to any view of those data) will live in the model class. 
@@ -121,9 +121,8 @@ corresponding Model, even when there is nothing to observe, or when
 the controller is interested in observing nothing within the model.
 
 Registration occurs automatically. If the observation is not wanted,
-the derived controller can call method
-\codename{Model.unregister\_observer} from the instance constructor, to
-unregister itself.
+the derived controller can call method \codename{unregister\_model}
+from the instance constructor, to unregister itself.
 
 
 \subsubsection{\label{VR:D}View registration}

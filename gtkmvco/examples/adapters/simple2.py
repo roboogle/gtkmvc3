@@ -27,6 +27,8 @@
 
 # A simple demo showing an Adapter at work
 # A text entry is kept aligned with an observable property
+# With respect to simple.py, when button is pressed the model is
+# changed, and the entry widget got updated accordingly.
 
 import _importer
 
@@ -70,7 +72,7 @@ class MyCtrl (gtkmvc.Controller):
     # signal handlers
     def on_button_clicked(self, button):
         print "Text is:'%s'" % self.model.text
-        self.model.text = "aa"
+        self.model.text = "Clicking the button changes the model as well!"
         return
 
     pass # end of class

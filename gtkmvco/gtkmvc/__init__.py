@@ -22,7 +22,7 @@
 #  Please report bugs to <cavada@irst.itc.it>.
 
 
-__all__ = ["model", "view", "controller", "observable", "observer"]
+__all__ = ["model", "view", "controller", "observable", "observer", "support"]
 
 __version = (1,2,1)
 

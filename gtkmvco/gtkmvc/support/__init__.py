@@ -22,4 +22,5 @@
 #  Please report bugs to <cavada@irst.itc.it>.
 
 
-__all__ = ["metaclass_base", "metaclasses", "wrappers", "decorators"]
+__all__ = ["metaclass_base", "metaclasses", "wrappers", "decorators",
+           "factories"]

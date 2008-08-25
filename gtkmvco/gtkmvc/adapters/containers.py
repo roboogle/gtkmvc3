@@ -25,7 +25,7 @@
 import types
 import gtk
 
-from gtkmvc.adapters.basic import UserClassAdapter
+from gtkmvc.adapters.basic import UserClassAdapter, Adapter
 
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
@@ -49,7 +49,6 @@ class StaticContainerAdapter (UserClassAdapter):
     dynamically. If the container grows up in length, no change will
     occur in the view-side.
     """
-
     def __init__(self, model, prop_name,
                  prop_read=None, prop_write=None, value_error=None):
 
@@ -59,7 +58,8 @@ class StaticContainerAdapter (UserClassAdapter):
                                   prop_read, prop_write, 
                                   value_error)
 
-        prop =  self._get_property()
+        prop =  Adapter._get_property(self)
+        #prop =  self._get_property() # bug fix reported by A. Dentella
         if not (hasattr(prop, "__getitem__") and
                 hasattr(prop, "__setitem__")):
             raise TypeError("Property " + self._prop_name +

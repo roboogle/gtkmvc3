@@ -142,7 +142,7 @@ class Adapter (Observer):
     def update_model(self):
         """Forces the property to be updated from the value hold by
         the widget. This method should be called directly by the
-        user in very unusual coditions."""
+        user in very unusual conditions."""
         self._write_property(self._read_widget())
         return
     
@@ -150,7 +150,7 @@ class Adapter (Observer):
         """Forces the widget to be updated from the property
         value. This method should be called directly by the user
         when the property is not observable, or in very unusual
-        coditions."""
+        conditions."""
         self._write_widget(self._read_property())
         return
 
@@ -218,8 +218,8 @@ class Adapter (Observer):
     def _get_property(self):
         """Private method that returns the value currently stored
         into the property"""
-        #return getattr(self.get_model(), self._prop_name)
-        return self._prop
+        return getattr(self.get_model(), self._prop_name)
+        #return self._prop # bug fix reported by A. Dentella
 
     def _set_property(self, val):
         """Private method that sets the value currently of the property."""
@@ -269,7 +269,7 @@ class Adapter (Observer):
         self._itsme = True
         try:
             setter = self._wid_info[self._wid][1]
-            wtype = self._wid_info[self._wid][2]            
+            wtype = self._wid_info[self._wid][2]
             if wtype is not None: setter(self._wid, self._cast_value(val, wtype))
             else: setter(self._wid, val)            
         finally:
@@ -308,8 +308,7 @@ class Adapter (Observer):
     def _on_prop_changed(self):
         """Called by the observation code, when the value in the
         observed property is changed"""
-        if self._itsme: return
-        self.update_widget() 
+        if not self._itsme: self.update_widget()
         return
 
     pass # end of class Adapter

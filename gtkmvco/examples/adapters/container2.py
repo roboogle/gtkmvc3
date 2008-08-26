@@ -1,4 +1,4 @@
-#  Author: Roberto Cavada <cavada@irst.itc.it>
+#  Author: Roberto Cavada <cavada@fbk.eu>
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
@@ -20,8 +20,8 @@
 #
 #  For more information on pygtkmvc see
 #  <http://pygtkmvc.sourceforge.net> or email to the author Roberto
-#  Cavada <cavada@irst.itc.it>.  Please report bugs to
-#  <cavada@irst.itc.it>.
+#  Cavada <cavada@fbk.eu>.  Please report bugs to
+#  <cavada@fbk.eu>.
 
 
 import _importer

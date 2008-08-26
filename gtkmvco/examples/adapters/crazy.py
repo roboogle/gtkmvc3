@@ -1,6 +1,6 @@
 #  Author: Roberto Cavada <cavada@fbk.eu>
 #
-#  Copyright (c) 2007 by Roberto Cavada
+#  Copyright (c) 2008 by Roberto Cavada
 #
 #  pygtkmvc is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -26,68 +26,79 @@
 
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters import StaticContainerAdapter
+from gtkmvc.adapters.basic import Adapter
 
 import gtk
 
-# This example shows how a bunch of widgets can be adapted to an 
-# observable property containing a map of integers
+# Here a set of widgets is connected to a set of data in the model.
+# Changing one value in the model has the effect of changing all
+# widgets which observe that value in the model.
+#
+# The resulting example is a little weird, but looking at the
+# simplicity of the code it should be easy to understand the powerful
+# of adapters.
+
 
 class MyView (View):
     def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window3")
+        View.__init__(self, ctrl, "adapters.glade", "window9")
         return
     pass
 
-
+import datetime
 class MyModel (Model):
     __properties__ = {
-        'box' : { 'en3' : 0,
-                  'lbl3' : 1,
-                  'sb3' : 2
-                  }
+        'expan' : True,
+        'toggle' : True,
+        'color' : gtk.gdk.color_parse("black"),
+        'url' : "http://pygtkmvc.sourceforge.net/",
+        'spin' : 5.0,
         }
-    
+
     def __init__(self):
         Model.__init__(self)
         return
     pass
 
-import random
+
 class MyCtrl (Controller):
     def __init__(self, m):
         Controller.__init__(self, m)
         return
 
-    def register_adapters(self):
-        a = StaticContainerAdapter(self.model, "box", value_error=myerr)
-        a.connect_widget(map(lambda x: self.view[x], "en3 lbl3 sb3".split()), 
-                         setters = {'lbl3': lambda w, v: w.set_markup("<big>Val=<b>%d</b></big>" % v),})
+    def register_adapters(self):        
+        # labels
+        self.adapt("expan", "label10")
         
+        ad = Adapter(self.model, "toggle")
+        ad.connect_widget(self.view["label_t1"], setter=lambda w,v: \
+                            w.set_markup("<big><b>%i</b></big>" % v))
+        self.adapt(ad)
+        self.adapt("toggle", "label_t2")
+        self.adapt("color", "label_t3")
+        self.adapt("url", "label_t4")
+        self.adapt("spin", "label_t5")
+
+        # controls
+        self.adapt("expan", "expander1")        
+        self.adapt("toggle", "togglebutton1")
+        self.adapt("toggle", "checkbutton1")
+        self.adapt("color", "colorbutton1")
+        #self.adapt("url", "linkbutton1") ##This needs glade-3
+        self.adapt("spin", "spinbutton1")
         return
 
-    def on_button3_clicked(self, button):
-        self.model.box[random.choice(self.model.box.keys())] += 1
-        return
-
-    def on_window3_delete_event(self, w, e):
+    def on_window9_delete_event(self, w, e):
         gtk.main_quit()
         return True
 
-    pass
+    pass # end of class
 
 # ----------------------------------------------------------------------
-
-def myerr(adapt, name, val):
-    print "Error from", adapt, ":", name, ",", val
-    adapt.update_widget()
-    return
-
 
 m = MyModel()
 c = MyCtrl(m)
 v = MyView(c)
+
 gtk.main()
-
-
 

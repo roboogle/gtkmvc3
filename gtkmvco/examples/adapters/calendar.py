@@ -1,6 +1,6 @@
 #  Author: Roberto Cavada <cavada@fbk.eu>
 #
-#  Copyright (c) 2007 by Roberto Cavada
+#  Copyright (c) 2008 by Roberto Cavada
 #
 #  pygtkmvc is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -24,69 +24,58 @@
 #  <cavada@fbk.eu>.
 
 
+# In this example the model contains a date.
+# A Calendar widget is connected to the model by an adapter.
+# Pressing the button, the selected date is printed to the stdout.
+
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters import StaticContainerAdapter
+from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import gtk
 
-# This example shows how a bunch of widgets can be adapted to an 
-# observable property containing a map of integers
 
 class MyView (View):
     def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window3")
+        View.__init__(self, ctrl, "adapters.glade", "window5")
         return
     pass
 
-
+import datetime
 class MyModel (Model):
     __properties__ = {
-        'box' : { 'en3' : 0,
-                  'lbl3' : 1,
-                  'sb3' : 2
-                  }
+        'data' : datetime.datetime.today()
         }
-    
+
     def __init__(self):
         Model.__init__(self)
         return
     pass
 
-import random
+
 class MyCtrl (Controller):
     def __init__(self, m):
         Controller.__init__(self, m)
         return
 
     def register_adapters(self):
-        a = StaticContainerAdapter(self.model, "box", value_error=myerr)
-        a.connect_widget(map(lambda x: self.view[x], "en3 lbl3 sb3".split()), 
-                         setters = {'lbl3': lambda w, v: w.set_markup("<big>Val=<b>%d</b></big>" % v),})
-        
+        self.adapt("data", "calendar")
         return
 
-    def on_button3_clicked(self, button):
-        self.model.box[random.choice(self.model.box.keys())] += 1
-        return
+    def on_button8_clicked(self, button): print self.model.data
 
-    def on_window3_delete_event(self, w, e):
+    def on_window5_delete_event(self, w, e):
         gtk.main_quit()
         return True
-
+    
     pass
 
 # ----------------------------------------------------------------------
 
-def myerr(adapt, name, val):
-    print "Error from", adapt, ":", name, ",", val
-    adapt.update_widget()
-    return
-
-
 m = MyModel()
 c = MyCtrl(m)
 v = MyView(c)
+
 gtk.main()
 
 

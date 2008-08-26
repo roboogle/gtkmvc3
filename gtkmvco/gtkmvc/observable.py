@@ -1,5 +1,5 @@
 #  -------------------------------------------------------------------------
-#  Author: Roberto Cavada <cavada@irst.itc.it>
+#  Author: Roberto Cavada <cavada@fbk.eu>
 #
 #  Copyright (C) 2006 by Roberto Cavada
 #
@@ -19,7 +19,7 @@
 #  Boston, MA 02110, USA.ridge, MA 02139, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
-#  or email to the author <cavada@irst.itc.it>.
+#  or email to the author <cavada@fbk.eu>.
 #  -------------------------------------------------------------------------
 
 

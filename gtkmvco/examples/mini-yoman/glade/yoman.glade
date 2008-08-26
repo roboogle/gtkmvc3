@@ -362,7 +362,7 @@
   <property name="website_label" translatable="yes">Yoman Homepage</property>
   <property name="authors">Baruch Even &lt;baruch@ev-en.org&gt;
 
-Yoman uses the MVC system and it does so easily with gtkvmvc of  Roberto Cavada &lt;cavada@irst.itc.it&gt;</property>
+Yoman uses the MVC system and it does so easily with gtkvmvc of  Roberto Cavada &lt;cavada@fbk.eu&gt;</property>
   <property name="translator_credits" translatable="yes" comments="TRANSLATORS: Replace this string with your names, one name per line.">translator-credits</property>
 </widget>
 

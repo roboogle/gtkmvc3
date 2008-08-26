@@ -44,12 +44,12 @@ change.
 Each Observer declares it is interested in receiving notifications on
 one or more properties changing, by a mechanism called
 \kw{Registration}. Once an Observer (for example, a Controller)
-registered itself among the Model it is associated with, it will be
+registered itself with the Model it is associated with, it will be
 notified of all changes of the observable properties. The Observers
 will be notified only of the property changes that they are actually
 interested in observing.
 
-An implicit syntactical rule binds observable properties names to
+An implicit syntactical rule binds observable property names to
 notifications sockets inside Observers. This rule allows an automatic
 connection, and fixes a sort of ``rule'' for methods names.
 

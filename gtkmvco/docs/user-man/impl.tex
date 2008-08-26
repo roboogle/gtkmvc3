@@ -103,7 +103,7 @@ classes:
 User's controllers must derive from this class.  A controller is
 always associated with one model, that the controller can monitor and
 modify. At the other side the controller can control a View.  Two
-members called \codename{model} and \codename{view} holds the
+members called \codename{model} and \codename{view} hold the
 corresponding instances.
 
 The controller holds all the code that lives between data in model and
@@ -171,8 +171,8 @@ def __init__(self, controller, glade_filename=None,
 \item[glade\_top\_widget\_name] can be a string or a list of strings.
   Each string provided is associated to the parameter glade\_filename
   content, and represent the name of the widget in the widgets tree
-  hierarchy to be considered as top level. This let the user to select
-  single parts of the glade trees passed through parameter
+  hierarchy to be considered as top level. This lets the user to
+  select single parts of the glade trees passed through parameter
   \codename{glade\_filename}.
 
 \item[parent\_view] is the view instance to be considered parent of
@@ -397,7 +397,7 @@ since its management is carried out by the base class
 \codename{Model}.
 
 Basically the user derives from class \codename{Model} (or the others
-listed in section \ref{MODELS}). The user and adds a class variable
+listed in section \ref{MODELS}). The user adds a class variable
 called \OPvar. This variable must be a map, whose elements' keys are
 names of properties, and the associated values are the initial values.
 
@@ -967,7 +967,7 @@ multi-threading support.
   
 \subsubsection{Special members for Observable Properties}
 Classes derived from Model, that exports \OPS, have several special
-members. Advanced users might be interested can override some of them,
+members. Advanced users might be interested in overriding some of them,
 but in general they should be considered as private members. They are
 explained here for the sake of completeness.
 

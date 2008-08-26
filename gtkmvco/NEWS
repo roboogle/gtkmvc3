@@ -1,4 +1,16 @@
 **********************************************************************
+*  Aug 26 2008                                                        * 
+**********************************************************************
+
+Released version 1.2.2
+
+This is a minor release that fixes two major bugs about adapters. 
+A few new examples about adapters have been also added. 
+Thanks to Alessandro Dentella <sandro TA e-den TOD it> for 
+reporting bugs.
+
+
+**********************************************************************
 *  Oct 15 2007                                                        * 
 **********************************************************************
 

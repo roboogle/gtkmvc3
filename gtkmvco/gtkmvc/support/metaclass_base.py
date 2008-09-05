@@ -135,7 +135,7 @@ class PropertyMeta (type):
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
 
         if prop_name in members_names:
-            cls.__msg__("Warning: automatic property builder overrids property %s in class %s" \
+            cls.__msg__("Warning: automatic property builder overrides property %s in class %s" \
                         % (prop_name, cls.__name__), 2)
             pass
         setattr(cls, prop_name, prop)

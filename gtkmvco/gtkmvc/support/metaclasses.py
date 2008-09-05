@@ -69,6 +69,45 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
 
     pass #end of class
 
+from gtkmvc.support.utils import get_function_from_source
+from sqlobject import Col
+from sqlobject.inheritance import InheritableSQLObject
+from sqlobject.events import listen, RowUpdateSignal
+
+class ObservablePropertyMetaSQL (ObservablePropertyMeta, InheritableSQLObject.__metaclass__):
+    """Classes instantiated by this meta-class must provide a method named
+    notify_property_change(self, prop_name, old, new)"""
+
+    
+    def __init__(cls, name, bases, dict):
+        InheritableSQLObject.__metaclass__.__init__(cls, name, bases, dict)            
+        ObservablePropertyMeta.__init__(cls, name, bases, dict)
+
+        pnames = getattr(cls, "__observe__", [])
+        for pn in pnames:
+            pr = dict.get(pn, None)
+            if not isinstance(pr, Col):
+                # this is not a SQLObject column (likely a normal
+                # observable property)
+                type(cls).__create_prop_accessors__(cls, pn, pr)
+                
+                pass
+        
+        listen(cls.update_listener, cls, RowUpdateSignal)
+        return    
+
+    def update_listener(cls, instance, kwargs):
+        pnames = getattr(cls, "__observe__", [])
+        for k in kwargs:
+            if k in pnames:
+                _old = getattr(instance, k)
+                _new = kwargs[k]
+                instance.notify_property_value_change(k, _old, _new)
+            pass
+        return
+
+    pass #end of class
+
 
 try:
     from gobject import GObjectMeta

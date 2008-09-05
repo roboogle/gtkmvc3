@@ -64,10 +64,7 @@ class Model (object):
         self.__instance_notif_after = {}
         self.__signal_notif = {}
         
-        for key in (self.__properties__.keys() + self.__derived_properties__.keys()):
-            self.register_property(key)
-            pass        
-
+        for key in self.__get_properties(): self.register_property(key)
         return
 
     def register_property(self, name):
@@ -78,7 +75,7 @@ class Model (object):
             pass
         
         # registers observable wrappers
-        prop = getattr(self, "_prop_%s" % name)
+        prop = getattr(self, "_prop_%s" % name, None)
             
         if isinstance(prop, ObsWrapperBase):
             prop.__set_model__(self, name)
@@ -112,7 +109,7 @@ class Model (object):
         if observer in self.__observers: return # not already registered
 
         self.__observers.append(observer)
-        for key in (self.__properties__.keys() + self.__derived_properties__.keys()):
+        for key in self.__get_properties():
             self.__add_observer_notification(observer, key)
             pass
         
@@ -122,7 +119,7 @@ class Model (object):
     def unregister_observer(self, observer):
         if observer not in self.__observers: return
 
-        for key in (self.__properties__.keys() + self.__derived_properties__.keys()):
+        for key in self.__get_properties():
             self.__remove_observer_notification(observer, key)
             pass
         
@@ -145,6 +142,10 @@ class Model (object):
         return
     
 
+    def __get_properties(self):
+        observees = getattr(self, "__observe__", [])
+        return self.__properties__.keys() + self.__derived_properties__.keys() + observees
+
     def __add_observer_notification(self, observer, prop_name):
         """Searches in the observer for any possible listener, and
         stores the notification methods to be called later"""
@@ -158,7 +159,7 @@ class Model (object):
             pass
 
         # is it a signal?
-        orig_prop = getattr(self, "_prop_%s" % prop_name)
+        orig_prop = getattr(self, "_prop_%s" % prop_name, None)
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name
             if hasattr(observer, method_name):
@@ -203,7 +204,7 @@ class Model (object):
             pass
 
 
-        orig_prop = getattr(self, "_prop_%s" % prop_name)
+        orig_prop = getattr(self, "_prop_%s" % prop_name, None)
         # is it a signal?
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name

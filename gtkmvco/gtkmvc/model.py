@@ -143,7 +143,7 @@ class Model (object):
     
 
     def __get_properties(self):
-        observees = getattr(self, "__observe__", [])
+        observees = getattr(self, "__observable__", [])
         return self.__properties__.keys() + self.__derived_properties__.keys() + observees
 
     def __add_observer_notification(self, observer, prop_name):

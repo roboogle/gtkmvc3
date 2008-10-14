@@ -26,14 +26,14 @@ import types
 
 
 class ObservablePropertyMeta (PropertyMeta):
-    """Classes instantiated by this meta-class must provide a method named
-    notify_property_change(self, prop_name, old, new)"""
-    def __init__(cls, name, bases, dict):
-        PropertyMeta.__init__(cls, name, bases, dict)
-        return    
+  """Classes instantiated by this meta-class must provide a method named
+  notify_property_change(self, prop_name, old, new)"""
+  def __init__(cls, name, bases, dict):
+    PropertyMeta.__init__(cls, name, bases, dict)
+    return    
     
-    def get_setter_source(cls, setter_name, prop_name):
-        return """def %(setter)s(self, val): 
+  def get_setter_source(cls, setter_name, prop_name):
+    return """def %(setter)s(self, val): 
  old = self._prop_%(prop)s
  new = type(self).create_value('%(prop)s', val, self)
  self._prop_%(prop)s = new
@@ -42,21 +42,21 @@ class ObservablePropertyMeta (PropertyMeta):
  return
 """ % {'setter':setter_name, 'prop':prop_name}
 
-    pass #end of class
+  pass #end of class
 
 
 class ObservablePropertyMetaMT (ObservablePropertyMeta):
-    """This class provides multithreading support for accesing
-    properties, through a locking mechanism. It is assumed a lock is
-    owned by the class that uses it. A Lock object called _prop_lock
-    is assumed to be a member of the using class. see for example class
-    ModelMT"""
-    def __init__(cls, name, bases, dict):
-        ObservablePropertyMeta.__init__(cls, name, bases, dict)
-        return 
+  """This class provides multithreading support for accesing
+  properties, through a locking mechanism. It is assumed a lock is
+  owned by the class that uses it. A Lock object called _prop_lock
+  is assumed to be a member of the using class. see for example class
+  ModelMT"""
+  def __init__(cls, name, bases, dict):
+    ObservablePropertyMeta.__init__(cls, name, bases, dict)
+    return 
     
-    def get_setter_source(cls, setter_name, prop_name):
-        return """def %(setter)s(self, val): 
+  def get_setter_source(cls, setter_name, prop_name):
+    return """def %(setter)s(self, val): 
  old = self._prop_%(prop)s
  new = type(self).create_value('%(prop)s', val, self)
  self._prop_lock.acquire()
@@ -67,55 +67,54 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
  return
 """ % {'setter':setter_name, 'prop':prop_name}
 
-    pass #end of class
-
-from gtkmvc.support.utils import get_function_from_source
-from sqlobject import Col
-from sqlobject.inheritance import InheritableSQLObject
-from sqlobject.events import listen, RowUpdateSignal
-
-class ObservablePropertyMetaSQL (ObservablePropertyMeta, InheritableSQLObject.__metaclass__):
-    """Classes instantiated by this meta-class must provide a method named
-    notify_property_change(self, prop_name, old, new)"""
-
-    
-    def __init__(cls, name, bases, dict):
-        InheritableSQLObject.__metaclass__.__init__(cls, name, bases, dict)            
-        ObservablePropertyMeta.__init__(cls, name, bases, dict)
-
-        pnames = getattr(cls, "__observe__", [])
-        for pn in pnames:
-            pr = dict.get(pn, None)
-            if not isinstance(pr, Col):
-                # this is not a SQLObject column (likely a normal
-                # observable property)
-                type(cls).__create_prop_accessors__(cls, pn, pr)
-                
-                pass
-        
-        listen(cls.update_listener, cls, RowUpdateSignal)
-        return    
-
-    def update_listener(cls, instance, kwargs):
-        pnames = getattr(cls, "__observe__", [])
-        for k in kwargs:
-            if k in pnames:
-                _old = getattr(instance, k)
-                _new = kwargs[k]
-                instance.notify_property_value_change(k, _old, _new)
-            pass
-        return
-
-    pass #end of class
+  pass #end of class
 
 
 try:
-    from gobject import GObjectMeta
-    class ObservablePropertyGObjectMeta (ObservablePropertyMeta, GObjectMeta): pass
-    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT, GObjectMeta): pass    
+  from sqlobject import Col
+  from sqlobject.inheritance import InheritableSQLObject
+  from sqlobject.events import listen, RowUpdateSignal
+  
+  class ObservablePropertyMetaSQL (ObservablePropertyMeta, InheritableSQLObject.__metaclass__):
+    """Classes instantiated by this meta-class must provide a method named
+    notify_property_change(self, prop_name, old, new)"""
+
+    def __init__(cls, name, bases, dict):
+      InheritableSQLObject.__metaclass__.__init__(cls, name, bases, dict)
+      ObservablePropertyMeta.__init__(cls, name, bases, dict)
+
+      listen(cls.update_listener, cls, RowUpdateSignal)
+      return    
+
+    def __create_prop_accessors__(cls, prop_name, default_val):
+      if not isinstance(default_val, Col):
+        # this is not a SQLObject column (likely a normal
+        # observable property)
+        ObservablePropertyMeta.__create_prop_accessors__(cls, prop_name, default_val)
+        pass
+      return
+    
+    def update_listener(cls, instance, kwargs):
+      pnames = getattr(cls, "__observable__", [])
+      for k in kwargs:
+        if k in pnames:
+          _old = getattr(instance, k)
+          _new = kwargs[k]
+          instance.notify_property_value_change(k, _old, _new)
+          pass
+        pass
+      return
+    
+    pass #end of class
+except: pass
+  
+try:
+  from gobject import GObjectMeta
+  class ObservablePropertyGObjectMeta (ObservablePropertyMeta, GObjectMeta): pass
+  class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT, GObjectMeta): pass    
 except:
-    class ObservablePropertyGObjectMeta (ObservablePropertyMeta): pass
-    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT): pass
-    pass
+  class ObservablePropertyGObjectMeta (ObservablePropertyMeta): pass
+  class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT): pass
+  pass
 
 

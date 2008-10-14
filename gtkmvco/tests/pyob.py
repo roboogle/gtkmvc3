@@ -39,7 +39,7 @@ class Person(MetaPerson):
   mi = StringCol(length=1, default=None)
   lname = StringCol()
 
-  __observe__ = ['fname', 'lname', 'zzz']    
+  __observable__ = ['fname', 'lname', 'zzz']    
   pass
 
 

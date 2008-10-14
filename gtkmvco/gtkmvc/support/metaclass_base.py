@@ -96,6 +96,11 @@ class PropertyMeta (type):
             type(cls).__create_prop_accessors__(cls, prop, props[prop])
             pass
 
+        # processes now all __obervable__
+        for pn in getattr(cls, "__observable__", []):
+          type(cls).__create_prop_accessors__(cls, pn, dict.get(pn, None))          
+          pass
+
         return
 
 
@@ -134,10 +139,6 @@ class PropertyMeta (type):
 
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
 
-        if prop_name in members_names:
-            cls.__msg__("Warning: automatic property builder overrides property %s in class %s" \
-                        % (prop_name, cls.__name__), 2)
-            pass
         setattr(cls, prop_name, prop)
 
         varname = "_prop_%s" % prop_name

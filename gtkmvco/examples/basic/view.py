@@ -32,8 +32,8 @@ class MyView (View):
     
     GLADE ="basic.glade"
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE)
+    def __init__(self):
+        View.__init__(self, glade=self.GLADE)
         return
 
     def set_counter_value(self, val):

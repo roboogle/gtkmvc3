@@ -22,16 +22,18 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 
-if __name__ == "__main__":
+# This module is used only as a utility to import gtkmvc when not
+# installed.
 
-    from model import MyModel
-    from controller import MyCtrl
-    from view import MyView
-    
-    m = MyModel()
-    v = MyView()
-    c = MyCtrl(m,v)
+if __name__ != "__main__":
+    try: import gtkmvc
+    except:
+        import os.path; import sys
+        top_dir = os.path.dirname(os.path.abspath(".."))
+        sys.path = [top_dir] + sys.path
+        import gtkmvc
+        pass
 
-    import gtk
-    gtk.main()
-    pass
+    gtkmvc.require("2.0.0")
+pass
+

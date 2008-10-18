@@ -64,7 +64,7 @@ class Model (object):
         self.__instance_notif_after = {}
         self.__signal_notif = {}
         
-        for key in self.__get_properties(): self.register_property(key)
+        for key in self.get_properties(): self.register_property(key)
         return
 
     def register_property(self, name):
@@ -109,7 +109,7 @@ class Model (object):
         if observer in self.__observers: return # not already registered
 
         self.__observers.append(observer)
-        for key in self.__get_properties():
+        for key in self.get_properties():
             self.__add_observer_notification(observer, key)
             pass
         
@@ -119,7 +119,7 @@ class Model (object):
     def unregister_observer(self, observer):
         if observer not in self.__observers: return
 
-        for key in self.__get_properties():
+        for key in self.get_properties():
             self.__remove_observer_notification(observer, key)
             pass
         
@@ -142,8 +142,8 @@ class Model (object):
         return
     
 
-    def __get_properties(self):
-        observees = getattr(self, "__observable__", [])
+    def get_properties(self):
+        observees = list(getattr(self, support.metaclasses.OBS_ARRAY_NAME, []))
         return self.__properties__.keys() + self.__derived_properties__.keys() + observees
 
     def __add_observer_notification(self, observer, prop_name):

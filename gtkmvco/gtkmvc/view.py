@@ -30,13 +30,15 @@ import types
 
 class View (object):
 
-    def __init__(self, controller, glade_filename=None,
-                 glade_top_widget_name=None, parent_view=None, register=True):
-        """If register is False you *must* call 'controller.register_view(self)'
-        from the derived class constructor (i.e. registration is delayed)
-        If filename is not given (or None) all following parameters must be
-        not given (or None). In that case widgets must be connected manually.
-        glade_top_widget_name can be either a string name or list of names."""
+    def __init__(self, controller=None, glade=None,
+                 glade_top_widget_name=None, parent_view=None):
+        """If controller is passed, then self will register itself
+        within it. This is provided for backward compatibility when
+        controllers had to be created before views.  If filename is
+        not given (or None) next two parameters must be not given (or
+        None). In that case widgets must be connected manually.
+        glade_top_widget_name can be either a string name or list of
+        names."""
         self.manualWidgets = {}
         self.autoWidgets = None
 
@@ -51,9 +53,9 @@ class View (object):
         else: wids = glade_top_widget_name  # Already a list or tuple
 
         # retrieves XML objects from glade
-        if (glade_filename is not None):
+        if (glade is not None):
             for i in range(0,len(wids)):
-                self.xmlWidgets.append(gtk.glade.XML(glade_filename, wids[i]))
+                self.xmlWidgets.append(gtk.glade.XML(glade, wids[i]))
                 pass
             pass        
 
@@ -67,11 +69,29 @@ class View (object):
             else: self.m_topWidget = self[wids[0]]
         else:  self.m_topWidget = None
 
-        if (glade_filename is not None): self.__autoconnect_signals(controller)
-        if (register):                   controller.register_view(self)
-        if (not parent_view is None):    self.set_parent_view(parent_view)
+        # calls code to setup user pieces of the view:
+        self.setup_widgets();
+        
+        if (not parent_view is None): self.set_parent_view(parent_view)
+        if (controller): controller.register_view(self)            
         return
 
+    def setup_widgets(self):
+        """This method is called at the end of instance construction,
+        to allow the user to:
+        1. Create her own widgets manually
+        2. Connect trees of widgets within the glade file, and all manual widgets 
+        3. Carry out all operations needed to properly setup all widgets
+
+        After this method has returned, registration of the view
+        inside the controller can occur.
+
+        This method has to be implemented in derived view classes. In
+        current implementation this method does not do anything.
+        """
+        return
+    
+        
     # Gives us the ability to do: view['widget_name'].action()
     # Returns None if no widget name has been found.
     def __getitem__(self, key):
@@ -195,21 +215,6 @@ class View (object):
         else: m = self.autoWidgets
         self.__idx += 1
         return m.keys()[self.__idx-1]
-
-
-    # performs Controller's signals auto-connection:
-    def __autoconnect_signals(self, controller):
-        dic = {}
-        for name in dir(controller):
-            method = getattr(controller, name)
-            if (not callable(method)): continue
-            assert(not dic.has_key(name)) # not already connected!
-            dic[name] = method
-            pass
-
-        for xml in self.xmlWidgets: xml.signal_autoconnect(dic) 
-        return
-
 
     
     pass # end of class View

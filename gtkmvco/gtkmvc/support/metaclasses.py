@@ -21,7 +21,7 @@
 #  or email to the author Roberto Cavada <cavada@fbk.eu>.
 #  Please report bugs to <cavada@fbk.eu>.
 
-from metaclass_base import PropertyMeta
+from metaclass_base import PropertyMeta, OBS_ARRAY_NAME
 import types
 
 
@@ -95,7 +95,7 @@ try:
       return
     
     def update_listener(cls, instance, kwargs):
-      pnames = getattr(cls, "__observable__", [])
+      pnames = getattr(cls, OBS_ARRAY_NAME, [])
       for k in kwargs:
         if k in pnames:
           _old = getattr(instance, k)

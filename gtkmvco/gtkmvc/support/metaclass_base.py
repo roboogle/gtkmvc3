@@ -33,6 +33,8 @@ from gtkmvc.support.utils import get_function_from_source
 # ----------------------------------------------------------------------
 
 VERBOSE_LEVEL = 5
+OBS_ARRAY_NAME = "__observables__"
+
 
 class PropertyMeta (type):
     """This is a meta-class that provides auto-property support.
@@ -96,8 +98,8 @@ class PropertyMeta (type):
             type(cls).__create_prop_accessors__(cls, prop, props[prop])
             pass
 
-        # processes now all __obervable__
-        for pn in getattr(cls, "__observable__", []):
+        # processes now all names in __observables__
+        for pn in getattr(cls, OBS_ARRAY_NAME, []):
           type(cls).__create_prop_accessors__(cls, pn, dict.get(pn, None))          
           pass
 

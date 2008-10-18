@@ -32,7 +32,7 @@ class Controller (Observer):
     us bind all of them at once, because their names are in the
     class dict.  This class automatically register its instances as
     observers into the corresponding model.  Also, when a view is
-    created, the view calls method register_view, which can be
+    passed, method register_view got called, which can be
     oveloaded in order to connect signals and perform other specific
     operation. A controller possibly handles and contains also a set
     of adapters that makes easier to connect widgets and observable
@@ -43,11 +43,14 @@ class Controller (Observer):
     properties that do not actually change the value are
     notified anyway."""
 
-    def __init__(self, model, spurious=False):
+    def __init__(self, model, view=None, spurious=False, auto_adapt=False):
         Observer.__init__(self, model, spurious)
 
         self.view = None
         self.__adapters = []
+        self.__auto_adapt = auto_adapt
+        
+        if view: self.register_view(view)
         return
 
     def register_view(self, view):
@@ -59,6 +62,7 @@ class Controller (Observer):
         """
         assert(self.view is None)
         self.view = view
+        self.__autoconnect_signals()
         self.register_adapters()
         return
 
@@ -68,10 +72,12 @@ class Controller (Observer):
         registration process, when it is time to possibly create all
         adapters. model and view can safely be taken from self.model
         and self.view. Derived classes can specilize this method. In
-        this implementation the method does nothing.
+        this implementation the method does auto-adaptation if
+        requested.
         """
         assert(self.model is not None)
         assert(self.view is not None)
+        if self.__auto_adapt: self.adapt()
         return
 
     def adapt(self, *args):
@@ -84,13 +90,16 @@ class Controller (Observer):
         needed to connect ('adapt') properties from one hand, and
         widgets on the other.
 
-        This method is provided in three flavours:
-        
-        1. An instance of an Adapter class can be created by the
+        This method is provided in four flavours:
+
+        1. No arguments. All properties in observed model will be
+           checked for possible widgets to be adapted with.
+
+        2. An instance of an Adapter class can be created by the
            caller and passed as a unique argument. The adapter must
            be already fully configured.
 
-        2. The name of a model's property is passed as a unique
+        3. The name of a model's property is passed as a unique
            argument.  A correponding widget name is searched and if
            found, an adapter is created. Name matching is performed
            by searching into view's widget names for words that end
@@ -102,11 +111,11 @@ class Controller (Observer):
            The way names are matched can be customized by deriving
            method match_prop_name.
 
-        3. Two strings can be passed, respectively containing the
+        4. Two strings can be passed, respectively containing the
            name of an observable property in the model, and the name
            of a widget in the view.
 
-        Flavour 1 allows for a full control, but flavour 2 and 3
+        Flavour 2 allows for a full control, but flavour 1, 3 and 4
         make easier to create adpaters with basic (default)
         behaviour.
 
@@ -116,23 +125,26 @@ class Controller (Observer):
         
         # checks arguments
         n = len(args)
-        if n not in (1,2): raise TypeError("adapt() takes 1 or 2 arguments (%d given)" % n)
+        if n not in range(3): raise TypeError("adapt() takes 0, 1 or 2 arguments (%d given)" % n)
 
-        if n == 1: #one argument
+        if n==0:
+            adapters = []
+            props = self.model.get_properties()
+            # matches all properties
+            for prop_name in props:
+                wid_name = self.__find_widget_match(prop_name)
+                #print "Autoadapting", prop_name, wid_name
+                adapters += self.__create_adapters__(prop_name, wid_name)                
+                pass
+
+        elif n == 1: #one argument
             from gtkmvc.adapters.basic import Adapter
             
             if isinstance(args[0], Adapter): adapters = (args[0],)
 
             elif isinstance(args[0], types.StringType):
                 prop_name = args[0]
-                names = []
-                for k in self.view:
-                    if self.__match_prop_name(prop_name, k): names.append(k)
-                    pass
-                if len(names) != 1:
-                    raise ValueError("%d widget candidates match property '%s': %s" % \
-                                     (len(names), prop_name, names))
-                wid_name = names[0]
+                wid_name = self.__find_widget_match(prop_name)
                 adapters = self.__create_adapters__(prop_name, wid_name)
                 pass
             else: raise TypeError("Argument of adapt() must be an Adapter or a string")
@@ -150,13 +162,47 @@ class Controller (Observer):
         for ad in adapters: self.__adapters.append(ad)
         return
 
+    def __find_widget_match(self, prop_name):
+        """Given a property name, searches into the view for a
+        possible corresponding widget to adapt with. This is called by
+        adapt. Returns the matching candidate widget name"""
 
+        names = []
+        for wid_name in self.view:
+            # if widget names ends with given property name: we skip
+            # any prefix in widget name
+            if wid_name.lower().endswith(prop_name.lower()): names.append(wid_name)
+            pass
+
+        if len(names) != 1:
+            raise ValueError("%d widget candidates match property '%s': %s" % \
+                                 (len(names), prop_name, names))
+        
+        return names[0]
+
+        
+    # performs Controller's signals auto-connection:
+    def __autoconnect_signals(self):
+        """This is called during view registration, to autoconnect
+        signals in glade file with methods within the controller"""
+        dic = {}
+        for name in dir(self):
+            method = getattr(self, name)
+            if (not callable(method)): continue
+            assert(not dic.has_key(name)) # not already connected!
+            dic[name] = method
+            pass
+
+        for xml in self.view.xmlWidgets: xml.signal_autoconnect(dic) 
+        return
+
+    
     def __match_prop_name(self, prop_name, wid_name):
         """
         Used internally when searching for a suitable widget. To customize
         its behaviour, re-implement this method into derived classes
         """
-        return wid_name.lower().endswith(prop_name.lower())
+        return 
 
 
     def __create_adapters__(self, prop_name, wid_name):

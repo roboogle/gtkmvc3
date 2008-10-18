@@ -48,6 +48,8 @@ class Controller (Observer):
 
         self.view = None
         self.__adapters = []
+        # set of properties explicitly adapted by the user:
+        self.__user_props = set()
         self.__auto_adapt = auto_adapt
         
         if view: self.register_view(view)
@@ -63,7 +65,9 @@ class Controller (Observer):
         assert(self.view is None)
         self.view = view
         self.__autoconnect_signals()
+
         self.register_adapters()
+        if self.__auto_adapt: self.adapt()
         return
 
     def register_adapters(self):
@@ -77,7 +81,6 @@ class Controller (Observer):
         """
         assert(self.model is not None)
         assert(self.view is not None)
-        if self.__auto_adapt: self.adapt()
         return
 
     def adapt(self, *args):
@@ -130,10 +133,10 @@ class Controller (Observer):
         if n==0:
             adapters = []
             props = self.model.get_properties()
-            # matches all properties
-            for prop_name in props:
+            # matches all properties not previoulsy adapter by the user:
+            for prop_name in filter(lambda p: p not in self.__user_props, props):
                 wid_name = self.__find_widget_match(prop_name)
-                #print "Autoadapting", prop_name, wid_name
+                #print "Auto-adapting property",prop_name, "and widget", wid_name
                 adapters += self.__create_adapters__(prop_name, wid_name)                
                 pass
 
@@ -159,7 +162,12 @@ class Controller (Observer):
             adapters = self.__create_adapters__(prop_name, wid_name)
             pass
 
-        for ad in adapters: self.__adapters.append(ad)
+        for ad in adapters:
+            self.__adapters.append(ad)
+            # remember properties added by the user
+            if n > 0: self.__user_props.add(ad.get_property_name())
+            pass
+        
         return
 
     def __find_widget_match(self, prop_name):

@@ -88,6 +88,14 @@ class Adapter (Observer):
         self._connect_model(model)
         return
 
+    def get_property_name(self):
+        """Returns the property the adapter is conected to"""
+        return self._prop_name
+
+    def get_widget(self):
+        """Returns the widget the adapter is conected to"""
+        return self._wid
+    
     def connect_widget(self, wid,
                        getter=None, setter=None, 
                        signal=None, arg=None, update=True):

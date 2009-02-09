@@ -34,7 +34,7 @@ except:
     sys.path = [top_dir] + sys.path
     import gtkmvc
     pass
-gtkmvc.require("1.2.0")
+gtkmvc.require("1.3.0")
 
 from gtkmvc.progen.model import ProgenModel, set_gui_log, set_shell_log
 from gtkmvc.progen.templates import VERSION
@@ -100,8 +100,8 @@ def run_gui(model):
     from gtkmvc.progen.ctrl import ProgenCtrl
     from gtkmvc.progen.view import ProgenView
 
-    c = ProgenCtrl(model)
-    v = ProgenView(c)
+    v = ProgenView()
+    c = ProgenCtrl(model,v)
 
     set_gui_log(v['tv_res'].get_buffer())
     gtk.main()

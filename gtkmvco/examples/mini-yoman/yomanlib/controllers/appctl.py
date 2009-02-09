@@ -34,15 +34,14 @@ class AppAboutCtl(Controller):
 	pass
 
 class AppCtl(Controller):
-	def __init__(self, model):
-		Controller.__init__(self, model)
-		self.note = NoteCtrl(model.data.empty_note, self)
-		self.main = MainCtrl(model.data, self.note)
+	def __init__(self, model, view):
+		Controller.__init__(self, model, view)
+		self.note = NoteCtrl(model.data.empty_note, view.note, self)
+		self.main = MainCtrl(model.data, view.main, self.note)
 		self.main.parent = self
 		return
 
 	def register_view(self, view):
-		Controller.register_view(self, view)
 		return
 
 	def set_title(self, text):
@@ -63,8 +62,8 @@ class AppCtl(Controller):
 
 	def on_about_activate(self, item):
 		from yomanlib.views.appview import AppAboutView
-		c = AppAboutCtl(self.model)
-	        v = AppAboutView(c, parent_view=self.view)
+	        v = AppAboutView(parent_view=self.view)
+		c = AppAboutCtl(self.model, v)
         	v.run()
 	        self.model.unregister_observer(c)
         	return True
@@ -91,13 +90,12 @@ class AppCtl(Controller):
 
 
 class MainCtrl(Controller):
-	def __init__(self, model, note_ctrl):
-		Controller.__init__(self, model)
+	def __init__(self, model, view, note_ctrl):
+		Controller.__init__(self, model, view)
 		self.note = note_ctrl
 		return
 
 	def register_view(self, view):
-		Controller.register_view(self, view)
 		treeview = self.view['treeview_main']
 		treeselect = treeview.get_selection()
 		treeselect.connect("changed", self.on_select_changed)
@@ -154,14 +152,13 @@ class MainCtrl(Controller):
 
 
 class NoteCtrl(Controller):
-	def __init__(self, model, window_ctrl):
-		Controller.__init__(self, model)
+	def __init__(self, model, view, window_ctrl):
+		Controller.__init__(self, model, view)
 		self.window_ctrl = window_ctrl
 		self.stop_model_update = False
 		return
 
 	def register_view(self, view):
-		Controller.register_view(self, view)
 		self.view['textview_note'].set_buffer(self.model)
 		self.view['entry_title'].set_text(self.model.title)
 		self.update_view()

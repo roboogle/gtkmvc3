@@ -34,8 +34,8 @@ import gtk
 # observable property containing a map of integers
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window3")
+    def __init__(self):
+        View.__init__(self, "adapters.glade", "window3")
         return
     pass
 
@@ -55,10 +55,6 @@ class MyModel (Model):
 
 import random
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
-
     def register_adapters(self):
         a = StaticContainerAdapter(self.model, "box", value_error=myerr)
         a.connect_widget(map(lambda x: self.view[x], "en3 lbl3 sb3".split()), 
@@ -85,8 +81,8 @@ def myerr(adapt, name, val):
 
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m,v)
 gtk.main()
 
 

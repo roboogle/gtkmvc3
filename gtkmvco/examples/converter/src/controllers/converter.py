@@ -30,17 +30,16 @@ from gtkmvc import Controller
 class ConverterCtrl (Controller):
     """Controller of the converter""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
 
-        self.source = AmountCtrl(model.source)
-        self.target = AmountCtrl(model.target)
+        self.source = AmountCtrl(model.source, view.source)
+        self.target = AmountCtrl(model.target, view.target)
         
         return
 
     def register_view(self, view):
         """Creates treeview columns, and connect missing signals"""
-        Controller.register_view(self, view)
 
         # if stand-alone, connects the window delete event to
         # kill the loop

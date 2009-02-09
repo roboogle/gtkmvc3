@@ -37,9 +37,7 @@ import gtk
 
 # hand-made view simply containing a text entry and a button
 class MyView (gtkmvc.View):
-    def __init__(self, ctrl):
-        gtkmvc.View.__init__(self, ctrl, register=False)
-
+    def setup_widgets(self):
         w = gtk.Window()
         e = gtk.Entry()
         b = gtk.Button("Press")
@@ -50,7 +48,6 @@ class MyView (gtkmvc.View):
         self['entry_text'] = e
         self['button'] = b
         self['window'] = w
-        ctrl.register_view(self)
         return
     pass # end of class
  #-----------------------------------------------------------
@@ -64,7 +61,6 @@ class MyCtrl (gtkmvc.Controller):
         return
 
     def register_view(self, view):
-        gtkmvc.Controller.register_view(self, view)
         view['button'].connect('clicked', self.on_button_clicked)
         view['window'].connect('delete-event', gtk.main_quit)
         return
@@ -88,7 +84,7 @@ class MyModel (gtkmvc.Model):
  #-----------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()

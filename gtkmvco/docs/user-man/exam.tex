@@ -83,9 +83,8 @@ GLADE = os.path.join(GLADE_PATH, GLADE_NAME)
 class ExampleView (View):
     """The application view. Contains only the main window1 tree."""
 
-    def __init__(self, controller):
-        """Contructor, takes the controller instance to perform registration"""
-        View.__init__(self, controller, GLADE, "window1")
+    def __init__(self):
+        View.__init__(self, GLADE, "window1")
         return
     pass # end of class
 \end{verbatim}}
@@ -168,15 +167,13 @@ class ExampleController(Controller):
     """The only one controller. Handles the button clicked signal, and
     notifications about one observable property."""
 
-    def __init__(self, model):
+    def __init__(self, model, view):
         """Contructor. model will be accessible via the member 'self.model'.
-        Registration is also performed."""
-        Controller.__init__(self, model)
+        View registration is also performed."""
+        Controller.__init__(self, model, view)
         return
 
     def register_view(self, view):
-        Controller.register_view(self, view) # Calls the overridden method
-
         # Connects the exiting signal:
         view.get_top_widget().connect("destroy", mainquit)
         return

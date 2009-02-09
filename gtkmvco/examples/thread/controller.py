@@ -24,16 +24,8 @@
 
 from gtkmvc import Controller
 class MyController (Controller):
-    """"""
-
     
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
-
     def register_view(self, view):
-        Controller.register_view(self, view)
-
         readme = open("README","r").read()
         view.set_info(readme)
         view.set_label("Hello")

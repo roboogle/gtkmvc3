@@ -30,16 +30,9 @@ import gtk
 
 class ProgenCtrl (Controller):
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
-        return
-
     def register_view(self, view):
-        Controller.register_view(self, view)
-
         self.view['window_appl'].connect('delete-event',
                                          self.on_window_delete)
-
         self.__enable_generate()
         return
 

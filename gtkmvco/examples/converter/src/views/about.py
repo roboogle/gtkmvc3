@@ -34,8 +34,8 @@ class AboutView (View):
     
     GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "about.glade") 
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE_FILE)
+    def __init__(self):
+        View.__init__(self, self.GLADE_FILE)
         return
 
     def set_text(self, text):

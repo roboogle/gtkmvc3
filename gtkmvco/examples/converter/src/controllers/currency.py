@@ -30,8 +30,8 @@ class CurrencyCtrl (Controller):
     """Controller of a Currency. gtk signals and observer align the
     model content and the view content.""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
         self.__changing = False
         return
 

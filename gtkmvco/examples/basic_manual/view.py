@@ -31,18 +31,7 @@ class MyView (View):
     """This handles only the graphical representation of the
     application. The widgets set is built by hand"""
 
-    # View registration is delayed until the widgets set has been
-    # built, to allow the controller to connect all needed widget's
-    # signals
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, register=False)
-        self.__build_widgets()
-        ctrl.register_view(self)
-        return
-
-    def __build_widgets(self):
-        # we register only the widgets that later are needed to be
-        # accessed
+    def setup_widgets(self):
         self['window'] = gtk.Window()
         self['window'].set_title("Basic Manual")
         t = gtk.Table(rows=2, columns=2)

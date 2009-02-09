@@ -43,8 +43,8 @@ def main():
     import gtk
     
     m = MyModel()
-    c = MyCtrl(m)
-    v = MyView(c)
+    v = MyView()
+    c = MyCtrl(m, v)
 
     gtk.main()
     return

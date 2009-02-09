@@ -34,35 +34,36 @@ import os
 class BaseView(View):
 	GLADE_FILE = 'glade/yoman.glade'
 
-	def __init__(self, ctrl, parent_view=None, auto_register=True):
-		View.__init__(self, ctrl, self.GLADE_FILE, self.TOP_WIDGET, parent_view, auto_register)
+	def __init__(self, parent_view=None):
+		View.__init__(self, self.GLADE_FILE, self.TOP_WIDGET, parent_view=parent_view)
 
 class AppView(BaseView):
 	TOP_WIDGET = 'window_main'
 
-	def __init__(self, ctrl):
-		BaseView.__init__(self, ctrl, auto_register=False)
+	def __init__(self):
+		BaseView.__init__(self)
 
-		self.main = MainView(ctrl.main)
+		self.main = MainView()
+		self.note = NoteView()
+
 		self['scrolledwindow_main'].add(self.main['treeview_main'])
-
-		self.note = NoteView(ctrl.note)
 		self['scrolledwindow_note'].add(self.note['viewport_note'])
-
-		ctrl.register_view(self)
-		pass
+		return
+        
 
 class BaseTreeView(BaseView):
-	def __init__(self, ctrl):
-		BaseView.__init__(self, ctrl, auto_register=False)
+	def __init__(self):
+		BaseView.__init__(self)
+                return
+
+        def setup_widgets(self):                
 		treeview = self[self.TOP_WIDGET[0]]
 		treeview.set_reorderable(True)
-
 		cell = gtk.CellRendererText()
 		tvcolumn = gtk.TreeViewColumn('Title', cell, text=0)
 		treeview.append_column(tvcolumn)
-
-		ctrl.register_view(self)
+                return
+        
 	
 class MainView(BaseTreeView):
 	TOP_WIDGET = ('treeview_main', 'main_popup')
@@ -70,12 +71,15 @@ class MainView(BaseTreeView):
 class NoteView(BaseView):
 	TOP_WIDGET = ('viewport_note', 'textview_note', 'entry_title')
 
-	def __init__(self, ctrl):
-		BaseView.__init__(self, ctrl)
+	def __init__(self):
+		BaseView.__init__(self)
 		self['textview_note'].set_wrap_mode(gtk.WRAP_WORD)
 
 class AppAboutView(BaseView):
 	TOP_WIDGET = 'aboutdialog'
+
+	def __init__(self, parent_view):
+		BaseView.__init__(self, parent_view=parent_view)
 
 	def run(self):
 		f = open(os.path.join(globals.TOPDIR, "LICENSE"), "r")

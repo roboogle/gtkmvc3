@@ -37,16 +37,17 @@ class CurrenciesView (View):
     
     GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "converter.glade") 
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE_FILE, "dialog_currencies")
+    def __init__(self):
+        View.__init__(self, self.GLADE_FILE, "dialog_currencies")
         return
 
-    def add_currency_view(self, curr_ctrl, select=False):
-        v = CurrencyView(curr_ctrl)
+    def add_currency_view(self, select=False):
+        """returns the newly added view"""
+        v = CurrencyView()
         self.remove_currency_view()
         self['hbox_top'].pack_end(v.get_top_widget())
         v.light_name(select)
-        return
+        return v
 
     def remove_currency_view(self):
         hbox = self['hbox_top']

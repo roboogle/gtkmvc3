@@ -28,8 +28,8 @@ from controller import MyController
 from view import MyView
 
 m = MyModel()
-c = MyController(m)
-v = MyView(c)
+v = MyView()
+c = MyController(m, v)
 
 
 import gtk

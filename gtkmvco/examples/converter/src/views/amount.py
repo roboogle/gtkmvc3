@@ -34,8 +34,8 @@ class AmountView (View):
     
     GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE_FILE, "table_top")
+    def __init__(self):
+        View.__init__(self, self.GLADE_FILE, "table_top")
         return
 
     def set_editable(self, flag):

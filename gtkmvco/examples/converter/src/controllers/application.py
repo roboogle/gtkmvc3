@@ -37,17 +37,10 @@ import gtk
 class ApplicationCtrl (Controller):
     """Controller of the top-level window (application)""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
-
-        self.converter = ConverterCtrl(model.converter)
-        return
-
-    def register_view(self, view):
-        """Creates treeview columns, and connect missing signals"""
-        Controller.register_view(self, view)
-
-        self.view.create_sub_views(self.converter)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
+        self.converter = ConverterCtrl(model.converter, view.converter)
+        self.currencies = None
         return
 
     def quit(self):
@@ -58,13 +51,13 @@ class ApplicationCtrl (Controller):
     #               gtk signals
     # ----------------------------------------
     def on_tb_editor_clicked(self, tb):
-        c = CurrenciesCtrl(self.model.currencies)
-        v = CurrenciesView(c)
+        v = CurrenciesView()
+        self.currencies = CurrenciesCtrl(self.model.currencies, v)
         return
         
     def on_tb_about_clicked(self, tb):        
-        c = AboutCtrl(self.model.about)
-        v = AboutView(c)
+        v = AboutView()
+        c = AboutCtrl(self.model.about, v)
         v.run() # this runs in modal mode
         return
 

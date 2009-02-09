@@ -32,18 +32,18 @@ import gtk
 class CurrenciesCtrl (Controller):
     """Controller of 'Currencies' dialog.""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
 
         self.adding_model = None
         self.editing_model = None
         self.editing_iter = None
+
+        self.currency = None
         return
 
     def register_view(self, view):
         """Creates treeview columns, and connect missing signals"""
-        Controller.register_view(self, view)
-
         self.setup_columns()
 
         # connects tv messages
@@ -77,8 +77,8 @@ class CurrenciesCtrl (Controller):
         """A currency has been added, or an existing curreny has been
         selected, and needs to be shown on the right side of the
         dialog"""
-        c = CurrencyCtrl(model)
-        self.view.add_currency_view(c, select)                
+        v = self.view.add_currency_view(select)
+        self.curreny = CurrencyCtrl(model, v)
         return
 
     def unselect(self):
@@ -101,6 +101,7 @@ class CurrenciesCtrl (Controller):
         self.adding_model = None
         self.editing_model = None
         self.editing_iter = None
+        self.curreny = None
 
         self.unselect()
         self.__changing_model = False

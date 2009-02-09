@@ -30,8 +30,11 @@ import os
 class ProgenView (View):
     GLADE_FILE = os.path.join(PROGEN_DIR, "progen.glade")
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE_FILE)
+    def __init__(self):
+        View.__init__(self, self.GLADE_FILE)
+        return
+
+    def setup_widgets(self):
         self['notebook_appl'].set_show_tabs(False)
         nb = self['notebook']
         nb.set_show_tabs(False)

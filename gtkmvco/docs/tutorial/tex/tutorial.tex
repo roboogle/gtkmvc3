@@ -46,7 +46,7 @@
 \begin{document}
 
 \title{A short tutorial for \pygtkmvc\\
-Version 1.2}
+Version 1.3}
 
 \author{ Roberto Cavada \thanks{FBK-irst, Trento, Italy,
  cavada@fbk.eu} }
@@ -90,7 +90,7 @@ The implementation of this example is split into three distinct
 parts. First, the \gui is constructed from a \glade file. Second,
 the \gui is constructed \emph{by hand}, by creating and connecting
 manually all widgets. Third, adapters are applied to make the code
-much more easy.
+much easier.
 
 Hand-made view is mainly presented to make this tutorial more
 complete, but the readers should keep in mind that they are going to
@@ -181,7 +181,7 @@ associate each widget with a string name. When a glade file is used to
 build the view, each widget will be associated automatically inside
 the view with the corresponding name occurring in the glade file.
 
-Moreover, each \codename{View} instance is connected to a
+later, each \codename{View} instance is connected to a
 corresponding \codename{Controller}, and when built from a glade file,
 methods inside the \codename{Controller} will be scanned to try to
 connect automatically all signals declared in the glade file.
@@ -195,9 +195,11 @@ from gtkmvc.view import View
 
 class MyView (View):
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, 'pygtkmvc-example.glade')
+    def __init__(self):
+        View.__init__(self, 'pygtkmvc-example.glade')
         return
+
+    # some special methods for setting this view...
 
     pass # end of class
 \end{verbatim}
@@ -222,8 +224,8 @@ from gtkmvc import Controller
 import gtk
 
 class MyController (Controller):
-    def __init__(self, model):
-        Controller.__init__(self, model)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
 
         # The controller is an observer for properties contained in
         # the model:
@@ -234,8 +236,6 @@ class MyController (Controller):
         ready to register itself. Here we connect the 'pressed' signal
         of the button with a controller's method. Signal 'destroy'
         for the main window is handled as well."""
-
-        Controller.register_view(self, view)
 
         # connects the signals:
         self.view['main_window'].connect('destroy', gtk.main_quit)
@@ -262,7 +262,7 @@ class MyController (Controller):
 In the class constructor, at first base class constructor is called,
 passing the \codename{Model} instance this \codename{Controller}
 instance belongs to. From that moment on, class member self.model will
-be accessible.
+be accessible. 
 
 \codename{Controller}'s base class \codename{Observer} calls method
 \codename{Model.register\_observer} in order to make the controller
@@ -272,9 +272,12 @@ member \codename{counter} will make method
 \codename{property\_counter\_value\_change} of class \\
 \codename{MyController} be called automatically.
 
+At construction time also the \codename{View} instance is passed,
+to be registered to be the view of the controller.
+
 Method \codename{register\_view} is called when a class
 \codename{View} instance requires to be registered to the controller
-it belongs to.  This method is mainly used to connect signals and
+it belongs to. This method is mainly used to connect signals and
 initialize the \gui side that depends on the application logic. In
 the example, signal \codename{"destroy"} of the main window is
 connected to \codename{gtk.main\_quit} to close the application when
@@ -311,8 +314,8 @@ from ctrl_glade import MyController
 from view_glade import MyView
 
 m = MyModel()
-c = MyController(m)
-v = MyView(c)
+v = MyView()
+c = MyController(m, c)
 
 gtk.main()
 \end{verbatim}
@@ -340,13 +343,18 @@ import gtk
 
 class MyViewNoGlade (View):
 
-    def __init__(self, ctrl):
+    def __init__(self):
 
         # The view here is not constructed from a glade file.
         # Registration is delayed, and widgets are added manually,
         # later.
-        View.__init__(self, ctrl, register=False)
-    
+        View.__init__(self, ctrl)
+        return    
+
+    def setup_widgets(self): 
+        # This method is called by the View constructor to build all
+        # widgets manually.
+
         # The set of widgets:
         w = gtk.Window()
         h = gtk.VBox()
@@ -376,24 +384,20 @@ class MyViewNoGlade (View):
 \end{verbatim}
 } 
 
-The entire work is carried out by the class constructor. At the
-beginning base class \codename{View} is called like in glade-based
-view class, but now parameter \codename{register} is set to
-\codename{False}, to delay the registration of the view within the
-controller. This to allow manual construction of the widgets set, that
-later during registration the controller will be able to access.
+The entire work is carried out by the method
+\codename{setup\_widgets}. This method is called by the View
+constructor and can be exploited to manually construct all the
+widgets set, that later during registration the controller will be
+able to access.
 
 Following lines are used to build the widgets set, and to associate a
 few of them with string names (only those that will have to accessed
 later).
 
-Finally, last line calls method \codename{register\_view} of the
-controller, in order to at last allow the controller to know about
-this view.
-
 Notice that here \glade file has not been used at all. Nevertheless, a
 mixed solution where \glade file(s) and manually constructed widgets
 sets is fully supported.
+
 
 \subsection{The controller}
 The controller is the same that has been used for the glade-based
@@ -409,9 +413,6 @@ connect the button ``\codename{clicked}'' event to class method
 from ctrl_glade import MyController
 
 class MyControllerNoGlade (MyController):
-    def __init__(self, model):
-        MyController.__init__(self, model)
-        return
 
     def register_view(self, view):
         MyController.register_view(self, view)
@@ -438,8 +439,8 @@ from ctrl_no_glade import MyControllerNoGlade
 from view_no_glade import MyViewNoGlade
 
 m = MyModel()
-c = MyControllerNoGlade(m)
-v = MyViewNoGlade(c)
+v = MyViewNoGlade()
+c = MyControllerNoGlade(m,v)
 gtk.main()
 \end{verbatim}
 } 
@@ -465,10 +466,10 @@ from view_no_glade import MyViewNoGlade
 from view_glade import MyView
 
 m = MyModel()
-c1 = MyControllerNoGlade(m)
-c2 = MyController(m)
-v1 = MyViewNoGlade(c1)
-v2 =  MyView(c2)
+v1 = MyViewNoGlade()
+c1 = MyControllerNoGlade(m,v1)
+v2 =  MyView()
+c2 = MyController(m,v2)
 gtk.main()
 \end{verbatim}
 }
@@ -498,7 +499,6 @@ import gtk
 
 class MyControllerAdap (Controller):
     def register_view(self, view):
-        Controller.register_view(self, view)
         # connects the signals:
         self.view['main_window'].connect('destroy', gtk.main_quit)
         return

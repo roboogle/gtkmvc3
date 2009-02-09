@@ -30,15 +30,9 @@ class AboutCtrl (Controller):
     """Controller of 'About' dialog. It handles the scrolling of the
     credits label, and the close button.""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
-        return
-
     def register_view(self, view):
         """Loads the text taking it from the model, then starts a
         timer to scroll it."""
-        Controller.register_view(self, view)
-
         self.view.set_text(self.model.credits)
         gobject.timeout_add(1500, self.on_begin_scroll)
         return

@@ -25,8 +25,8 @@
 from gtkmvc import View
 class MyView (View):
     GLADE = "thread.glade"
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, self.GLADE)
+    def __init__(self):
+        View.__init__(self, self.GLADE)
         return
 
     def set_label(self, text):

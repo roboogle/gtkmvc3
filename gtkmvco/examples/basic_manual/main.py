@@ -29,8 +29,8 @@ if __name__ == "__main__":
     from view import MyView
     
     m = MyModel()
-    c = MyCtrl(m)
-    v = MyView(c)
+    v = MyView()
+    c = MyCtrl(m, v)
 
     import gtk
     gtk.main()

@@ -40,8 +40,8 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window9")
+    def __init__(self):
+        View.__init__(self, "adapters.glade", "window9")
         return
     pass
 
@@ -62,9 +62,6 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):        
         # labels
@@ -97,8 +94,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

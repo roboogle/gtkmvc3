@@ -62,13 +62,11 @@ import gtk
 
 class ${class_name} (${base_class_name}):
     
-    def __init__(self, model):
-        ${base_class_name}.__init__(self, model)
+    def __init__(self, model, view):
+        ${base_class_name}.__init__(self, model, view)
         return
 
     def register_view(self, view):
-        ${base_class_name}.register_view(self, view)
-
         # setup of widgets
         self.view['${top_widget}'].connect('delete-event', self.on_${top_widget}_delete_event)
         return
@@ -96,11 +94,9 @@ import os.path
 
 class ${class_name} (${base_class_name}):
     GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "${glade_fn}")
-    def __init__(self, ctrl):
-        ${base_class_name}.__init__(self, ctrl, self.GLADE_FILE,
-                                     "${top_widget}", register=False)
-        self.setup_widgets()
-        ctrl.register_view(self)
+    def __init__(self):
+        ${base_class_name}.__init__(self, self.GLADE_FILE, "${top_widget}")
+
         return
 
     def setup_widgets(self):
@@ -117,10 +113,8 @@ import gtk
 
 class ${class_name} (${base_class_name}):
 
-    def __init__(self, ctrl):
-        ${base_class_name}.__init__(self, ctrl, register=False)
-        self.setup_widgets()
-        ctrl.register_view(self)
+    def __init__(self):
+        ${base_class_name}.__init__(self)
         return
 
     def setup_widgets(self):
@@ -187,8 +181,8 @@ def main(*args, **kargs):
     ${view_import} as ApplView
 
     m = ApplModel()
-    c = ApplCtrl(m)
-    v = ApplView(c)
+    v = ApplView()
+    c = ApplCtrl(m,v)
 
     gtk.main()    
     return
@@ -255,6 +249,6 @@ For further information take a tour at
 # These are exported outside
 # ----------------------------------------------------------------------
 DEFAULT_HEADER = header
-VERSION=("1","2","0")
+VERSION=("1","3","0")
 DEFAULT_MAP = { 'license' : gpl, 'version' : ".".join(VERSION) }
 # ----------------------------------------------------------------------

@@ -24,7 +24,7 @@
 
 from gtkmvc.observer import Observer
 import types
-
+import gobject
 
 class Controller (Observer):
     """
@@ -52,8 +52,21 @@ class Controller (Observer):
         self.__user_props = set()
         self.__auto_adapt = auto_adapt
         
-        if view: self.register_view(view)
+        if view: gobject.idle_add(self._idle_register_view, view)
         return
+
+    def _idle_register_view(self, view):
+        """Internal method that calls register_view"""
+        assert(self.view is None)
+        self.view = view
+        self.view.setup_widgets()
+
+        self.__autoconnect_signals()
+
+        self.register_view(view)
+        self.register_adapters()
+        if self.__auto_adapt: self.adapt()
+        return False
 
     def register_view(self, view):
         """
@@ -62,12 +75,8 @@ class Controller (Observer):
         signals manually, create and connect treeview, textview,
         etc.
         """
-        assert(self.view is None)
-        self.view = view
-        self.__autoconnect_signals()
-
-        self.register_adapters()
-        if self.__auto_adapt: self.adapt()
+        assert(self.model is not None)
+        assert(self.view is not None)
         return
 
     def register_adapters(self):

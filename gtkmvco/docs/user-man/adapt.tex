@@ -86,18 +86,15 @@ entry. Notice that the name of the text entry is
 { \codesize
 \begin{verbatim}
 class MyView (gtkmvc.View):
-    def __init__(self, ctrl):
-        gtkmvc.View.__init__(self, ctrl, register=False)
 
+    def setup_widgets(self):
         w = gtk.Window(); e = gtk.Entry(); b = gtk.Button("Press")
-
         h = gtk.VBox(); h.add(e); h.add(b); w.add(h)
         w.show_all()
         self['entry_text'] = e
-        self['button'] = b
-        
-        ctrl.register_view(self)
+        self['button'] = b        
         return
+
     pass # end of class
 \end{verbatim}
 }
@@ -126,7 +123,6 @@ class MyCtrl (gtkmvc.Controller):
         return
 
     def register_view(self, view):
-        gtkmvc.Controller.register_view(self, view)
         view['button'].connect('clicked', self.on_button_clicked)
         return
 
@@ -174,8 +170,8 @@ The code that instantiates and runs this example is as usual:
 { \codesize
 \begin{verbatim}
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m,v)
 gtk.main()
 \end{verbatim}
 }
@@ -515,8 +511,8 @@ launching code:
 { \codesize
 \begin{verbatim}
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 a = StaticContainerAdapter(m, "box")
 a.connect_widget(v["hbox"])
@@ -535,8 +531,8 @@ label \codename{"lbl"} shows its value.
 { \codesize
 \begin{verbatim}
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 a1 = StaticContainerAdapter(m, "box")
 a1.connect_widget(map(lambda x: v[x], "en lbl sb".split()), 

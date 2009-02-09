@@ -37,21 +37,24 @@ class ConverterView (View):
     
     GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
 
-    def __init__(self, ctrl, stand_alone=True):
+    def __init__(self, stand_alone=True):
         """stand_alone means that this view has a its-own windows, i.e. the
         converter is used as a stand alone (non embedded) application"""
 
         if stand_alone: twid = "window_converter"
         else: twid = "vbox_converter"
-        View.__init__(self, ctrl, self.GLADE_FILE, twid, register=False)
+        View.__init__(self, self.GLADE_FILE, twid)
 
         # creates and connects sub views
-        self.source = AmountView(ctrl.source)
-        self.target = AmountView(ctrl.target)
+        self.source = AmountView()
+        self.target = AmountView()
 
         # makes target uneditable
         self.target.set_editable(False)
 
+        return
+
+    def setup_widgets(self):
         vbox = self['vbox_converter']
         wid = self.source.get_top_widget()
         vbox.pack_start(wid)
@@ -59,8 +62,6 @@ class ConverterView (View):
         
         wid = self.target.get_top_widget()
         vbox.pack_end(wid)
-
-        ctrl.register_view(self)
         return
 
     def is_stand_alone(self): return self["window_converter"] is not None

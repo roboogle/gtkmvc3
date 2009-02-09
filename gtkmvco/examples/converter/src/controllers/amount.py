@@ -29,20 +29,14 @@ import gtk
 class AmountCtrl (Controller):
     """Controller of a single 'amount' (see AmountModel)""" 
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
+    def __init__(self, model, view):
+        Controller.__init__(self, model, view)
 
         self.__changing_amount = False
         return
 
     def register_view(self, view):
         """Creates treeview columns, and connect missing signals"""
-        Controller.register_view(self, view)
-
-        self.setup_combobox()
-        return
-
-    def setup_combobox(self):
         cb = self.view['cb_currency']
         cb.set_model(self.model.currencies)
         cell = gtk.CellRendererText()
@@ -54,7 +48,6 @@ class AmountCtrl (Controller):
 
         cb.set_cell_data_func(cell, on_cell_data)
         return
-
 
     # ----------------------------------------
     #               callbacks

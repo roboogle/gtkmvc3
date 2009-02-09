@@ -35,8 +35,8 @@ import gtk
 # changed by pressing a button
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window8")
+    def __init__(self):
+        View.__init__(self, "adapters.glade", "window8")
         return
     pass
 
@@ -53,8 +53,8 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
+    def __init__(self, m, v):
+        Controller.__init__(self, m, v)
         return
 
     def register_adapters(self):
@@ -75,8 +75,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

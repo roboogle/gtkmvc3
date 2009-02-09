@@ -49,8 +49,8 @@ def main():
     cm.load("currencies")
     
     m = MyModel(cm)
-    c = MyCtrl(m)
-    v = MyView(c)
+    v = MyView()
+    c = MyCtrl(m, v)
 
     gtk.main()
     return

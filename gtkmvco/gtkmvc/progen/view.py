@@ -28,10 +28,11 @@ import gtk
 import os
 
 class ProgenView (View):
-    GLADE_FILE = os.path.join(PROGEN_DIR, "progen.glade")
+    glade = os.path.join(PROGEN_DIR, "progen.glade")
 
     def __init__(self):
-        View.__init__(self, self.GLADE_FILE)
+        super(ProgenView, self).__init__()
+        self.setup_widgets()
         return
 
     def setup_widgets(self):

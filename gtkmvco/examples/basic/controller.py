@@ -29,18 +29,12 @@ from gtkmvc import Controller
 class MyCtrl (Controller):
     """Handles signal processing, and keeps alignment of model and
     view"""
-    def __init__(self, model, view):
-        Controller.__init__(self, model, view)
-        return
 
     def register_view(self, view):
-        Controller.register_view(self, view)
-
         # sets initial values for the view
         self.view.set_counter_value(self.model.counter)
         self.view.set_reset_value(self.model.reset_value)
         return
-
 
     # gtk signals
     def on_window_delete_event(self, window, event):
@@ -59,10 +53,8 @@ class MyCtrl (Controller):
     def on_sb_reset_value_changed(self, sb):
         self.model.reset_value = sb.get_value_as_int()
         return
-
     
-    # observable properties
-    
+    # observable properties    
     def property_counter_value_change(self, model, old, new):
         self.view.set_counter_value(new)
         return

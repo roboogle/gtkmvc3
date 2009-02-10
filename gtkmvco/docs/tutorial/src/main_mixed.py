@@ -19,10 +19,10 @@ from view_glade import MyView
 
 m = MyModel()
 
-c1 = MyControllerNoGlade(m)
-c2 = MyController(m)
+v1 = MyViewNoGlade()
+v2 =  MyView()
 
-v1 = MyViewNoGlade(c1)
-v2 =  MyView(c2)
+c1 = MyControllerNoGlade(m, v1)
+c2 = MyController(m, v2)
 
 gtk.main()

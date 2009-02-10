@@ -16,7 +16,7 @@ from ctrl_glade_adap import MyControllerAdap
 from view_glade import MyView
 
 m = MyModel()
-c = MyControllerAdap(m)
-v = MyView(c)
+v = MyView()
+c = MyControllerAdap(m, v)
 
 gtk.main()

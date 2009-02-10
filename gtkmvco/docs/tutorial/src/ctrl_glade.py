@@ -24,17 +24,11 @@ class MyController (Controller):
          correspondently. This means that the controller is
          an observer for property 'counter' as well."""
 
-    def __init__(self, model):
-        Controller.__init__(self, model)
-        return
-
     def register_view(self, view):
         """This method is called by the view, that calls it when it is
         ready to register itself. Here we connect the 'pressed' signal
         of the button with a controller's method. Signal 'destroy'
         for the main window is handled as well."""
-
-        Controller.register_view(self, view)
 
         # connects the signals:
         self.view['main_window'].connect('destroy', gtk.main_quit)

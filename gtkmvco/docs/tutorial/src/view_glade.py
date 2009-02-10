@@ -18,13 +18,14 @@ from gtkmvc import View
 class MyView (View):
     """Glade-based view class.
 
-       The view is a window containing a button and a label. The label
-       shows the value of a counter contained in the model. Of course
-       the controller does the connection. Every time the button is
-       pressed, the counter will be incremented."""
+       The view is a window containing a button and a label. The
+       label shows the value of a counter contained in the
+       model. Of course the controller wil provide the
+       connection. Every time the button is pressed, the counter
+       will be incremented."""
 
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, 'pygtkmvc-example.glade')
+    def __init__(self):
+        super(MyView, self).__init__('pygtkmvc-example.glade')
         return
 
     pass # end of class

@@ -59,7 +59,6 @@ class Controller (Observer):
         """Internal method that calls register_view"""
         assert(self.view is None)
         self.view = view
-        self.view.setup_widgets()
 
         self.__autoconnect_signals()
 

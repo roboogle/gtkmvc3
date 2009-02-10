@@ -93,13 +93,11 @@ import gtk
 import os.path
 
 class ${class_name} (${base_class_name}):
-    GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "${glade_fn}")
+    glade = os.path.join(utils.globals.GLADE_DIR, "${glade_fn}")
+    top = "${top_widget}"
     def __init__(self):
-        ${base_class_name}.__init__(self, self.GLADE_FILE, "${top_widget}")
+        ${base_class_name}.__init__(self)
 
-        return
-
-    def setup_widgets(self):
         # construction of manual widgets and other settings
         return
 
@@ -115,9 +113,7 @@ class ${class_name} (${base_class_name}):
 
     def __init__(self):
         ${base_class_name}.__init__(self)
-        return
 
-    def setup_widgets(self):
         # construction of manual widgets and other settings
         w = gtk.Window()
         w.set_title("Hello ${name}")

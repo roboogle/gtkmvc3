@@ -49,6 +49,8 @@ class ConverterView (View):
         self.source = AmountView()
         self.target = AmountView()
 
+        self.setup_widgets()
+
         # makes target uneditable
         self.target.set_editable(False)
 

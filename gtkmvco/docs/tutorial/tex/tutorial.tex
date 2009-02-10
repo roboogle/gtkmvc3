@@ -142,10 +142,6 @@ class MyModel (Model):
     # observable properties:
     __properties__ = { 'counter' : 0 }
 
-    def __init__(self):
-        Model.__init__(self)
-        return
-
     pass # end of class
 \end{verbatim}
 } 
@@ -196,7 +192,7 @@ from gtkmvc.view import View
 class MyView (View):
 
     def __init__(self):
-        View.__init__(self, 'pygtkmvc-example.glade')
+        super(MyView, self).__init__('pygtkmvc-example.glade')
         return
 
     # some special methods for setting this view...
@@ -206,9 +202,41 @@ class MyView (View):
 }
 
 Class \codename{MyView} calls simply \codename{View}'s class
-constructor from within its constructor, by passing the
-\codename{Controller} instance which it belongs to, and the glade file
+constructor from within its constructor, by passing the glade file
 name. All the hard work is carried out by class \codename{View}.
+
+Most of the time user's views are like class \codename{MyView}
+here: they derive from \codename{View} and simply call View's
+constructor by passing glade filename and possibly name of top
+level widget. In this situation, it is possible to use a much
+compact declaration for views:
+
+{ \codesize 
+\begin{verbatim}   
+class MyView2 (View):
+    glade = 'pygtkmvc-example.glade'
+    pass # end of class
+\end{verbatim}
+}
+
+Another alternative is:
+
+{ \codesize 
+\begin{verbatim}   
+class MyView3 (View): pass
+\end{verbatim}
+}
+
+later when instantiating the view:
+{ \codesize 
+\begin{verbatim}   
+   ...
+   v = MyView3(glade='pygtkmvc-example.glade')
+\end{verbatim}
+}
+
+Similarly, it is possible to to the same for top-level widget (or
+widgets) with member or parameter \codename{top}.
 
 
 \subsection{The controller}
@@ -225,7 +253,7 @@ import gtk
 
 class MyController (Controller):
     def __init__(self, model, view):
-        Controller.__init__(self, model, view)
+        super(MyController, self).__init__(model, view)
 
         # The controller is an observer for properties contained in
         # the model:
@@ -344,16 +372,8 @@ import gtk
 class MyViewNoGlade (View):
 
     def __init__(self):
-
         # The view here is not constructed from a glade file.
-        # Registration is delayed, and widgets are added manually,
-        # later.
-        View.__init__(self, ctrl)
-        return    
-
-    def setup_widgets(self): 
-        # This method is called by the View constructor to build all
-        # widgets manually.
+        super(MyViewNoGlade, self).__init__()
 
         # The set of widgets:
         w = gtk.Window()
@@ -373,22 +393,14 @@ class MyViewNoGlade (View):
         self['label'] = l
         self['button'] = b
         
-        # View's registration was delayed, now we can proceed.
-        # This will allow the controller to set up all signals
-        # connections, and other operations:
-        ctrl.register_view(self)
-
         return
 
     pass # end of class
 \end{verbatim}
 } 
 
-The entire work is carried out by the method
-\codename{setup\_widgets}. This method is called by the View
-constructor and can be exploited to manually construct all the
-widgets set, that later during registration the controller will be
-able to access.
+The entire work is carried out by the View's constructor which can
+be exploited to manually construct all the widgets set.
 
 Following lines are used to build the widgets set, and to associate a
 few of them with string names (only those that will have to accessed
@@ -415,8 +427,6 @@ from ctrl_glade import MyController
 class MyControllerNoGlade (MyController):
 
     def register_view(self, view):
-        MyController.register_view(self, view)
-
         # connects the signals:
         self.view['button'].connect('clicked', self.on_button_clicked)
         return    

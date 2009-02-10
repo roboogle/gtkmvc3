@@ -25,22 +25,26 @@
 
 
 import gtk.glade
-from controller import Controller
 import types
-import gobject
 
 class View (object):
+    glade = None
+    top=None
 
-    def __init__(self, glade=None,
-                 glade_top_widget_name=None, parent_view=None, 
+    def __init__(self, glade=None, top=None, 
+                 parent=None, 
                  controller=None):
-        """If controller is passed, then self will register itself
-        within it. This is provided for backward compatibility when
-        controllers had to be created before views (DO NOT USE IN
-        NEW CODE).  If filename is not given (or None) next two
-        parameters must be not given (or None). In that case
-        widgets must be connected manually.  glade_top_widget_name
-        can be either a string name or list of names."""
+        """If glade filename is not given (or None) next parameter
+        top must be not given neither (or None). In that case
+        widgets must be connected manually. top can be either a
+        string name or list of names, representing the name of the
+        top level widget, or a list of names of top level widgets
+        in the glade file. If parent is another View instance used
+        to create a hierarchy of views. If controller is passed,
+        then self will register itself within it. This is provided
+        for backward compatibility when controllers had to be
+        created before views (DO NOT USE IN NEW CODE)."""
+
         self.manualWidgets = {}
         self.autoWidgets = None
 
@@ -49,20 +53,23 @@ class View (object):
         # Sets a callback for custom widgets
         gtk.glade.set_custom_handler(self._custom_widget_create)
 
-        if (( type(glade_top_widget_name) == types.StringType)
-            or (glade_top_widget_name is None) ):
-            wids = (glade_top_widget_name,)
-        else: wids = glade_top_widget_name  # Already a list or tuple
+        if top: _top = top
+        else: _top = self.top
+        if type(_top) == types.StringType or _top is None:
+            wids = (_top,)
+        else: wids = _top  # Already a list or tuple
 
         # retrieves XML objects from glade
-        if glade is not None:
+        if glade: _glade = glade
+        else: _glade = self.glade
+        if _glade is not None:
             for i in range(0,len(wids)):
-                self.xmlWidgets.append(gtk.glade.XML(glade, wids[i]))
+                self.xmlWidgets.append(gtk.glade.XML(_glade, wids[i]))
                 pass
             pass        
 
         # top widget list or singleton:
-        if glade_top_widget_name is not None:
+        if _top is not None:
             if len(wids) > 1:
                 self.m_topWidget = []
                 for i in range(0, len(wids)):
@@ -71,31 +78,20 @@ class View (object):
             else: self.m_topWidget = self[wids[0]]
         else:  self.m_topWidget = None
        
-        if parent_view is not None: self.set_parent_view(parent_view)
+        if parent is not None: self.set_parent_view(parent)
 
         if controller: 
             # this is deprecated
-            gobject.idle_add(controller._register_view, self) 
+            import warnings
+            warnings.warn("Controller specified in View constructor is no longer expected",
+                          DeprecationWarning)
+
+            import gobject
+            gobject.idle_add(controller._register_view, self)
             pass
 
         return
-
-    def setup_widgets(self):
-        """This method is called at the end of instance construction,
-        to allow the user to:
-        1. Create her own widgets manually
-        2. Connect trees of widgets within the glade file, and all manual widgets 
-        3. Carry out all operations needed to properly setup all widgets
-
-        After this method has returned, registration of the view
-        inside the controller can occur.
-
-        This method has to be implemented in derived view classes. In
-        current implementation this method does not do anything.
-        """
-        return
-    
-        
+       
     # Gives us the ability to do: view['widget_name'].action()
     # Returns None if no widget name has been found.
     def __getitem__(self, key):

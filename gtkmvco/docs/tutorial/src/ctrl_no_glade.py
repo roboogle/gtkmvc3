@@ -22,13 +22,7 @@ class MyControllerNoGlade (MyController):
          correspondently. This means that the controller is
          an observer for property 'counter' as well."""
 
-    def __init__(self, model):
-        MyController.__init__(self, model)
-        return
-
     def register_view(self, view):
-        MyController.register_view(self, view)
-
         # connects the signals:
         self.view['button'].connect('clicked', self.on_button_clicked)
         return    

@@ -35,7 +35,7 @@ class BaseView(View):
 	GLADE_FILE = 'glade/yoman.glade'
 
 	def __init__(self, parent_view=None):
-		View.__init__(self, self.GLADE_FILE, self.TOP_WIDGET, parent_view=parent_view)
+		View.__init__(self, self.GLADE_FILE, self.TOP_WIDGET, parent=parent_view)
 
 class AppView(BaseView):
 	TOP_WIDGET = 'window_main'
@@ -54,9 +54,7 @@ class AppView(BaseView):
 class BaseTreeView(BaseView):
 	def __init__(self):
 		BaseView.__init__(self)
-                return
 
-        def setup_widgets(self):                
 		treeview = self[self.TOP_WIDGET[0]]
 		treeview.set_reorderable(True)
 		cell = gtk.CellRendererText()

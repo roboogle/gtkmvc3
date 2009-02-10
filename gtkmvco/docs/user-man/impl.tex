@@ -152,30 +152,35 @@ The View constructor is quite much complicated:
 
 { \codesize 
 \begin{verbatim} 
-def __init__(self, glade_filename=None,
-             glade_top_widget_name=None, parent_view=None, 
-             controller=None)
+def __init__(self, glade=None, top=None, parent=None)
 \end{verbatim}} 
 
 
 \begin{description}
-\item[glade\_filename] can be either a string or a list of strings. In
+\item[glade] can be either a string or a list of strings. In
   any case each provided string represents the file name of a \glade
   file. Typically each glade file contains a tree of (named) widgets.
-
-\item[glade\_top\_widget\_name] can be a string or a list of strings.
-  Each string provided is associated to the parameter glade\_filename
-  content, and represent the name of the widget in the widgets tree
+   
+  When not given (of \codename{None}) a corresponding class member
+  called \codename{glade} is checked. If also \codename{self.glade}
+  is \codename{None} it means that there is no \glade file and the
+  widgets will have to be constructed manually.
+  
+\item[top] can be a string or a list of strings.  Each string
+  provided is associated to the parameter \codename{glade} content,
+  and represent the name of the widget in the widgets tree
   hierarchy to be considered as top level. This lets the user to
   select single parts of the glade trees passed through parameter
-  \codename{glade\_filename}.
+  \codename{glade}. 
 
-\item[parent\_view] is the view instance to be considered parent of
-self. Generally this parameter is None. 
+  When not given (of \codename{None}) a corresponding class member
+  called \codename{top} is checked. If also \codename{self.top} is
+  \codename{None} it means that the root widget name of the given
+  \glade file will be taken as the name for the top level widget.
 
-\item[controller] This parameter is provided for compatibility with
-  old versions of \gtkmvc. Now the view is passed when creating the
-  Controller, so this parameter should be not used in new code. 
+\item[parent] is the view instance to be considered parent of
+  self. This can be used in special cases to construct hiearchical
+  views. Generally this parameter is None or not given.
 
 \end{description}
 
@@ -193,14 +198,12 @@ and use it as follows:
 from gtkmvc import View
 
 class MyView (View):
-  def __init__(self):
-    View.__init__(self, 'test.glade')
-    return
+  glade = 'test.glade'
   pass 
 
 m = MyModel()
 v = MyView()
-c = MyController(m,v)
+c = MyController(m, v)
 
 v['start_button'] # this returns a gtk.Button object
 \end{verbatim}
@@ -218,8 +221,7 @@ v['vbox_widget'] = gtk.VBox()
 }
 
 The creation on the fly of new widgets should be performed within
-the derived view method setup\_widgets that is automatically called
-by the View's constructor:
+the derived view cosntructor:
 
 { \codesize 
 \begin{verbatim}
@@ -227,11 +229,8 @@ from gtkmvc import View
 
 class MyView (View):
   def __init__(self, ):
-    View.__init__(self, 'test.glade')
-    ...
-    return
+    super(MyView, self).__init__('test.glade')
 
-  def setup_widgets(self): 
     self['vbox_widget'] = gtk.VBox()
     ...
     return
@@ -304,7 +303,7 @@ from gtkmvc import View
 
 class MyView (View):
   def __init__(self):
-    View.__init__(self, 'test.glade')
+    super(MyView, self).__init__('test.glade')
     #...
     return
   pass 
@@ -346,9 +345,6 @@ from gtkmvc import Controller
 import gtk
 
 class MyCtrl (Controller):
-  def __init__(self, m, v):
-    Controller.__init__(self, m, v)
-    return
 
   def register_view(self, view):
     tv = self.view['tv_main']    
@@ -663,16 +659,10 @@ class MyModel (Model):
         'mymap'  : {},
         }
 
-    def __init__(self):
-        Model.__init__(self)
-        return    
     pass # end of class
 
 # ----------------------------------------------------------------------
 class MyObserver (Observer):
-    def __init__(self, model):
-        Observer.__init__(self, model)
-        return
 
     # notifications
 

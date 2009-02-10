@@ -36,7 +36,9 @@ import gtkmvc
 import gtk
 class MyView (gtkmvc.View):
 
-    def setup_widgets(self):
+    def __init__(self):
+        super(MyView, self).__init__()
+
         self['window'] = gtk.Window()
         self['window'].set_title("A damned small example")
         t = gtk.Table(rows=2, columns=2)
@@ -67,7 +69,6 @@ import gtkmvc
 import gtk
 class MyCtrl (gtkmvc.Controller):
     def register_view(self, view):
-        super(MyCtrl, self).register_view(view)
         view['window'].connect('delete-event', self.on_window_delete_event)
         view['button'].connect('clicked', self.on_button_clicked)
         return

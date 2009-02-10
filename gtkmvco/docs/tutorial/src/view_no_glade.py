@@ -23,12 +23,10 @@ class MyViewNoGlade (View):
        the controller does the connection. Every time the button is
        pressed, the counter will be incremented."""
 
-    def __init__(self, ctrl):
+    def __init__(self):
 
         # The view here is not constructed from a glade file.
-        # Registration is delayed, and widgets are added manually,
-        # later.
-        View.__init__(self, ctrl, register=False)
+        super(MyViewNoGlade, self).__init__()
     
         # The set of widgets:
         w = gtk.Window()
@@ -48,10 +46,6 @@ class MyViewNoGlade (View):
         self['label'] = l
         self['button'] = b
         
-        # View's registration was delayed, now we can proceed.
-        # This will allow the controller to set up all signals
-        # connections, and other operations:
-        ctrl.register_view(self)
         return
 
     pass # end of class

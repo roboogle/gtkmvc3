@@ -31,7 +31,9 @@ class MyView (View):
     """This handles only the graphical representation of the
     application. The widgets set is built by hand"""
 
-    def setup_widgets(self):
+    def __init__(self):
+        super(MyView,self).__init__()
+
         self['window'] = gtk.Window()
         self['window'].set_title("Basic Manual")
         t = gtk.Table(rows=2, columns=2)

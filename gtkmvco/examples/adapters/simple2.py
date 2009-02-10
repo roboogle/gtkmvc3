@@ -37,7 +37,9 @@ import gtk
 
 # hand-made view simply containing a text entry and a button
 class MyView (gtkmvc.View):
-    def setup_widgets(self):
+    def __init__(self):
+        super(MyView,self).__init__()
+
         w = gtk.Window()
         e = gtk.Entry()
         b = gtk.Button("Press")

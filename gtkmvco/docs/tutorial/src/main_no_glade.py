@@ -16,7 +16,7 @@ from ctrl_no_glade import MyControllerNoGlade
 from view_no_glade import MyViewNoGlade
 
 m = MyModel()
-c = MyControllerNoGlade(m)
-v = MyViewNoGlade(c)
+v = MyViewNoGlade()
+c = MyControllerNoGlade(m, v)
 
 gtk.main()

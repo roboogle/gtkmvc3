@@ -16,7 +16,7 @@ from ctrl_glade import MyController
 from view_glade import MyView
 
 m = MyModel()
-c = MyController(m)
-v = MyView(c)
+v = MyView()
+c = MyController(m, v)
 
 gtk.main()

@@ -35,15 +35,13 @@ import os.path
 class ApplicationView (View):
     """A view for the top level window (application)"""
     
-    GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
-
+    glade = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
+    top = 'window_app'
     def __init__(self):
-        View.__init__(self, self.GLADE_FILE, 'window_app')
+        View.__init__(self)
 
         self.converter = ConverterView(False) # not a top level
-        return
 
-    def setup_widgets(self):
         vbox = self['vbox_top']
         vbox.pack_start(self.converter.get_top_widget())
         return

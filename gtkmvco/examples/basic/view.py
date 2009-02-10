@@ -30,11 +30,7 @@ class MyView (View):
     """This handles only the graphical representation of the
     application. The widgets set is loaded from glade file"""
     
-    GLADE ="basic.glade"
-
-    def __init__(self):
-        View.__init__(self, glade=self.GLADE)
-        return
+    glade = "basic.glade"
 
     def set_counter_value(self, val):
         self['label_val'].set_markup("<big><b>%d</b></big>" % val)

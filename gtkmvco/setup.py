@@ -8,7 +8,7 @@
 from distutils.core import setup
 
 setup(name="python-gtkmvc",
-      version="1.2.3",
+      version="1.2.99",
       description="Model-View-Controller and Observer patterns "\
                   "for PyGTK2",
       author="Roberto Cavada",

@@ -101,8 +101,7 @@ class Model (object):
     def has_property(self, name):
         """Returns true if given property name refers an observable
         property inside self or inside derived classes"""
-        return self.__properties__.has_key(name) or \
-               self.__derived_properties__.has_key(name)
+        return name in self.get_properties()
 
 
     def register_observer(self, observer):
@@ -144,8 +143,10 @@ class Model (object):
 
     def get_properties(self):
         observees = list(getattr(self, support.metaclasses.OBS_ARRAY_NAME, []))
-        return self.__properties__.keys() + self.__derived_properties__.keys() + observees
+        return getattr(self, support.metaclasses.PROPS_MAP_NAME).keys() + \
+          getattr(self, support.metaclasses.DER_PROPS_MAP_NAME).keys() + observees
 
+    
     def __add_observer_notification(self, observer, prop_name):
         """Searches in the observer for any possible listener, and
         stores the notification methods to be called later"""

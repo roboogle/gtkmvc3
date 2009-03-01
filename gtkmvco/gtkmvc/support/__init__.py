@@ -22,5 +22,3 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 
-__all__ = ["metaclass_base", "metaclasses", "wrappers", "decorators",
-           "factories"]

@@ -229,7 +229,7 @@ from gtkmvc import View
 
 class MyView (View):
   def __init__(self, ):
-    super(MyView, self).__init__('test.glade')
+    View.__init__(self, 'test.glade')
 
     self['vbox_widget'] = gtk.VBox()
     ...
@@ -303,7 +303,7 @@ from gtkmvc import View
 
 class MyView (View):
   def __init__(self):
-    super(MyView, self).__init__('test.glade')
+    View.__init__(self, 'test.glade')
     #...
     return
   pass 

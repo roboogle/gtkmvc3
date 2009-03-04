@@ -87,7 +87,7 @@ entry. Notice that the name of the text entry is
 \begin{verbatim}
 class MyView (gtkmvc.View):
     def __init__(self):
-        super(MyView, self).__init__()
+        gtkmvc.View.__init__(self)
 
         w = gtk.Window(); e = gtk.Entry(); b = gtk.Button("Press")
         h = gtk.VBox(); h.add(e); h.add(b); w.add(h)

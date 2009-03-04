@@ -45,8 +45,8 @@ from gtkmvc import ${base_class_name}
 class ${class_name} (${base_class_name}):
 
     # Observable properties
-    __properties__ = {
-        }
+    somevalue = 0
+    __observables__ = ("somevalue",)
     
     def __init__(self):
         ${base_class_name}.__init__(self)
@@ -75,13 +75,41 @@ class ${class_name} (${base_class_name}):
         # setup of adapters
         return
 
-    # Handlers for signals:
+    # ---------------------------------------------------------------
+    #        Signal handlers
+    # ---------------------------------------------------------------
     def on_${top_widget}_delete_event(self, win, event):
         gtk.main_quit() # say goodbye
         return True
 
-    # Notifications from observable properties:
+    # ---------------------------------------------------------------
+    #        Notifications from observable properties
+    # ---------------------------------------------------------------
     
+    # For value-change notifications
+#     def property_<property_name_here>_value_change(self, model, old_value, new_value):
+#         return
+
+    # For value-change of containers like lists, maps, or method calls for observable class instances. 
+    # There exist 'before' and 'after' versions, you can use both or only one, depending on your need. 
+#     def property_<property_name_here>_before_change(self, model, instance, name, args, kwargs):
+#         # instance is the object that is being changed (the list for example)
+#         # name is the name of the method that is used to change it ('append' for example)
+#         # args is the list of arguments of the invoked method 'name'
+#         # kwargs is the keywords map of the invoked method 'name'
+#         return
+#
+#     def property_<property_name_here>_after_change(self, model, instance, name, args, kwargs):
+#         # instance is the object that is being changed (the list for example)
+#         # name is the name of the method that is used to change it ('append' for example)
+#         # args is the list of arguments of the invoked method 'name'
+#         # kwargs is the keywords map of the invoked method 'name'
+#         return   
+
+    def property_somevalue_value_change(self, model, old_value, new_value):
+        return
+
+   
     pass # end of class ${class_name}
 """
 

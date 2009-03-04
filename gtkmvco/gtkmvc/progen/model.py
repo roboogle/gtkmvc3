@@ -63,22 +63,27 @@ def set_shell_log():
 
 class ProgenModel (Model):
     """The application model"""
-    __properties__ = {
-        'name'  : "", 
-        'glade' : True,
-        'glade_fn' : "application.glade",
-        'author' : "",
-        'email'     : "",
-        'copyright' : "",
-        'destdir' : ".",
-        'complex' : True,
-        'src_header' : None,
-        'other_comment' : "",
-        'src_name'      : "src",
-        'res_name'      : "resources",
-        'top_widget'    : "window_appl",
-        'dist_gtkmvc' : True, 
-        }
+    name  = "" 
+    glade = True
+    glade_fn = "application.glade"
+    author = ""
+    email     = ""
+    copyright = ""
+    destdir = "."
+    complex = True
+    src_header = None
+    other_comment = ""
+    src_name      = "src"
+    res_name      = "resources"
+    top_widget    = "window_appl"
+    dist_gtkmvc = True 
+
+    __observables__ = ("name", "glade", "glade_fn", "author", 
+                       "email", "copyright", "destdir", "complex", 
+                       "src_header", "other_comment", "src_name", 
+                       "res_name", "top_widget", "dist_gtkmvc",
+                       )
+
 
     def __init__(self):
         Model.__init__(self)
@@ -229,7 +234,7 @@ class ProgenModel (Model):
               'date'      : datetime.datetime.today().ctime(),
               }
 
-        for k in self.__properties__: m[k] = getattr(self, k)
+        for k in self.__observables__: m[k] = getattr(self, k)
         self.templ.update(m)
         
         if self.src_header is None: header = templates.DEFAULT_HEADER + template

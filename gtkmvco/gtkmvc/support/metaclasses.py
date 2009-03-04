@@ -107,6 +107,7 @@ class PropertyMeta (type):
         # class (also from bases)
         for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
         setattr(cls, ALL_OBS_SET, obs)
+        logger.debug("class %s has observables: %s", cls.__name__, obs)
         return
 
 

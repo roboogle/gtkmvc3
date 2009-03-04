@@ -26,7 +26,7 @@ class MyViewNoGlade (View):
     def __init__(self):
 
         # The view here is not constructed from a glade file.
-        super(MyViewNoGlade, self).__init__()
+        View.__init__(self)
     
         # The set of widgets:
         w = gtk.Window()

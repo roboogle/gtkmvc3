@@ -21,11 +21,8 @@ class MyModel (Model):
     and does not know it lives in a MVC chain."""
 
     # observable properties:
-    __properties__ = { 'counter' : 0 }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    counter = 0
+    __observables__ = ('counter',)
 
     pass # end of class
 # ----------------------------------------------------------------------

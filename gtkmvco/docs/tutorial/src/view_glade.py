@@ -23,10 +23,7 @@ class MyView (View):
        model. Of course the controller wil provide the
        connection. Every time the button is pressed, the counter
        will be incremented."""
-
-    def __init__(self):
-        super(MyView, self).__init__('pygtkmvc-example.glade')
-        return
+    glade = "pygtkmvc-example.glade"
 
     pass # end of class
 # ----------------------------------------------------------------------

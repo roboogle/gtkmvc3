@@ -107,9 +107,9 @@ reflect the content of the text entry \codename{entry\_text}.
 { \codesize
 \begin{verbatim}
 class MyModel (gtkmvc.Model):
-    __properties__ = {
-        'text' : "Ciao",
-        }
+    text : "Ciao"
+    __observables__ = ("test",)
+
     pass # end of class
 \end{verbatim}
 }
@@ -483,13 +483,12 @@ to the widgets into the \codename{HBox}. When the button is clicked,
 one of the three integers is randomly incremented.
 
 { \codesize
-  \begin{verbatim}
+\begin{verbatim}
 class MyModel (Model):
-    __properties__ = {
-       'box' : [0,1,2]
-       }
+    box = [0,1,2]
+    __observables__ = ("box",)
     pass # end of class
-  \end{verbatim}
+\end{verbatim}
 }
 
 The controller handles the button click signal:
@@ -558,11 +557,10 @@ also a map, whose keys are widget names.
 { \codesize
 \begin{verbatim}
 class MyModel (Model):
-    __properties__ = {
-        'box' : { 'en'  : 0,
-                  'lbl' : 1,
-                  'sb'  : 2 }
-        }
+    box = { 'en'  : 0,
+            'lbl' : 1,
+            'sb'  : 2 }
+    __observables__ = ("box",)
     pass # end of class
 \end{verbatim}
 }

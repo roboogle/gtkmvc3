@@ -374,9 +374,25 @@ since its management is carried out by the base class
 \codename{Model}.
 
 Basically the user derives from class \codename{Model} (or the others
-listed in section \ref{MODELS}). The user adds a class variable
-called \OPvar. This variable must be a map, whose elements' keys are
-names of properties, and the associated values are the initial values.
+listed in section \ref{MODELS}). 
+
+Properties are listed as class variables with default values, and
+to declare which variables in the model are also observable,
+special class variable \OBSvar can be used. 
+
+\OBSvar is a tuple (or a list) of names of class variables that are
+observable. Names can contain wilcards like \codename{*} to match
+any sequence of characters, \codename{?} to match one single
+character, etc. See module \codename{fnmatch} in \python library
+for other information about possible use of wilcards in
+names. Important to say that if wilcards are used, names starting
+with a double underscore \codename(\_,\_) will be not matched.
+
+It is also possible for the user to add a class variable called
+\OPvar. This variable must be a map, whose elements' keys are names
+of properties, and the associated values are the initial
+values. Using \OPvar is complementary to the use of \OBSvar, but it
+is now deprecated and should be avoided in new code.
 
 For example, suppose you want to create an \OP called \codename{name} 
 initially associated to the string value ``Rob'':
@@ -386,7 +402,8 @@ initially associated to the string value ``Rob'':
 from gtkmvc import Model
 
 class MyModel (Model):
-  __properties__ = { 'name' : 'Rob' }
+  name = 'Rob'
+  __observables__ = ("name",)
 
   def __init__(self):
     Model.__init__(self)
@@ -396,6 +413,45 @@ class MyModel (Model):
   pass # end of class
 \end{verbatim}
 }
+
+This is another example showing the usage of wilcards in names:
+{ \codesize 
+\begin{verbatim} 
+from gtkmvc import Model
+
+class MyModelWithWilcards (Model):
+  firstname = 'Rob'
+  secondname = 'Mario'
+  surname = 'Cavada'
+  energy = 0.2 # needs holidays!
+  entropy = 1.0
+  enology = "good science"
+
+  __observables__ = ("*name", "en????y")
+  pass # end of class
+\end{verbatim}
+}
+
+In the example, all properties but \codename{energy} are declared
+to be observable.
+
+Old-style (deprecated) observable properties declaration that makes
+use of special variable \OPvar is shown here. This example is shown
+only for completeness and should be not used anymore in new code.
+
+{ \codesize 
+\begin{verbatim} 
+from gtkmvc import Model
+
+class MyModelDeprecated (Model):
+
+ __properties__ = { 
+    'name' : 'Rob',
+  }
+  pass # end of class
+\end{verbatim}
+}
+
 
 By using a specific meta-class, property \codename{name} will be
 automatically added, as well as all the code to handle it.
@@ -477,9 +533,8 @@ For example:
 from gtkmvc import Model
 
 class Test1 (Model):
-    __properties__ = {
-        'prop1'  : 1
-        }
+    prop1 = 1
+    __observables__ = ("prop1", )
 
     def __init__(self):
         Model.__init__(self)
@@ -494,10 +549,9 @@ class Test1 (Model):
     pass # end of class
 
 class Test2 (Test1):    
-    __properties__ = {
-        'prop2'  : 2,
-        'prop1'  : 3
-        }
+    prop2 = 2
+    prop1 = 3
+    __observables__ = ("prop?",)
     
     def __init__(self):
         Test1.__init__(self)
@@ -573,9 +627,8 @@ For example:
 from gtkmvc import Model
 
 class MyModel (Model):
-    __properties__ = {
-        'prop1'  : [1,2,3]
-        }
+    prop1 = [1,2,3]
+    __observables__ = ("prop1",)
 
     def __init__(self):
         Model.__init__(self)
@@ -652,12 +705,11 @@ sequences like \kw{lists} and \emph{maps}. For example:
 from gtkmvc import Model, Observer
 
 # ----------------------------------------------------------------------
-class MyModel (Model):    
-    __properties__ = {
-        'myint'  : 0, 
-        'mylist' : [],
-        'mymap'  : {},
-        }
+class MyModel (Model): 
+    myint = 0
+    mylist = []
+    mymap = {}
+    __observables__ = ("my*", )
 
     pass # end of class
 
@@ -771,21 +823,13 @@ class AdHocClass (observable.Observable):
 
 # ----------------------------------------------------------------------
 class MyModel (Model):
-    __properties__ = {
-        'obj' : AdHocClass(),
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    obj = AdHocClass()
+    __observables__ = ("obj",)
 
     pass # end of class
 
 # ----------------------------------------------------------------------
 class MyObserver (Observer):
-    def __init__(self, model):
-        Observer.__init__(self, model)
-        return
 
     def property_obj_value_change(self, model, old, new):
         print "obj value changed from:", old, "to:", new 
@@ -855,14 +899,8 @@ class HolyClass (object):
 
 # ----------------------------------------------------------------------
 class MyModel (Model):
-
-    __properties__ = {
-        'obj' : (HolyClass, HolyClass(), ('change',)),
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    obj = (HolyClass, HolyClass(), ('change',))
+    __observables__ = ("obj",)
 
     pass # end of class
 \end{verbatim}
@@ -889,20 +927,13 @@ from gtkmvc import observable
 
 # ----------------------------------------------------------------------
 class MyModel (Model):
-    __properties__ = {
-        'sgn'  : observable.Signal(),
-        }
+    sgn = observable.Signal()
+    __observables__ = ("sgn",)
 
-    def __init__(self):
-        Model.__init__(self)
-        return    
     pass
 
 # ----------------------------------------------------------------------
 class MyObserver (Observer):
-    def __init__(self, model):
-        Observer.__init__(self, model)
-        return
 
     # notification
     def property_sgn_signal_emit(self, model, args, kwargs):
@@ -944,16 +975,23 @@ explained here for the sake of completeness.
 
 \begin{description}
 
-\item[\OPvar] A class (static) member that maps property names and
-initial values. This must be provided as a map by the user.
+\item[\OBSvar] A class (static) member that lists property
+  names. This must be provided as either a tuple or a list by the
+  user. Wilcards in names can be used to match property names, but
+  properties with names starting with a double underscore
+  \codename{\_,\_} will be not matched.
 
-\item[\OPdvar] Automatically generated static member that maps the 
-\OPS exported by all base classes. This does not contain \OPS that 
-the class overrides. 
+\item[\OPvar] (Deprecated, do not use anymore) A dictionary mapping
+  observable properties names and their initial value. This
+  variable has been substituted by \OBSvar. 
+
+\item[\OPdvar] (Deprecated) Automatically generated static member
+  that maps the \OPS exported by all base classes. This does not
+  contain \OPS that the class overrides.
 
 \item[\codename{\_prop\_\emph{property\_name}}] This is an
-  auto-generated variable to hold the property value. For example, a
-  property called \codename{x} will generate a variable called
+  auto-generated variable holding the property value. For example,
+  a property called \codename{x} will generate a variable called
   \codename{\_prop\_x}.
 
 \item[\codename{get\_prop\_\emph{property\_name}}] This public method

@@ -111,9 +111,8 @@ class ExampleModel (Model):
     # Observable property: code for that is automatically generated
     # by metaclass constructor. The controller will be the observer
     # for this property
-    __properties__ = {
-        "message_index" : -1   # -1 is the initial value
-        }
+    message_index = -1   # -1 is the initial value
+    __observables__ = ("message_index",)
 
     def __init__(self):
         Model.__init__(self)
@@ -136,13 +135,21 @@ class ExampleModel (Model):
 \end{verbatim}
 }
 
-Notice the class' variable \codename{\_\_properties\_\_}, which is a
-map of (property, value) couples. The base class Model belongs to a
+Notice that class instance members are declared to be observable
+through the special class variable \codename{\_\_observables\_\_},
+which is a list of names (string) of the properties that are
+observable.
+
+The base class Model belongs to a
 meta-class which automatically searches for observable properties and
 generates the needed code to handle the notification.  When the value
 of variable \codename{message\_index} changes, all registered
 observers will be notified.
 
+It is also possible to use the special class' variable
+\codename{\_\_properties\_\_}, which is a map of (property, value)
+couples. This variable was used in older versions of \gtkmvc and
+now should be avoided.
 
 \subsubsection{Controller}
 Class \codename{ExampleController} contains the \emph{logic} of the

@@ -37,10 +37,13 @@ class MyModel (ModelMT):
     This requires to isolate the thread changing the model from the
     thread which the controller runs in. This insulation is carried
     out transparently by class ModelMT that out model derives from."""
-    
-    __properties__ = { 'counter' : 0,
-                       'busy' : False, 
-                       }
+
+    counter = 0
+    busy = False
+    __observables__ = ('counter', 'busy')
+#    __properties__ = { 'counter' : 0,
+#                       'busy' : False, 
+#                       }
     
     def __init__(self):
         ModelMT.__init__(self)

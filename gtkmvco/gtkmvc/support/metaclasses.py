@@ -24,6 +24,7 @@
 import new
 import re
 import types
+import warnings
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import get_function_from_source
@@ -84,19 +85,24 @@ class PropertyMeta (type):
         # the set of all obs (it is calculated and stored below)
         obs = set()
 
-        # Generates code for all properties (but not for derived props):
-        props = getattr(cls, PROPS_MAP_NAME, {})            
-        for prop in props.keys():
-            type(cls).__create_prop_accessors__(cls, prop, props[prop])
+        # processes now all names in __observables__ 
+        for prop in type(cls).__get_observables_array__(cls):
+            type(cls).__create_prop_accessors__(cls, prop, _dict.get(prop, None))
             obs.add(prop)
             pass
 
-        # processes now all names in __observables__ 
-        for prop in type(cls).__get_observables_array__(cls):
-          type(cls).__create_prop_accessors__(cls, prop, _dict.get(prop, None))
-          obs.add(prop)
-          pass
+        # Generates code for all properties (but not for derived props):
+        props = getattr(cls, PROPS_MAP_NAME, {})            
+        if len(props) > 0: warnings.warn("The use of '%s.%s' in models is deprecated. Use the tuple '%s' instead (see the manual)" %
+                                         (cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
+                                         DeprecationWarning)
 
+        # processes all names in __properties__ (deprecated, overloaded by __observables__)
+        for prop in (x for x in props.iterkeys() if x not in obs):
+            type(cls).__create_prop_accessors__(cls, prop, props[prop])
+            obs.add(prop)
+            pass
+        
         # generates the list of _all_ properties available for this
         # class (also from bases)
         for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
@@ -105,21 +111,23 @@ class PropertyMeta (type):
 
 
     def __get_observables_array__(cls):
-        """Returns an array of strings by expanding wilcards found
+        """Returns a set of strings by expanding wilcards found
         in class field __observables__. Expansion works only with
         names not prefixed with __"""
         import fnmatch
-        res_set = set() # this is used for performances
-        res = [] # this is used to keep ordering
+        res_set = set()
 
         not_found = []
-        for name in getattr(cls, OBS_TUPLE_NAME, tuple()):
+        names = getattr(cls, OBS_TUPLE_NAME, tuple())
+        if not isinstance(names, types.ListType) and not isinstance(names, types.TupleType):
+            raise TypeError("Member %s.%s must be a list or tuple" % (cls.__name__, OBS_TUPLE_NAME))
+
+        for name in names:
+            if type(name) != types.StringType: raise TypeError("Member %s.%s must contain only strings (found %s)" % 
+                                                               (cls.__name__, OBS_TUPLE_NAME, type(name)))
             if hasattr(cls, name):
-                if getattr(cls, name) != types.MethodType: 
-                    res.append(name)
-                    res_set.add(name)
-                    pass
-                
+                if getattr(cls, name) != types.MethodType: res_set.add(name)
+                pass
             else: not_found.append(name)
             pass
 
@@ -129,11 +137,11 @@ class PropertyMeta (type):
                      and type(v) != types.MethodType
                      and x not in res_set):
             for pat in not_found:
-                if fnmatch.fnmatch(name, pat): res.append(name); res_set.add(name)
+                if fnmatch.fnmatch(name, pat): res_set.add(name)
                 pass
             pass
         
-        return res
+        return res_set
 
         
     def __create_prop_accessors__(cls, prop_name, default_val):

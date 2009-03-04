@@ -24,20 +24,22 @@
 import new
 import re
 import types
-import logging
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import get_function_from_source
+from gtkmvc.support.log import logger
 
 
 # ----------------------------------------------------------------------
 
-OBS_ARRAY_NAME = "__observables__"
+OBS_TUPLE_NAME = "__observables__"
 
 # old name, supported only for backward compatilibity, do not use it
 # anymore in new code
 PROPS_MAP_NAME = "__properties__" 
-DER_PROPS_MAP_NAME = "__derivated"+PROPS_MAP_NAME
+
+# This keeps the names of all observable properties (old and new)
+ALL_OBS_SET = "__all_observables__"
 
 
 class PropertyMeta (type):
@@ -74,48 +76,66 @@ class PropertyMeta (type):
     An example is provided in meta-class PropertyMetaVerbose below.
     """
     
-    def __init__(cls, name, bases, dict):
+    def __init__(cls, name, bases, _dict):
         """class constructor"""
         properties = {}
-        type.__init__(cls, name, bases, dict)
-
-        props = getattr(cls, PROPS_MAP_NAME, {})
-        setattr(cls, DER_PROPS_MAP_NAME, {})
-        der_props = getattr(cls, DER_PROPS_MAP_NAME)
-        
-        # Calculates derived properties:
-        for base in bases:
-            maps = ( getattr(base, PROPS_MAP_NAME, {}),
-                     getattr(base, DER_PROPS_MAP_NAME, {}) )
-            for _map in maps:
-                for p in _map.keys():
-                    if not props.has_key(p) and not der_props.has_key(p):
-                        der_props[p] = _map[p]
-                        pass
-                    pass
-                pass
-            pass
+        type.__init__(cls, name, bases, _dict)
+       
+        # the set of all obs (it is calculated and stored below)
+        obs = set()
 
         # Generates code for all properties (but not for derived props):
         props = getattr(cls, PROPS_MAP_NAME, {})            
         for prop in props.keys():
             type(cls).__create_prop_accessors__(cls, prop, props[prop])
+            obs.add(prop)
             pass
 
-        # processes now all names in __observables__
-        for pn in getattr(cls, OBS_ARRAY_NAME, []):
-          type(cls).__create_prop_accessors__(cls, pn, dict.get(pn, None))          
+        # processes now all names in __observables__ 
+        for prop in type(cls).__get_observables_array__(cls):
+          type(cls).__create_prop_accessors__(cls, prop, _dict.get(prop, None))
+          obs.add(prop)
           pass
 
+        # generates the list of _all_ properties available for this
+        # class (also from bases)
+        for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
+        setattr(cls, ALL_OBS_SET, obs)
         return
 
 
-    def __msg__(cls, msg, level):
-        """if level is less or equal to VERBOSE_LEVEL, ths message will
-        be printed"""
-        if level <= VERBOSE_LEVEL: logging.debug(msg)
-        return
+    def __get_observables_array__(cls):
+        """Returns an array of strings by expanding wilcards found
+        in class field __observables__. Expansion works only with
+        names not prefixed with __"""
+        import fnmatch
+        res_set = set() # this is used for performances
+        res = [] # this is used to keep ordering
 
+        not_found = []
+        for name in getattr(cls, OBS_TUPLE_NAME, tuple()):
+            if hasattr(cls, name):
+                if getattr(cls, name) != types.MethodType: 
+                    res.append(name)
+                    res_set.add(name)
+                    pass
+                
+            else: not_found.append(name)
+            pass
+
+        # now searches all possible matches for those that have not been found:
+        for name in (x for x,v in cls.__dict__.iteritems()
+                     if not x.startswith("__") 
+                     and type(v) != types.MethodType
+                     and x not in res_set):
+            for pat in not_found:
+                if fnmatch.fnmatch(name, pat): res.append(name); res_set.add(name)
+                pass
+            pass
+        
+        return res
+
+        
     def __create_prop_accessors__(cls, prop_name, default_val):
         """Private method that creates getter and setter, and the
         corresponding property"""
@@ -130,8 +150,8 @@ class PropertyMeta (type):
             func = get_function_from_source(src)
             setattr(cls, getter_name, func)
         else:
-            cls.__msg__("Warning: Custom member '%s' overloads generated accessor of property '%s'" \
-                        % (getter_name, prop_name), 2)
+            logger.debug("Custom member '%s' overloads generated getter of property '%s'", 
+                         getter_name, prop_name)
             pass
 
         if setter_name not in members_names:
@@ -139,18 +159,17 @@ class PropertyMeta (type):
             func = get_function_from_source(src)
             setattr(cls, setter_name, func)
         else:
-            cls.__msg__("Warning: Custom member '%s' overloads generated accessor of property '%s'" \
-                        % (setter_name, prop_name), 2)
+            logger.warning("Custom member '%s' overloads generated setter of property '%s'",
+                           setter_name, prop_name)
             pass
 
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
-
         setattr(cls, prop_name, prop)
 
         varname = "_prop_%s" % prop_name
         if not varname in members_names: cls.__create_property(varname, default_val)
-        else: cls.__msg__("Warning: automatic property builder found a possible clashing for variable %s inside class %s" \
-                          % (varname, cls.__name__), 2)
+        else: logger.warning("Automatic property builder found a possible clashing for variable %s inside class %s",
+                             varname, cls.__name__)
         return
 
     def __create_property(cls, name, default_val):
@@ -318,7 +337,7 @@ try:
       return
     
     def update_listener(cls, instance, kwargs):
-      pnames = getattr(cls, OBS_ARRAY_NAME, [])
+      pnames = type(cls).__get_observables_array__(cls)
       for k in kwargs:
         if k in pnames:
           _old = getattr(instance, k)

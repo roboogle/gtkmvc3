@@ -142,9 +142,9 @@ class Model (object):
     
 
     def get_properties(self):
-        observees = list(getattr(self, support.metaclasses.OBS_ARRAY_NAME, []))
-        return getattr(self, support.metaclasses.PROPS_MAP_NAME).keys() + \
-          getattr(self, support.metaclasses.DER_PROPS_MAP_NAME).keys() + observees
+        """Returns a list of all observable properties accessible
+        from the model"""
+        return list(getattr(self, support.metaclasses.ALL_OBS_SET, []))
 
     
     def __add_observer_notification(self, observer, prop_name):

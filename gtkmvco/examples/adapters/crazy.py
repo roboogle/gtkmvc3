@@ -47,17 +47,15 @@ class MyView (View):
 
 import datetime
 class MyModel (Model):
-    __properties__ = {
-        'expan' : True,
-        'toggle' : True,
-        'color' : gtk.gdk.color_parse("black"),
-        'url' : "http://pygtkmvc.sourceforge.net/",
-        'spin' : 5.0,
-        }
 
-    def __init__(self):
-        Model.__init__(self)
-        return
+    expan = True
+    toggle = True
+    color = gtk.gdk.color_parse("black")
+    url = "http://pygtkmvc.sourceforge.net/"
+    spin = 5.0
+
+    __observables__ = ("expan", "toggle", "color", "url", "spin")
+
     pass
 
 

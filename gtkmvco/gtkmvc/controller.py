@@ -52,7 +52,7 @@ class Controller (Observer):
         self.__user_props = set()
         self.__auto_adapt = auto_adapt
         
-        if view: gobject.idle_add(self._idle_register_view, view)
+        if view: gobject.idle_add(self._idle_register_view, view, priority=gobject.PRIORITY_HIGH)
         return
 
     def _idle_register_view(self, view):

@@ -42,6 +42,17 @@ PROPS_MAP_NAME = "__properties__"
 # This keeps the names of all observable properties (old and new)
 ALL_OBS_SET = "__all_observables__"
 
+# name of the variable that hold a property value
+PROP_NAME = "_prop_%(prop_name)s"
+
+# These are the names for property getter/setter methods that depend on property name
+GET_PROP_NAME = "__get_%(prop_name)s_value__"
+SET_PROP_NAME = "__set_%(prop_name)s_value__"
+
+# There are the names for generic property getter/setter methods
+GET_GENERIC_NAME = "__get_value__"
+SET_GENERIC_NAME = "__set_value__"
+
 
 class PropertyMeta (type):
     """This is a meta-class that provides auto-property support.
@@ -137,9 +148,22 @@ class PropertyMeta (type):
                      if not x.startswith("__") 
                      and type(v) != types.MethodType
                      and x not in res_set):
-            for pat in not_found:
+            for pat, i in zip(not_found,range(len(not_found))):
                 if fnmatch.fnmatch(name, pat): res_set.add(name)
+                del not_found[i]
                 pass
+            pass
+
+        # finally, there might entries that have no corresponding
+        # value, but there exist getter and setter methods. These
+        # entries are valid only if they do not contain wilcards
+        wilcards = frozenset("[]!*?")
+        for name, nameset in zip(not_found, (frozenset(x) for x in not_found)):
+            if (len(nameset & wilcards) == 0 and # no wilcards in the name
+                ((hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and # has property getter and setter 
+                  hasattr(cls, SET_PROP_NAME % {'prop_name' : name})) or
+                 (hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
+                  hasattr(cls, SET_GENERIC_NAME)))): res_set.add(name)
             pass
         
         return res_set
@@ -175,7 +199,7 @@ class PropertyMeta (type):
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
         setattr(cls, prop_name, prop)
 
-        varname = "_prop_%s" % prop_name
+        varname = PROP_NAME % {'prop_name' : prop_name}
         if not varname in members_names: cls.__create_property(varname, default_val)
         else: logger.warning("Automatic property builder found a possible clashing for variable %s inside class %s",
                              varname, cls.__name__)
@@ -232,17 +256,17 @@ class PropertyMeta (type):
 
     # Override these:
     def get_getter_source(cls, getter_name, prop_name):
-        """This must be overridden if you need a different implementation.
-        Simply the generated implementation returns the variable name
-        _prop_name"""
+        """This must be overridden if you need a different
+        implementation.  Simply the generated implementation returns
+        the variable name given by PROP_NAME"""
+        return "def %(getter_name)s(self): return " + PROP_NAME % \
+          {'getter_name' : getter_name, 'prop_name' : prop_name}
 
-        return "def %s(self): return self._prop_%s" % (getter_name, prop_name)
-    
     def get_setter_source(cls, setter_name, prop_name):
         """This must be overridden if you need a different implementation.
         Simply the generated implementation sets the variable _prop_name"""
-        return "def %s(self, val):  self._prop_%s = val" \
-               % (setter_name, prop_name)
+        return "def %(setter_name)s(self, val):  self." + PROP_NAME + " = val" % \
+          {'setter_name' : setter_name, 'prop_name' : prop_name}
        
     pass # end of class
 # ----------------------------------------------------------------------
@@ -282,18 +306,88 @@ class ObservablePropertyMeta (PropertyMeta):
   def __init__(cls, name, bases, dict):
     PropertyMeta.__init__(cls, name, bases, dict)
     return    
-    
+
+  def get_getter_source(cls, getter_name, prop_name):
+      """This implementation returns the PROP_NAME value if there
+      exists such property. If there exist a pair of methods
+      __get_<prop_name>_value__ and __set_<prop_name>_value__ the
+      value is taken from the getter. Otherwise if there exists the
+      generic pair __get_value__ and __set_value__ the gettter is
+      called. The getter method (specific or general) is called _only_
+      if there exists no variable called PROP_NAME (see the user
+      manual)"""
+
+      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
+      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+
+      has_specific_getter = (
+          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
+          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
+
+      has_general_getter = (
+          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
+          hasattr(cls, SET_GENERIC_NAME))
+
+      assert has_prop_variable or has_specific_getter or has_general_getter, "no var/methods for '%s'" % prop_name
+      
+      # when property variable is given, it overrides all getters
+      if has_prop_variable:
+          getter = "self." + PROP_NAME
+          if has_specific_getter: logger.warning("Custom getter/setter for property '%s' is ignored as a class field exists for property" % prop_name)
+
+      # specific getter ovverides the general one
+      elif has_specific_getter: getter = "self." + GET_PROP_NAME + "()" 
+
+      # generic getter
+      else: getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
+
+      # general getter ovverides the general one
+      return ("def %(getter_name)s(self): return " + getter) % \
+        {'getter_name' : getter_name, 'prop_name' : prop_name}
+          
+  
   def get_setter_source(cls, setter_name, prop_name):
-    return """def %(setter)s(self, val): 
- old = self._prop_%(prop)s
- new = type(self).create_value('%(prop)s', val, self)
- self._prop_%(prop)s = new
- if type(self).check_value_change(old, new): self._reset_property_notification('%(prop)s')
- self.notify_property_value_change('%(prop)s', old, val)
+      """The setter follows the rules of the getter. First search for
+      property variable, then specific getter/seter pair methods, and
+      finally the generic getter/setter pair (see the user manual)"""
+
+      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
+      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+
+      has_specific_setter = (
+          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
+          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
+
+      has_general_setter = (
+          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
+          hasattr(cls, SET_GENERIC_NAME))
+
+      assert has_prop_variable or has_specific_setter or has_general_setter
+
+      if has_prop_variable:
+          getter = "self._prop_%(prop_name)s"
+          setter = "self._prop_%(prop_name)s = new"
+
+      elif has_specific_setter:
+          getter = "self." + GET_PROP_NAME + "()"
+          setter = "self." + SET_PROP_NAME + "(new)"
+          
+      else:
+          getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
+          setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
+          pass          
+      
+      return ("""def %(setter_name)s(self, val): 
+ old = """ + getter + """
+ new = type(self).create_value('%(prop_name)s', val, self)
+ """ + setter + """
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s')
+ self.notify_property_value_change('%(prop_name)s', old, val)
  return
-""" % {'setter':setter_name, 'prop':prop_name}
+""") % {'setter_name':setter_name, 'prop_name':prop_name}
 
   pass #end of class
+# ----------------------------------------------------------------------
 
 
 class ObservablePropertyMetaMT (ObservablePropertyMeta):
@@ -307,16 +401,43 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
     return 
     
   def get_setter_source(cls, setter_name, prop_name):
-    return """def %(setter)s(self, val): 
- old = self._prop_%(prop)s
- new = type(self).create_value('%(prop)s', val, self)
+      """Setter for MT.""" 
+      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
+      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+
+      has_specific_setter = (
+          hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and # has property getter and setter 
+          hasattr(cls, SET_PROP_NAME % {'prop_name' : name}))
+
+      has_general_setter = (
+          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
+          hasattr(cls, SET_GENERIC_NAME))
+
+      assert has_prop_variable or has_specific_setter or has_general_setter
+
+      if has_prop_variable:
+          getter = "self._prop_%(prop_name)s"
+          setter = "self._prop_%(prop_name)s = new"
+
+      elif has_specific_setter:
+          getter = "self." + GET_PROP_NAME + "()"
+          setter = "self." + SET_PROP_NAME + "(new)"
+          
+      else:
+          getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
+          setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
+          pass          
+      
+      return """def %(setter_name)s(self, val): 
+ old = """ + getter + """
+ new = type(self).create_value('%(prop_name)s', val, self)
  self._prop_lock.acquire()
- self._prop_%(prop)s = new
+ """ + setter + """
  self._prop_lock.release()
- if type(self).check_value_change(old, new): self._reset_property_notification('%(prop)s')
- self.notify_property_value_change('%(prop)s', old, val)
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s')
+ self.notify_property_value_change('%(prop_name)s', old, val)
  return
-""" % {'setter':setter_name, 'prop':prop_name}
+""" % {'setter_name':setter_name, 'prop_name':prop_name}
 
   pass #end of class
 
@@ -327,8 +448,8 @@ try:
   from sqlobject.events import listen, RowUpdateSignal
   
   class ObservablePropertyMetaSQL (ObservablePropertyMeta, InheritableSQLObject.__metaclass__):
-    """Classes instantiated by this meta-class must provide a method named
-    notify_property_change(self, prop_name, old, new)"""
+    """Classes instantiated by this meta-class must provide a method
+    named notify_property_change(self, prop_name, old, new)"""
 
     def __init__(cls, name, bases, dict):
       InheritableSQLObject.__metaclass__.__init__(cls, name, bases, dict)

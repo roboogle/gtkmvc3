@@ -46,8 +46,8 @@ ALL_OBS_SET = "__all_observables__"
 PROP_NAME = "_prop_%(prop_name)s"
 
 # These are the names for property getter/setter methods that depend on property name
-GET_PROP_NAME = "__get_%(prop_name)s_value__"
-SET_PROP_NAME = "__set_%(prop_name)s_value__"
+GET_PROP_NAME = "get_%(prop_name)s_value"
+SET_PROP_NAME = "set_%(prop_name)s_value"
 
 # There are the names for generic property getter/setter methods
 GET_GENERIC_NAME = "__get_value__"
@@ -148,12 +148,11 @@ class PropertyMeta (type):
                      if not x.startswith("__") 
                      and type(v) != types.MethodType
                      and x not in res_set):
-            for pat, i in zip(not_found,range(len(not_found))):
+            for pat, i in zip(not_found, range(len(not_found))):
                 if fnmatch.fnmatch(name, pat): res_set.add(name)
-                del not_found[i]
                 pass
             pass
-
+        
         # finally, there might entries that have no corresponding
         # value, but there exist getter and setter methods. These
         # entries are valid only if they do not contain wilcards
@@ -165,7 +164,7 @@ class PropertyMeta (type):
                  (hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
                   hasattr(cls, SET_GENERIC_NAME)))): res_set.add(name)
             pass
-        
+
         return res_set
 
         
@@ -199,10 +198,14 @@ class PropertyMeta (type):
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
         setattr(cls, prop_name, prop)
 
-        varname = PROP_NAME % {'prop_name' : prop_name}
-        if not varname in members_names: cls.__create_property(varname, default_val)
-        else: logger.warning("Automatic property builder found a possible clashing for variable %s inside class %s",
-                             varname, cls.__name__)
+        has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+        if has_prop_variable:
+            varname = PROP_NAME % {'prop_name' : prop_name}
+            if not varname in members_names: cls.__create_property(varname, default_val)
+            else: logger.warning("Automatic property builder found a possible clashing for variable %s inside class %s",
+                                 varname, cls.__name__)
+            pass
+        
         return
 
     def __create_property(cls, name, default_val):
@@ -377,7 +380,7 @@ class ObservablePropertyMeta (PropertyMeta):
           setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
           pass          
       
-      return ("""def %(setter_name)s(self, val): 
+      return ("""def %(setter_name)s(self, val):
  old = """ + getter + """
  new = type(self).create_value('%(prop_name)s', val, self)
  """ + setter + """
@@ -385,6 +388,7 @@ class ObservablePropertyMeta (PropertyMeta):
  self.notify_property_value_change('%(prop_name)s', old, val)
  return
 """) % {'setter_name':setter_name, 'prop_name':prop_name}
+
 
   pass #end of class
 # ----------------------------------------------------------------------

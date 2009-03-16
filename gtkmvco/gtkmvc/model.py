@@ -24,6 +24,7 @@
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
 from observable import Signal
+from support.log import logger
 
 
 class Model (object):
@@ -156,6 +157,7 @@ class Model (object):
             method = getattr(observer, method_name)
             if method not in self.__value_notifications[prop_name]:
                 list.append(self.__value_notifications[prop_name], method)
+                logger.debug("Added value change notification '%s'", method_name)
                 pass
             pass
 
@@ -167,6 +169,7 @@ class Model (object):
                 method = getattr(observer, method_name)
                 if method not in self.__signal_notif[prop_name]:
                     list.append(self.__signal_notif[prop_name], method)
+                    logger.debug("Added signal emit notification '%s'", method_name)
                     pass
                 pass
             pass
@@ -178,6 +181,7 @@ class Model (object):
                 method = getattr(observer, method_name)
                 if method not in self.__instance_notif_before[prop_name]:
                     list.append(self.__instance_notif_before[prop_name], method)
+                    logger.debug("Added before call notification '%s'", method_name)
                     pass
                 pass
             
@@ -186,6 +190,7 @@ class Model (object):
                 method = getattr(observer, method_name)
                 if method not in self.__instance_notif_after[prop_name]:
                     list.append(self.__instance_notif_after[prop_name], method)
+                    logger.debug("Added after call notification '%s'", method_name)
                     pass
                 pass
             pass
@@ -200,6 +205,7 @@ class Model (object):
                 method = getattr(observer, method_name)
                 if method in self.__value_notifications[prop_name]:
                     self.__value_notifications[prop_name].remove(method)
+                    logger.debug("Removed value change notification '%s'", method_name)
                     pass
                 pass
             pass
@@ -213,6 +219,7 @@ class Model (object):
                 method = getattr(observer, method_name)
                 if method in self.__signal_notif[prop_name]:
                     self.__signal_notif[prop_name].remove(method)
+                    logger.debug("Removed signal emit notification '%s'", method_name)
                     pass
                 pass
             pass
@@ -225,6 +232,7 @@ class Model (object):
                     method = getattr(observer, method_name)
                     if method in self.__instance_notif_before[prop_name]:
                         self.__instance_notif_before[prop_name].remove(method)
+                        logger.debug("Removed before call notification '%s'", method_name)
                         pass
                     pass
                 pass
@@ -235,6 +243,7 @@ class Model (object):
                     method = getattr(observer, method_name)
                     if method in self.__instance_notif_after[prop_name]:
                         self.__instance_notif_after[prop_name].remove(method)
+                        logger.debug("Removed after call notification '%s'", method_name)
                         pass
                     pass
                 pass

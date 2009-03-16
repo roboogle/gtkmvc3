@@ -102,7 +102,7 @@
 	      <property name="update_policy">GTK_UPDATE_ALWAYS</property>
 	      <property name="snap_to_ticks">False</property>
 	      <property name="wrap">False</property>
-	      <property name="adjustment">0 0 100 1 10 10</property>
+	      <property name="adjustment">0 0 100 1 10 0</property>
 	      <signal name="value_changed" handler="on_sb_reset_value_changed" last_modification_time="Mon, 23 Oct 2006 14:44:17 GMT"/>
 	    </widget>
 	    <packing>

@@ -64,8 +64,8 @@ class MyObserver (Observer):
 
     # notifications
 
-    def property_int_value_change(self, model, old, new):
-        print "int changed!"
+    def property_a_int_value_change(self, model, old, new):
+        print "a_int changed!"
         return
 
     def property_a_list_value_change(self, model, old, new):

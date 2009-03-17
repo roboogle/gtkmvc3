@@ -39,13 +39,20 @@ class MyModel (Model):
 
     internal = 0
 
-    # external here is a property that is not stored internally, but
+    # external_spec here is a property that is not stored internally, but
     # handled by a pair of methods (a getter and a setter)
-    __observables__ = ["internal", "external"]
+    # external_gen instead does not have a specific pair of getter/setter, but
+    # its values are got and set by a general methods pair.
+    __observables__ = ["internal", "external_spec", "external_gen"]
 
-    def get_external_value(self): return "some value for external"
-    def set_external_value(self, val):
-        print "setter for external was called"
+    def get_external_spec_value(self): return "some value for external_spec"
+    def set_external_spec_value(self, val):
+        print "specific setter has been called"
+        return
+
+    def get__value(self, name): return "some value for generic " + name
+    def set__value(self, name, value):
+        print "generic setter for %s has been called" % name
         return
     
     pass
@@ -61,8 +68,12 @@ class MyObserver (Observer):
         print "internal changed!"
         return
 
-    def property_external_value_change(self, model, old, new):
-        print "external changed!"
+    def property_external_spec_value_change(self, model, old, new):
+        print "external spec changed!"
+        return
+
+    def property_external_gen_value_change(self, model, old, new):
+        print "external gen changed!"
         return
     
     pass
@@ -75,8 +86,11 @@ if __name__ == "__main__":
     c = MyObserver(m)
 
     m.internal = 20
-    m.external = "a new value"
-    
+    m.external_spec = "a new value"
+    m.external_gen = "a new value"
+
+    a = m.external_gen
+    print a
     pass
 
 

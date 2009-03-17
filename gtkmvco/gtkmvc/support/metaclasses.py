@@ -50,8 +50,8 @@ GET_PROP_NAME = "get_%(prop_name)s_value"
 SET_PROP_NAME = "set_%(prop_name)s_value"
 
 # There are the names for generic property getter/setter methods
-GET_GENERIC_NAME = "__get_value__"
-SET_GENERIC_NAME = "__set_value__"
+GET_GENERIC_NAME = "get__value"
+SET_GENERIC_NAME = "set__value"
 
 
 class PropertyMeta (type):

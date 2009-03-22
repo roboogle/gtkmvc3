@@ -1,8 +1,8 @@
 \subsection{\label{OBS} Implementation of the \obs}
 
-A Model does not know that it is connected to a (set of) controllers,
+A Model does not know that it is connected to a set of controllers,
 because this knowledge implies the knowledge of the \gui semantics,
-which should be out-of-scope for the Model.
+which has to be out-of-scope for the Model.
 
 Nevertheless, sometimes it is necessary for a Model to communicate to
 the \gui logics (generally the Controllers set) that the model state
@@ -59,10 +59,10 @@ an example in the latest part should make all these concepts clearer.
 
 \emph{Adapters} (see section \ref{ADAPT} are powerful entities that
 can be used to automatically bind part of the view with part of the
-model with aminimal effort, without any need to couple with complex
+model with a minimal effort, without any need to couple with complex
 code and naming rules. However, \emph{Adapters} should be used only
 after all the ``manual'' mechanisms have been well understood, and
-for this reason they are presented only at the end of this manual.
+for this reason they are presented only at the end of this document.
 
 
 \subsubsection{\label{KOBS} Supported types of Observable Properties}
@@ -74,12 +74,12 @@ Observable properties can hold several types of values:
   \emph{assigned} to the property.
 
 \item [Mutable sequential types] Like lists and maps. A notification
-  will occur even when the \emph{content} of the object changes, e.g.
+  will occur when the \emph{content} of the object changes, e.g.
   when one element of the sequence is assigned, added, removed, etc.
  
 \item [User classes] The user can declare the set of methods that can
-  be observed (i.e. observables will be notified when before or/and
-  after observed object methods are called.) 
+  be observed (i.e. observables will be notified before and/or after
+  observed object \emph{methods} are called.)
 
 \item [Events] To notify the observers that some event is occurred.
 \end{description}

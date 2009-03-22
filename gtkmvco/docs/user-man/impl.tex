@@ -5,9 +5,9 @@
 This section presents some details regarding the implementation of the
 \mvco framework in Python.
 
-\subsection{Models, Controllers and Views in detail}
+\subsection{Models, Views and Controllers in detail}
 The \mvco framework essentially supplies three base classes which
-implement respectively a View, a Model and a Controller.  Developers
+implement respectively a View, a Model and a Controller. Developers
 have to derive custom classes from the base classes set, adding the
 implementation which depends on the application semantics.
 
@@ -22,21 +22,13 @@ implementation which depends on the application semantics.
    loop, even when sent by models running from other threads.
  \end{itemize}
 
-\item[Controller base class] Supplies servicing for:
- \begin{itemize} 
- \item Automatic registration as observers of the associated Model.
- \item Easy access to the associated Model and View for any derived
-   class.
- \item Instantiation of \emph{adapters}.
- \end{itemize}
-
 \item[View base class] Supplies servicing for:
  \begin{itemize} 
  \item Automatic widgets tree registration. Input can be a set of root
  widgets stored inside a \glade File, or a completely customized widgets
  hierarchies.
  \item Automatic signals connection to methods supplied by the
- associated Controller.
+ associated Controller(s).
 \item Widget retrieval inside the set of hierarchy. Widget can be
   accessed by using the name they have been defined from within
   \glade, at design time, or that have been specified when creating
@@ -44,15 +36,25 @@ implementation which depends on the application semantics.
 \item Support for custom widgets declared in \glade files.
  \end{itemize}
 
+ \item[Controller base class] Supplies servicing for:
+ \begin{itemize} 
+ \item Automatic registration as observers of the associated Model.
+ \item Easy access to the associated Model and View for any derived
+   class.
+ \item Construction of columns and renderers of
+   \codename{gtk.TreeView} widgets.
+ \item Instantiation of \emph{adapters}.
+ \end{itemize}
+
 \end{description}
 
 
 \subsection{\label{MODELS} Models}
-Models must be used to hold the \emph{data} of the application. They
-can be connected to observers (like Controllers) by a mechanism
-detailed by section \ref{OPD}.  It is important to note that apart
-from during the registration phase, the model does not know that
-there exists a set observers connected to it.
+Models must be used to hold the \emph{data} or \emph{logic} of the
+application. They can be connected to observers (like Controllers) by
+a mechanism detailed by section \ref{OPD}.  It is important to note
+that apart from during the registration phase, the model does not know
+that there exists a set observers connected to it.
 
 All the code strictly related to the data of the application (i.e. not
 related to any view of those data) will live in the model class. 

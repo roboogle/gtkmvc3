@@ -345,3 +345,20 @@ class TextBufferModel (Model, gtk.TextBuffer):
         return
     pass
     
+
+
+# ----------------------------------------------------------------------
+try:
+  from sqlobject.inheritance import InheritableSQLObject
+  class SQLObjectModel (Model, InheritableSQLObject):
+      __metaclass__ = support.metaclasses.ObservablePropertyMetaSQL
+
+      def __init__(self, *args, **kargs):
+          Model.__init__(self)
+          InheritableSQLObject.__init__(self, *args, **kargs)
+          return
+      pass # end of class
+
+  SQLObjectModel.createTable()
+  
+except: pass

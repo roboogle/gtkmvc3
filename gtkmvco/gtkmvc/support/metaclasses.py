@@ -104,8 +104,8 @@ class PropertyMeta (type):
 
         # Generates code for all properties (but not for derived props):
         props = getattr(cls, PROPS_MAP_NAME, {})            
-        if len(props) > 0: warnings.warn("The use of '%s.%s' in models is deprecated. Use the tuple '%s' instead (see the manual)" %
-                                         (cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
+        if len(props) > 0: warnings.warn("In class %s.%s the use of attribute '%s' in models is deprecated. Use the tuple '%s' instead (see the manual)" %
+                                         (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
                                          DeprecationWarning)
 
         # processes all names in __properties__ (deprecated, overloaded by __observables__)
@@ -118,7 +118,7 @@ class PropertyMeta (type):
         # class (also from bases)
         for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
         setattr(cls, ALL_OBS_SET, obs)
-        logger.debug("class %s has observables: %s", cls.__name__, obs)
+        logger.debug("class %s.%s has observables: %s", cls.__module__, cls.__name__, obs)
         return
 
 
@@ -132,11 +132,11 @@ class PropertyMeta (type):
         not_found = []
         names = getattr(cls, OBS_TUPLE_NAME, tuple())
         if not isinstance(names, types.ListType) and not isinstance(names, types.TupleType):
-            raise TypeError("Member %s.%s must be a list or tuple" % (cls.__name__, OBS_TUPLE_NAME))
+            raise TypeError("In class %s.%s attribute '%s' must be a list or tuple" % (cls.__module__, cls.__name__, OBS_TUPLE_NAME))
 
         for name in names:
-            if type(name) != types.StringType: raise TypeError("Member %s.%s must contain only strings (found %s)" % 
-                                                               (cls.__name__, OBS_TUPLE_NAME, type(name)))
+            if type(name) != types.StringType: raise TypeError("In class %s.%s attribute '%s' must contain only strings (found %s)" % 
+                                                               (cls.__module__, cls.__name__, OBS_TUPLE_NAME, type(name)))
             if hasattr(cls, name):
                 if getattr(cls, name) != types.MethodType: res_set.add(name)
                 pass
@@ -163,6 +163,10 @@ class PropertyMeta (type):
                   hasattr(cls, SET_PROP_NAME % {'prop_name' : name})) or
                  (hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
                   hasattr(cls, SET_GENERIC_NAME)))): res_set.add(name)
+            else: # the observable was not found!
+                logger.warning("In class %s.%s ignoring observable '%s' which has no corresponding attribute or custom getter/setter pair" % (cls.__module__, cls.__name__, name))
+                pass
+                               
             pass
 
         return res_set
@@ -202,8 +206,8 @@ class PropertyMeta (type):
         if has_prop_variable:
             varname = PROP_NAME % {'prop_name' : prop_name}
             if not varname in members_names: cls.__create_property(varname, default_val)
-            else: logger.warning("Automatic property builder found a possible clashing for variable %s inside class %s",
-                                 varname, cls.__name__)
+            else: logger.warning("In class %s.%s automatic property builder found a possible clashing with attribute '%s'",
+                                 cls.__module__, cls.__name__, varname)
             pass
         
         return
@@ -212,6 +216,13 @@ class PropertyMeta (type):
         setattr(cls, name, cls.create_value(name, default_val))
         return
 
+    def has_prop_attribute(cls, prop_name):
+        """This methods returns True if there exists a class attribute
+        for the given property. The attribute is searched locally
+        only"""
+        props = getattr(cls, PROPS_MAP_NAME, {})
+        return cls.__dict__.has_key(prop_name) or props.has_key(prop_name)
+    
     def check_value_change(cls, old, new):
         """Checks whether the value of the property changed in type
         or if the instance has been changed to a different instance.
@@ -320,8 +331,7 @@ class ObservablePropertyMeta (PropertyMeta):
       if there exists no variable called PROP_NAME (see the user
       manual)"""
 
-      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
-      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+      has_prop_variable = cls.has_prop_attribute(prop_name)
 
       has_specific_getter = (
           hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
@@ -336,7 +346,7 @@ class ObservablePropertyMeta (PropertyMeta):
       # when property variable is given, it overrides all getters
       if has_prop_variable:
           getter = "self." + PROP_NAME
-          if has_specific_getter: logger.warning("Custom getter/setter for property '%s' is ignored as a class field exists for property" % prop_name)
+          if has_specific_getter: logger.warning("In class %s.%s ignoring custom getter/setter pair for property '%s' as a corresponding attribute exists" % (cls.__module__, cls.__name__, prop_name))
 
       # specific getter ovverides the general one
       elif has_specific_getter: getter = "self." + GET_PROP_NAME + "()" 
@@ -354,8 +364,7 @@ class ObservablePropertyMeta (PropertyMeta):
       property variable, then specific getter/seter pair methods, and
       finally the generic getter/setter pair (see the user manual)"""
 
-      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
-      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+      has_prop_variable = cls.has_prop_attribute(prop_name)
 
       has_specific_setter = (
           hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
@@ -406,8 +415,7 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
     
   def get_setter_source(cls, setter_name, prop_name):
       """Setter for MT.""" 
-      props = getattr(cls, PROPS_MAP_NAME, {}) # the properties map
-      has_prop_variable = hasattr(cls, prop_name) or props.has_key(prop_name)
+      has_prop_variable = cls.has_prop_attribute(prop_name)
 
       has_specific_setter = (
           hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and # has property getter and setter 

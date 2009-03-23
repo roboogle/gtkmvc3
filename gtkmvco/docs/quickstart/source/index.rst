@@ -99,7 +99,89 @@ Some terminology
 .. note:: 
  All these entities are now presented more in details.   
           
-          
+-----
+Views
+-----
+
+A view is a class that is intended to be a container for widgets. ::
+
+ import gtk
+ from gtkmvc import View
+
+ class MyView (View):
+    glade = "view_glade_file.glade"
+    top = "name_of_top_level_widget"
+
+    def __init__(self):
+        View.__init__(self)
+        
+        # possible construction of manual widgets
+        self['name_of_new_label'] = gtk.Label("A label manually constructed!")
+        self['some_container_in_glade_file'].pack_start(self['name_of_new_label'])
+
+        # possible setup of all widgets
+        # ...
+        return
+
+    def set_sentitivity(self, flag):
+        for wid in (self[x] for x in ('widget1', 'widget2', )):
+            wid.set_sensitive(flag)
+            pass
+        return
+
+    pass # end of class
+
+Your view is derived from base class ``gtkmvc.View`` that offers
+several services:
+
+1. Attributes ``glade`` that is used to tell the view which glade file
+   its widgets are taken from.
+2. Attributes ``top`` that is used to tell which is the widget name in
+   the glade file tree to be taken as the root widget. It is also
+   possible to specify a list of names to pick a set of trees.
+3. The view instance can be used a container (a dictionary) of
+   widgets, both for accessing named widgets in glade files, and for
+   creating new widgets manually.
+
+Views can be decomposed into a hierarchy of views. For example::
+
+ import gtk
+ from gtkmvc import View
+
+ class MySuperView (View):
+    glade = "view1.glade"
+    top = "view1_top_widget"
+
+    def __init__(self):
+        View.__init__(self)
+
+        self.subview = MySubView()
+
+        # connects the subview to a widget in the containing view
+        self['some_container'].add(self.subview.get_top_widget())
+        return
+    pass # end of class
+ 
+ class MySubView (View):
+    def __init__(self):
+        View.__init__(self, glade="view2.glade", top="view2_top_widget")
+        # setting of sub view...
+        return
+    pass # end of class
+
+As you can see:
+
+1. It is possible to construct a hierarchy of views to deal with view
+   composition.
+2. Subviews can be connected to known containers widgets, like in the
+   example.
+3. Class View provides the method ``get_top_widget`` that returns the
+   View's top level widget.
+4. Both attributes ``glade`` and ``top`` can be overridden or
+   substituted by View's constructor equivalent parameters. 
+
+    
+==================
 Indices and tables
 ==================
 

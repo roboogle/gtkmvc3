@@ -173,14 +173,145 @@ As you can see:
 
 1. It is possible to construct a hierarchy of views to deal with view
    composition.
-2. Subviews can be connected to known containers widgets, like in the
-   example.
+2. Subviews  can be connected to known containers widgets into the
+   containing view, like in the example.
 3. Class View provides the method ``get_top_widget`` that returns the
    View's top level widget.
 4. Both attributes ``glade`` and ``top`` can be overridden or
    substituted by View's constructor equivalent parameters. 
 
-    
+
+------
+Models
+------
+
+A model is a class that is intended to contain the application's
+logic. It contains data and methods, and a subset of the data can be
+declared to be *observable*. ::
+
+ from gtkmvc import Model
+ class MyModel (Model):
+    data1 = 10
+    data2 = "a string"
+    data3 = "a list of strings".split()
+
+    __observables__ = ("data1", "data3")
+
+    pass # end of class
+
+A model must derive from ``gtkmvc.Model`` [#fn1]_ and it is not
+different from any other normal class. *Observable Properties* are
+declared through the special attribute ``__observables__`` which is
+a sequence of string names.
+
+In the example class attributes ``data1`` and ``data3`` are declared
+to be observable properties. Names in ``__observables__`` can contain
+wilcards [#fn2]_ and all attributes in the class not beginning with a
+double underscore ``__`` will be checked for matching. For example
+``__observables__ = ("data?",)`` would match ``data1``, ``data2`` and
+``data3``.
+
+Observable properties can be assigned to several types of values,
+included lists, maps, and user defined classes. See the User Manual
+for the details. 
+
+---------
+Observers
+---------
+
+An observer is a class that is interested in being notified when some
+observable properties into one or models it observes got changed.
+For example::
+
+ from gtkmvc import Observer
+ class MyObserver (Observer):
+
+    def __init__(self, model):
+        Observer.__init__(self, model)
+        return
+        
+    def property_data1_value_change(self, model, old, new):
+        print "Property data1 changed from %d to %d"
+        return
+
+    def property_data3_after_change(self, model, instance, name, res, args, kwargs):
+        print "data3 after change:", instance, name, res
+        return
+    pass # end of class
+
+The constructor (here reported only for the sake of readability, even
+if not needed at all) takes a model and register itself as an observer
+within the model. 
+
+Methods in the observer that are intended to receive notifications use
+a *naming convention*. Here you can see two different types of
+notifications:
+
+1. Value change notification.
+2. List modifications.
+
+Here is how the model and the observer can interact::
+
+ m = MyModel()
+ o = MyObserver(m)
+
+ m.data1 += 1
+ print ">>> Here m.data is", m.data1
+
+ m.data3.append("Roberto")
+ m.data3[0] = "gtkmvc"
+ m.data3[1] = "improves your life"
+ 
+The execution ot this example produces the following output::
+
+ Property data1 changed from 10 to 11
+ >>> Here m.data is 11
+ data3 after change: ['a', 'list', 'of', 'strings', 'Roberto'] append None
+ data3 after change: ['gtkmvc', 'list', 'of', 'strings', 'Roberto'] __setitem__ None
+ data3 after change: ['gtkmvc', 'improves your life', 'of', 'strings', 'Roberto'] __setitem__ None
+
+Of course an observer is not limited to observe one model. Class Model
+offers method ``register_observer`` which *any* class can use to
+register itself as an observer::
+
+ m1 = MyModel()
+ o = MyObserver(m1) # o observes m1
+ m2 = AnotherModel()
+ m2.register_observer(o) # o observes also m2 now
+
+It is usual to see models observing other models, like siblings or
+sub-models in model hierarchies. 
+
+-----------
+Controllers
+-----------
+
+Controllers are the most complex structures that are intended to:
+
+1. Contain the GUI logics.
+2. Connect one model and one or more views, without making them know.
+3. Observe the model they are connected to.
+4. Provide handlers for gtk signals (declared in the views connected to it)
+5. Setting up widgets that depend on the model. For example setting up
+   of ``gtk.TreeView`` whose ``gtk.TreeModel`` lives within the model. 
+6. Setting up :ref:`adapters`
+
+
+.. _adapters:
+
+--------
+Adapters
+--------
+
+
+.. rubric:: Footnotes
+
+.. [#fn1] Or any class derived from ``gtkmvc.Model``, see the User
+.. [#fn2] See Python module 
+   `fnmatch <http://docs.python.org/library/fnmatch.html>`_ 
+   for information about accepted wilcards
+
+
 ==================
 Indices and tables
 ==================

@@ -28,7 +28,7 @@ import time
 
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
-
+from gtkmvc import Model
 
 # ----------------------------------------------------------------------
 class Adapter (Observer):
@@ -177,7 +177,7 @@ class Adapter (Observer):
             models = parts[:-1]
             for name in models:
                 model = getattr(model, name)
-                if not isinstance(model, gtkmvc.Model):
+                if not isinstance(model, Model):
                     raise TypeError("Attribute '" + name +
                                     "' was expected to be a Model, but found: " +
                                     str(model))

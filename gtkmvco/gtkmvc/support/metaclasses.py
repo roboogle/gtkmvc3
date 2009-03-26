@@ -98,7 +98,9 @@ class PropertyMeta (type):
 
         # processes now all names in __observables__ 
         for prop in type(cls).__get_observables_array__(cls):
-            type(cls).__create_prop_accessors__(cls, prop, _dict.get(prop, None))
+            val = _dict.get(prop, None)
+            if val is not None: type(cls).__create_prop_accessors__(cls, prop, val)
+            elif type(getattr(cls, prop)) != property: type(cls).__create_prop_accessors__(cls, prop, val)
             obs.add(prop)
             pass
 

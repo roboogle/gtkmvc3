@@ -23,6 +23,23 @@
 #  Please report bugs to <cavada@fbk.eu>.
 #  -------------------------------------------------------------------------
 
+from support import decorators
+
+# this is internal
+_NOTIFIED_NAME = "_gtkmvc_notified_method"
+
+def observes(*args):
+    """Use this decorator with methods in observers that are intended
+    to be used for notifications. args is an arbitrary number of
+    arguments with the names of the observable properties to be
+    observed"""
+    
+    @decorators.good_decorator
+    def _decorator(_notified):
+        setattr(_notified, _NOTIFIED_NAME, set(args))
+        return _notified
+    return _decorator
+# ----------------------------------------------------------------------
 
 class Observer (object):
     """Use this class as base class of all observers"""

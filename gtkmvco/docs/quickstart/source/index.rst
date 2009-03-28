@@ -186,7 +186,7 @@ Models
 ------
 
 A model is a class that is intended to contain the application's
-logic. It contains data and methods, and a subset of the data can be
+logic. A model contains data and methods, and a subset of the data can be
 declared to be *observable*. ::
 
  from gtkmvc import Model
@@ -199,10 +199,12 @@ declared to be *observable*. ::
 
     pass # end of class
 
-A model must derive from ``gtkmvc.Model`` [#fn1]_ and it is not
-different from any other normal class. *Observable Properties* are
-declared through the special attribute ``__observables__`` which is
-a sequence of string names.
+A model must derive from ``gtkmvc.Model`` [#fn1]_ which derives from
+``Observer`` as models may be interested in observing themself and
+other models (see *Observers* below).
+
+*Observable Properties* are declared through the special attribute
+``__observables__`` which is a sequence of string names.
 
 In the example class attributes ``data1`` and ``data3`` are declared
 to be observable properties. Names in ``__observables__`` can contain
@@ -211,9 +213,123 @@ double underscore ``__`` will be checked for matching. For example
 ``__observables__ = ("data?",)`` would match ``data1``, ``data2`` and
 ``data3``.
 
-Observable properties can be assigned to several types of values,
-included lists, maps, and user defined classes. See the User Manual
-for the details. 
+Observable Properties
+~~~~~~~~~~~~~~~~~~~~~
+
+Observable properties live into models and can be assigned to several
+types of values, included lists, maps, and user defined classes.  For
+all details about the observable properties, see the User Manual for
+the details.
+
+1. Value Properties
+"""""""""""""""""""
+*Value Properties* are intended to hold values which when are
+*re-assigned* observers are notified. ::
+
+ from gtkmvc import Model
+ class MyModel (Model):
+    data1 = 5
+    data2 = [1,2,3]
+    data3 = {}
+    data4 = SomeClass()
+    __observables__ = ("data?", )
+    pass # end of class
+
+ m = MyModel()
+ # here the properties are re-assigned
+ m.data1 += 15  
+ m.data2 = [4,5,6]
+ m.data3 = { "key" : "value" }
+ m.data4 = SomeOtherClass() 
+
+Every time a value property gets reassigned, observers observing it
+will be notified.
+
+2. Mutable containers
+"""""""""""""""""""""
+When the value of an observable property is a mutable object, like a
+sequence or a map, observers may be interested in being notified when
+a method is called on the object itself::
+
+ # here the object contents are changed:
+ m.data2.append(7)
+ m.data3['key2'] = "value for key2"
+ 
+
+3. Mutable class instances
+""""""""""""""""""""""""""
+Properties can be instances of mutable classes. Like for containers
+objects, observers may be interested in being notified when a method
+changing the object is called::
+
+ # here the object contents are changed:
+ m.data4.some_method_changing_the_instance()
+
+Of course it is needed to declare method
+``SomeOtherClass.some_method_changing_the_instance`` to be
+observable. For example::
+
+ from gtkmvc.model import Model, observable
+ class SomeOtherClass (observable.Observable):
+    """This is a class that is thought to be integrated into the
+    observer pattern. It is declared to be 'observable' and the
+    methods which we are interested in monitoring are decorated
+    accordingly"""
+
+    val = 0
+
+    @observable.observed # this way the method is declared as 'observed'
+    def change(self): self.val += 1
+
+    pass #end of class
+
+Observable properties derive from class ``Observable`` and methods
+that change the content of the instance can be declared by using the
+``observed`` decorator like in the example. 
+
+Ok, but what if my class is already existing? It is less natural, but
+gtkmvc supports observable properties of already existing classes'
+instances::
+
+ from gtkmvc import Model, Observer
+
+ class ExistingClass (object):
+    """This is an already existing class whose code is not intended to
+    be changed. Instead, when instantiated into the model, it is
+    declared in a particular manner, so that the model can recognise
+    it and wrap it in order to monitor it"""
+    
+    val = 0 
+
+    def change(self): self.val += 1
+    pass #end of class
+
+
+ class MyModel (Model):
+
+    obj = (ExistingClass, ExistingClass(), ('change',))
+    __observables__ = ["obj"]
+
+    pass # end of class
+
+The triplet must contain the name of the class, the instance, and a
+list naming the methods whose calls can be observed by observers. 
+
+4. Signals
+""""""""""
+Sometimes the models want to communicate to observers that *events*
+occurred. For this ``Signal`` can be used as property value::
+
+ from gtkmvc import Model, observable
+ class MyModel (Model):
+    sgn = observable.Signal()
+    __observables__ = ("sgn",)
+    pass
+
+ m = MyModel()
+ m.sgn.emit()
+ m.sgn.emit("A value can also be passed here")
+
 
 ---------
 Observers
@@ -225,10 +341,6 @@ For example::
 
  from gtkmvc import Observer
  class MyObserver (Observer):
-
-    def __init__(self, model):
-        Observer.__init__(self, model)
-        return
         
     def property_data1_value_change(self, model, old, new):
         print "Property data1 changed from %d to %d"
@@ -239,10 +351,6 @@ For example::
         return
     pass # end of class
 
-The constructor (here reported only for the sake of readability, even
-if not needed at all) takes a model and register itself as an observer
-within the model. 
-
 Methods in the observer that are intended to receive notifications use
 a *naming convention*. Here you can see two different types of
 notifications:
@@ -250,11 +358,24 @@ notifications:
 1. Value change notification.
 2. List modifications.
 
-Here is how the model and the observer can interact::
+Here is how the model and the observer can be connected/unconnected::
+
+ m = MyModel()
+ o = MyObserver()
+ o.observe_model(m)
+ # ...
+ o.relieve_model(m)
+
+``Observer`` constructor optionally takes a model that it registers
+into::
 
  m = MyModel()
  o = MyObserver(m)
+ # ...
+ o.relieve_model(m)
 
+Now let's try to modify the assigned value to a property::
+ 
  m.data1 += 1
  print ">>> Here m.data is", m.data1
 
@@ -270,17 +391,20 @@ The execution ot this example produces the following output::
  data3 after change: ['gtkmvc', 'list', 'of', 'strings', 'Roberto'] __setitem__ None
  data3 after change: ['gtkmvc', 'improves your life', 'of', 'strings', 'Roberto'] __setitem__ None
 
-Of course an observer is not limited to observe one model. Class Model
-offers method ``register_observer`` which *any* class can use to
-register itself as an observer::
+Of course an observer is not limited to observe one model::
 
  m1 = MyModel()
  o = MyObserver(m1) # o observes m1
  m2 = AnotherModel()
- m2.register_observer(o) # o observes also m2 now
+ o.observe_model(m2) # o observes also m2 now
 
 It is usual to see models observing other models, like siblings or
-sub-models in model hierarchies. 
+sub-models in model hierarchies. For this reason class ``Model``
+derives from class ``Observer``::
+
+ m3 = AnotherModel()
+ m3.observe_model(m2) # m3 observes m2
+
 
 -----------
 Controllers

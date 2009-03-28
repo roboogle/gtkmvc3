@@ -36,10 +36,7 @@
 
 
 import _importer
-
-from gtkmvc.model import Model
-from gtkmvc.observer import Observer
-import gtkmvc.observable as observable
+from gtkmvc import Model, Observer, observable
 
 # ----------------------------------------------------------------------
 class AdHocClass (observable.Observable):

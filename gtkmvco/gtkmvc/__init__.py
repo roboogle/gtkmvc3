@@ -31,6 +31,7 @@ from model_mt import ModelMT
 from controller import Controller
 from view import View
 from observer import Observer
+import observer
 import observable
 import adapters
 

@@ -23,11 +23,16 @@
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
+from observer import Observer
 from observable import Signal
 from support.log import logger
 
+# these constants are used internally
+_obs_implicit = 0
+_obs_explicit = 1
 
-class Model (object):
+
+class Model (Observer):
     """
     This class is the application model base class. It handles a set
     of observable properties which you are interested in showing by
@@ -47,6 +52,9 @@ class Model (object):
     define the method called 'property_p_value_change' in each
     listening observer class.
 
+    The Model is also an observer (typically, of itself and of
+    other models. 
+    
     Notice that tipically 'controllers' implement the observer
     pattern. The notification method gets the emitting model, the
     old value for the property and the new one.  Properties
@@ -57,9 +65,12 @@ class Model (object):
     __properties__ = {} # override this
     
     def __init__(self):
-        object.__init__(self)
+        Observer.__init__(self)
+        
         self.__observers = []
-        # keys are properties names, values are methods inside the observer:
+        # keys are properties names, values are pairs (bool, methods)
+        # inside the observer. bool is True for custom observing
+        # methods, False otherwise
         self.__value_notifications = {}
         self.__instance_notif_before = {}
         self.__instance_notif_after = {}
@@ -106,8 +117,11 @@ class Model (object):
 
 
     def register_observer(self, observer):
+        """Register given observer among those observers which are
+        interested in observing the model"""
         if observer in self.__observers: return # not already registered
 
+        assert isinstance(observer, Observer)
         self.__observers.append(observer)
         for key in self.get_properties():
             self.__add_observer_notification(observer, key)
@@ -117,8 +131,11 @@ class Model (object):
             
 
     def unregister_observer(self, observer):
-        if observer not in self.__observers: return
+        """Unregister the given observer that is no longer interested
+        in observing the model"""
+        assert isinstance(observer, Observer)
 
+        if observer not in self.__observers: return
         for key in self.get_properties():
             self.__remove_observer_notification(observer, key)
             pass
@@ -152,12 +169,31 @@ class Model (object):
         """Searches in the observer for any possible listener, and
         stores the notification methods to be called later"""
 
+        # retrieves the set of custom observing methods 
+        cust_methods = observer.get_custom_observing_methods(prop_name)
+
         method_name = "property_%s_value_change" % prop_name
         if hasattr(observer, method_name):
-            method = getattr(observer, method_name)
-            if method not in self.__value_notifications[prop_name]:
-                list.append(self.__value_notifications[prop_name], method)
-                logger.debug("Added value change notification '%s'", method_name)
+            pair = (_obs_implicit, getattr(observer, method_name))
+            if pair not in self.__value_notifications[prop_name]:
+                list.append(self.__value_notifications[prop_name], pair)
+                logger.debug("Added implicit value change notification '%s'",
+                             method_name)
+                pass
+            pass
+
+        # checks for custom observing methods. If it is a signal,
+        # a method or value is decided from number of
+        # arguments. This is not particularly robust.
+        # self, model, prop_name, old, new
+        for meth in (m for m in cust_methods
+                     if m.im_func.func_code.co_argcount == 5):
+                
+            pair = (_obs_explicit, meth)
+            if pair not in self.__value_notifications[prop_name]:
+                list.append(self.__value_notifications[prop_name], pair)
+                logger.debug("Added explicit value change notification '%s'",
+                             meth.im_func.__name__)
                 pass
             pass
 
@@ -166,46 +202,112 @@ class Model (object):
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name
             if hasattr(observer, method_name):
-                method = getattr(observer, method_name)
-                if method not in self.__signal_notif[prop_name]:
-                    list.append(self.__signal_notif[prop_name], method)
-                    logger.debug("Added signal emit notification '%s'", method_name)
+                pair = (_obs_implicit, getattr(observer, method_name))
+                if pair not in self.__signal_notif[prop_name]:
+                    list.append(self.__signal_notif[prop_name], pair)
+                    logger.debug("Added implicit signal emit notification '%s'",
+                                 method_name)
                     pass
                 pass
+
+            # checks for custom observing methods. If it is a signal,
+            # a method or value is decided from number of
+            # arguments. This is not particularly robust.
+            # self, model, signal_name, arg
+            for meth in (m for m in cust_methods
+                         if m.im_func.func_code.co_argcount == 4):
+                
+                pair = (_obs_explicit, meth)
+                if pair not in self.__signal_notif[prop_name]:
+                    list.append(self.__signal_notif[prop_name], pair)
+                    logger.debug("Added explicit signal emit notification '%s'",
+                                 meth.im_func.__name__)
+                    pass
+                pass                    
             pass
         
         # is it an instance change notification type?
         elif isinstance(orig_prop, ObsWrapperBase):
             method_name = "property_%s_before_change" % prop_name
             if hasattr(observer, method_name):
-                method = getattr(observer, method_name)
-                if method not in self.__instance_notif_before[prop_name]:
-                    list.append(self.__instance_notif_before[prop_name], method)
-                    logger.debug("Added before call notification '%s'", method_name)
+                pair = (_obs_implicit, getattr(observer, method_name))
+                if pair not in self.__instance_notif_before[prop_name]:
+                    list.append(self.__instance_notif_before[prop_name], pair)
+                    logger.debug("Added implicit before call notification '%s'",
+                                 method_name)
                     pass
                 pass
-            
+
+            # checks for custom observing methods. If it is a signal,
+            # a method or value is decided from number of
+            # arguments. This is not particularly robust.
+            # self, model, prop_name, instance, meth_name, args, kwargs
+            for meth in (m for m in cust_methods
+                         if m.im_func.func_code.co_argcount == 7):
+                
+                pair = (_obs_explicit, meth)
+                if pair not in self.__instance_notif_before[prop_name]:
+                    list.append(self.__instance_notif_before[prop_name], pair)
+                    logger.debug("Added explicit before call notification '%s'",
+                                 meth.im_func.__name__)
+                    pass
+                pass                    
+
             method_name = "property_%s_after_change" % prop_name
             if hasattr(observer, method_name):
-                method = getattr(observer, method_name)
-                if method not in self.__instance_notif_after[prop_name]:
-                    list.append(self.__instance_notif_after[prop_name], method)
-                    logger.debug("Added after call notification '%s'", method_name)
+                pair = (_obs_implicit, getattr(observer, method_name))
+                if pair not in self.__instance_notif_after[prop_name]:
+                    list.append(self.__instance_notif_after[prop_name], pair)
+                    logger.debug("Added implicit after call notification '%s'",
+                                 method_name)
                     pass
                 pass
+
+            # checks for custom observing methods. If it is a signal,
+            # a method or value is decided from number of
+            # arguments. This is not particularly robust.
+            # self, model, prop_name, instance, meth_name, res, args, kwargs
+            for meth in (m for m in cust_methods
+                         if m.im_func.func_code.co_argcount == 8):
+                
+                pair = (_obs_explicit, meth)
+                if pair not in self.__instance_notif_after[prop_name]:
+                    list.append(self.__instance_notif_after[prop_name], pair)
+                    logger.debug("Added explicit after call notification '%s'",
+                                 meth.im_func.__name__)
+                    pass
+                pass                    
+            
             pass
 
         return
 
     
     def __remove_observer_notification(self, observer, prop_name):
+
+        # retrieves the set of custom observing methods
+        # and removes corresponding the notification methods
+        cust_methods = observer.get_custom_observing_methods(prop_name)
+        for meth in cust_methods:
+            pair = (_obs_explicit, meth)
+            for _map in (self.__value_notifications,
+                         self.__signal_notif,
+                         self.__instance_notif_before,
+                         self.__instance_notif_after,):
+                         
+                if prop_name in _map and \
+                        pair in _map[prop_name]: _map[prop_name].remove(pair)
+                pass
+            pass
+            
         if self.__value_notifications.has_key(prop_name):
             method_name = "property_%s_value_change" % prop_name
             if hasattr(observer, method_name):
-                method = getattr(observer, method_name)
-                if method in self.__value_notifications[prop_name]:
-                    self.__value_notifications[prop_name].remove(method)
-                    logger.debug("Removed value change notification '%s'", method_name)
+                pair = (_obs_implicit, getattr(observer, method_name))
+                if pair in self.__value_notifications[prop_name]:
+                    self.__value_notifications[prop_name].remove(pair)
+                    logger.debug("Removed implicit value change notification '%s'",
+                                 method_name)
                     pass
                 pass
             pass
@@ -216,10 +318,11 @@ class Model (object):
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name
             if hasattr(observer, method_name):
-                method = getattr(observer, method_name)
-                if method in self.__signal_notif[prop_name]:
-                    self.__signal_notif[prop_name].remove(method)
-                    logger.debug("Removed signal emit notification '%s'", method_name)
+                pair = (_obs_implicit, getattr(observer, method_name))
+                if pair in self.__signal_notif[prop_name]:
+                    self.__signal_notif[prop_name].remove(pair)
+                    logger.debug("Removed implicit signal emit notification '%s'",
+                                 method_name)
                     pass
                 pass
             pass
@@ -229,10 +332,11 @@ class Model (object):
             if self.__instance_notif_before.has_key(prop_name):
                 method_name = "property_%s_before_change" % prop_name
                 if hasattr(observer, method_name):
-                    method = getattr(observer, method_name)
-                    if method in self.__instance_notif_before[prop_name]:
-                        self.__instance_notif_before[prop_name].remove(method)
-                        logger.debug("Removed before call notification '%s'", method_name)
+                    pair = (_obs_implicit, getattr(observer, method_name))
+                    if pair in self.__instance_notif_before[prop_name]:
+                        self.__instance_notif_before[prop_name].remove(pair)
+                        logger.debug("Removed implicit before call "\
+                                         "notification '%s'", method_name)
                         pass
                     pass
                 pass
@@ -240,10 +344,11 @@ class Model (object):
             if self.__instance_notif_after.has_key(prop_name):
                 method_name = "property_%s_after_change" % prop_name
                 if hasattr(observer, method_name):
-                    method = getattr(observer, method_name)
-                    if method in self.__instance_notif_after[prop_name]:
-                        self.__instance_notif_after[prop_name].remove(method)
-                        logger.debug("Removed after call notification '%s'", method_name)
+                    pair = (_obs_implicit, getattr(observer, method_name))
+                    if pair in self.__instance_notif_after[prop_name]:
+                        self.__instance_notif_after[prop_name].remove(pair)
+                        logger.debug("Removed after call notification '%s'",
+                                     method_name)
                         pass
                     pass
                 pass
@@ -259,17 +364,23 @@ class Model (object):
         calls the given method with the given arguments"""
         return method(*args, **kwargs)
     
-
-    # ---------- Notifiers:
+    # -------------------------------------------------------------
+    #            Notifiers:
+    # -------------------------------------------------------------
     
     def notify_property_value_change(self, prop_name, old, new):
         assert(self.__value_notifications.has_key(prop_name))
-        for method in self.__value_notifications[prop_name] :
+        for flag, method in self.__value_notifications[prop_name] :
             obs = method.im_self
             # notification occurs checking spuriousness of the observer
             if old != new or obs.accepts_spurious_change():
-                self.__notify_observer__(obs, method,
-                                         self, old, new) # notifies the change
+                if flag == _obs_implicit: 
+                    self.__notify_observer__(obs, method,
+                                             self, old, new) # notifies the change
+                else: # explicit (custom) notification
+                    self.__notify_observer__(obs, method,
+                                             self, prop_name, old, new) # notifies the change
+                    pass
                 pass
             pass
         return                
@@ -277,26 +388,47 @@ class Model (object):
     def notify_method_before_change(self, prop_name, instance, meth_name,
                                     args, kwargs):
         assert(self.__instance_notif_before.has_key(prop_name))
-        for method in self.__instance_notif_before[prop_name] :
-            self.__notify_observer__(method.im_self, method, self, instance,
-                                     meth_name, args, kwargs) # notifies the change
+        for flag, method in self.__instance_notif_before[prop_name]:
+            # notifies the change
+            if flag == _obs_implicit: 
+                self.__notify_observer__(method.im_self, method,
+                                         self, instance,
+                                         meth_name, args, kwargs)
+            else: # explicit (custom) notification
+                self.__notify_observer__(method.im_self, method,
+                                         self, prop_name, instance,
+                                         meth_name, args, kwargs)
             pass
         return                
 
     def notify_method_after_change(self, prop_name, instance, meth_name,
                                    res, args, kwargs):
         assert(self.__instance_notif_after.has_key(prop_name))
-        for method in self.__instance_notif_after[prop_name] :
-            self.__notify_observer__(method.im_self, method, self, instance,
-                                     meth_name, res, args, kwargs) # notifies the change
+        for flag, method in self.__instance_notif_after[prop_name]:
+            # notifies the change
+            if flag == _obs_implicit: 
+                self.__notify_observer__(method.im_self, method,
+                                         self, instance,
+                                         meth_name, res, args, kwargs) 
+            else: # explicit (custom) notification
+                self.__notify_observer__(method.im_self, method,
+                                         self, prop_name, instance,
+                                         meth_name, res, args, kwargs)
+            
             pass
         return
 
-    def notify_signal_emit(self, prop_name, args, kwargs):
+    def notify_signal_emit(self, prop_name, arg):
         assert(self.__signal_notif.has_key(prop_name))
-        for method in self.__signal_notif[prop_name] :
-            self.__notify_observer__(method.im_self, method, self,
-                                     args, kwargs) # notifies the signal emit
+        
+        for flag, method in self.__signal_notif[prop_name]:
+            # notifies the signal emit
+            if flag == _obs_implicit:
+                self.__notify_observer__(method.im_self, method,
+                                         self, arg)
+            else: # explicit (custom) notification
+                self.__notify_observer__(method.im_self, method,
+                                         self, prop_name, arg)
             pass
         return
         

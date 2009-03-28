@@ -106,11 +106,13 @@ class PropertyMeta (type):
 
         # Generates code for all properties (but not for derived props):
         props = getattr(cls, PROPS_MAP_NAME, {})            
-        if len(props) > 0: warnings.warn("In class %s.%s the use of attribute '%s' in models is deprecated. Use the tuple '%s' instead (see the manual)" %
+        if len(props) > 0: warnings.warn("In class %s.%s the use of attribute '%s' in models is deprecated."\
+                                             " Use the tuple '%s' instead (see the manual)" %
                                          (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
                                          DeprecationWarning)
 
-        # processes all names in __properties__ (deprecated, overloaded by __observables__)
+        # processes all names in __properties__ (deprecated,
+        # overloaded by __observables__)
         for prop in (x for x in props.iterkeys() if x not in obs):
             type(cls).__create_prop_accessors__(cls, prop, props[prop])
             obs.add(prop)
@@ -120,7 +122,8 @@ class PropertyMeta (type):
         # class (also from bases)
         for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
         setattr(cls, ALL_OBS_SET, obs)
-        logger.debug("class %s.%s has observables: %s", cls.__module__, cls.__name__, obs)
+        logger.debug("class %s.%s has observables: %s", cls.__module__,
+                     cls.__name__, obs)
         return
 
 
@@ -133,25 +136,28 @@ class PropertyMeta (type):
 
         not_found = []
         names = getattr(cls, OBS_TUPLE_NAME, tuple())
-        if not isinstance(names, types.ListType) and not isinstance(names, types.TupleType):
-            raise TypeError("In class %s.%s attribute '%s' must be a list or tuple" % (cls.__module__, cls.__name__, OBS_TUPLE_NAME))
+        if not isinstance(names, types.ListType) and \
+                not isinstance(names, types.TupleType):
+            raise TypeError("In class %s.%s attribute '%s' must be a list or tuple" %
+                            (cls.__module__, cls.__name__, OBS_TUPLE_NAME))
 
         for name in names:
-            if type(name) != types.StringType: raise TypeError("In class %s.%s attribute '%s' must contain only strings (found %s)" % 
-                                                               (cls.__module__, cls.__name__, OBS_TUPLE_NAME, type(name)))
-            if hasattr(cls, name):
-                if getattr(cls, name) != types.MethodType: res_set.add(name)
-                pass
+            if type(name) != types.StringType:
+                raise TypeError("In class %s.%s attribute '%s' must contain"\
+                                    " only strings (found %s)" % 
+                                (cls.__module__, cls.__name__, OBS_TUPLE_NAME,
+                                 type(name)))
+            if hasattr(cls, name) and \
+                    getattr(cls, name) != types.MethodType: res_set.add(name)
             else: not_found.append(name)
             pass
 
         # now searches all possible matches for those that have not been found:
         for name in (x for x,v in cls.__dict__.iteritems()
                      if not x.startswith("__") 
-                     and type(v) != types.MethodType
-                     and x not in res_set):
+                     and type(v) != types.MethodType and x not in res_set):
             for pat, i in zip(not_found, range(len(not_found))):
-                if fnmatch.fnmatch(name, pat): res_set.add(name)
+                if fnmatch.fnmatch(name, pat): res_set.add(name) 
                 pass
             pass
         
@@ -160,15 +166,20 @@ class PropertyMeta (type):
         # entries are valid only if they do not contain wilcards
         wilcards = frozenset("[]!*?")
         for name, nameset in zip(not_found, (frozenset(x) for x in not_found)):
-            if (len(nameset & wilcards) == 0 and # no wilcards in the name
-                ((hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and # has property getter and setter 
-                  hasattr(cls, SET_PROP_NAME % {'prop_name' : name})) or
-                 (hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
-                  hasattr(cls, SET_GENERIC_NAME)))): res_set.add(name)
-            else: # the observable was not found!
-                logger.warning("In class %s.%s ignoring observable '%s' which has no corresponding attribute or custom getter/setter pair" % (cls.__module__, cls.__name__, name))
-                pass
-                               
+            if len(nameset & wilcards) == 0: # no wilcards in the name
+                # has property getter and setter :
+                if ((hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and 
+                     hasattr(cls, SET_PROP_NAME % {'prop_name' : name}))
+                    or # has generic getter and setter 
+                    (hasattr(cls, GET_GENERIC_NAME) and 
+                     hasattr(cls, SET_GENERIC_NAME))): res_set.add(name)
+                else: # the observable was not found!
+                    logger.warning("In class %s.%s ignoring observable '%s' "\
+                                       "which has no corresponding attribute"\
+                                       " or custom getter/setter pair" %
+                                   (cls.__module__, cls.__name__, name))
+                    pass
+                pass                               
             pass
 
         return res_set

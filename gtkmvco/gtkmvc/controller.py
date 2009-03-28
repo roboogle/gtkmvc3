@@ -46,6 +46,7 @@ class Controller (Observer):
     def __init__(self, model, view=None, spurious=False, auto_adapt=False):
         Observer.__init__(self, model, spurious)
 
+        self.model = model
         self.view = None
         self.__adapters = []
         # set of properties explicitly adapted by the user:

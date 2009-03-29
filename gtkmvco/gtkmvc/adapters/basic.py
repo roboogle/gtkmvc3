@@ -200,7 +200,8 @@ class Adapter (Observer):
         self._prop_name = prop
         
         # registration of model:
-        self.register_model(model)
+        self._model = model
+        self.observe_model(model)
         return
     
 
@@ -226,12 +227,12 @@ class Adapter (Observer):
     def _get_property(self):
         """Private method that returns the value currently stored
         into the property"""
-        return getattr(self.get_model(), self._prop_name)
+        return getattr(self._model, self._prop_name)
         #return self._prop # bug fix reported by A. Dentella
 
     def _set_property(self, val):
         """Private method that sets the value currently of the property."""
-        return setattr(self.get_model(), self._prop_name, val)
+        return setattr(self._model, self._prop_name, val)
 
     def _read_property(self, *args):
         """Returns the (possibly transformed) value that is stored

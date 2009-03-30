@@ -481,16 +481,15 @@ class TextBufferModel (Model, gtk.TextBuffer):
 
 # ----------------------------------------------------------------------
 try:
+  __connection__ = "sqlite:/:memory:"
   from sqlobject.inheritance import InheritableSQLObject
-  class SQLObjectModel (Model, InheritableSQLObject):
+  class SQLObjectModel (InheritableSQLObject, Model):
       __metaclass__ = support.metaclasses.ObservablePropertyMetaSQL
 
       def __init__(self, *args, **kargs):
-          Model.__init__(self)
           InheritableSQLObject.__init__(self, *args, **kargs)
+          Model.__init__(self)
           return
       pass # end of class
-
   SQLObjectModel.createTable()
-  
 except: pass

@@ -472,7 +472,8 @@ try:
   from sqlobject.inheritance import InheritableSQLObject
   from sqlobject.events import listen, RowUpdateSignal
   
-  class ObservablePropertyMetaSQL (ObservablePropertyMeta, InheritableSQLObject.__metaclass__):
+  class ObservablePropertyMetaSQL (InheritableSQLObject.__metaclass__,
+                                   ObservablePropertyMeta):
     """Classes instantiated by this meta-class must provide a method
     named notify_property_change(self, prop_name, old, new)"""
 

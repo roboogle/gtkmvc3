@@ -1,5 +1,6 @@
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc import Model, observer
+from gtkmvc.model import SQLObjectModel
 from gtkmvc.adapters.basic import Adapter
 from gtkmvc import observable
 from gtkmvc.support.metaclasses import ObservablePropertyMetaSQL
@@ -11,65 +12,42 @@ import new
 
 from gtkmvc.support import factories
 
-
-#cl = (Model.__metaclass__, SQLObject.__metaclass__)
-#cl = (Model.__metaclass__, InheritableSQLObject.__metaclass__)
-#meta = new.classobj('meta', cl, {'__module__': '__main__', '__doc__': None})
-meta = ObservablePropertyMetaSQL
-
-sqlhub.processConnection = connectionForURI('sqlite:/:memory:')
-
-
-class MetaPerson(Model, InheritableSQLObject):
-  __metaclass__ = meta
-
-  def __init__(self, *args, **kargs):
-      Model.__init__(self)
-      InheritableSQLObject.__init__(self, *args, **kargs)
-      return
-  pass
-MetaPerson.createTable()
+__connection__ = "sqlite:/:memory:"
 
 
 # ----------------------------------------------------------------------
-class Person(MetaPerson):
+class Person(SQLObjectModel):
   __properties__ = { 'aaa' : 1 }
     
   fname = StringCol()
   mi = StringCol(length=1, default=None)
   lname = StringCol()
 
-  __observable__ = ['fname', 'lname', 'zzz']    
+  __observables__ = ['fname', 'lname', 'zzz']    
+
   pass
 
 
-class PersonCtrl(Controller):
-    
-  def property_fname_value_change(self, model, old, new):
-      print "fname CHANGED!", old, new
-      return
+class PersonObserver(observer.Observer):
 
-  def property_zzz_value_change(self, model, old, new):
-      print "zzz CHANGED!", old, new
-      return
-
-  def property_aaa_value_change(self, model, old, new):
-      print "aaa CHANGED!", old, new
+  @observer.observes("fname", "lname", "zzz", 'aaa')
+  def property_value_change(self, model, prop_name, old, new):
+      print "CHANGED", prop_name, old, new
       return
   pass
-
 
 Person.createTable()
 p = Person(fname="John", lname="Doe")
 print p
 
-c = PersonCtrl(p)
+o = PersonObserver(p)
 
 p.fname = "Ciccio"
 print p
 
 p.aaa += 1
 p.zzz = 10
+# ----------------------------------------------------------------------
 
 #class Student (Person):
 #    year = StringCol()

@@ -6,11 +6,14 @@ TOPDIR = ../../..
 
 pdf: ${PDF_DEST}
 
+html: html_build
+
 clean:
-	rm -f ${TOP_TEX} ${BUILT} *~ 
+	rm -f ${BUILT} *~ 
 
 distclean: clean
-	rm -f ${PDF_DEST}
+	rm -f ${TOP_TEX} ${PDF_DEST}
+	rm -f html
 
 # ---------------------------------------------------------
 SED = sed
@@ -26,8 +29,20 @@ ${PDF_DEST} : ${MAIN}.pdf
 	mv $< $@
 
 ${MAIN}.pdf : ${TOP_TEX} ${TEX}
-	${LATEX} $< && ${LATEX} $< && ${LATEX} $<
+	${LATEX} $<
+	makeindex $<
+	${LATEX} $<	
+	${LATEX} $<	
 
 ${TOP_TEX}: ${META_TOP_TEX}
 	${SED} 's/$$version/${VERSION}/g' $< > $@ 
 
+html_struct: ${TOP_TEX} 
+	mkdir -p ./html
+	mkdir -p ./html/figs/png
+	cp ${TEX} ./html/
+	cp figs/png/*.png ./html/figs/png/
+	cp pygtkmvc.cfg ./html/
+
+html_build: html_struct
+	cd html && htlatex pygtkmvc "pygtkmvc"

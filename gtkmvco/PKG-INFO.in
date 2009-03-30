@@ -1,7 +1,7 @@
 Metadata-Version: 1.0
 Name: python-gtkmvc
-Version: 1.2.99
-Summary: Model-View-Controller and Observer patterns for PyGTK2
+Version: $version
+Summary: $description
 Home-page: http://pygtkmvc.sourceforge.net/
 Author: Roberto Cavada
 Author-email: cavada@fbk.eu

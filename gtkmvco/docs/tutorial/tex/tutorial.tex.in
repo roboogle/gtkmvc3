@@ -46,7 +46,7 @@
 \begin{document}
 
 \title{A short tutorial for \pygtkmvc\\
-Version 1.3}
+Version $version}
 
 \author{ Roberto Cavada \thanks{FBK-irst, Trento, Italy,
  cavada@fbk.eu} }

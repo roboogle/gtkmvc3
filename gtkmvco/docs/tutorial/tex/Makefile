@@ -19,7 +19,7 @@ distclean: clean
 SED = sed
 LATEX = pdflatex
 VERSION = $(shell python ${TOPDIR}/setup.py --version)
-BUILT = $(addprefix ${MAIN}, .log .toc .aux)
+BUILT = $(addprefix ${MAIN}, .log .toc .aux .ind .ilg)
 META_TOP_TEX = ${MAIN}.tex.in
 TOP_TEX = $(basename ${META_TOP_TEX})
 TEX = $(wildcard *.tex)

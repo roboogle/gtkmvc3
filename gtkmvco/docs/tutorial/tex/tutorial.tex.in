@@ -74,7 +74,7 @@ button, which increments the counter by one every time it is pressed.
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=3cm]{eps/appl.png}
+\includegraphics[width=3cm]{png/appl.png}
 \caption{How the mini-application looks like}
 \end{center}
 \end{figure}
@@ -164,7 +164,7 @@ associated with a function called \codename{on\_button\_clicked}.
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=10cm]{eps/glade.png}
+\includegraphics[width=10cm]{png/glade.png}
 \caption{\label{fig:glade}\glade at work}
 \end{center}
 \end{figure}
@@ -557,7 +557,7 @@ label shows the property's value. Method
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=4cm]{eps/adap.png}
+\includegraphics[width=4cm]{png/adap.png}
 \caption{\label{fig:adap}Adapter at work}
 \end{center}
 \end{figure}
@@ -582,7 +582,7 @@ program and as a GUI application.
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=8cm]{eps/progen.png}
+\includegraphics[width=8cm]{png/progen.png}
 \caption{\label{fig:progen}\kw{gtkmvc-progen} GUI at work}
 \end{center}
 \end{figure}
@@ -625,7 +625,7 @@ $> python hello.py
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=6cm]{eps/hello.png}
+\includegraphics[width=6cm]{png/hello.png}
 \caption{\label{fig:hello}The skeletal hello application}
 \end{center}
 \end{figure}

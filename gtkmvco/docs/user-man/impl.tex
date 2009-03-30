@@ -473,9 +473,9 @@ changes. To create an observer, derive your class from base class
 
 { \codesize 
 \begin{verbatim} 
-from gtkmvc import Observer
+from gtkmvc import observer
 
-class AnObserver (Observer):
+class AnObserver (observer.Observer):
   def __init__(self, model):
     Observer.__init__(self, model)
 
@@ -499,6 +499,28 @@ observer must define a method called
 \codename{property\_name\_value\_change} that when is automatically
 called will get the instance of the model containing the changed
 property, and the property's old and new values.
+
+Instead of using an implicit naming convention for the notification
+methods, is also possible to declare that a method within the observer
+is interested in receiving notifications for a bunch of properties:
+
+{ \codesize 
+\begin{verbatim} 
+from gtkmvc import observer
+
+class AnObserver (observer.Observer):
+
+  @observer.observes('name', ...)
+  def an_observing_method(self, model, prop_name, old, new):
+    print ``Property '%s' changed from '%s' to '%s''' % (prop_name, old, new)
+    return
+
+  pass # end of class
+\end{verbatim}
+}
+
+Of course the explicit observing method will receive the name of the
+property it is changed as now it can observe multiple properties. 
 
 As already mentioned, when used in combination with the \mvc,
 Controllers are also Observers of their models.

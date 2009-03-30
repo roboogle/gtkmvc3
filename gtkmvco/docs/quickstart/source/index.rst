@@ -3,7 +3,7 @@
    contain the root `toctree` directive.
 
 ====================
-gtkmvc in 60 minutes
+gtkmvc in 45 minutes
 ====================
 
 This document presents gtkmvc for those who are in hurry, or for
@@ -136,7 +136,7 @@ In the middle, the control part live. The controllers within it can
 see through the barriers. Controllers observe some parts of the logic
 into the model side, and can control some parts of the views.
 
-1. One controller control one or more Views
+1. One controller controls one view (and possibly the sub-views)
 2. One view can be controller by one or more controllers.
 3. One controller control and observes one model.
 4. One controller can also observe many other models.
@@ -871,7 +871,7 @@ value into the given widget. Here it used to markup the text.
 .. note:: There are similar parameters for getting, setting and error
    	  handling that can be called both when getting/setting the
    	  value from/to the model and the widget. Adapters are complex
-   	  structure that can be further developed, see the User
+   	  entities that can be further developed, see the User
    	  Manual for a complete description.
     
 Finally, we need only to create a **MVC** triplet and run ``gtk``::
@@ -907,7 +907,9 @@ In the example we connect all the widgets very easily::
 			 
     pass # end of class
 
-Here you see the result.
+Very compact isn't it? Here you see the result of this magic, where
+the widgets' content reflect the initial values of the observable
+properties they are attached to.
 
 .. image:: images/example2.png
 
@@ -924,7 +926,7 @@ Where do you go now?
 Good reading so far? If you are interested, you can download and
 install **gtkmvc**, see the examples provided along with it, read the
 User Manual, read the Tutorial, subscribe to the project mailing list,
-send feedback to the user, etc.
+send feedback to the user, and - most of all - *start using it*!
 
 
 
@@ -936,11 +938,4 @@ send feedback to the user, etc.
    for information about accepted wildcards
 
 
-==================
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

@@ -35,7 +35,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General substitutions.
-project = 'pygtkmvc'
+project = 'gtkmvc: A Quickstart Guide'
 copyright = '2009, Roberto Cavada'
 
 # The default replacements for |version| and |release|, also used in various
@@ -142,14 +142,14 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pygtkmvcdoc'
+htmlhelp_basename = 'gtkmvc-qsg'
 
 
 # Options for LaTeX output
 # ------------------------
 
 # The paper size ('letter' or 'a4').
-#latex_paper_size = 'letter'
+latex_paper_size = 'letter'
 
 # The font size ('10pt', '11pt' or '12pt').
 #latex_font_size = '10pt'
@@ -157,7 +157,7 @@ htmlhelp_basename = 'pygtkmvcdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'pygtkmvc.tex', 'pygtkmvc Documentation',
+  ('index', 'quickstart.tex', 'gtkmvc: A Quickstart Guide',
    'Roberto Cavada', 'manual'),
 ]
 
@@ -167,7 +167,7 @@ latex_documents = [
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-#latex_use_parts = False
+latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
 #latex_preamble = ''

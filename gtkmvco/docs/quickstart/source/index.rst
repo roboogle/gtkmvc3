@@ -232,6 +232,11 @@ As you can see:
 4. Both attributes ``glade`` and ``top`` can be overridden or
    substituted by View's constructor equivalent parameters. 
 
+For simple cases (views offering no services, and only based on a
+glade file) it is not mandatory to derive our own class::
+
+ from gtkmvc import View
+ v = View(glade="myview.glade", top="mytop_widget)
 
 ------
 Models

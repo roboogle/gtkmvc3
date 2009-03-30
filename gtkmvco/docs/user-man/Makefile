@@ -13,14 +13,14 @@ clean:
 
 distclean: clean
 	rm -f ${TOP_TEX} ${PDF_DEST}
-
+	rm -rf html
 
 
 # ---------------------------------------------------------
 SED = sed
 LATEX = pdflatex
 VERSION = $(shell python ${TOPDIR}/setup.py --version)
-BUILT = $(addprefix ${MAIN}, .log .toc .aux)
+BUILT = $(addprefix ${MAIN}, .log .toc .aux .ind .ilg)
 META_TOP_TEX = ${MAIN}.tex.in
 TOP_TEX = $(basename ${META_TOP_TEX})
 TEX = $(wildcard *.tex)
@@ -46,7 +46,7 @@ html_struct: ${TOP_TEX}
 	mkdir -p ./html/figs/png
 	cp ${TEX} ./html/
 	cp figs/png/*.png ./html/figs/png/
-	cp pygtkmvc.cfg ./html/
+	cp ${MAIN}.cfg ./html/
 
 html_build: html_struct
-	cd html && htlatex pygtkmvc "pygtkmvc"
+	cd html && htlatex ${MAIN} "${MAIN}"

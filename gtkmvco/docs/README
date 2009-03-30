@@ -1,1 +1,5 @@
-To generate both the user manual and the tutorial, use pdflatex. 
+To generate pdf pdflatex is used.
+To generate html, htlatex is used.
+
+To generate all:
+$> make

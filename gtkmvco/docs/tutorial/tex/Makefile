@@ -13,7 +13,7 @@ clean:
 
 distclean: clean
 	rm -f ${TOP_TEX} ${PDF_DEST}
-	rm -f html
+	rm -rf html
 
 # ---------------------------------------------------------
 SED = sed
@@ -39,10 +39,10 @@ ${TOP_TEX}: ${META_TOP_TEX}
 
 html_struct: ${TOP_TEX} 
 	mkdir -p ./html
-	mkdir -p ./html/figs/png
+	mkdir -p ./html/png
 	cp ${TEX} ./html/
-	cp figs/png/*.png ./html/figs/png/
-	cp pygtkmvc.cfg ./html/
+	cp png/*.png ./html/png/
+	cp ${MAIN}.cfg ./html/
 
 html_build: html_struct
-	cd html && htlatex pygtkmvc "pygtkmvc"
+	cd html && htlatex ${MAIN} "${MAIN}"

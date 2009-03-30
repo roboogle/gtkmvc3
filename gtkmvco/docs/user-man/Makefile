@@ -1,18 +1,20 @@
-
+# ---------------------------------------------------------
 PDF_DEST = gtkmvc-userman.pdf
+MAIN = pygtkmvc
+TOPDIR = ../..
+# ---------------------------------------------------------
 
 pdf: ${PDF_DEST}
-
 
 clean:
 	rm -f ${TOP_TEX} ${BUILT} *~ 
 
+distclean: clean
+	rm -f ${PDF_DEST}
 
-MAIN = pygtkmvc
+# ---------------------------------------------------------
 SED = sed
 LATEX = pdflatex
-
-TOPDIR = ../..
 VERSION = $(shell python ${TOPDIR}/setup.py --version)
 BUILT = $(addprefix ${MAIN}, .log .toc .aux)
 META_TOP_TEX = ${MAIN}.tex.in

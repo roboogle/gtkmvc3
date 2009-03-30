@@ -7,10 +7,10 @@ TOPDIR = ../..
 pdf: ${PDF_DEST}
 
 clean:
-	rm -f ${TOP_TEX} ${BUILT} *~ 
+	rm -f ${BUILT} *~ 
 
 distclean: clean
-	rm -f ${PDF_DEST}
+	rm -f ${TOP_TEX} ${PDF_DEST}
 
 # ---------------------------------------------------------
 SED = sed
@@ -26,7 +26,12 @@ ${PDF_DEST} : ${MAIN}.pdf
 	mv $< $@
 
 ${MAIN}.pdf : ${TOP_TEX} ${TEX}
-	${LATEX} $< && ${LATEX} $< && ${LATEX} $<
+	${LATEX} $<
+	makeindex $<
+	${LATEX} $<	
+	${LATEX} $<	
+
+
 
 ${TOP_TEX}: ${META_TOP_TEX}
 	${SED} 's/$$version/${VERSION}/g' $< > $@ 

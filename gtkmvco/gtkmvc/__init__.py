@@ -24,7 +24,7 @@
 
 __all__ = ["model", "view", "controller", "observable", "observer", "support"]
 
-__version = (1,2,99)
+__version = (1,99,0)
 
 from model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
 from model_mt import ModelMT

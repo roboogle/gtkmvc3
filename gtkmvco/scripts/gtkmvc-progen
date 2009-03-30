@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 # ----------------------------------------------------------------------
 #  Author: Roberto Cavada <cavada@fbk.eu>
@@ -29,12 +29,13 @@
 # checks for gtkmvc
 try: import gtkmvc
 except:
+    # use the local installation
     import os.path; import sys
-    top_dir = os.path.dirname(os.path.abspath("."))
+    top_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     sys.path = [top_dir] + sys.path
     import gtkmvc
     pass
-gtkmvc.require("1.2.99")
+gtkmvc.require("1.99.0")
 
 from gtkmvc.progen.model import ProgenModel, set_gui_log, set_shell_log
 from gtkmvc.progen.templates import VERSION
@@ -44,6 +45,8 @@ import sys
 req_options = ("name",)
 def process_options(args):
     m={}
+    if len(args) == 0:
+        raise ValueError("No options given: run with option 'help'")
     for a in args:
         kv = a.split("=")
         if len(kv) > 2: raise ValueError("Invalid option: %s" % a)
@@ -80,8 +83,9 @@ def print_help():
     print "For example: gui"
     print "Attributes and their default values are:"
 
-    for a in ProgenModel.__properties__:
-        v = ProgenModel.__properties__[a]
+    m = ProgenModel()
+    
+    for a, v in ((a, getattr(m,a)) for a in m.get_properties()):
         if v is None: v=""
         elif v is True: v="yes"
         elif v is False: v="no"        
@@ -124,9 +128,11 @@ def main(attributes):
 
 if __name__ == "__main__":
     print_banner()
-    attr = process_options(sys.argv[1:])
-    fix_options(attr)
-    check_options(attr)
+    try:
+        attr = process_options(sys.argv[1:])
+        fix_options(attr)
+        check_options(attr)
+    except Exception,e : print e; sys.exit(1)
     if attr.has_key("help"): print_help(); sys.exit(1)
 
     main(attr)

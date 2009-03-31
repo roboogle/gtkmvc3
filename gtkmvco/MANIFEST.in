@@ -9,17 +9,25 @@ include examples/converter/about examples/converter/currencies
 include examples/mini-yoman/yoman examples/mini-yoman/LICENSE
 include examples/adapters
 
+recursive-include docs Makefile
+
 # docs
 recursive-include docs/user-man/figs/png *.png
-recursive-include docs/user-man  *.tex
+recursive-include docs/user-man  *.tex *.tex.in *.cfg
 
 # tutorial
-recursive-include docs/tutorial *.tex *.png
-recursive-include docs README *.py *.glade
+recursive-include docs/tutorial/tex *.tex *.png *.tex.in *.cfg
+recursive-include docs/tutorial/src *.py *.glade
+#recursive-include README *.py *.glade
+
+# quickstart
+recursive-include docs/quickstart/source *.rst *.py *.png dummy
 
 # glade
 include gtkmvc/progen/progen.glade
 
 prune dist
-
+prune docs/tutorial/tex/html
+prune docs/user-man/html
+prune docs/quickstart/build
 

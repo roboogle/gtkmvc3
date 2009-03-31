@@ -3,7 +3,7 @@ DESTDIR = build
 
 PDF_SRC = user-man/gtkmvc-userman.pdf \
           tutorial/tex/gtkmvc-tutorial.pdf \
-          quickstart/build/latex/quickstart.pdf
+          quickstart/build/latex/gtkmvc-quickstart.pdf
 # ----------------------------------------------------------------------
 
 HTML_DESTDIR = ${DESTDIR}/html
@@ -33,7 +33,8 @@ ${PDF_SRC} : pdfbuild
 pdfbuild:
 	cd user-man && ${MAKE} pdf
 	cd tutorial/tex && ${MAKE} pdf
-	cd quickstart && ${MAKE} latex && cd build/latex && ${MAKE} all-pdf
+	cd quickstart && ${MAKE} latex && cd build/latex && \
+	   ${MAKE} all-pdf && mv quickstart.pdf gtkmvc-quickstart.pdf
 
 ${PDF_DESTS} : ${PDF_SRC} ${PDF_DESTDIR}
 	cp ${PDF_SRC} ${PDF_DESTDIR}/

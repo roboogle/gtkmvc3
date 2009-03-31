@@ -1,0 +1,130 @@
+<html > 
+<head><title>Using Adapters</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="tutorial.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="tutorial.css"> 
+<script type="text/javascript" src="tutorial-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 490--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse8.html" >next</a>] [<a 
+href="tutorialse6.html" >prev</a>] [<a 
+href="tutorialse6.html#tailtutorialse6.html" >prev-tail</a>] [<a 
+href="#tailtutorialse7.html">tail</a>] [<a 
+href="tutorial.html#tutorialse7.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">7   </span> <a 
+ id="x9-160007"></a>Using Adapters</h3>
+<!--l. 491--><p class="noindent" >Since version 1.2 adapters largely contribute to make the code simpler and so to
+reduce development costs and efforts.
+<!--l. 495--><p class="indent" >   Adapters <span 
+class="cmti-10">adapt </span>some part of the model to some part of the view. In a
+simple version, one adapter makes one property (possibly observable) into
+the model communicate autonomously with a single widget into the view,
+and viceversa. Readers can find all information about adapters in the user
+manual.
+<!--l. 502--><p class="indent" >   We want to have an adapter to handle coordination between property <span id="textcolor50"><span 
+class="cmtt-10">counter</span></span>
+and the label. Model and View remain unchanged. It is the Controller that can be
+simplified as follows:
+                                                                  
+
+                                                                  
+   <div class="verbatim">
+#&#x00A0;This&#x00A0;is&#x00A0;file&#x00A0;ctrl_glade_adap.py
+&#x00A0;<br />from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Controller
+&#x00A0;<br />import&#x00A0;gtk
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyControllerAdap&#x00A0;(Controller):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_view(self,&#x00A0;view):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;connects&#x00A0;the&#x00A0;signals:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.view[&#8217;main_window&#8217;].connect(&#8217;destroy&#8217;,&#x00A0;gtk.main_quit)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_adapters(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.adapt("counter",&#x00A0;"label")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;signals:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;on_button_clicked(self,&#x00A0;button):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.model.counter&#x00A0;+=&#x00A0;1&#x00A0;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;model
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 527--><p class="nopar" >
+<!--l. 530--><p class="indent" >   Controller method <span id="textcolor51"><span 
+class="cmtt-10">register</span><span 
+class="cmtt-10">_adapters</span></span> is called by the framework when adapters
+can be instantiated. The controller is no longer interested in observing property
+<span id="textcolor52"><span 
+class="cmtt-10">Counter</span></span> and to initialize the value shown in the label, as these activities are now
+transparently carried out by the adapter.
+<!--l. 536--><p class="indent" >   Notice that if editable widget like a text entry were used instead of a label, the
+adapter would also have taken care about changes of the text entry reporting them to
+the property.
+<!--l. 541--><p class="indent" >   Now suppose you want to apply some customization to the way the label shows
+the property&#8217;s value. Method <span id="textcolor53"><span 
+class="cmtt-10">register</span><span 
+class="cmtt-10">_adapters</span></span> might be:
+                                                                  
+
+                                                                  
+   <div class="verbatim">
+&#x00A0;&#x00A0;&#x00A0;&#x00A0;from&#x00A0;gtkmvc&#x00A0;import&#x00A0;adapters
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_adapters(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;a&#x00A0;=&#x00A0;adapters.Adapter(self.model,&#x00A0;"counter")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;a.connect_widget(self.view[&#8217;label&#8217;],
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;setter=lambda&#x00A0;w,v:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;w.set_markup("&#x003C;big&#x003E;Counter=&#x003C;b&#x003E;%02d&#x003C;/b&#x003E;&#x003C;/big&#x003E;"&#x00A0;%&#x00A0;v))
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.adapt(a)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+</div>
+<!--l. 555--><p class="nopar" >
+<!--l. 558--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+                                                                  
+
+                                                                  
+<a 
+ id="x9-160013"></a>
+                                                                  
+
+                                                                  
+<div class="center" 
+>
+<!--l. 559--><p class="noindent" >
+
+<!--l. 560--><p class="noindent" ><img 
+src="png/adap.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;3: </td><td  
+class="content">Adapter at work</td></tr></table><!--tex4ht:label?: x9-160013 -->
+</div>
+                                                                  
+
+                                                                  
+<!--l. 563--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 565--><p class="indent" >   Here an adapter is created explicitly, and parameter <span id="textcolor54"><span 
+class="cmtt-10">setter</span></span> is used to custom the
+functional block that is in charge of writing to the widget.
+<!--l. 569--><p class="indent" >   There are several types of adapters that can be used, depending on the property
+kind and the widget type they adapt. Adapter offer a very straight and simple
+default support, but they can be largely customized when needs get more advanced.
+See the user manual for further information.
+                                                                  
+
+                                                                  
+   <!--l. 576--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse8.html" >next</a>] [<a 
+href="tutorialse6.html" >prev</a>] [<a 
+href="tutorialse6.html#tailtutorialse6.html" >prev-tail</a>] [<a 
+href="tutorialse7.html" >front</a>] [<a 
+href="tutorial.html#tutorialse7.html" >up</a>] </p></div>
+<!--l. 576--><p class="indent" >   <a 
+ id="tailtutorialse7.html"></a>  
+</body></html> 

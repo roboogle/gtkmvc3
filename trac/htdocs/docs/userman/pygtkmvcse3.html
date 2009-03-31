@@ -1,0 +1,84 @@
+<html > 
+<head><title> Architectural Overview</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="pygtkmvc.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="pygtkmvc.css"> 
+<script type="text/javascript" src="pygtkmvc-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 1--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse5.html" >next</a>] [<a 
+href="pygtkmvcse2.html" >prev</a>] [<a 
+href="pygtkmvcse2.html#tailpygtkmvcse2.html" >prev-tail</a>] [<a 
+href="#tailpygtkmvcse3.html">tail</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse4.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a 
+ id="x6-40003"></a> Architectural Overview</h3>
+<!--l. 3--><p class="noindent" >Figure <a 
+href="#x6-40011">1<!--tex4ht:ref: HLA_f --></a> shows the high level software architecture for an application based on
+<span 
+class="cmsl-10">PyGTK </span>and the supplied mvco Infrastructure. It shows the functional architecture as
+well.
+<!--l. 7--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x6-40011"></a>
+
+<div class="center" 
+>
+<!--l. 8--><p class="noindent" >
+
+<!--l. 9--><p class="noindent" ><img 
+src="figs/png/arch.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;1: </td><td  
+class="content">Overview of the architecture</td></tr></table><!--tex4ht:label?: x6-40011 -->
+</div>
+
+<!--l. 12--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 16--><p class="indent" >   In terms of functionalities, at the highest level is located the <span 
+class="cmti-10">Application Layer</span>,
+which is partially based on the <span 
+class="cmti-10">MVC&#8211;O </span>Infrastructure, and whose implementation
+depends on the application semantics. The impact of the framework is intended to be
+as much little as possible.
+<!--l. 22--><p class="indent" >   The MVC&#8211;O <span 
+class="cmti-10">Services Layer </span>supplies a quasi-generic platform which implements
+the <span 
+class="cmti-10">MVC </span>pattern and the <span 
+class="cmti-10">Observer </span>pattern. As the figure <a 
+href="#x6-40011">1<!--tex4ht:ref: HLA_f --></a> depicts, the <span 
+class="cmti-10">MVC&#8211;O</span>
+layer is partially based on <span 
+class="cmsl-10">PyGTK </span>in order to provide supports for the view and
+controller parts. Furthermore, model part may access <span 
+class="cmsl-10">PyGTK </span>when using the <span 
+class="cmti-10">MVC</span>
+pattern provided by <span 
+class="cmsl-10">PyGTK </span>itself, like for example <span 
+class="cmtt-9">TextBuffer </span>or <span 
+class="cmtt-9">TreeModel </span>objects.
+However in general the model part is indenpended on the specific graphical
+toolkit.
+<!--l. 31--><p class="indent" >   Lower layers supply several functionalities concerning the graphical toolkit (GTK
+and <span 
+class="cmsl-10">Glade</span>) and the Scripting Environment (namely Python).
+<!--l. 68--><p class="indent" >
+
+
+   <!--l. 1--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse5.html" >next</a>] [<a 
+href="pygtkmvcse2.html" >prev</a>] [<a 
+href="pygtkmvcse2.html#tailpygtkmvcse2.html" >prev-tail</a>] [<a 
+href="pygtkmvcse3.html" >front</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse4.html" >up</a>] </p></div>
+<!--l. 1--><p class="indent" >   <a 
+ id="tailpygtkmvcse3.html"></a>  
+</body></html> 

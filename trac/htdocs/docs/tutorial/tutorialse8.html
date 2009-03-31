@@ -1,0 +1,136 @@
+<html > 
+<head><title>Generating a standard project from scratch</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="tutorial.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="tutorial.css"> 
+<script type="text/javascript" src="tutorial-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 576--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse9.html" >next</a>] [<a 
+href="tutorialse7.html" >prev</a>] [<a 
+href="tutorialse7.html#tailtutorialse7.html" >prev-tail</a>] [<a 
+href="#tailtutorialse8.html">tail</a>] [<a 
+href="tutorial.html#tutorialse8.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">8   </span> <a 
+ id="x10-170008"></a>Generating a standard project from scratch</h3>
+<!--l. 578--><p class="noindent" >Since version 1.2.0 a little application called <span 
+class="cmti-10">gtkmvc-progen </span>is available to help setting
+up from scratch a new application based on <span 
+class="cmti-10">pygtkmvc</span>. <span 
+class="cmti-10">gtkmvc-progen </span>is available
+both as a command-line program and as a GUI application.
+<!--l. 583--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+                                                                  
+
+                                                                  
+<a 
+ id="x10-170014"></a>
+                                                                  
+
+                                                                  
+<div class="center" 
+>
+<!--l. 584--><p class="noindent" >
+
+<!--l. 585--><p class="noindent" ><img 
+src="png/progen.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;4: </td><td  
+class="content"><span 
+class="cmti-10">gtkmvc-progen </span>GUI at work</td></tr></table><!--tex4ht:label?: x10-170014 -->
+</div>
+                                                                  
+
+                                                                  
+<!--l. 588--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 590--><p class="indent" >   By the way, the source code of <span 
+class="cmti-10">gtkmvc-progen </span>is simple and can be exploted to
+learn more about gtkmvc-based applications. A model carries out all the work, and a
+controller/view pair provides the GUI if needed.
+<!--l. 595--><p class="indent" >   <span 
+class="cmti-10">gtkmvc-progen </span>can be executed either locally from the script directory, or can be
+executed as any other program if <span 
+class="cmti-10">pygtkmvc </span>has been officially installed on the hosting
+system.
+<!--l. 599--><p class="indent" >   From the local script directory:
+                                                                  
+
+                                                                  
+   <div class="verbatim">
+$&#x003E;&#x00A0;python&#x00A0;gtkmvc-progen&#x00A0;name=hello&#x00A0;author="Roberto&#x00A0;Cavada"&#x00A0;gui=no
+</div>
+<!--l. 602--><p class="nopar" >
+<!--l. 604--><p class="indent" >   If <span 
+class="cmti-10">pygtkmvc </span>was installed:
+                                                                  
+
+                                                                  
+   <div class="verbatim">
+$&#x003E;&#x00A0;gtkmvc-progen&#x00A0;name=hello&#x00A0;author="Roberto&#x00A0;Cavada"&#x00A0;gui=no
+</div>
+<!--l. 607--><p class="nopar" >
+<!--l. 609--><p class="indent" >   &#8220;name=hello&#8221; is an example of setting of a property that customizes the way
+<span 
+class="cmti-10">gtkmvc-progen </span>works. See the user manual for a full list.
+<!--l. 612--><p class="indent" >   A new directory called <span 
+class="cmtt-10">hello </span>will be created in the current directory (as property
+<span 
+class="cmti-10">destdir </span>is &#8220;.&#8221; by default.
+<!--l. 615--><p class="indent" >   Let us run now the resulting application skeleton.
+                                                                  
+
+                                                                  
+   <div class="verbatim">
+$&#x003E;&#x00A0;cd&#x00A0;hello
+&#x00A0;<br />$&#x003E;&#x00A0;ls
+&#x00A0;<br />hello.py&#x00A0;&#x00A0;resources&#x00A0;&#x00A0;src
+&#x00A0;<br />
+&#x00A0;<br />$&#x003E;&#x00A0;python&#x00A0;hello.py
+</div>
+<!--l. 623--><p class="nopar" >
+<!--l. 626--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+                                                                  
+
+                                                                  
+<a 
+ id="x10-170025"></a>
+                                                                  
+
+                                                                  
+<div class="center" 
+>
+<!--l. 627--><p class="noindent" >
+
+<!--l. 628--><p class="noindent" ><img 
+src="png/hello.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;5: </td><td  
+class="content">The skeletal hello application</td></tr></table><!--tex4ht:label?: x10-170025 -->
+</div>
+                                                                  
+
+                                                                  
+<!--l. 631--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+                                                                  
+
+                                                                  
+   <!--l. 634--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse9.html" >next</a>] [<a 
+href="tutorialse7.html" >prev</a>] [<a 
+href="tutorialse7.html#tailtutorialse7.html" >prev-tail</a>] [<a 
+href="tutorialse8.html" >front</a>] [<a 
+href="tutorial.html#tutorialse8.html" >up</a>] </p></div>
+<!--l. 634--><p class="indent" >   <a 
+ id="tailtutorialse8.html"></a>  
+</body></html> 

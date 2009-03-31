@@ -1,0 +1,1293 @@
+<html > 
+<head><title>Details of implementation</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="pygtkmvc.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="pygtkmvc.css"> 
+<script type="text/javascript" src="pygtkmvc-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 4--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse8.html" >next</a>] [<a 
+href="pygtkmvcse5.html" >prev</a>] [<a 
+href="pygtkmvcse5.html#tailpygtkmvcse5.html" >prev-tail</a>] [<a 
+href="pygtkmvcse4.html#tailpygtkmvcse5.html">tail</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse7.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">5   </span> <a 
+ id="x9-100005"></a>Details of implementation</h3>
+<!--l. 5--><p class="noindent" >This section presents some details regarding the implementation of the <span 
+class="cmti-10">MVC&#8211;O</span>
+framework in Python.
+<!--l. 8--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">5.1   </span> <a 
+ id="x9-110005.1"></a>Models, Views and Controllers in detail</h4>
+<!--l. 9--><p class="noindent" >The <span 
+class="cmti-10">MVC&#8211;O </span>framework essentially supplies three base classes which implement
+respectively a View, a Model and a Controller. Developers have to derive custom
+classes from the base classes set, adding the implementation which depends on the
+application semantics.
+<!--l. 14--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">Model base class</span> </dt><dd 
+class="description">Supplies servicing for:
+         <ul class="itemize1">
+         <li class="itemize">Fully automatic Observable Properties
+         </li>
+         <li class="itemize">Automatic broadcast notification when observable properties change.
+         </li>
+         <li class="itemize">Transparent notifications to observers running in the <span 
+class="cmsl-10">PyGTK </span>loop,
+         even when sent by models running from other threads.</li></ul>
+     </dd><dt class="description">
+<span 
+class="cmbx-10">View base class</span> </dt><dd 
+class="description">Supplies servicing for:
+         <ul class="itemize1">
+         <li class="itemize">Automatic  widgets  tree  registration.  Input  can  be  a  set  of  root
+         widgets  stored  inside  a  <span 
+class="cmsl-10">Glade  </span>File,  or  a  completely  customized
+         widgets hierarchies.
+         </li>
+         <li class="itemize">Automatic signals connection to methods supplied by the associated
+         Controller(s).
+         </li>
+         <li class="itemize">Widget retrieval inside the set of hierarchy. Widget can be accessed
+         by using the name they have been defined from within <span 
+class="cmsl-10">Glade</span>, at
+         design time, or that have been specified when creating widgets by
+         hand.
+
+         </li>
+         <li class="itemize">Support for custom widgets declared in <span 
+class="cmsl-10">Glade </span>files.</li></ul>
+     </dd><dt class="description">
+<span 
+class="cmbx-10">Controller base class</span> </dt><dd 
+class="description">Supplies servicing for:
+         <ul class="itemize1">
+         <li class="itemize">Automatic registration as observers of the associated Model.
+         </li>
+         <li class="itemize">Easy access to the associated Model and View for any derived class.
+         </li>
+         <li class="itemize">Construction of columns and renderers of <span 
+class="cmtt-9">gtk.TreeView </span>widgets.
+         </li>
+         <li class="itemize">Instantiation of <span 
+class="cmti-10">adapters</span>.</li></ul>
+     </dd></dl>
+<!--l. 52--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">5.2   </span> <a 
+ id="x9-120005.2"></a> Models</h4>
+<!--l. 53--><p class="noindent" >Models must be used to hold the <span 
+class="cmti-10">data </span>or <span 
+class="cmti-10">logic </span>of the application. They can
+be connected to observers (like Controllers) by a mechanism detailed by
+section <a 
+href="#x9-210005.5">5.5<!--tex4ht:ref: OPD --></a>. It is important to note that apart from during the registration
+phase, the model does not know that there exists a set observers connected to
+it.
+<!--l. 59--><p class="indent" >   All the code strictly related to the data of the application (i.e. not related to any
+view of those data) will live in the model class.
+<!--l. 62--><p class="indent" >   There exist several model classes that users can derive their own classes:
+<!--l. 65--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.Model</span> </dt><dd 
+class="description">Standard       model       class.       The       derived       class
+     does not multiple-derive from gobject classes, and there are not methods
+     in the class that run from threads different from the <span 
+class="cmsl-10">PyGTK </span>main loop
+     thread. This is the base model class most likely users will derive their own
+     models.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.ModelMT</span> </dt><dd 
+class="description">Multi-threading model used as the previous class Model,
+     but to be used in all cases when the <span 
+class="cmsl-10">PyGTK </span>main loop runs in a thread
+     that is different from the thread running the model. This is the typical
+     case  of  a  model  that  needs  to  perform  asynchronous  operations  that
+     requires much time to complete, and that can be ran on a different thread
+     making the <span 
+class="cmti-10">GUI  </span>still responsive to the user actions. When the model&#8217;s
+     thread changes an observable property, corresponding notifications will be
+     transparently delivered to the observers through their own thread.
+
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.TreeStoreModel</span> </dt><dd 
+class="description">To be used as a base model class that derives both
+     from <span 
+class="cmtt-9">Model </span>and <span 
+class="cmtt-9">gtk.TreeStore</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.TreeStoreModelMT</span> </dt><dd 
+class="description">To be used as a base model class that derives
+     both from <span 
+class="cmtt-9">ModelMT </span>and <span 
+class="cmtt-9">gtk.TreeStore</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.ListStoreModel</span> </dt><dd 
+class="description">To be used as a base model class that derives both
+     from <span 
+class="cmtt-9">Model </span>and <span 
+class="cmtt-9">gtk.ListStore</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.ListStoreModelMT</span> </dt><dd 
+class="description">To be used as a base model class that derives
+     both from <span 
+class="cmtt-9">ModelMT </span>and <span 
+class="cmtt-9">gtk.ListStore</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.TextBufferModel</span> </dt><dd 
+class="description">To be used as a base model class that derives both
+     from <span 
+class="cmtt-9">Model </span>and <span 
+class="cmtt-9">gtk.TextBuffer</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">gtkmvc.TextBufferModelMT</span> </dt><dd 
+class="description">To be used as a base model class that derives
+     both from <span 
+class="cmtt-9">ModelMT </span>and <span 
+class="cmtt-9">gtk.TextBuffer</span>.
+     </dd></dl>
+<!--l. 103--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">5.3   </span> <a 
+ id="x9-130005.3"></a>Controllers</h4>
+<!--l. 104--><p class="noindent" >User&#8217;s controllers must derive from this class. A controller is always associated with
+one model, that the controller can monitor and modify. At the other side the
+controller can control a View. Two members called <span 
+class="cmtt-9">model </span>and <span 
+class="cmtt-9">view </span>hold the
+corresponding instances.
+<!--l. 110--><p class="indent" >   The controller holds all the code that lives between data in model and the
+data-presentation in the view. For example the controller will read a property value
+from the model, and will send that value to the view, to visualize it. If the property
+in the model is an Observable Property that the Controller is interested in
+monitoring, than when somebody will change the property, the controller will be
+notified and will update the view.
+<!--l. 119--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.1   </span> <a 
+ id="x9-140005.3.1"></a>Model registration</h5>
+<!--l. 120--><p class="noindent" >By default, a controller is also an Observer (see below) of the corresponding Model,
+even when there is nothing to observe, or when the controller is interested in
+observing nothing within the model.
+
+<!--l. 124--><p class="indent" >   Registration occurs automatically. If the observation is not wanted, the derived
+controller can call method <span 
+class="cmtt-9">unregister</span><span 
+class="cmtt-9">_model </span>from the instance constructor, to
+unregister itself.
+<!--l. 129--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.3.2   </span> <a 
+ id="x9-150005.3.2"></a>View registration</h5>
+<!--l. 130--><p class="noindent" >View registration (see View class, below) occurs upon Controller construction. An
+important method of the class Controller that user can override is <span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_view</span>,
+that the Controller will call during View&#8217;s registration. This can be used to connect
+custom signals to widgets of the view, or to perform some initialization that can be
+performed only when model, controller and view are actually connected.
+<span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_view </span>gets the view instance that is performing its registration within the
+controller. See section <a 
+href="#x9-200005.4.4">5.4.4<!--tex4ht:ref: VR:EX --></a> for an example of how this mechanism may be exploited
+effectively.
+<!--l. 141--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">5.4   </span> <a 
+ id="x9-160005.4"></a>Views</h4>
+<!--l. 142--><p class="noindent" >User&#8217;s views derive from base class <span 
+class="cmtt-9">gtkmvc.View</span>, that is the only part specific for the
+<span 
+class="cmsl-10">PyGTK </span>graphic toolkit.
+<!--l. 145--><p class="indent" >   A View is associated to a set of widgets. In general, this set can be organized as a
+set of trees of widgets. Each tree can be optionally be generated by using the <span 
+class="cmsl-10">Glade</span>
+application (see section <a 
+href="pygtkmvcse6.html#x10-250006.1">6.1<!--tex4ht:ref: GLEX --></a>).
+<!--l. 151--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.4.1   </span> <a 
+ id="x9-170005.4.1"></a>Constructor</h5>
+<!--l. 153--><p class="noindent" >The View constructor is quite much complicated:
+
+   <div class="verbatim">
+def&#x00A0;__init__(self,&#x00A0;glade=None,&#x00A0;top=None,&#x00A0;parent=None)
+</div>
+<!--l. 158--><p class="nopar" >
+<!--l. 161--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">glade</span> </dt><dd 
+class="description">can be either a string or a list of strings. In any case each provided string
+     represents the file name of a <span 
+class="cmsl-10">Glade </span>file. Typically each glade file contains
+     a tree of (named) widgets.
+     <!--l. 166--><p class="noindent" >When not given (of <span 
+class="cmtt-9">None</span>) a corresponding class member called <span 
+class="cmtt-9">glade </span>is
+     checked. If also <span 
+class="cmtt-9">self.glade </span>is <span 
+class="cmtt-9">None </span>it means that there is no <span 
+class="cmsl-10">Glade </span>file and
+     the widgets will have to be constructed manually.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">top</span> </dt><dd 
+class="description">can be a string or a list of strings. Each string provided is associated to
+     the parameter <span 
+class="cmtt-9">glade </span>content, and represent the name of the widget in the
+     widgets tree hierarchy to be considered as top level. This lets the user to
+     select single parts of the glade trees passed through parameter <span 
+class="cmtt-9">glade</span>.
+     <!--l. 178--><p class="noindent" >When not given (of  <span 
+class="cmtt-9">None</span>) a corresponding class member called <span 
+class="cmtt-9">top </span>is
+     checked. If also <span 
+class="cmtt-9">self.top </span>is <span 
+class="cmtt-9">None </span>it means that the root widget name of
+     the given <span 
+class="cmsl-10">Glade </span>file will be taken as the name for the top level widget.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">parent</span> </dt><dd 
+class="description">is the view instance to be considered parent of self. This can be used
+     in special cases to construct hiearchical views. Generally this parameter
+     is None or not given.
+     </dd></dl>
+<!--l. 190--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.4.2   </span> <a 
+ id="x9-180005.4.2"></a>A widgets container</h5>
+<!--l. 192--><p class="noindent" >The <span 
+class="cmtt-9">View </span>class can also be considered a map, that associates widget names to the
+corresponding widget objects. If file <span 
+class="cmtt-10">test.glade </span>contains a Button that you
+called <span 
+class="cmtt-9">start</span><span 
+class="cmtt-9">_button </span>from within <span 
+class="cmsl-10">Glade</span>, you can create the view and use it as
+follows:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;View
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyView&#x00A0;(View):
+&#x00A0;<br />&#x00A0;&#x00A0;glade&#x00A0;=&#x00A0;&#8217;test.glade&#8217;
+&#x00A0;<br />&#x00A0;&#x00A0;pass
+&#x00A0;<br />
+&#x00A0;<br />m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />v&#x00A0;=&#x00A0;MyView()
+&#x00A0;<br />c&#x00A0;=&#x00A0;MyController(m,&#x00A0;v)
+&#x00A0;<br />
+&#x00A0;<br />v[&#8217;start_button&#8217;]&#x00A0;#&#x00A0;this&#x00A0;returns&#x00A0;a&#x00A0;gtk.Button&#x00A0;object
+</div>
+<!--l. 211--><p class="nopar" >
+<!--l. 214--><p class="indent" >   Instead of using only <span 
+class="cmsl-10">Glade </span>files, sometimes the derived views create a set of
+widgets on the fly. If these widgets must be accessed later, they can be associated
+simply by (continuing the code above):
+
+   <div class="verbatim">
+v[&#8217;vbox_widget&#8217;]&#x00A0;=&#x00A0;gtk.VBox()
+&#x00A0;<br />...
+</div>
+<!--l. 222--><p class="nopar" >
+<!--l. 225--><p class="indent" >   The creation on the fly of new widgets should be performed within the derived
+view cosntructor:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;View
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyView&#x00A0;(View):
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;__init__(self,&#x00A0;):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;View.__init__(self,&#x00A0;&#8217;test.glade&#8217;)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;self[&#8217;vbox_widget&#8217;]&#x00A0;=&#x00A0;gtk.VBox()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass
+</div>
+<!--l. 241--><p class="nopar" >
+<!--l. 245--><p class="indent" >   Another important mechanism provided by the class View is the signals
+auto-connection. By using <span 
+class="cmsl-10">Glade </span>users can associate to widget&#8217;s signals functions and
+methods to be called when associated events happen. When performs the
+registration, the View searches inside the corresponding Controller instance for
+methods to associate with signals, and all methods found are automatically
+connected.
+<!--l. 253--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.4.3   </span> <a 
+ id="x9-190005.4.3"></a>Custom widgets support</h5>
+<!--l. 254--><p class="noindent" >A basic support for Custom widgets is provided since version 1.0.1. Designers can
+specify custom widgets within a <span 
+class="cmsl-10">Glade </span>file, and for each custom widget they may
+specify a function name to be called to build it. The specified function will be
+searched and invoked among the <span 
+class="cmtt-9">View </span>methods when the instance is created. <span 
+class="cmtt-9">View</span>&#8217;s
+method for custom widget creation has prototype:
+
+   <div class="verbatim">
+&#x00A0;def&#x00A0;func_name(self,&#x00A0;str1,&#x00A0;str2,&#x00A0;int1,&#x00A0;int2)
+</div>
+<!--l. 265--><p class="nopar" >
+<!--l. 268--><p class="indent" >   Creation functions are expected to return a widget object.
+<!--l. 271--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.4.4   </span> <a 
+ id="x9-200005.4.4"></a>An example about View Registration</h5>
+<!--l. 272--><p class="noindent" >A typical example of exploitation of the view registration mechanism is the
+setup of a <span 
+class="cmtt-9">gtk.TreeView </span>chain: construction of <span 
+class="cmtt-9">TreeView</span>, <span 
+class="cmtt-9">TreeViewColumn</span>,
+<span 
+class="cmtt-9">CellRenderers</span>, connection to the <span 
+class="cmtt-9">TreeModel</span>, etc. As <span 
+class="cmsl-10">Glade </span>does not provide a
+full support for these widgets, and as the <span 
+class="cmtt-9">TreeModel </span>lives in the model-side
+of the application, their construction cannot occur within the View, but
+must be performed within the Controller, that knows both the view and
+model sides. The right time when this construction has to occur is the view
+registration.
+<!--l. 283--><p class="indent" >   The idea is to have a <span 
+class="cmtt-9">TreeView </span>showing an integer and a string in two separated
+columns from a <span 
+class="cmtt-9">gtk.ListStore</span>.
+<!--l. 286--><p class="indent" >   Now suppose you created a project in <span 
+class="cmsl-10">Glade </span>that contains a window, some menus
+and other accessories, and a <span 
+class="cmtt-9">TreeView </span>whose properties are set in <span 
+class="cmsl-10">Glade </span>in a
+comfortable manner (see figure <a 
+href="#x9-200014">4<!--tex4ht:ref: fig:VR --></a>).
+<!--l. 291--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x9-200014"></a>
+
+<div class="center" 
+>
+<!--l. 292--><p class="noindent" >
+
+<!--l. 293--><p class="noindent" ><img 
+src="figs/png/treeview.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;4: </td><td  
+class="content">Designing a <span 
+class="cmtt-9">TreeView </span>by means of <span 
+class="cmsl-10">Glade</span></td></tr></table><!--tex4ht:label?: x9-200014 -->
+</div>
+
+<!--l. 296--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 298--><p class="indent" >   In the example, the <span 
+class="cmtt-9">TreeView </span>has been called <span 
+class="cmtt-9">tv</span><span 
+class="cmtt-9">_main</span>, and after View creation the
+widget will be available with that name.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;View
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyView&#x00A0;(View):
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;View.__init__(self,&#x00A0;&#8217;test.glade&#8217;)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;pass
+</div>
+<!--l. 312--><p class="nopar" >
+<!--l. 315--><p class="indent" >   The <span 
+class="cmtt-9">ListStore </span>is of course not contained in the view, but it is created and stored
+in the Model. If the model had to be also a <span 
+class="cmtt-9">ListStore </span>(i.e. derived from it) <span 
+class="cmtt-9">MyModel</span>
+had to derive from <span 
+class="cmtt-9">gtkmvc.ListStoreModel </span>instead of <span 
+class="cmtt-9">Model</span>. To keep things easier,
+Has&#8211;A relationship is chosen.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />import&#x00A0;gtk
+&#x00A0;<br />import&#x00A0;gobject
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;Model.__init__(self)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.list&#x00A0;=&#x00A0;gtk.ListStore(gobject.TYPE_INT,&#x00A0;gobject.TYPE_STRING)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;pass
+</div>
+<!--l. 335--><p class="nopar" >
+<!--l. 338--><p class="indent" >   The controller has the responsibility of connecting the <span 
+class="cmtt-9">TreeView </span>and the
+<span 
+class="cmtt-9">ListStore</span>, and it creates columns and renderers as well. Construction must
+occur after View has been created. More precisely, the ideal time is during
+view-registration.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Controller
+&#x00A0;<br />import&#x00A0;gtk
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyCtrl&#x00A0;(Controller):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;register_view(self,&#x00A0;view):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;tv&#x00A0;=&#x00A0;self.view[&#8217;tv_main&#8217;]
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;tv.set_model(self.model.list)&#x00A0;#&#x00A0;sets&#x00A0;the&#x00A0;model
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;creates&#x00A0;the&#x00A0;columns
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;cell&#x00A0;=&#x00A0;gtk.CellRendererText()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;col&#x00A0;=&#x00A0;gtk.TreeViewColumn(&#8217;Int&#8217;,&#x00A0;cell,&#x00A0;text=0)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;tv.append_column(col)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;cell&#x00A0;=&#x00A0;gtk.CellRendererText()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;col&#x00A0;=&#x00A0;gtk.TreeViewColumn(&#8217;String&#8217;,&#x00A0;cell,&#x00A0;text=1)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;tv.append_column(col)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;registers&#x00A0;any&#x00A0;treeview-related&#x00A0;signals...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 368--><p class="nopar" >
+   <h4 class="subsectionHead"><span class="titlemark">5.5   </span> <a 
+ id="x9-210005.5"></a>Observable Properties in details</h4>
+<!--l. 374--><p class="noindent" >The mechanism of the Observable Properties (<span 
+class="cmti-10">OP</span>) is fully automatic, since its
+management is carried out by the base class <span 
+class="cmtt-9">Model</span>.
+<!--l. 378--><p class="indent" >   Basically the user derives from class <span 
+class="cmtt-9">Model </span>(or the others listed in section
+<a 
+href="#x9-120005.2">5.2<!--tex4ht:ref: MODELS --></a>).
+<!--l. 381--><p class="indent" >   Properties are listed as class variables with default values, and to declare which
+variables in the model are also observable, special class variable <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>can
+be used.
+<!--l. 385--><p class="indent" >   <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>is a tuple (or a list) of names of class variables that are
+observable. Names can contain wilcards like <span 
+class="cmtt-9">* </span>to match any sequence of characters, <span 
+class="cmtt-9">?</span>
+to match one single character, etc. See module <span 
+class="cmtt-9">fnmatch </span>in <span 
+class="cmsl-10">Python </span>library for other
+information about possible use of wilcards in names. Important to say that if
+wilcards are used, names starting with a double underscore <span 
+class="cmtt-9">( </span>_,_) will be not
+matched.
+<!--l. 393--><p class="indent" >   It is also possible for the user to add a class variable called <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span>. This
+variable must be a map, whose elements&#8217; keys are names of properties, and the
+associated values are the initial values. Using <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>is complementary to the
+use of <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span>, but it is now deprecated and should be avoided in new
+
+code.
+<!--l. 399--><p class="indent" >   For example, suppose you want to create an <span 
+class="cmti-10">OP </span>called <span 
+class="cmtt-9">name </span>initially associated to
+the string value &#8220;Rob&#8221;:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;name&#x00A0;=&#x00A0;&#8217;Rob&#8217;
+&#x00A0;<br />&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("name",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;Model.__init__(self)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 416--><p class="nopar" >
+<!--l. 419--><p class="indent" >   This is another example showing the usage of wilcards in names:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyModelWithWilcards&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;firstname&#x00A0;=&#x00A0;&#8217;Rob&#8217;
+&#x00A0;<br />&#x00A0;&#x00A0;secondname&#x00A0;=&#x00A0;&#8217;Mario&#8217;
+&#x00A0;<br />&#x00A0;&#x00A0;surname&#x00A0;=&#x00A0;&#8217;Cavada&#8217;
+&#x00A0;<br />&#x00A0;&#x00A0;energy&#x00A0;=&#x00A0;0.2&#x00A0;#&#x00A0;needs&#x00A0;holidays!
+&#x00A0;<br />&#x00A0;&#x00A0;entropy&#x00A0;=&#x00A0;1.0
+&#x00A0;<br />&#x00A0;&#x00A0;enology&#x00A0;=&#x00A0;"good&#x00A0;science"
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("*name",&#x00A0;"en????y")
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 434--><p class="nopar" >
+<!--l. 437--><p class="indent" >   In the example, all properties but <span 
+class="cmtt-9">energy </span>are declared to be observable.
+<!--l. 440--><p class="indent" >   Old-style (deprecated) observable properties declaration that makes use of special
+variable <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>is shown here. This example is shown only for completeness
+and should be not used anymore in new code.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyModelDeprecated&#x00A0;(Model):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;__properties__&#x00A0;=&#x00A0;{
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;name&#8217;&#x00A0;:&#x00A0;&#8217;Rob&#8217;,
+&#x00A0;<br />&#x00A0;&#x00A0;}
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 454--><p class="nopar" >
+<!--l. 458--><p class="indent" >   By using a specific meta-class, property <span 
+class="cmtt-9">name </span>will be automatically added, as well
+as all the code to handle it.
+<!--l. 461--><p class="indent" >   This means that you may use the property in this way:
+
+   <div class="verbatim">
+m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />print&#x00A0;m.name&#x00A0;&#x00A0;#&#x00A0;prints&#x00A0;&#8217;Rob&#8217;
+&#x00A0;<br />m.name&#x00A0;=&#x00A0;&#8217;Roberto&#8217;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;property&#x00A0;value
+</div>
+<!--l. 467--><p class="nopar" >
+<!--l. 470--><p class="indent" >   What&#8217;s missing is now an observer, to be notified when the property changes. To
+create an observer, derive your class from base class <span 
+class="cmtt-9">gtkmvc.Observer</span>.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;observer
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;AnObserver&#x00A0;(observer.Observer):
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;__init__(self,&#x00A0;model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;Observer.__init__(self,&#x00A0;model)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;property_name_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;&#8216;&#8216;Property&#x00A0;name&#x00A0;changed&#x00A0;from&#x00A0;&#8217;%s&#8217;&#x00A0;to&#x00A0;&#8217;%s&#8217;&#8217;&#8217;&#x00A0;%&#x00A0;(old,&#x00A0;new)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 490--><p class="nopar" >
+<!--l. 493--><p class="indent" >   The Observer constructor gets an instance of a Model, and registers the class
+instance itself to the given model, to become an observer of that model
+instance.
+<!--l. 497--><p class="indent" >   To receive notifications for the property <span 
+class="cmtt-9">name</span>, the observer must define a method
+called <span 
+class="cmtt-9">property</span><span 
+class="cmtt-9">_name</span><span 
+class="cmtt-9">_value</span><span 
+class="cmtt-9">_change </span>that when is automatically called will get the
+instance of the model containing the changed property, and the property&#8217;s old and
+new values.
+<!--l. 503--><p class="indent" >   Instead of using an implicit naming convention for the notification methods, is
+also possible to declare that a method within the observer is interested in receiving
+notifications for a bunch of properties:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;observer
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;AnObserver&#x00A0;(observer.Observer):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;@observer.observes(&#8217;name&#8217;,&#x00A0;...)
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;an_observing_method(self,&#x00A0;model,&#x00A0;prop_name,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;&#8216;&#8216;Property&#x00A0;&#8217;%s&#8217;&#x00A0;changed&#x00A0;from&#x00A0;&#8217;%s&#8217;&#x00A0;to&#x00A0;&#8217;%s&#8217;&#8217;&#8217;&#x00A0;%&#x00A0;(prop_name,&#x00A0;old,&#x00A0;new)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 519--><p class="nopar" >
+<!--l. 522--><p class="indent" >   Of course the explicit observing method will receive the name of the property it is
+changed as now it can observe multiple properties.
+<!--l. 525--><p class="indent" >   As already mentioned, when used in combination with the <span 
+class="cmti-10">MVC </span>pattern,
+Controllers are also Observers of their models.
+<!--l. 528--><p class="indent" >   Here follows an example of usage:
+
+   <div class="verbatim">
+m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />o&#x00A0;=&#x00A0;AnObserver(m)
+&#x00A0;<br />
+&#x00A0;<br />print&#x00A0;m.name&#x00A0;&#x00A0;#&#x00A0;prints&#x00A0;&#8217;Rob&#8217;
+&#x00A0;<br />m.name&#x00A0;=&#x00A0;&#8217;Roberto&#8217;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;property&#x00A0;value,&#x00A0;o&#x00A0;is&#x00A0;notified
+</div>
+<!--l. 536--><p class="nopar" >
+<!--l. 539--><p class="indent" >   Things so far are easy enough, but they get a bit complicated when you derive
+custom models from other custom models. For example, what happens to <span 
+class="cmti-10">OP </span>if you
+derive a new model class from the class <span 
+class="cmtt-9">MyModel</span>?
+<!--l. 544--><p class="indent" >   In this case the behavior of the <span 
+class="cmti-10">OP </span>trusty follows the typical Object Oriented
+rules:
+     <ol  class="enumerate1" >
+     <li 
+  class="enumerate" id="x9-21002x1">Any <span 
+class="cmti-10">OP </span>in base class are inherited by derived classes.
+     </li>
+     <li 
+  class="enumerate" id="x9-21004x2">Derived class can override any <span 
+class="cmti-10">OP </span>in base classes.
+     </li>
+     <li 
+  class="enumerate" id="x9-21006x3">If multiple base classes defines the same <span 
+class="cmti-10">OP</span>, only the first <span 
+class="cmti-10">OP </span>will be
+     accessible from the derived class.</li></ol>
+<!--l. 553--><p class="indent" >   For example:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;Test1&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop1&#x00A0;=&#x00A0;1
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("prop1",&#x00A0;)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;Model.__init__(self)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;this&#x00A0;class&#x00A0;is&#x00A0;an&#x00A0;observer&#x00A0;of&#x00A0;its&#x00A0;own&#x00A0;properties:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.register_observer(self)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_prop1_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;%s&#8217;&#x00A0;to&#x00A0;&#8217;%s&#8217;"&#x00A0;%&#x00A0;(old,&#x00A0;new)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;Test2&#x00A0;(Test1):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop2&#x00A0;=&#x00A0;2
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop1&#x00A0;=&#x00A0;3
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("prop?",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;Test1.__init__(self)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;also&#x00A0;this&#x00A0;class&#x00A0;is&#x00A0;an&#x00A0;observer&#x00A0;of&#x00A0;itself:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.register_observer(self)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_prop2_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"prop2&#x00A0;changed&#x00A0;from&#x00A0;&#8217;%s&#8217;&#x00A0;to&#x00A0;&#8217;%s&#8217;"&#x00A0;%&#x00A0;(old,&#x00A0;new)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;test&#x00A0;code:
+&#x00A0;<br />t1&#x00A0;=&#x00A0;Test1()
+&#x00A0;<br />t2&#x00A0;=&#x00A0;Test2()
+&#x00A0;<br />
+&#x00A0;<br />t2.prop2&#x00A0;=&#x00A0;20
+&#x00A0;<br />t2.prop1&#x00A0;=&#x00A0;30
+&#x00A0;<br />t1.prop1&#x00A0;=&#x00A0;10
+</div>
+<!--l. 599--><p class="nopar" >
+<!--l. 602--><p class="indent" >   When executed, this script generates this output:
+
+   <div class="verbatim">
+prop2&#x00A0;changed&#x00A0;from&#x00A0;&#8217;2&#8217;&#x00A0;to&#x00A0;&#8217;20&#8217;
+&#x00A0;<br />prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;3&#8217;&#x00A0;to&#x00A0;&#8217;30&#8217;
+&#x00A0;<br />prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;1&#8217;&#x00A0;to&#x00A0;&#8217;10&#8217;
+</div>
+<!--l. 608--><p class="nopar" >
+<!--l. 611--><p class="indent" >   As you can see, <span 
+class="cmtt-9">t2.prop1 </span>overrides the <span 
+class="cmti-10">OP </span><span 
+class="cmtt-9">prop1 </span>defined in Test1 (they have different
+initial values). Test2 could also override method <span 
+class="cmtt-9">property</span><span 
+class="cmtt-9">_prop1</span><span 
+class="cmtt-9">_value</span><span 
+class="cmtt-9">_change</span>:
+
+   <div class="verbatim">
+class&#x00A0;Test2&#x00A0;(Test1):
+&#x00A0;<br />&#x00A0;&#x00A0;#&#x00A0;...&#x00A0;copy&#x00A0;from&#x00A0;previous&#x00A0;definition,&#x00A0;and&#x00A0;add:
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;def&#x00A0;property_prop1_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"Test2:&#x00A0;prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;%s&#8217;&#x00A0;to&#x00A0;&#8217;%s&#8217;"&#x00A0;%&#x00A0;(old,&#x00A0;new)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;pass
+</div>
+<!--l. 625--><p class="nopar" >
+<!--l. 628--><p class="indent" >   As you expect, the output in this case would be:
+
+   <div class="verbatim">
+prop2&#x00A0;changed&#x00A0;from&#x00A0;&#8217;2&#8217;&#x00A0;to&#x00A0;&#8217;20&#8217;
+&#x00A0;<br />Test2:&#x00A0;prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;3&#8217;&#x00A0;to&#x00A0;&#8217;30&#8217;
+&#x00A0;<br />prop1&#x00A0;changed&#x00A0;from&#x00A0;&#8217;1&#8217;&#x00A0;to&#x00A0;&#8217;10&#8217;
+</div>
+<!--l. 634--><p class="nopar" >
+<!--l. 638--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.5.1   </span> <a 
+ id="x9-220005.5.1"></a>Types of Observable Properties</h5>
+<!--l. 640--><p class="noindent" >In section <a 
+href="pygtkmvcse4.html#x7-90004.2.1">4.2.1<!--tex4ht:ref: KOBS --></a> we anticipated that there exist several types of <span 
+class="cmti-10">OP</span>. In the examples
+so far we have seen only <span 
+class="cmti-10">value OPs</span>, meaning that observers will be notified of any
+change of <span 
+class="cmti-10">value </span>assigned to the corresponding <span 
+class="cmti-10">OP</span>. What would happen if the value
+of the property would be a complex object like a list, or a user-defined class, and the
+object would change internally?
+<!--l. 647--><p class="indent" >   For example:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop1&#x00A0;=&#x00A0;[1,2,3]
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("prop1",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;Model.__init__(self)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;...
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />m.prop1.append(4)
+&#x00A0;<br />m.prop1[1]&#x00A0;=&#x00A0;5
+</div>
+<!--l. 666--><p class="nopar" >
+<!--l. 669--><p class="indent" >   Last two lines of the previous example actually change the <span 
+class="cmti-10">OP </span>internally, that is
+different from <span 
+class="cmti-10">assigning </span>a new value to the property like in <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">m.prop1</span><span 
+class="cmtt-10">&#x00A0;=</span><span 
+class="cmtt-10">&#x00A0;[5,4,3,2]</span></span></span>
+that would trigger a value notifications like those seen in previous examples. Similar
+problem is found when the property is assigned to a class instance, and then a
+method that change the instance is called.
+<!--l. 676--><p class="indent" >   <span 
+class="cmti-10">Mutable sequential types </span>and <span 
+class="cmti-10">User classes </span>are also supported by the <span 
+class="cmti-10">Observer</span>
+pattern of <span 
+class="cmti-10">gtkmvc</span>, but the name of the notified method in the controller
+has to be changed accordingly. The idea is to provide two methods to be
+notified:
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">property</span><span 
+class="cmbx-10">_</span><span 
+class="cmtt-9">name </span><span 
+class="cmbx-10">_before</span><span 
+class="cmbx-10">_change</span> </dt><dd 
+class="description">That is called immediately <span 
+class="cmti-10">before </span>a method
+     that changes the instance is called on the <span 
+class="cmti-10">OP </span>called <span 
+class="cmtt-9">name</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">property</span><span 
+class="cmbx-10">_</span><span 
+class="cmtt-9">name </span><span 
+class="cmbx-10">_after</span><span 
+class="cmbx-10">_change</span> </dt><dd 
+class="description">That  is  called  immediately  <span 
+class="cmti-10">after  </span>a  method
+     that changes the instance is called on the <span 
+class="cmti-10">OP </span>called <span 
+class="cmtt-9">name</span>.</dd></dl>
+<!--l. 689--><p class="indent" >   Of course, it is not needed to define both of the two methods in the observer class,
+as only the actually defined methods will be called.
+<!--l. 692--><p class="indent" >   The signature of these methods is:
+
+   <div class="verbatim">
+&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_&#x003C;name&#x003E;_before_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;args,&#x00A0;kwargs)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_&#x003C;name&#x003E;_after_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;res,&#x00A0;args,&#x00A0;kwargs)
+</div>
+<!--l. 700--><p class="nopar" >
+<!--l. 703--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">self</span> </dt><dd 
+class="description">The Observer class instance defining the method.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">model</span> </dt><dd 
+class="description">The Model instance containing the <span 
+class="cmti-10">OP  </span>called <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">&#x003C;name&#x003E;</span></span></span> that is being
+     changed.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">instance</span> </dt><dd 
+class="description">The object instance that is assigned to the <span 
+class="cmti-10">OP </span>called <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">&#x003C;name&#x003E;</span></span></span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">name</span> </dt><dd 
+class="description">The name of the method that is being called. This is different from
+     <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">&#x003C;name&#x003E;</span></span></span> that is the name of the <span 
+class="cmti-10">OP </span>contained in the model.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">res</span> </dt><dd 
+class="description">(Only for <span 
+class="cmti-10">after </span>notification) the value returned by the method <span 
+class="cmti-10">name </span>that
+     has been called on the <span 
+class="cmti-10">OP instance</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">args</span> </dt><dd 
+class="description">List of arguments of the method <span 
+class="cmti-10">name</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">kwargs</span> </dt><dd 
+class="description">Map of keyword arguments of the method <span 
+class="cmti-10">name</span>.</dd></dl>
+<!--l. 719--><p class="indent" >   As it can be noticed, the only difference between these two method signatures is
+the parameter <span 
+class="cmti-10">res </span>that is obviously available only for notification method
+<span 
+class="cmti-10">after</span>.
+<!--l. 723--><p class="indent" >   The framework <span 
+class="cmti-10">MVC&#8211;O </span>provides a full support for python mutable sequences like
+<span 
+class="cmti-10">lists </span>and <span 
+class="cmti-10">maps</span>. For example:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model,&#x00A0;Observer
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;myint&#x00A0;=&#x00A0;0
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;mylist&#x00A0;=&#x00A0;[]
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;mymap&#x00A0;=&#x00A0;{}
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("my*",&#x00A0;)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyObserver&#x00A0;(Observer):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;notifications
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_myint_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"myint&#x00A0;changed"
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_mylist_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"mylist&#x00A0;changed"
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_mylist_before_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;args,&#x00A0;kwargs):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"mylist&#x00A0;before&#x00A0;change:",&#x00A0;instance,&#x00A0;name,&#x00A0;args,&#x00A0;kwargs
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_mylist_after_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,&#x00A0;res,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;args,&#x00A0;kwargs):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"mylist&#x00A0;after&#x00A0;change:",&#x00A0;instance,&#x00A0;name,&#x00A0;res,&#x00A0;args,&#x00A0;kwargs
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;for&#x00A0;mymap&#x00A0;value_change&#x00A0;and&#x00A0;before_change&#x00A0;are&#x00A0;not&#x00A0;provided!
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_mymap_after_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,&#x00A0;res,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;args,&#x00A0;kwargs):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"mymap&#x00A0;after&#x00A0;change:",&#x00A0;instance,&#x00A0;name,&#x00A0;res,&#x00A0;args,&#x00A0;kwargs
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;Look&#x00A0;at&#x00A0;what&#x00A0;happens&#x00A0;to&#x00A0;the&#x00A0;observer
+&#x00A0;<br />if&#x00A0;__name__&#x00A0;==&#x00A0;"__main__":
+&#x00A0;<br />
+
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;c&#x00A0;=&#x00A0;MyObserver(m)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;int:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.myint&#x00A0;=&#x00A0;20
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;list:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.mylist&#x00A0;=&#x00A0;[1,2]&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;calls&#x00A0;value_change
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.mylist.append(10)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.mylist[0]&#x00A0;=&#x00A0;m.mylist[0]+1
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;changes&#x00A0;the&#x00A0;map:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.mymap["hello"]&#x00A0;=&#x00A0;30
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.mymap.update({&#8217;bye&#8217;&#x00A0;:&#x00A0;50})
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;del&#x00A0;m.mymap["hello"]
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+</div>
+<!--l. 791--><p class="nopar" >
+<!--l. 794--><p class="indent" >   After the execution, this is the program output:
+
+   <div class="verbatim">
+myint&#x00A0;changed
+&#x00A0;<br />mylist&#x00A0;changed
+&#x00A0;<br />mylist&#x00A0;before&#x00A0;change:&#x00A0;[1,&#x00A0;2]&#x00A0;append&#x00A0;(10,)&#x00A0;{}
+&#x00A0;<br />mylist&#x00A0;after&#x00A0;change:&#x00A0;[1,&#x00A0;2,&#x00A0;10]&#x00A0;append&#x00A0;None&#x00A0;(10,)&#x00A0;{}
+&#x00A0;<br />mylist&#x00A0;before&#x00A0;change:&#x00A0;[1,&#x00A0;2,&#x00A0;10]&#x00A0;__setitem__&#x00A0;(0,&#x00A0;2)&#x00A0;{}
+&#x00A0;<br />mylist&#x00A0;after&#x00A0;change:&#x00A0;[2,&#x00A0;2,&#x00A0;10]&#x00A0;None&#x00A0;__setitem__&#x00A0;(0,&#x00A0;2)&#x00A0;{}
+&#x00A0;<br />mymap&#x00A0;after&#x00A0;change:&#x00A0;{&#8217;hello&#8217;:&#x00A0;30}&#x00A0;None&#x00A0;__setitem__&#x00A0;(&#8217;hello&#8217;,&#x00A0;30)&#x00A0;{}
+&#x00A0;<br />mymap&#x00A0;after&#x00A0;change:&#x00A0;{&#8217;bye&#8217;:&#x00A0;50,&#x00A0;&#8217;hello&#8217;:&#x00A0;30}&#x00A0;update&#x00A0;None&#x00A0;({&#8217;bye&#8217;:&#x00A0;50},)&#x00A0;{}
+&#x00A0;<br />mymap&#x00A0;after&#x00A0;change:&#x00A0;{&#8217;bye&#8217;:&#x00A0;50}&#x00A0;None&#x00A0;__delitem__&#x00A0;(&#8217;hello&#8217;,)&#x00A0;{}
+</div>
+<!--l. 807--><p class="nopar" >
+<!--l. 810--><p class="indent" >   This covers those cases where you have your <span 
+class="cmti-10">OPs </span>holding mutable sequence
+values. What if the value is a user-defined class instance? The notification mechanism
+is the same: when a method <span 
+class="cmtt-9">M </span>that changes internally the instance is called,
+Observer&#8217;s methods <span 
+class="cmti-10">before </span>and <span 
+class="cmti-10">after </span>will be called. However, how can the user
+declare that method <span 
+class="cmtt-9">M </span><span 
+class="cmti-10">does changes </span>the instance? Two mechanism are provided by
+the framework:
+     <ul class="itemize1">
+     <li class="itemize">For  already  existing  classes  and  class  instances.  In  this  cases  the
+     declaration occurs when the instance is assigned to the <span 
+class="cmti-10">OP </span>in the model.
+     </li>
+     <li class="itemize">For ad-hoc and new classes. In this case the method will be <span 
+class="cmti-10">declared </span>as
+     <span 
+class="cmti-10">Observable </span>at the class level, through a special <span 
+class="cmti-10">decorator </span>provided by the
+     framework. This is the preferable manner.</li></ul>
+<!--l. 827--><p class="indent" >   Examples for new classes:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Observer
+&#x00A0;<br />from&#x00A0;gtkmvc&#x00A0;import&#x00A0;observable
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;AdHocClass&#x00A0;(observable.Observable):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):&#x00A0;self.val&#x00A0;=&#x00A0;0
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;this&#x00A0;way&#x00A0;the&#x00A0;method&#x00A0;is&#x00A0;declared&#x00A0;as&#x00A0;&#8217;observed&#8217;:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;@observable.observed
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;change(self):&#x00A0;self.val&#x00A0;+=&#x00A0;1
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;this&#x00A0;is&#x00A0;NOT&#x00A0;observed:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;is_val(self,&#x00A0;val):&#x00A0;return&#x00A0;self.val&#x00A0;==&#x00A0;val
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;obj&#x00A0;=&#x00A0;AdHocClass()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("obj",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyObserver&#x00A0;(Observer):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_obj_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"obj&#x00A0;value&#x00A0;changed&#x00A0;from:",&#x00A0;old,&#x00A0;"to:",&#x00A0;new
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_obj_after_change(self,&#x00A0;model,&#x00A0;instance,&#x00A0;name,&#x00A0;res,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;args,&#x00A0;kwargs):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"obj&#x00A0;after&#x00A0;change:",&#x00A0;instance,&#x00A0;name,&#x00A0;res,&#x00A0;args,&#x00A0;kwargs
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;Look&#x00A0;at&#x00A0;what&#x00A0;happens&#x00A0;to&#x00A0;the&#x00A0;observer
+&#x00A0;<br />if&#x00A0;__name__&#x00A0;==&#x00A0;"__main__":
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;c&#x00A0;=&#x00A0;MyObserver(m)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.obj.change()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.obj&#x00A0;=&#x00A0;None
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+</div>
+<!--l. 876--><p class="nopar" >
+
+<!--l. 879--><p class="indent" >   The execution prints out (slightly modified for the sake of readability):
+
+   <div class="verbatim">
+obj&#x00A0;after&#x00A0;change:&#x00A0;&#x003C;__main__.AdHocClass&#x00A0;object&#x00A0;at&#x00A0;0xb7d91e8c&#x003E;
+&#x00A0;<br />change&#x00A0;None&#x00A0;(&#x003C;__main__.AdHocClass&#x00A0;object&#x00A0;at&#x00A0;0xb7d91e8c&#x003E;,)&#x00A0;{}
+&#x00A0;<br />
+&#x00A0;<br />obj&#x00A0;value&#x00A0;changed
+&#x00A0;<br />from:&#x00A0;&#x003C;__main__.AdHocClass&#x00A0;object&#x00A0;at&#x00A0;0xb7d91e8c&#x003E;&#x00A0;to:&#x00A0;None
+</div>
+<!--l. 889--><p class="nopar" >
+<!--l. 892--><p class="indent" >   As you can see, declaring a class as <span 
+class="cmti-10">observable </span>is as simple as deriving from
+<span 
+class="cmtt-9">gtkmvc.observable.Observable </span>and decorating those class methods that must be
+observed with the decorator <span 
+class="cmtt-9">gtkmvc.observable.observe </span>(decorators are supported by
+Python version 2.4 and later only).
+<!--l. 899--><p class="indent" >   What if the user class cannot be easy changed, or only an instance of the class is
+available as <span 
+class="cmti-10">OP </span>value? In this case declaration of the methods to be observed can be
+done at time of declaration of the corresponding <span 
+class="cmti-10">OP</span>. In this case the <span 
+class="cmti-10">value </span>to be
+assigned to the <span 
+class="cmti-10">OP </span>must be a triple <span class="obeylines-h"><span class="verb"><span 
+class="cmtt-10">(class,</span><span 
+class="cmtt-10">&#x00A0;instance,</span><span 
+class="cmtt-10">&#x00A0;method_names&#x003E;</span></span></span>,
+where:
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">class</span> </dt><dd 
+class="description">Is the <span 
+class="cmtt-9">class </span>of the object to be observed.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">instance</span> </dt><dd 
+class="description">Is the object to be observed.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">method</span><span 
+class="cmbx-10">_names</span> </dt><dd 
+class="description">Is a tuple of strings, representing the method names of the
+     instance to be observed.</dd></dl>
+<!--l. 911--><p class="indent" >   For example:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />#----------------------------------------------------------------------
+&#x00A0;<br />#&#x00A0;This&#x00A0;is&#x00A0;a&#x00A0;class&#x00A0;the&#x00A0;used&#x00A0;cannot/don&#8217;t&#x00A0;want&#x00A0;to&#x00A0;change
+&#x00A0;<br />class&#x00A0;HolyClass&#x00A0;(object):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):&#x00A0;self.val&#x00A0;=&#x00A0;0
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;change(self):&#x00A0;self.val&#x00A0;+=&#x00A0;1
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;obj&#x00A0;=&#x00A0;(HolyClass,&#x00A0;HolyClass(),&#x00A0;(&#8217;change&#8217;,))
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("obj",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 930--><p class="nopar" >
+<!--l. 936--><p class="indent" >   Finally, <span 
+class="cmti-10">OP </span>can hold special values that are <span 
+class="cmti-10">signals </span>that can be used to notify
+observers that certain events occurred.
+<!--l. 939--><p class="indent" >   To declare an <span 
+class="cmti-10">OP </span>as a signal, the value of the <span 
+class="cmti-10">OP </span>must be <span 
+class="cmtt-9">gtkmvc.observable.Signal()</span>.
+To notify an event, the model can then invoke method <span 
+class="cmtt-9">emit </span>of the <span 
+class="cmti-10">OP</span>. The observers
+will be notified by calling method <span 
+class="cmtt-9">property</span><span 
+class="cmtt-9">_&#x003C;name&#x003E;</span><span 
+class="cmtt-9">_signal</span><span 
+class="cmtt-9">_emit </span>that will also receive
+any parameter passed to the <span 
+class="cmtt-9">emit </span>method. For example:
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Observer
+&#x00A0;<br />from&#x00A0;gtkmvc&#x00A0;import&#x00A0;observable
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;sgn&#x00A0;=&#x00A0;observable.Signal()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("sgn",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;----------------------------------------------------------------------
+&#x00A0;<br />class&#x00A0;MyObserver&#x00A0;(Observer):
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;notification
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_sgn_signal_emit(self,&#x00A0;model,&#x00A0;args,&#x00A0;kwargs):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"Signal:",&#x00A0;model,&#x00A0;args,&#x00A0;kwargs
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+&#x00A0;<br />#&#x00A0;Look&#x00A0;at&#x00A0;what&#x00A0;happens&#x00A0;to&#x00A0;the&#x00A0;observer
+&#x00A0;<br />if&#x00A0;__name__&#x00A0;==&#x00A0;"__main__":
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;c&#x00A0;=&#x00A0;MyObserver(m)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.sgn.emit()&#x00A0;#&#x00A0;we&#x00A0;emit&#x00A0;a&#x00A0;signal
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;m.sgn.emit("hello!",&#x00A0;key=10)&#x00A0;#&#x00A0;with&#x00A0;arguments
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass
+</div>
+<!--l. 976--><p class="nopar" >
+<!--l. 979--><p class="indent" >   The execution of this example will produce:
+
+   <div class="verbatim">
+Signal:&#x00A0;&#x003C;__main__.MyModel&#x00A0;object&#x00A0;at&#x00A0;0xb7de564c&#x003E;&#x00A0;()&#x00A0;{}
+&#x00A0;<br />Signal:&#x00A0;&#x003C;__main__.MyModel&#x00A0;object&#x00A0;at&#x00A0;0xb7de564c&#x003E;&#x00A0;(&#8217;hello!&#8217;,)&#x00A0;{&#8217;key&#8217;:&#x00A0;10}
+</div>
+<!--l. 985--><p class="nopar" >
+<!--l. 988--><p class="indent" >   In the <span 
+class="cmtt-10">examples</span>, there are several examples that show how different types of <span 
+class="cmti-10">OPs</span>
+can be used. Of course all available types can be used in all available kind of model
+classes, with or without multi-threading support.
+<!--l. 994--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">5.5.2   </span> <a 
+ id="x9-230005.5.2"></a>Special members for Observable Properties</h5>
+<!--l. 995--><p class="noindent" >Classes derived from Model, that exports <span 
+class="cmti-10">OPs</span>, have several special members.
+Advanced users might be interested in overriding some of them, but in general they
+should be considered as private members. They are explained here for the sake of
+completeness.
+<!--l. 1000--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span> </dt><dd 
+class="description">A class (static) member that lists property names. This must
+     be provided as either a tuple or a list by the user. Wilcards in names can
+     be used to match property names, but properties with names starting with
+     a double underscore <span 
+class="cmtt-9">_,</span><span 
+class="cmtt-9">_ </span>will be not matched.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span> </dt><dd 
+class="description">(Deprecated,  do  not  use  anymore)  A  dictionary  mapping
+     observable properties names and their initial value. This variable has been
+     substituted by <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span>.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_derived</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span> </dt><dd 
+class="description">(Deprecated) Automatically generated static member
+     that maps the <span 
+class="cmti-10">OPs </span>exported by all base classes. This does not contain
+     <span 
+class="cmti-10">OPs </span>that the class overrides.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_</span><span 
+class="cmitt-10x-x-90">property</span><span 
+class="cmitt-10x-x-90">_name</span> </dt><dd 
+class="description">This is an auto-generated variable holding the property
+     value. For example, a property called <span 
+class="cmtt-9">x </span>will generate a variable called
+     <span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_x</span>.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">get</span><span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_</span><span 
+class="cmitt-10x-x-90">property</span><span 
+class="cmitt-10x-x-90">_name</span> </dt><dd 
+class="description">This public method is the getter for the property. It is
+     automatically generated only if the user does not define one. This means
+     that the user can change the behavior of it by defining their own method.
+     For example, for property <span 
+class="cmtt-9">x </span>the method is <span 
+class="cmtt-9">get</span><span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_x</span>. This method gets
+     only self and returns the corresponding property value.
+
+     </dd><dt class="description">
+<span 
+class="cmtt-9">set</span><span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_</span><span 
+class="cmitt-10x-x-90">property</span><span 
+class="cmitt-10x-x-90">_name</span> </dt><dd 
+class="description">This public method is customizable like <br 
+class="newline" /><span 
+class="cmtt-9">get</span><span 
+class="cmtt-9">_prop</span><span 
+class="cmtt-9">_&#x003C;property</span><span 
+class="cmtt-9">_name&#x003E;</span>. This does not return anything, and gets self
+     and the value to be assigned to the property. The default auto-generated
+     code also calls method <span 
+class="cmtt-9">gtkmvc.Model.notify</span><span 
+class="cmtt-9">_property</span><span 
+class="cmtt-9">_change </span>to notify the
+     change to all registered observers.
+     </dd></dl>
+<!--l. 1038--><p class="indent" >   For further details about this topic see meta-classes <span 
+class="cmtt-9">PropertyMeta </span>and
+<br 
+class="newline" /><span 
+class="cmtt-9">ObservablePropertyMeta </span>from package <span 
+class="cmtt-9">support</span>.
+<!--l. 78--><p class="indent" >
+
+
+   <!--l. 12--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse8.html" >next</a>] [<a 
+href="pygtkmvcse5.html" >prev</a>] [<a 
+href="pygtkmvcse5.html#tailpygtkmvcse5.html" >prev-tail</a>] [<a 
+href="pygtkmvcse5.html" >front</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse7.html" >up</a>] </p></div>
+<!--l. 12--><p class="indent" >   <a 
+ id="tailpygtkmvcse5.html"></a>    
+</body></html> 

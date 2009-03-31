@@ -1,0 +1,68 @@
+<html > 
+<head><title>The framework</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="tutorial.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="tutorial.css"> 
+<script type="text/javascript" src="tutorial-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 88--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse4.html" >next</a>] [<a 
+href="tutorialse2.html" >prev</a>] [<a 
+href="tutorialse2.html#tailtutorialse2.html" >prev-tail</a>] [<a 
+href="#tailtutorialse3.html">tail</a>] [<a 
+href="tutorial.html#tutorialse3.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">3   </span> <a 
+ id="x5-40003"></a>The framework</h3>
+<!--l. 89--><p class="noindent" >The implementation of this example is split into three distinct parts. First, the <span 
+class="cmti-10">GUI</span>
+is constructed from a <span 
+class="cmsl-10">Glade </span>file. Second, the <span 
+class="cmti-10">GUI </span>is constructed <span 
+class="cmti-10">by hand</span>, by creating
+and connecting manually all widgets. Third, adapters are applied to make the code
+much easier.
+<!--l. 95--><p class="indent" >   Hand-made view is mainly presented to make this tutorial more complete, but the
+readers should keep in mind that they are going to adopt the former most of the
+times, or even more often a mixture of them, where many parts come from one or
+more glade files, and some others are built manually.
+<!--l. 101--><p class="indent" >   The use of glade files is also the reason why the <span 
+class="cmti-10">pygtkmvc </span>framework
+is split into three distinct parts. It is a matter of fact that in practice the
+Model-View-Controller pattern will almost always collapse to a two-level
+framework, where the View and the Controller are represented by a unique
+monolithic entity (let&#8217;s call it <span 
+class="cmti-10">V&amp;C</span>), and the Model is still separated by the
+rest.
+<!--l. 108--><p class="indent" >   The <span 
+class="cmti-10">pygtkmvc </span>framework provides three well-distinguishable levels, to allow the
+pure-glade parts to go into the View side (in a direct and very natural way), and all
+the remaining parts that would be put in the <span 
+class="cmti-10">V&amp;C </span>part, to go either in the
+Controller part, or in the View part, depending on how much close to the <span 
+class="cmti-10">GUI </span>stuff
+are.
+<!--l. 114--><p class="indent" >   For example, all the widgets signal handlers must go in the Controller side,
+whereas the code that sets some attributes of a specific widget might live either in
+the Controller or in the View, depending on how much those attributes are bounded
+to the application logic.
+<!--l. 119--><p class="indent" >   The more some code depends on the logic of the application, the farther it lives
+from the View side. If some code depends only on the logic without any relation with
+the <span 
+class="cmti-10">GUI </span>stuff, it must live in the Model.
+                                                                  
+
+                                                                  
+   <!--l. 125--><div class="crosslinks"><p class="noindent">[<a 
+href="tutorialse4.html" >next</a>] [<a 
+href="tutorialse2.html" >prev</a>] [<a 
+href="tutorialse2.html#tailtutorialse2.html" >prev-tail</a>] [<a 
+href="tutorialse3.html" >front</a>] [<a 
+href="tutorial.html#tutorialse3.html" >up</a>] </p></div>
+<!--l. 125--><p class="indent" >   <a 
+ id="tailtutorialse3.html"></a>  
+</body></html> 

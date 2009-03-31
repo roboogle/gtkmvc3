@@ -1,0 +1,852 @@
+<html > 
+<head><title>Adapters</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="pygtkmvc.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="pygtkmvc.css"> 
+<script type="text/javascript" src="pygtkmvc-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 1--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse8.html" >prev</a>] [<a 
+href="pygtkmvcse8.html#tailpygtkmvcse8.html" >prev-tail</a>] [<a 
+href="pygtkmvcse5.html#tailpygtkmvcse7.html">tail</a>] [<a 
+href="pygtkmvc.html#pygtkmvc1.tmp" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">7   </span> <a 
+ id="x11-300007"></a>Adapters</h3>
+<!--l. 4--><p class="noindent" >Version 1.2 introduces <span 
+class="cmti-10">Adapters</span>, a powerful feature that makes the framework
+perform some standard and boring activities autonomously.
+<!--l. 8--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">7.1   </span> <a 
+ id="x11-310007.1"></a>Introduction</h4>
+<!--l. 10--><p class="noindent" >Previous sections presented the framework and its main feature, that is &#8211; to recap it
+once again &#8211; to provide a full support for separating the logical and the presentation
+sides of an application. This separation is featured by the <span 
+class="cmti-10">MVC </span>pattern and the
+<span 
+class="cmti-10">Observer </span>pattern.
+<!--l. 15--><p class="indent" >   Although features are important, <span 
+class="cmti-10">goals </span>are the driving targets that lead the
+framework development. Most important goals of the framework are to keep
+simplicity, transparency and lightness, and to bear the level of abstraction high whilst
+still allowing to control and customise lower levels.
+<!--l. 21--><p class="indent" >   It is the case that the framework forces and helps to both design and implement
+applications in a clean and robust way.
+<!--l. 24--><p class="indent" >   However, sometimes things get complicated even for simple designs. In particular
+<span 
+class="cmti-10">Controllers </span>tend to blow up in size and complexity when handling a <span 
+class="cmti-10">View </span>containing
+many widgets, and when observing many properties into the <span 
+class="cmti-10">Model</span>. Also, since the
+framework can handle several kinds of observable properties (<span 
+class="cmti-10">OPs</span>), developers are
+required to remember and use some naming conventions for notifications methods
+defined inside <span 
+class="cmti-10">Observers</span>. Conventions contributes to make things that would be easy
+too complex.
+<!--l. 33--><p class="indent" >   In particular, when a default behaviour is expected, the <span 
+class="cmti-10">Controller </span>gets filled in
+with many methods whose code follows a template that is identically repeated all
+over again.
+<!--l. 39--><p class="indent" >   For example, let us suppose it is needed to have a text entry always aligned with
+some part of the model. This would require to have a textual observable property
+into the model, a signal handler into the controller to handle the <span 
+class="cmtt-9">&#8217;changed&#8217; </span>signal,
+and a method to handle notification for observable property value changes.
+When a <span 
+class="cmtt-9">&#8217;changed&#8217; </span>signal arrives, the corresponding signal handler should
+read the text entry value and report it to the observable property into the
+model. Viceversa, when the observable property in the model get changed for
+any reason, the notification code into the controller should update the text
+entry value. The handlers&#8217; code should also avoid to fall into a reciprocal
+loop.
+
+<!--l. 53--><p class="indent" >   It is in this context that adapters become pretty nifty.
+<!--l. 55--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">7.2   </span> <a 
+ id="x11-320007.2"></a>What are Adapters</h4>
+<!--l. 57--><p class="noindent" ><span 
+class="cmti-10">Adapters </span>are the generalization of the the code that handles autonomously the
+connection between a set of widgets and a corresponding set of properties (possibly
+observable) to keep aligned automatically the logical and the presentation sides, and
+to keep low the complexity of controllers.
+<!--l. 63--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x11-320017"></a>
+
+<div class="center" 
+>
+<!--l. 64--><p class="noindent" >
+
+<!--l. 65--><p class="noindent" ><img 
+src="figs/png/adap.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;7: </td><td  
+class="content"> Schematic simple adapter</td></tr></table><!--tex4ht:label?: x11-320017 -->
+</div>
+
+<!--l. 68--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 70--><p class="indent" >   In figure <a 
+href="#x11-320017">7<!--tex4ht:ref: ADAP_f --></a> is represented a simple adapter, where main internal functional blocks
+are shown. There exist functional blocks to control (and possibly customise) the way
+the property and the widget are read and written. Also, there is a functional block to
+manage how errors are handled when exceptions occur when writing into the
+property.
+<!--l. 77--><p class="indent" >   An Adapter <span 
+class="cmti-10">adapts </span>widgets and model&#8217;s properties. Adapters offer strong
+customization, but in their simplest use they are pretty easy to be used. In this
+context, previous example might be handled as follows.
+<!--l. 82--><p class="indent" >   We have a hand-made View containing a button and a text entry. Notice that the
+name of the text entry is <span 
+class="cmtt-9">entry</span><span 
+class="cmtt-9">_text</span>.
+
+   <div class="verbatim">
+class&#x00A0;MyView&#x00A0;(gtkmvc.View):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;gtkmvc.View.__init__(self)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;w&#x00A0;=&#x00A0;gtk.Window();&#x00A0;e&#x00A0;=&#x00A0;gtk.Entry();&#x00A0;b&#x00A0;=&#x00A0;gtk.Button("Press")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;h&#x00A0;=&#x00A0;gtk.VBox();&#x00A0;h.add(e);&#x00A0;h.add(b);&#x00A0;w.add(h)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;w.show_all()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self[&#8217;entry_text&#8217;]&#x00A0;=&#x00A0;e
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self[&#8217;button&#8217;]&#x00A0;=&#x00A0;b
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 100--><p class="nopar" >
+<!--l. 104--><p class="indent" >   The model contains an observable property that should always reflect the content
+of the text entry <span 
+class="cmtt-9">entry</span><span 
+class="cmtt-9">_text</span>.
+
+   <div class="verbatim">
+class&#x00A0;MyModel&#x00A0;(gtkmvc.Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;text&#x00A0;:&#x00A0;"Ciao"
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("test",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 114--><p class="nopar" >
+<!--l. 117--><p class="indent" >   As usual, the controller is the most complex part, but by exploiting an adapter it
+gets pretty much simplified.
+
+   <div class="verbatim">
+class&#x00A0;MyCtrl&#x00A0;(gtkmvc.Controller):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_adapters(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.adapt("text")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_view(self,&#x00A0;view):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;view[&#8217;button&#8217;].connect(&#8217;clicked&#8217;,&#x00A0;self.on_button_clicked)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;signal&#x00A0;handles
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;on_button_clicked(self,&#x00A0;button):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;print&#x00A0;"Text&#x00A0;is:&#8217;%s&#8217;"&#x00A0;%&#x00A0;self.model.text
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 136--><p class="nopar" >
+<!--l. 139--><p class="indent" >   The idea in this example is to have &#8220;<span 
+class="cmtt-9">button</span>&#8221; that when pressed makes model&#8217;s
+observable property <span 
+class="cmtt-9">text </span>printed out to the standard output.
+<!--l. 143--><p class="indent" >   No code is included to handle <span 
+class="cmtt-9">entry</span><span 
+class="cmtt-9">_text </span>&#8220;change&#8221; signal and observable property
+value change notifications. Instead, a new method surfaces off the controller:
+<span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_adapters</span>.
+<!--l. 148--><p class="indent" >   This method is called at the right time by the framework and it is a
+good place where adapters can be created and connected. In the example,
+creation occurs through a call to another new method of class Controller:
+<span 
+class="cmtt-9">adapt</span>.
+<!--l. 153--><p class="indent" >   The new method is pretty complex and will be discussed in depth later. Enough
+to say now that parameter <span 
+class="cmtt-9">"text" </span>represents the name of the observable property
+that we want to adapt. The corresponding widget is searched among all widgets in
+the view, and widget <span 
+class="cmtt-9">entry</span><span 
+class="cmtt-9">_text </span>is found and connected automatically. The way this
+magic happens is not important at this stage, but soon you will introduced
+with all details, to make you know how to fully exploit and control this new
+feature.
+<!--l. 162--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x11-320028"></a>
+
+<div class="center" 
+>
+<!--l. 163--><p class="noindent" >
+
+<!--l. 164--><p class="noindent" ><img 
+src="figs/png/adap1.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;8: </td><td  
+class="content"> Simple adapter at work</td></tr></table><!--tex4ht:label?: x11-320028 -->
+</div>
+
+<!--l. 167--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 170--><p class="indent" >   The code that instantiates and runs this example is as usual:
+
+   <div class="verbatim">
+m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />v&#x00A0;=&#x00A0;MyView()
+&#x00A0;<br />c&#x00A0;=&#x00A0;MyCtrl(m,v)
+&#x00A0;<br />gtk.main()
+</div>
+<!--l. 177--><p class="nopar" >
+<!--l. 180--><p class="indent" >   File <span 
+class="cmtt-10">examples/adapters/simple.py </span>contains the full source code of this
+example. When being run, it shows up a window containing the text entry and the
+button. When the button is pressed, the content of the observable property <span 
+class="cmtt-9">text </span>is
+printed to the standard output. Initially, <span 
+class="cmtt-9">text </span>is assigned to <span 
+class="cmtt-9">"Ciao" </span>and the text entry
+reflects it accordingly.
+<!--l. 188--><p class="indent" >   If the user changes the text in the entry, the property <span 
+class="cmtt-9">text </span>will be changed
+accordingly, as it is easy to check by clicking the button. Viceversa, if the property
+<span 
+class="cmtt-9">text </span>were changed by another model, observer, etc., the text entry would get updated
+accordingly.
+   <h4 class="subsectionHead"><span class="titlemark">7.3   </span> <a 
+ id="x11-330007.3"></a>Module <span 
+class="cmtt-9">adapters</span></h4>
+<!--l. 196--><p class="noindent" >Currently, module <span 
+class="cmtt-9">adapters </span>contains a few adapters classes.
+<!--l. 199--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmtt-9">Adapter</span> </dt><dd 
+class="description">Connects a widget and a property. The property cannot be a container
+     or a user-defined class.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">UserClassAdapter</span> </dt><dd 
+class="description">This class handles the communication between a widget and
+     a class instance that is a property inside the model.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">RoUserClassAdapter</span> </dt><dd 
+class="description">This  is  similar  to  <span 
+class="cmtt-9">UserClassAdapter</span>,  but  dedicated  to
+     read-only class instances. Used internally to handle for example <span 
+class="cmtt-9">datetime</span>
+     properties, when connecting a <span 
+class="cmtt-9">gtk.Calendar</span>.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">StaticContainerAdapter</span> </dt><dd 
+class="description">This class can be used to bound a set of widgets to
+     a single property that is a container, like a tuple, a list or a map, or in
+     general a class that implements <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_getitem</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>and <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_setitem</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>methods.</dd></dl>
+<!--l. 221--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x11-330019"></a>
+
+<div class="center" 
+>
+<!--l. 222--><p class="noindent" >
+
+<!--l. 223--><p class="noindent" ><img 
+src="figs/png/adapuml.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;9: </td><td  
+class="content"> Adapters class hierarchy</td></tr></table><!--tex4ht:label?: x11-330019 -->
+</div>
+
+<!--l. 226--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+   <h5 class="subsubsectionHead"><span class="titlemark">7.3.1   </span> <a 
+ id="x11-340007.3.1"></a>Class <span 
+class="cmtt-9">Adapter</span></h5>
+<!--l. 231--><p class="noindent" >This is the base class for all adapters. All adapters derive from class <span 
+class="cmtt-9">Observer</span>.
+Instantiation of an Adapter can be optionally complex and customizable by using
+same optional parameters. Available parameters are presented here, but examples
+will show them applied in a practical manner.
+<!--l. 237--><p class="indent" >   Important operations are:
+<!--l. 239--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">Constructor</span> </dt><dd 
+class="description">Class constructor gets several parameters, but only two are strictly
+     required.
+
+     <div class="verbatim">
+     def&#x00A0;__init__(self,&#x00A0;model,&#x00A0;prop_name,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop_read=None,&#x00A0;prop_write=None,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;value_error=None)
+</div>
+     <!--l. 248--><p class="nopar" >
+     <!--l. 251--><p class="noindent" >
+         <dl class="description"><dt class="description">
+     <span 
+class="cmtt-9">model</span> </dt><dd 
+class="description">is the Model instance containing the property to be observed.
+         </dd><dt class="description">
+     <span 
+class="cmtt-9">prop</span><span 
+class="cmtt-9">_name</span> </dt><dd 
+class="description">is the model&#8217;s property name (as a string). It is possible to use
+         a dotted notation to identify a property contained into a hierarchy
+         of models. For example &#8217;a.b.c&#8217; identifies property &#8217;c&#8217; into model &#8217;b&#8217;
+         inside model &#8217;a&#8217;, where model &#8217;a&#8217; is an attribute of given top level
+         model. Last name can be an observable or non-observable attribute,
+         and previous names (if specified) must all refer to instances of class
+         <span 
+class="cmtt-9">Model</span>. First name from the left must be the name of a model instance
+         inside the given model.
+         </dd><dt class="description">
+     <span 
+class="cmtt-9">prop</span><span 
+class="cmtt-9">_read</span> </dt><dd 
+class="description">optional function that apply custom modifications to the value
+         of the property before reading it. The function takes a value and must
+         return a transformed value. Use to customize the way the property
+         is read, and to apply useful transformations to the read value.
+         </dd><dt class="description">
+     <span 
+class="cmtt-9">prop</span><span 
+class="cmtt-9">_write</span> </dt><dd 
+class="description">Like   <span 
+class="cmtt-9">prop</span><span 
+class="cmtt-9">_read  </span>optional   function   that   apply   custom
+         modifications  to  the  value  of  the  property  before  writing  it.  The
+         function takes a value and must return a transformed value whose
+         type  must  be  compatible  with  the  type  of  the  property.  Use  to
+         customize  the  way  the  property  is  written,  and  to  apply  useful
+         transformations to the value.
+         </dd><dt class="description">
+     <span 
+class="cmtt-9">value</span><span 
+class="cmtt-9">_error</span> </dt><dd 
+class="description">optional parameter that can be a function (or a method) to
+         be called when a <span 
+class="cmtt-9">ValueError </span>exception occurs while trying to set
+         a wrong value for the property inside the model. The function will
+         receive: the adapter, the property name and the value coming from
+         the widget that offended the model. Useful to catch and handle error
+         conditions.
+         </dd></dl>
+     </dd><dt class="description">
+<span 
+class="cmbx-10">Widget connection</span> </dt><dd 
+class="description">Constructor connects properties, while widgets are connected
+     through method <span 
+class="cmtt-9">connect</span><span 
+class="cmtt-9">_widget</span>:
+
+     <div class="verbatim">
+     def&#x00A0;connect_widget(self,&#x00A0;widget,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;getter=None,&#x00A0;setter=None,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;signal=None,&#x00A0;arg=None,&#x00A0;update=True)
+</div>
+     <!--l. 297--><p class="nopar" >
+     <!--l. 300--><p class="noindent" >
+         <dl class="description"><dt class="description">
+     <span 
+class="cmbx-10">widget</span> </dt><dd 
+class="description">is the widget that is needed to connect
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">getter</span> </dt><dd 
+class="description">optional function used to &#8220;read&#8221; the widget. The function receives
+         a widget instance.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">setter</span> </dt><dd 
+class="description">optional function used to &#8220;write&#8221; the widget. The function receives
+         a widget instance and the value to be written.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">signal</span> </dt><dd 
+class="description">Optional name of the signal that will be used to monitor the widget
+         changes.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">arg</span> </dt><dd 
+class="description">Optional argument that is passed to the signal handler. It will be
+         used when connecting the signal.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">update</span> </dt><dd 
+class="description">If False, the widget will be not initially updated with the initial
+         value of the property. Used in very particular conditions.</dd></dl>
+     </dd><dt class="description">
+<span 
+class="cmbx-10">update</span><span 
+class="cmbx-10">_model()</span> </dt><dd 
+class="description">Forces the property to be updated from the value hold by the
+     widget. This method should be called directly by the user in very unusual
+     conditions.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">update</span><span 
+class="cmbx-10">_widget()</span> </dt><dd 
+class="description">Forces the widget to be updated from the property value. This
+     method should be called directly by the user when the property is not
+     observable, or in very unusual conditions.
+     </dd></dl>
+<!--l. 328--><p class="indent" >   At this step thorough people would be asking them self how instantiation of
+adapters can work in its simplest option, i.e. by specifying the minimal set of
+parameters, and exploiting all default values for the others.
+<!--l. 333--><p class="indent" >   The framework searches information about widgets and possible default values for
+any unspecified parameter into module <span 
+class="cmtt-10">adapters.default</span>.
+
+<!--l. 337--><p class="indent" >   Suppose for example that the specified widget is a <span 
+class="cmtt-9">gtk.Entry</span>. Good candidates for
+unspecified <span 
+class="cmtt-9">getter </span>and <span 
+class="cmtt-9">setter </span>would be <span 
+class="cmtt-9">gtk.Entry.get</span><span 
+class="cmtt-9">_text </span>and <span 
+class="cmtt-9">gtk.Entry.set</span><span 
+class="cmtt-9">_text</span>
+respectively. <span 
+class="cmtt-9">signal </span>will be <span 
+class="cmtt-9">"changed" </span>to capture events that change the value of the
+widget.
+<!--l. 344--><p class="indent" >   Later a list of all currently supported widgets will be presented.
+<!--l. 347--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">7.3.2   </span> <a 
+ id="x11-350007.3.2"></a>Class <span 
+class="cmtt-9">UserClassAdapter</span></h5>
+<!--l. 349--><p class="noindent" >This class handles the communication between a widget and a class instance
+(possibly observable) that is a property inside the model. The value to be shown is
+taken and stored by using a getter and a setter. getter and setter can be: names of
+user class methods, bound or unbound methods of the user class, or a function that
+will receive the user class instance and possible arguments whose number depends on
+whether it is a getter or a setter.
+<!--l. 357--><p class="indent" >   Class <span 
+class="cmtt-9">UserClassAdapter </span>derives directly from class <span 
+class="cmtt-9">Adapter </span>and redefines the
+constructor as follow.
+
+   <div class="verbatim">
+&#x00A0;&#x00A0;def&#x00A0;__init__(self,&#x00A0;model,&#x00A0;prop_name,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;getter,&#x00A0;setter,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;prop_read=None,&#x00A0;prop_write=None,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;value_error=None):
+</div>
+<!--l. 367--><p class="nopar" >
+<!--l. 370--><p class="indent" >   Where <span 
+class="cmtt-9">getter </span>and <span 
+class="cmtt-9">setter </span>are two new required parameters, and all the other are
+unchanged.
+<!--l. 373--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmtt-9">getter</span> </dt><dd 
+class="description">can be a string holding the name of the user class method, a bound or
+     unbound method of the user class, or a function that will receive the user
+     class instance. The function or method is required to return the value to
+     be read into the user class.
+     </dd><dt class="description">
+<span 
+class="cmtt-9">setter</span> </dt><dd 
+class="description">can be a string holding the name of the user class method, a bound or
+     unbound method of the user class, or a function that will receive the user
+     class instance and a value for setting.</dd></dl>
+<!--l. 388--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">7.3.3   </span> <a 
+ id="x11-360007.3.3"></a>Class <span 
+class="cmtt-9">StaticContainerAdapter</span></h5>
+<!--l. 389--><p class="noindent" >This class can be used to bound a set of widgets to a property that is a container,
+like a tuple, a list or a map, or in general a class that implements <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_getitem</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>and
+<span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_setitem</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_ </span>methods.
+<!--l. 394--><p class="indent" >   From the other hand, the set of widgets can be a list provided by the user, or a
+container widget like a Box, a Notebook, etc. Widgets will be linked by their position
+when the property is list-like, or by their names or instances when the property is
+map-like.
+<!--l. 400--><p class="indent" >   This class supports only properties that are static containers, i.e. those containers
+that do not change their length dynamically. If the container grows up in length, no
+change will occur in the view-side.
+<!--l. 405--><p class="indent" >   This class derives from class <span 
+class="cmtt-9">UserClassAdapter</span>.
+<!--l. 407--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">Widget connection</span> </dt><dd 
+class="description">Different   than   Adapter&#8217;s   method,   <span 
+class="cmtt-9">connect</span><span 
+class="cmtt-9">_widget</span>
+     accepts sets.
+
+     <div class="verbatim">
+     def&#x00A0;connect_widget(self,&#x00A0;widget,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;getters=None,&#x00A0;setters=None,
+     &#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;signals=None,&#x00A0;arg=None)
+</div>
+     <!--l. 418--><p class="nopar" >
+     <!--l. 421--><p class="noindent" >
+         <dl class="description"><dt class="description">
+     <span 
+class="cmbx-10">widget</span> </dt><dd 
+class="description">is either a container widget, or a list of widgets.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">getters</span> </dt><dd 
+class="description">optional function or list or a map of functions used to &#8220;read&#8221; the
+         widget(s). Each function receives a widget instance.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">setters</span> </dt><dd 
+class="description">optional function or list or a map of functions used to &#8220;write&#8221;
+         the widget(s). Each function receives a widget instance and value for
+         setting.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">signal</span> </dt><dd 
+class="description">can be None, a signal name, or a list or a map of signal names.
+         </dd><dt class="description">
+     <span 
+class="cmbx-10">arg</span> </dt><dd 
+class="description">Optional argument that is passed to each signal handler. It will be
+         used when connecting the signal(s).</dd></dl>
+     <!--l. 438--><p class="noindent" >When maps are used, keys can be widgets or widget names. The length of the
+     possible lists or maps must be lesser or equal to the number of widgets that will
+     be connected.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">update</span><span 
+class="cmbx-10">_model(idx=None)</span> </dt><dd 
+class="description">Updates the value of property at given index. If <span 
+class="cmtt-9">idx </span>is
+     <span 
+class="cmtt-9">None</span>, all controlled indices will be updated. This method should be called
+     directly by the user in very unusual conditions.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">update</span><span 
+class="cmbx-10">_widget(idx=None)</span> </dt><dd 
+class="description">Forces the widget at given index to be updated from
+     the property value. If index is not given, all controlled widgets will be updated.
+     This method should be called directly by the user when the property is not
+     observable, or in very unusual conditions.</dd></dl>
+<!--l. 454--><p class="indent" >   Since things got a bit convoluted here, some examples can help to understand
+how this kind of adapter can be used.
+<!--l. 458--><p class="indent" >   Suppose you have a glade file containing a button and a <span 
+class="cmtt-9">HBox </span>called <span 
+class="cmtt-9">"hbox"</span>
+containing a text entry, a label and a <span 
+class="cmtt-9">SpinButton</span>.
+<!--l. 462--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x11-3600110"></a>
+
+<div class="center" 
+>
+<!--l. 463--><p class="noindent" >
+
+<!--l. 464--><p class="noindent" ><img 
+src="figs/png/adap2.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;10: </td><td  
+class="content"> <span 
+class="cmtt-9">StaticContainerAdapter </span>at work</td></tr></table><!--tex4ht:label?: x11-3600110 -->
+</div>
+
+<!--l. 467--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 469--><p class="indent" >   The view is simply:
+
+   <div class="verbatim">
+class&#x00A0;MyView&#x00A0;(View):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self,&#x00A0;ctrl):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;View.__init__(self,&#x00A0;ctrl,&#x00A0;"adapters.glade",&#x00A0;"window")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />&#x00A0;&#x00A0;
+</div>
+<!--l. 478--><p class="nopar" >
+<!--l. 481--><p class="indent" >   The model contains a tuple of three integers that we want to connect to the
+widgets into the <span 
+class="cmtt-9">HBox</span>. When the button is clicked, one of the three integers is
+randomly incremented.
+
+   <div class="verbatim">
+class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;box&#x00A0;=&#x00A0;[0,1,2]
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("box",)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 491--><p class="nopar" >
+<!--l. 494--><p class="indent" >   The controller handles the button click signal:
+
+   <div class="verbatim">
+import&#x00A0;random
+&#x00A0;<br />class&#x00A0;MyCtrl&#x00A0;(Controller):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;on_button_clicked(self,&#x00A0;button):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.model.box[random.randint(0,2)]&#x00A0;+=&#x00A0;1
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />&#x00A0;&#x00A0;
+</div>
+<!--l. 503--><p class="nopar" >
+<!--l. 506--><p class="indent" >   If typically construction of adapters occurs into method <span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_adapters </span>for the
+sake of simplicity in this example instantiation of the adapter is located in the main
+launching code:
+
+   <div class="verbatim">
+m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />v&#x00A0;=&#x00A0;MyView()
+&#x00A0;<br />c&#x00A0;=&#x00A0;MyCtrl(m,&#x00A0;v)
+&#x00A0;<br />
+&#x00A0;<br />a&#x00A0;=&#x00A0;StaticContainerAdapter(m,&#x00A0;"box")
+&#x00A0;<br />a.connect_widget(v["hbox"])
+&#x00A0;<br />
+&#x00A0;<br />gtk.main()
+</div>
+<!--l. 521--><p class="nopar" >
+<!--l. 524--><p class="indent" >   Adaption of widgets occur by their position into the <span 
+class="cmtt-9">"hbox" </span>container.
+<!--l. 527--><p class="indent" >   Second example makes use of an explicit list of widgets, and exploits also
+parameter <span 
+class="cmtt-9">setters </span>to customize the way the label <span 
+class="cmtt-9">"lbl" </span>shows its value.
+
+   <div class="verbatim">
+m&#x00A0;=&#x00A0;MyModel()
+&#x00A0;<br />v&#x00A0;=&#x00A0;MyView()
+&#x00A0;<br />c&#x00A0;=&#x00A0;MyCtrl(m,&#x00A0;v)
+&#x00A0;<br />
+&#x00A0;<br />a1&#x00A0;=&#x00A0;StaticContainerAdapter(m,&#x00A0;"box")
+&#x00A0;<br />a1.connect_widget(map(lambda&#x00A0;x:&#x00A0;v[x],&#x00A0;"en&#x00A0;lbl&#x00A0;sb".split()),
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;setters&#x00A0;=&#x00A0;{&#8217;lbl&#8217;:&#x00A0;lambda&#x00A0;w,&#x00A0;v:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;w.set_markup("&#x003C;big&#x003E;Val:&#x00A0;&#x003C;b&#x003E;%d&#x003C;/b&#x003E;&#x003C;/big&#x003E;"&#x00A0;%&#x00A0;v)})
+&#x00A0;<br />
+&#x00A0;<br />gtk.main()
+</div>
+<!--l. 543--><p class="nopar" >
+<!--l. 546--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x11-3600211"></a>
+
+<div class="center" 
+>
+<!--l. 547--><p class="noindent" >
+
+<!--l. 548--><p class="noindent" ><img 
+src="figs/png/adap3.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;11: </td><td  
+class="content"> Customized setter for the label</td></tr></table><!--tex4ht:label?: x11-3600211 -->
+</div>
+
+<!--l. 551--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 554--><p class="indent" >   Finally, instead of being a tuple, the observable property can be also a map,
+whose keys are widget names.
+
+   <div class="verbatim">
+class&#x00A0;MyModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;box&#x00A0;=&#x00A0;{&#x00A0;&#8217;en&#8217;&#x00A0;&#x00A0;:&#x00A0;0,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;lbl&#8217;&#x00A0;:&#x00A0;1,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;sb&#8217;&#x00A0;&#x00A0;:&#x00A0;2&#x00A0;}
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("box",)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 565--><p class="nopar" >
+<!--l. 568--><p class="indent" >   in this case bounding between widgets and values into the property in the model
+is carried out by looking at names, and not position.
+   <h4 class="subsectionHead"><span class="titlemark">7.4   </span> <a 
+ id="x11-370007.4"></a>Support for adapter instantiation</h4>
+<!--l. 573--><p class="noindent" >As already seen, since version 1.2 class <span 
+class="cmtt-9">Controller </span>offers two new methods to support
+instantiation of adapters.
+<!--l. 576--><p class="indent" >
+     <dl class="description"><dt class="description">
+<span 
+class="cmbx-10">register</span><span 
+class="cmbx-10">_adapters()</span> </dt><dd 
+class="description">This method is called by the framework when it is the
+     best time to create all adapters. All that users are required to do is to
+     override this method into their controllers derived from <span 
+class="cmtt-9">Controller</span>.
+     </dd><dt class="description">
+<span 
+class="cmbx-10">adapt(...)</span> </dt><dd 
+class="description">This  method  can  be  used  within  <span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_adapters </span>to  adapt
+     properties and widgets. Arguments can be one of the following:
+     <!--l. 586--><p class="noindent" >
+         <ol  class="enumerate1" >
+         <li 
+  class="enumerate" id="x11-37002x1">Property name as a string. A corresponding widget is searched among
+         view&#8217;s widgets and if only one match is found, a default adapter
+         is created. The type of the created adapter depends both on the
+         property and the widget type. Widget name matching is performed
+         by searching the property name into widget names, case insensitive.
+         </li>
+         <li 
+  class="enumerate" id="x11-37004x2">Property name and widget name. Like previous but widget name is
+         explicitly declared.
+         </li>
+         <li 
+  class="enumerate" id="x11-37006x3">An instance of an Adapter. The adapter must be already connected
+         to a widget.</li></ol>
+     <!--l. 601--><p class="noindent" >The first two flavors of method <span 
+class="cmtt-9">adapt </span>allows for an easy construction of a
+     default adapter, but only the third allows for a full control.
+     </dd></dl>
+
+<!--l. 608--><p class="noindent" >
+   <h4 class="subsectionHead"><span class="titlemark">7.5   </span> <a 
+ id="x11-380007.5"></a>Supported widgets</h4>
+<!--l. 611--><p class="noindent" >Here follows the list of those widgets that are currently supported by the
+framework out of the box. In method <span 
+class="cmtt-9">Controller.adapt </span>when adapting a
+widget, it is searched into this list a matching and one or more adapters are
+created.
+<!--l. 616--><p class="indent" >   If no matching is found, a fallback tentative is to connect to widget signal
+<span 
+class="cmtt-9">"changed" </span>if there exists. If this fails, an assertion is raised.
+<!--l. 620--><p class="indent" >   If a widget is not listed here, it does not mean that it is not supported.
+Instead, it will be enough to specify all required parameters when instantiating
+adapters.
+<div class="center" 
+>
+<!--l. 624--><p class="noindent" >
+<div class="tabular"> <table id="TBL-2" class="tabular" 
+cellspacing="0" cellpadding="0" rules="groups" 
+><colgroup id="TBL-2-1g"><col 
+id="TBL-2-1"></colgroup><colgroup id="TBL-2-2g"><col 
+id="TBL-2-2"></colgroup><colgroup id="TBL-2-3g"><col 
+id="TBL-2-3"></colgroup><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-1-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-1"  
+class="td11">Widget type        </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-2"  
+class="td11">Property type      </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-1-3"  
+class="td11">Notes                     </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr 
+class="vspace" style="font-size:2.15277pt"><td 
+>&nbsp;</td><td 
+>&nbsp;</td><td 
+>&nbsp;</td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-2-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-1"  
+class="td11"><span 
+class="cmtt-9">gtk.Arrow         </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-2"  
+class="td11"><span 
+class="cmtt-9">gtk.ArrowType    </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-2-3"  
+class="td11">Current direction      </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-3-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-1"  
+class="td11"><span 
+class="cmtt-9">gtk.Calendar      </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-2"  
+class="td11"><span 
+class="cmtt-9">datetime </span>or <span 
+class="cmtt-9">date  </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-3-3"  
+class="td11">Selected day            </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-4-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-1"  
+class="td11"><span 
+class="cmtt-9">gtk.CheckMenuItem </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-2"  
+class="td11"><span 
+class="cmtt-9">types.BooleanType</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-4-3"  
+class="td11">Current toggle state  </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-5-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-1"  
+class="td11"><span 
+class="cmtt-9">gtk.ColorButton   </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-2"  
+class="td11"><span 
+class="cmtt-9">gtk.gdk.Color    </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-5-3"  
+class="td11">Selected colour         </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-6-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-1"  
+class="td11"><span 
+class="cmtt-9">gtk.ColorSelection</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-2"  
+class="td11"><span 
+class="cmtt-9">gtk.gdk.Color    </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-6-3"  
+class="td11">Selected colour         </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-7-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-7-1"  
+class="td11"><span 
+class="cmtt-9">gtk.Entry         </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-7-2"  
+class="td11">String                </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-7-3"  
+class="td11">Current entry content</td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-8-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-8-1"  
+class="td11"><span 
+class="cmtt-9">gtk.Expander      </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-8-2"  
+class="td11"><span 
+class="cmtt-9">types.BooleanType</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-8-3"  
+class="td11">True if expanded       </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-9-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-9-1"  
+class="td11"><span 
+class="cmtt-9">gtk.Label         </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-9-2"  
+class="td11">String or number </td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-9-3"  
+class="td11">Label content           </td>
+</tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-10-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-10-1"  
+class="td11"><span 
+class="cmtt-9">gtk.ToggleButton  </span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-10-2"  
+class="td11"><span 
+class="cmtt-9">types.BooleanType</span></td><td  style="white-space:nowrap; text-align:left;" id="TBL-2-10-3"  
+class="td11">Current toggle state  </td>
+</tr><tr 
+class="hline"><td><hr></td><td><hr></td><td><hr></td></tr><tr  
+ style="vertical-align:baseline;" id="TBL-2-11-"><td  style="white-space:nowrap; text-align:left;" id="TBL-2-11-1"  
+class="td11">                </td>
+</tr></table></div></div>
+<!--l. 88--><p class="indent" >
+
+
+   <!--l. 1--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvcse8.html" >prev</a>] [<a 
+href="pygtkmvcse8.html#tailpygtkmvcse8.html" >prev-tail</a>] [<a 
+href="pygtkmvcse7.html" >front</a>] [<a 
+href="pygtkmvc.html#pygtkmvc1.tmp" >up</a>] </p></div>
+<!--l. 1--><p class="indent" >   <a 
+ id="tailpygtkmvcse7.html"></a>   
+</body></html> 

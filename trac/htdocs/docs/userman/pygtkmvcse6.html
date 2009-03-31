@@ -1,0 +1,295 @@
+<html > 
+<head><title> A simple application</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
+<!-- html,2,info,next,mouseover,no-DOCTYPE --> 
+<meta name="src" content="pygtkmvc.tex"> 
+<meta name="date" content="2009-03-31 17:46:00"> 
+<link rel="stylesheet" type="text/css" href="pygtkmvc.css"> 
+<script type="text/javascript" src="pygtkmvc-js.js"></script> 
+<script type="text/javascript" src="overlib.js"><!-- overLIB (c) Erik Bosrup --></script> <!--http://www.bosrup.com/web/overlib/--></head><body 
+><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div> 
+   <!--l. 12--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvc1.tmp" >next</a>] [<a 
+href="pygtkmvcse7.html" >prev</a>] [<a 
+href="pygtkmvcse7.html#tailpygtkmvcse7.html" >prev-tail</a>] [<a 
+href="#tailpygtkmvcse6.html">tail</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse8.html" >up</a>] </p></div>
+   <h3 class="sectionHead"><span class="titlemark">6   </span> <a 
+ id="x10-240006"></a> A simple application</h3>
+<!--l. 13--><p class="noindent" >This section describes the process of creation of a sample application, from the
+design with <span 
+class="cmsl-10">Glade</span>, to the integration of views and code inside the <span 
+class="cmti-10">MVC&#8211;O</span>
+Infrastructure.
+<!--l. 17--><p class="indent" >   We want to design and implement a simple application constituted by only one
+window, containing two string labels. One label shows a text, while the other shows
+the number of characters displayed (i.e. the length of the string) by the first one.
+There is also a button the user can press. By pressing the button, the user can
+change the displayed text, and of course this action might change also the displayed
+text length accordingly. Figure <a 
+href="#x10-240015">5<!--tex4ht:ref: EX:f --></a> gives an idea on how the application should
+appear.
+<!--l. 26--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x10-240015"></a>
+
+<div class="center" 
+>
+<!--l. 27--><p class="noindent" >
+
+<!--l. 28--><p class="noindent" ><img 
+src="figs/png/example.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;5: </td><td  
+class="content">The sample Application</td></tr></table><!--tex4ht:label?: x10-240015 -->
+</div>
+
+<!--l. 31--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+   <h4 class="subsectionHead"><span class="titlemark">6.1   </span> <a 
+ id="x10-250006.1"></a><span 
+class="cmsl-10">Glade</span></h4>
+<!--l. 34--><p class="noindent" >Figure <a 
+href="#x10-250016">6<!--tex4ht:ref: GL:f --></a> shows <span 
+class="cmsl-10">Glade </span>and a project named <span 
+class="cmtt-9">example</span>. The sample <span 
+class="cmti-10">GUI </span>has only one
+top-level window (named <span 
+class="cmtt-9">window1</span>).
+<!--l. 38--><p class="indent" >   <hr class="figure"><div class="figure" 
+><table class="figure"><tr class="figure"><td class="figure" 
+>
+
+<a 
+ id="x10-250016"></a>
+
+<div class="center" 
+>
+<!--l. 39--><p class="noindent" >
+
+<!--l. 40--><p class="noindent" ><img 
+src="figs/png/example_glade.png" alt="PIC"  
+>
+<br /> <table class="caption" 
+><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;6: </td><td  
+class="content">Designing the example by means of <span 
+class="cmsl-10">Glade </span>for GTK2</td></tr></table><!--tex4ht:label?: x10-250016 -->
+</div>
+
+<!--l. 43--><p class="indent" >   </td></tr></table></div><hr class="endfigure">
+<!--l. 45--><p class="indent" >   The <span 
+class="cmsl-10">Widget Tree Window </span>shows the widgets hierarchy. There are essentially the
+three main components (one button and two labels), grouped inside a set of
+<span 
+class="cmti-10">containers</span>, which supplies alignments and resizing capabilities.
+<!--l. 50--><p class="indent" >   On the right side of Figure <a 
+href="#x10-250016">6<!--tex4ht:ref: GL:f --></a>, the <span 
+class="cmsl-10">Properties Window </span>shows that the widget
+named <span 
+class="cmtt-9">button1 </span>has signal <span 
+class="cmtt-9">clicked </span>associated with function <span 
+class="cmtt-9">on</span><span 
+class="cmtt-9">_button1</span><span 
+class="cmtt-9">_clicked</span>. This
+means that the Controller will have to supply this function in order to handle the
+<span 
+class="cmtt-9">click </span>event occurring in <span 
+class="cmtt-9">button1</span>.
+   <h4 class="subsectionHead"><span class="titlemark">6.2   </span> <a 
+ id="x10-260006.2"></a>Implementation</h4>
+<!--l. 58--><p class="noindent" >The implementation is slightly elaborate for this example, because the goal here is to
+show how the sample application can be implemented by using the <span 
+class="cmti-10">MVC&#8211;O</span>
+Infrastructure.
+<!--l. 62--><p class="indent" >   A basic knowledge of any Object Oriented programming language is sufficient to
+understand how this example has been pushed inside the <span 
+class="cmti-10">MVC&#8211;O </span>framework. On the
+contrary, a fair knowledge of the Python language is required in order to understand
+the code details.
+<!--l. 67--><p class="indent" >   More description section is <a 
+href="pygtkmvcse5.html#x9-100005">5<!--tex4ht:ref: DI --></a>.
+<!--l. 70--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">6.2.1   </span> <a 
+ id="x10-270006.2.1"></a>View</h5>
+<!--l. 71--><p class="noindent" >In the example, the View is implemented inside the class <span 
+class="cmtt-9">ExampleView </span>shown
+below.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;View
+&#x00A0;<br />import&#x00A0;os.path
+&#x00A0;<br />
+&#x00A0;<br />GLADE_PATH&#x00A0;=&#x00A0;"./glade"
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;ExampleView&#x00A0;(View):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""The&#x00A0;application&#x00A0;view.&#x00A0;Contains&#x00A0;only&#x00A0;the&#x00A0;main&#x00A0;window1&#x00A0;tree."""
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;glade&#x00A0;=&#x00A0;os.path.join(GLADE_PATH,&#x00A0;"example.glade")
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;top&#x00A0;=&#x00A0;"window1"
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 86--><p class="nopar" >
+<!--l. 88--><p class="indent" >   Class <span 
+class="cmtt-9">ExampleView </span>extends the generic <span 
+class="cmtt-9">View </span>class, which performs most of the job,
+as described above. Class memebers <span 
+class="cmtt-9">glade </span>and <span 
+class="cmtt-9">top </span>are used instead of calling <span 
+class="cmtt-9">View</span>
+constructor directly.
+<!--l. 93--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">6.2.2   </span> <a 
+ id="x10-280006.2.2"></a>Model</h5>
+<!--l. 94--><p class="noindent" >Class <span 
+class="cmtt-9">ExampleModel </span>is as simple as class <span 
+class="cmtt-9">ExampleView</span>. As for <span 
+class="cmtt-9">ExampleView</span>, it extends a
+base class of the <span 
+class="cmti-10">MVC&#8211;O </span>Infrastructure, class <span 
+class="cmtt-9">Model</span>. The state is represented by a
+set of possible messages, as well as by the current message index. The current
+message index is also an observable property. A couple of methods are supplied in
+order to access the state.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Model
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;ExampleModel&#x00A0;(Model):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""The&#x00A0;model&#x00A0;contains&#x00A0;a&#x00A0;set&#x00A0;of&#x00A0;messages
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;and&#x00A0;an&#x00A0;observable&#x00A0;property&#x00A0;that&#x00A0;represent&#x00A0;the&#x00A0;current&#x00A0;message
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;index"""
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;Observable&#x00A0;property:&#x00A0;code&#x00A0;for&#x00A0;that&#x00A0;is&#x00A0;automatically&#x00A0;generated
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;by&#x00A0;metaclass&#x00A0;constructor.&#x00A0;The&#x00A0;controller&#x00A0;will&#x00A0;be&#x00A0;the&#x00A0;observer
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;for&#x00A0;this&#x00A0;property
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;message_index&#x00A0;=&#x00A0;-1&#x00A0;&#x00A0;&#x00A0;#&#x00A0;-1&#x00A0;is&#x00A0;the&#x00A0;initial&#x00A0;value
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;__observables__&#x00A0;=&#x00A0;("message_index",)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;Model.__init__(self)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.messages=&#x00A0;(&#8217;Initial&#x00A0;message&#8217;,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;Another&#x00A0;message&#8217;,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;Another&#x00A0;message&#x00A0;again&#8217;,
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#8217;Model&#x00A0;changed&#x00A0;again!&#8217;)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;get_message(self,&#x00A0;index):&#x00A0;return&#x00A0;self.messages[index]
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;set_next_message(self):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;this&#x00A0;changes&#x00A0;the&#x00A0;observable&#x00A0;property:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.message_index&#x00A0;=&#x00A0;(self.message_index&#x00A0;+&#x00A0;1)&#x00A0;%&#x00A0;len(self.messages)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+&#x00A0;<br />
+</div>
+<!--l. 135--><p class="nopar" >
+<!--l. 138--><p class="indent" >   Notice that class instance members are declared to be observable through the
+special class variable <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_observables</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span>, which is a list of names (string) of the
+properties that are observable.
+<!--l. 143--><p class="indent" >   The base class Model belongs to a meta-class which automatically searches for
+observable properties and generates the needed code to handle the notification. When
+the value of variable <span 
+class="cmtt-9">message</span><span 
+class="cmtt-9">_index </span>changes, all registered observers will be
+notified.
+<!--l. 149--><p class="indent" >   It is also possible to use the special class&#8217; variable <span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_properties</span><span 
+class="cmtt-9">_</span><span 
+class="cmtt-9">_</span>, which is a map
+of (property, value) couples. This variable was used in older versions of <span 
+class="cmti-10">gtkmvc </span>and
+now should be avoided.
+
+<!--l. 154--><p class="noindent" >
+   <h5 class="subsubsectionHead"><span class="titlemark">6.2.3   </span> <a 
+ id="x10-290006.2.3"></a>Controller</h5>
+<!--l. 155--><p class="noindent" >Class <span 
+class="cmtt-9">ExampleController </span>contains the <span 
+class="cmti-10">logic </span>of the application. The controller handles
+two signals and the observable property notification. Signals are the <span 
+class="cmtt-9">destroy </span>event,
+invoked when the application quits, and the <span 
+class="cmtt-9">on</span><span 
+class="cmtt-9">_button1</span><span 
+class="cmtt-9">_clicked</span>, fired when <span 
+class="cmtt-9">button1</span>
+is pressed.
+
+   <div class="verbatim">
+from&#x00A0;gtkmvc&#x00A0;import&#x00A0;Controller
+&#x00A0;<br />from&#x00A0;gtk&#x00A0;import&#x00A0;mainquit
+&#x00A0;<br />
+&#x00A0;<br />class&#x00A0;ExampleController(Controller):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""The&#x00A0;only&#x00A0;one&#x00A0;controller.&#x00A0;Handles&#x00A0;the&#x00A0;button&#x00A0;clicked&#x00A0;signal,&#x00A0;and
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;notifications&#x00A0;about&#x00A0;one&#x00A0;observable&#x00A0;property."""
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;__init__(self,&#x00A0;model,&#x00A0;view):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""Contructor.&#x00A0;model&#x00A0;will&#x00A0;be&#x00A0;accessible&#x00A0;via&#x00A0;the&#x00A0;member&#x00A0;&#8217;self.model&#8217;.
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;View&#x00A0;registration&#x00A0;is&#x00A0;also&#x00A0;performed."""
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;Controller.__init__(self,&#x00A0;model,&#x00A0;view)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;register_view(self,&#x00A0;view):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;Connects&#x00A0;the&#x00A0;exiting&#x00A0;signal:
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;view.get_top_widget().connect("destroy",&#x00A0;mainquit)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;Signal
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;on_button1_clicked(self,&#x00A0;button):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""Handles&#x00A0;the&#x00A0;signal&#x00A0;clicked&#x00A0;for&#x00A0;button1.&#x00A0;Changes&#x00A0;the&#x00A0;model."""
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.model.set_next_message()
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;#&#x00A0;Observables&#x00A0;notifications&#x00A0;(value):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;def&#x00A0;property_message_index_value_change(self,&#x00A0;model,&#x00A0;old,&#x00A0;new):
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;"""The&#x00A0;model&#x00A0;is&#x00A0;changed&#x00A0;and&#x00A0;the&#x00A0;view&#x00A0;must&#x00A0;be&#x00A0;updated"""
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;msg&#x00A0;=&#x00A0;self.model.get_message(new)
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.view[&#8217;label_text&#8217;].set_text(msg)
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;self.view[&#8217;label_text_len&#8217;].set_text(str(len(msg)))
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;&#x00A0;return
+&#x00A0;<br />
+&#x00A0;<br />&#x00A0;&#x00A0;&#x00A0;&#x00A0;pass&#x00A0;#&#x00A0;end&#x00A0;of&#x00A0;class
+</div>
+<!--l. 198--><p class="nopar" >
+<!--l. 201--><p class="indent" >   The <span 
+class="cmtt-9">destroy </span>signal is connected when the View registers itself inside the controller,
+by using the method override of <span 
+class="cmtt-9">register</span><span 
+class="cmtt-9">_view</span>. Method <span 
+class="cmtt-9">on</span><span 
+class="cmtt-9">_button1</span><span 
+class="cmtt-9">_clicked </span>calls a
+method inside the model which changes a part of the state inside the model. Since
+that part of the state is an observable property, the associated observer (which
+is the controller itself) is notified of the modification, by calling method
+<span 
+class="cmtt-9">property</span><span 
+class="cmtt-9">_message</span><span 
+class="cmtt-9">_index</span><span 
+class="cmtt-9">_value</span><span 
+class="cmtt-9">_change</span>. This method updates the view connected to
+the controller.
+<!--l. 83--><p class="indent" >
+
+
+   <!--l. 1--><div class="crosslinks"><p class="noindent">[<a 
+href="pygtkmvc1.tmp" >next</a>] [<a 
+href="pygtkmvcse7.html" >prev</a>] [<a 
+href="pygtkmvcse7.html#tailpygtkmvcse7.html" >prev-tail</a>] [<a 
+href="pygtkmvcse6.html" >front</a>] [<a 
+href="pygtkmvc.html#pygtkmvcse8.html" >up</a>] </p></div>
+<!--l. 1--><p class="indent" >   <a 
+ id="tailpygtkmvcse6.html"></a>    
+</body></html> 

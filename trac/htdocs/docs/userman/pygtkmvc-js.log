@@ -1,0 +1,11 @@
+This is TeX, Version 3.141592 (Web2C 7.5.6) (format=tex 2008.11.2)  31 MAR 2009 17:46
+**\def\Link#1.a.b.c.{\expandafter\def\csname tex4ht\endcsname{\expandafter\def\
+csname tex4ht\endcsname{#1,xhtml}\input tex4ht.sty }}\def\HCode{\futurelet\HCod
+e\HChar}\def\HChar{\ifx"\HCode\def\HCode"##1"{\Link##1}\expandafter\HCode\else\
+expandafter\Link\fi}\HCode .a.b.c.\input  pygtkmvc-js
+(./pygtkmvc-js.tex (/usr/share/texmf/tex/generic/tex4ht/onmouseover.4ht
+version 2008-06-13-00:02
+\CodeNumber=\count26
+)
+[1] )
+Output written on pygtkmvc-js.dvi (1 page, 1084 bytes).

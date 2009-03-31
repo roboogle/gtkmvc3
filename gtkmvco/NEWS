@@ -1,7 +1,68 @@
 **********************************************************************
-*  Aug 26 2008                                                        * 
+*  Apr 1 2009                                                        * 
 **********************************************************************
 
+Released version 1.99.0
+
+This is a major release that breaks backward compatibility with the
+1.2 family.
+
+Also, this version is not stable yet, as there might be some changes
+in the forthcoming releases toward version 2.0.0.
+
+* New features
+  Features 1 and 2 cause this version to be no backward compatible.
+  
+  1. View's constructor no longer takes a controller.
+
+  2. Controller's constructor takes a view. This allows (together with
+     1.) to have multiple controllers controlling a shared view,
+     making possible to decompose controllers (see the website for
+     details)
+
+  3. Support for SQLObject (support for SQLAlchemy delayed to 1.99.1)
+
+  4. Support for custom observable properties in Models. Now it is
+     possible to define observable properties whose values are stored
+     outside the model, in a DB, a file, a network, etc.
+
+  5. New syntax for defining observable properties. Now class
+     attributes are used as in common ORMs.
+
+  6. Explicit declaration of observing methods into observer through
+     decorators.
+
+  7. Views have attributes 'glade' and 'top' to simplify their
+     construction.
+
+  8. gtkmvc has now its own logging system that users can set when
+     required. Previous naive prints have been removed. 
+
+* Documentation
+  1. New website
+
+  2. New Quick Start Guide
+
+  
+* Refactoring, Bug fixes
+  1. Improved performances
+
+  2. Cleaned up View construction, that is now much more simple
+  
+  3. Fixed a row of minor bugs
+
+Thanks to those who provided feedback and bug reports.
+In particular, to:
+
+Henrik Bohre <henrik TOD bohre TA gmail TOD com>
+Joel Cross
+Alessandro Dentella <sandro TA e-den TOD it>
+Christopher Groskopf <cgroskop TA calpoly TOD edu>
+
+
+**********************************************************************
+*  Aug 26 2008                                                       * 
+**********************************************************************
 Released version 1.2.2
 
 This is a minor release that fixes two major bugs about adapters. 
@@ -11,7 +72,7 @@ reporting bugs.
 
 
 **********************************************************************
-*  Oct 15 2007                                                        * 
+*  Oct 15 2007                                                       * 
 **********************************************************************
 
 Released version 1.2.1
@@ -22,7 +83,7 @@ reporting it.
 
 
 **********************************************************************
-*  Oct 14 2007                                                        * 
+*  Oct 14 2007                                                       * 
 **********************************************************************
 
 Released version 1.2.0

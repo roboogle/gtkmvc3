@@ -77,11 +77,8 @@ class MyCtrl (gtkmvc.Controller):
  #-----------------------------------------------------------
 
 class MyModel (gtkmvc.Model):
-
-    __properties__ = {
-        'text' : "Ciao",
-        }
-
+    text = "Ciao"
+    __observables__ = ("text",)
     pass # end of class
  #-----------------------------------------------------------
 

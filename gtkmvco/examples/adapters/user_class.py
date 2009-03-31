@@ -63,26 +63,21 @@ class UserClass (observable.Observable):
 
 
 class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window2")
-        return
+    glade = "adapters.glade"
+    top = "window2"
     pass
 
 
 class MyModel (Model):
-    __properties__ = {
-        'xx' : UserClass(10), 
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    xx = UserClass(10)
+    __observables__ = ("xx",)
     pass
 
 
 class MyCtrl (Controller):
     def register_adapters(self):
-        a = UserClassAdapter(self.model, "xx", "get_x", "set_x", value_error=myerr)
+        a = UserClassAdapter(self.model, "xx", "get_x", "set_x",
+                             value_error=myerr)
         a.connect_widget(self.view["en2"])
         self.adapt(a)
         return

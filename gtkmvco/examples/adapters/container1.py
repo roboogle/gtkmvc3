@@ -34,27 +34,18 @@ import gtk
 # observable property containing a tuple of values
 
 class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window3")
-        return
+    glade = "adapters.glade"
+    top = "window3"
     pass
 
 
 class MyModel (Model):
-    __properties__ = {
-        'box' : [0,1,2]
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    box = [0,1,2]
+    __observables__ = ("box",)
     pass
 
 import random
 class MyCtrl (Controller):
-    def __init__(self, m,v):
-        Controller.__init__(self, m, v)
-        return
 
     def register_adapters(self):
         a = StaticContainerAdapter(self.model, "box")

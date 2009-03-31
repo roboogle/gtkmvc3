@@ -36,27 +36,18 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window5")
-        return
+    glade = "adapters.glade"
+    top = "window5"
     pass
 
 import datetime
 class MyModel (Model):
-    __properties__ = {
-        'data' : datetime.datetime.today()
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    data = datetime.datetime.today()
+    __observables__ = ("data",)
     pass
 
 
 class MyCtrl (Controller):
-    def __init__(self, m, v):
-        Controller.__init__(self, m, v)
-        return
 
     def register_adapters(self):
         self.adapt("data", "calendar")

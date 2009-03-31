@@ -42,20 +42,12 @@ class MyView (View):
 
 
 class MyModel (Model):
-    __properties__ = {
-        'dir' : gtk.ARROW_UP,
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    dir = gtk.ARROW_UP
+    __observables__ = ("dir",)
     pass
 
 
 class MyCtrl (Controller):
-    def __init__(self, m, v):
-        Controller.__init__(self, m, v)
-        return
 
     def register_adapters(self):
         self.adapt("dir")

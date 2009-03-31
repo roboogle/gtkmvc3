@@ -34,23 +34,15 @@ import gtk
 # observable property containing a map of integers
 
 class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window3")
-        return
+    glade = "adapters.glade"
+    top = "window3"
     pass
 
-
 class MyModel (Model):
-    __properties__ = {
-        'box' : { 'en3' : 0,
-                  'lbl3' : 1,
-                  'sb3' : 2
-                  }
-        }
-    
-    def __init__(self):
-        Model.__init__(self)
-        return
+    box = { 'en3' : 0,
+            'lbl3' : 1,
+            'sb3' : 2 }
+    __observables__ = ("box",)
     pass
 
 import random

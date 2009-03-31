@@ -40,9 +40,8 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window9")
-        return
+    glade = "adapters.glade"
+    top = "window9"
     pass
 
 import datetime
@@ -55,7 +54,6 @@ class MyModel (Model):
     spin = 5.0
 
     __observables__ = ("expan", "toggle", "color", "url", "spin")
-
     pass
 
 

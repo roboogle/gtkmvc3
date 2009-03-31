@@ -446,8 +446,8 @@ class TreeStoreModel (Model, gtk.TreeStore):
     __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
     
     def __init__(self, column_type, *args):
-        Model.__init__(self)
         gtk.TreeStore.__init__(self, column_type, *args)
+        Model.__init__(self)
         return
     pass
 
@@ -459,8 +459,8 @@ class ListStoreModel (Model, gtk.ListStore):
     __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
     
     def __init__(self, column_type, *args):
-        Model.__init__(self)
         gtk.ListStore.__init__(self, column_type, *args)
+        Model.__init__(self)
         return
     pass
     
@@ -472,8 +472,8 @@ class TextBufferModel (Model, gtk.TextBuffer):
     __metaclass__  = support.metaclasses.ObservablePropertyGObjectMeta   
     
     def __init__(self, table=None):
-        Model.__init__(self)
         gtk.TextBuffer.__init__(self, table)
+        Model.__init__(self)
         return
     pass
     

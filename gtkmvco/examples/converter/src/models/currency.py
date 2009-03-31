@@ -28,12 +28,10 @@ from gtkmvc import observable
 
 class CurrencyModel (Model):
 
-    __properties__ = {
-        'name' : "New",
-        'rate' : 1.0,
-        'notes' : "",
-        }
-
+    name = "New"
+    rate = 1.0
+    notes = ""
+    __observables__ = ("name", "rate", "notes")
 
     def __init__(self, name=None, rate=None, notes=None):
         Model.__init__(self)

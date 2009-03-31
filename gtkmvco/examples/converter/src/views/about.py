@@ -32,11 +32,7 @@ import gtk
 class AboutView (View):
     """This is the view for the 'About' dialog"""
     
-    GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "about.glade") 
-
-    def __init__(self):
-        View.__init__(self, self.GLADE_FILE)
-        return
+    glade = os.path.join(utils.globals.GLADE_DIR, "about.glade") 
 
     def set_text(self, text):
         self['label_text'].set_markup(text)

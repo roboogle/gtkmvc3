@@ -54,15 +54,8 @@ class ExistingClass (object):
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        # the tuple contains: class name, instance and the list of
-        # method names that we want to have observed:
-        'obj' : (ExistingClass, ExistingClass(), ('change',)),
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    obj = (ExistingClass, ExistingClass(), ('change',))
+    __observables__ = ["obj"]
 
     pass # end of class
 

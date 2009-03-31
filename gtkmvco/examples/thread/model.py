@@ -41,9 +41,6 @@ class MyModel (ModelMT):
     counter = 0
     busy = False
     __observables__ = ('counter', 'busy')
-#    __properties__ = { 'counter' : 0,
-#                       'busy' : False, 
-#                       }
     
     def __init__(self):
         ModelMT.__init__(self)

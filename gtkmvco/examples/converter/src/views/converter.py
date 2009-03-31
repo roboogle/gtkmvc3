@@ -35,7 +35,7 @@ import os.path
 class ConverterView (View):
     """A view for the converter"""
     
-    GLADE_FILE = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
+    glade = os.path.join(utils.globals.GLADE_DIR, "converter.glade")
 
     def __init__(self, stand_alone=True):
         """stand_alone means that this view has a its-own windows, i.e. the
@@ -43,7 +43,7 @@ class ConverterView (View):
 
         if stand_alone: twid = "window_converter"
         else: twid = "vbox_converter"
-        View.__init__(self, self.GLADE_FILE, twid)
+        View.__init__(self, top=twid)
 
         # creates and connects sub views
         self.source = AmountView()

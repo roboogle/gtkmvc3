@@ -35,12 +35,11 @@ class AboutModel (Model):
     spirit of this tutorial, the usage of an observable property for
     the credits text is an exaggeration.""" 
 
-    __properties__ = {
-        'credits' : "",
-        }
-
+    credits = ""
     CREDITS_FILE = os.path.join(utils.globals.TOP_DIR, "about")
 
+    __observables__ = ("credits",)
+    
     def __init__(self):
         Model.__init__(self)
 

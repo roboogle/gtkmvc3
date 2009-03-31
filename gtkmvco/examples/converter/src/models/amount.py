@@ -34,11 +34,10 @@ class AmountModel (Model):
     and an iterator within the currencies model pointing to the
     currently selected currency which the amount refer to."""
 
-    __properties__ = {
-        'amount' : 0.0,
-        'iter'   : None,
-        }
-
+    amount = 0.0
+    iter = None
+    __observables__ = ("amount", "iter")
+    
     def __init__(self, currencies_model):
         Model.__init__(self)
         

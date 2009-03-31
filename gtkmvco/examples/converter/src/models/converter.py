@@ -29,18 +29,17 @@ from amount import AmountModel
 from gtkmvc import Model
 
 class ConverterModel (Model):
-    __properties__ = {
-        'can_convert' : False,
-        }
+    can_convert = False
+    __observables__ = ("can_convert",)
+
     def __init__(self, currencies_model):
         Model.__init__(self)
 
         self.source = AmountModel(currencies_model)
         self.target = AmountModel(currencies_model)
 
-        self.source.register_observer(self)
-        self.target.register_observer(self)
-
+        self.observe_model(self.source)
+        self.observe_model(self.target)
         return
 
     def convert(self):

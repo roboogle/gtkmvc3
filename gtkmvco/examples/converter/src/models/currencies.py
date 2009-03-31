@@ -39,9 +39,9 @@ class CurrenciesModel (ListStoreModel):
     file is kept aligned if the model is changed later"""
 
     def __init__(self, filename=None):
+
         ListStoreModel.__init__(self, gobject.TYPE_PYOBJECT # currency model
                                 );
-
         self.parser = xml.parsers.expat.ParserCreate()
         self.parser.StartElementHandler = self.__start_element
         self.parser.EndElementHandler = self.__end_element

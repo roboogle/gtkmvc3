@@ -65,10 +65,9 @@ class AppModel(Model):
 
 
 class NoteModel(TextBufferModel):
-	__properties__ = {
-		"enabled": True,
-		"title": "",
-	}
+	enabled = True
+	title = ""
+	__observables__ = ("enabled", "title")
 
 	def __init__(self, title="", text="", enabled=True):
 		TextBufferModel.__init__(self)

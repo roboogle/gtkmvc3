@@ -42,13 +42,8 @@ import gtkmvc.observable as observable
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        'sgn'  : observable.Signal(),
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    sgn = observable.Signal()
+    __observables__ = ("sgn",)
 
     pass
 

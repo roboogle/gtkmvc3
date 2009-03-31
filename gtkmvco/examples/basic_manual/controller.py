@@ -29,9 +29,6 @@ from gtkmvc import Controller
 class MyCtrl (Controller):
     """Handles signal processing, and keeps alignment of model and
     view"""
-    def __init__(self, model, view):
-        Controller.__init__(self, model, view)
-        return
 
     def register_view(self, view):
         self.view['window'].connect("delete-event", self.on_window_delete_event)

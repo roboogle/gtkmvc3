@@ -36,6 +36,8 @@
 
 
 import _importer
+
+import _importer
 from gtkmvc import Model, Observer, observable
 
 # ----------------------------------------------------------------------
@@ -57,13 +59,8 @@ class AdHocClass (observable.Observable):
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        'obj' : AdHocClass(),
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    obj = AdHocClass()
+    __observables__ = ("obj",)
 
     pass # end of class
 

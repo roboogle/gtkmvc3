@@ -30,17 +30,10 @@ class MyModel (Model):
     """Our model contains a numeric counter and a numeric value that
     holds the value that the counter must be assigned to when we the
     model is reset"""
-
-    __properties__ = {
-        'counter' : 0, 
-        'reset_value' : 0,
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
+    counter = 0 
+    reset_value = 0
+    __observables__ = ('counter', 'reset_value')
 
     def reset(self): self.counter = self.reset_value
-
     pass # end of class
     

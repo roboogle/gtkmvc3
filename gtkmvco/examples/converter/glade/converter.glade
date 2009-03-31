@@ -111,7 +111,7 @@
 	  <property name="update_policy">GTK_UPDATE_ALWAYS</property>
 	  <property name="snap_to_ticks">False</property>
 	  <property name="wrap">False</property>
-	  <property name="adjustment">0 0 1000000000 1 10 10</property>
+	  <property name="adjustment">0 0 1000000000 1 10 0</property>
 	  <signal name="value_changed" handler="on_sb_amount_value_changed" last_modification_time="Sat, 25 Nov 2006 16:20:46 GMT"/>
 	</widget>
 	<packing>
@@ -564,7 +564,7 @@
 	  <property name="update_policy">GTK_UPDATE_ALWAYS</property>
 	  <property name="snap_to_ticks">False</property>
 	  <property name="wrap">False</property>
-	  <property name="adjustment">1 0 1000000 1 10 10</property>
+	  <property name="adjustment">1 0 1000000 1 10 0</property>
 	  <signal name="value_changed" handler="on_sb_rate_value_changed" last_modification_time="Sat, 25 Nov 2006 15:53:36 GMT"/>
 	</widget>
 	<packing>

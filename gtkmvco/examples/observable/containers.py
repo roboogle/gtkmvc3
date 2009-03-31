@@ -39,17 +39,12 @@ class MyModel (Model):
     """Since version 1.0.0, both maps and lists are allowed as
     observable properties. When changed, observers' methods
     property_<name>_{before,after}_change will be called if found."""
-    
-    __properties__ = {
-        'a_int'  : 0, 
-        'a_list' : [],
-        'a_map'  : {},
-        }
 
-    def __init__(self):
-        Model.__init__(self)
-        return    
+    a_int = 0
+    a_list = []
+    a_map = {}
 
+    __observables__ = ["a_*"]
     pass
 
 
@@ -58,12 +53,7 @@ class MyObserver (Observer):
     """Since version 1.0.0, base class 'Observer' is provided to
     create observers that are not necessarily derived from Controller"""
 
-    def __init__(self, model):
-        Observer.__init__(self, model)
-        return
-
     # notifications
-
     def property_a_int_value_change(self, model, old, new):
         print "a_int changed!"
         return
@@ -102,7 +92,7 @@ if __name__ == "__main__":
     c = MyObserver(m)
 
     # change int:
-    m.int = 20
+    m.a_int = 20
 
     # change the list:
     m.a_list.append(10)

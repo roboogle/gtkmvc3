@@ -149,7 +149,7 @@ class CurrenciesCtrl (Controller):
             self.apply_modification()
             return
 
-        self.unregister_model() # self unregisters itself
+        self.relieve_model(self.model) # no longer observed
         if id == gtk.RESPONSE_CLOSE: self.view.destroy()
         return
         

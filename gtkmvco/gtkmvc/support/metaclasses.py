@@ -100,7 +100,10 @@ class PropertyMeta (type):
         for prop in type(cls).__get_observables_array__(cls):
             val = _dict.get(prop, None)
             if val is not None: type(cls).__create_prop_accessors__(cls, prop, val)
-            elif type(getattr(cls, prop)) != property: type(cls).__create_prop_accessors__(cls, prop, val)
+            # a getter/setter pair or an observable attribute:
+            elif not hasattr(cls, prop) or type(getattr(cls, prop)) != property:
+                type(cls).__create_prop_accessors__(cls, prop, val)
+                pass
             obs.add(prop)
             pass
 
@@ -431,8 +434,8 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
       has_prop_variable = cls.has_prop_attribute(prop_name)
 
       has_specific_setter = (
-          hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and # has property getter and setter 
-          hasattr(cls, SET_PROP_NAME % {'prop_name' : name}))
+          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
+          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
 
       has_general_setter = (
           hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
@@ -453,7 +456,7 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
           setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
           pass          
       
-      return """def %(setter_name)s(self, val): 
+      return ("""def %(setter_name)s(self, val): 
  old = """ + getter + """
  new = type(self).create_value('%(prop_name)s', val, self)
  self._prop_lock.acquire()
@@ -462,7 +465,7 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
  if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s')
  self.notify_property_value_change('%(prop_name)s', old, val)
  return
-""" % {'setter_name':setter_name, 'prop_name':prop_name}
+""") % {'setter_name':setter_name, 'prop_name':prop_name}
 
   pass #end of class
 
@@ -514,5 +517,4 @@ except:
   class ObservablePropertyGObjectMeta (ObservablePropertyMeta): pass
   class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT): pass
   pass
-
 

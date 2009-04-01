@@ -1,3 +1,7 @@
+**********************************************************************
+*  Apr 1 2009                                                        * 
+**********************************************************************
+
 Released version 1.99.0
 
 This is a major release that breaks backward compatibility with the
@@ -54,3 +58,104 @@ Henrik Bohre <henrik TOD bohre TA gmail TOD com>
 Joel Cross
 Alessandro Dentella <sandro TA e-den TOD it>
 Christopher Groskopf <cgroskop TA calpoly TOD edu>
+
+
+**********************************************************************
+*  Aug 26 2008                                                       * 
+**********************************************************************
+Released version 1.2.2
+
+This is a minor release that fixes two major bugs about adapters. 
+A few new examples about adapters have been also added. 
+Thanks to Alessandro Dentella <sandro TA e-den TOD it> for 
+reporting bugs.
+
+
+**********************************************************************
+*  Oct 15 2007                                                       * 
+**********************************************************************
+
+Released version 1.2.1
+
+This is a minor release that fixes a minor bug.
+Thanks to Roman Dobosz <gryf TA elysium TOD pl> for promptly
+reporting it.
+
+
+**********************************************************************
+*  Oct 14 2007                                                       * 
+**********************************************************************
+
+Released version 1.2.0
+
+* New features:
+
+  - Added adapters, new entities that largely simplify and reduce
+    costs and development efforts. Adapters handles autonomous
+    coordination between properties into models and widgets into
+    views. Roughly speaking, an adapter keeps aligned some part of
+    the model and a widget in a transparent and still customizable
+    way.
+
+  - Added script gtkmvc-progen that aids developers in generating
+    gtkmvc-based projects from scratch. gtkmvc-progen can be run in
+    both batch and GUI modalities. For example:
+    $> gtkmvc-progen name=myproj author="Wil Shakespeare" gui=no
+
+    ... generates project "myproj" in batch mode. See the user
+    manual for a full list of available options.
+    
+* Other changes
+  
+  - Spurious value changes in observable properties are no longer
+    notified by default. A new optional parameter of class Observer
+    allows for a backward-compatible semantics.
+
+  - Widgets search into Views has been optimized.
+
+  - Bug fixes and optimizations. 
+
+    o Undefined handlers for custom widgets are correctly
+      managed. Thanks to Allan Douglas <zalguod TA users TOD
+      sourceforge TOD net> for providing a working patch.
+
+    o Fixed a subtle bug in the observer pattern implementation.
+
+    o A few other minor fixes and optimizations. 
+
+
+
+**********************************************************************
+*  May 22 2007                                                       * 
+**********************************************************************
+
+Released version 1.0.1
+This version ships bug fixes and a new feature.
+
+* New features:
+  - Custom widgets into glade file are now supported by views.
+
+* Bug fixes:
+  - Fixed access to properties in multi-threading models
+  - Fixed a bug in the observable properties registration mechanism
+
+* Many thanks to: 
+  - Guillaume Libersat <glibersat AT linux62.org> for providing a
+    patch that enable reading custom widgets from glade files.
+
+  - Phillip Calvin <phillipc AT toasterlogic.com> and Andreas Poisel
+    <ap AT automatisch.cc> for reporting bugs.
+
+  - Jeffrey Barish <jeff_barish AT earthlink.net> for providing
+    feedback.
+
+  - Kartik Mistry <kartik.mistry AT gmail.com> for his work on
+    Debian package.
+
+
+
+**********************************************************************
+*  Dec 21 2006                                                       * 
+**********************************************************************
+
+Released first stable version 1.0.0

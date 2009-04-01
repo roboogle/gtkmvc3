@@ -1,3 +1,4 @@
+# Makefile for building all docs
 
 DESTDIR = build
 

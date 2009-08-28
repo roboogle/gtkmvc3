@@ -21,6 +21,7 @@
 #  or email to the author Roberto Cavada <cavada@fbk.eu>.
 #  Please report bugs to <cavada@fbk.eu>.
 
+import gtk
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
 from observer import Observer
@@ -438,7 +439,6 @@ class Model (Observer):
 
 
 
-import gtk
 # ----------------------------------------------------------------------
 class TreeStoreModel (Model, gtk.TreeStore):
     """Use this class as base class for your model derived by

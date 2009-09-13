@@ -330,9 +330,14 @@ instantiation of adapters can work in its simplest option, i.e. by
 specifying the minimal set of parameters, and exploiting all default
 values for the others.
 
-The framework searches information about widgets and possible
-default values for any unspecified parameter into module
-\file{adapters.default}.
+The framework searches information about widgets and possible default
+values for any unspecified parameter into module
+\file{adapters.default}. The module exports two functions to add and
+remove default adapters at runtime. These function are:
+\begin{description}
+  \item[add\_adapter] to add a new default adapter.
+  \item[remove\_adapter] to remove a default adapter.
+\end{description}
 
 Suppose for example that the specified widget is a
 \codename{gtk.Entry}. Good candidates for unspecified
@@ -342,7 +347,6 @@ respectively. \codename{signal} will be \codename{"changed"} to
 capture events that change the value of the widget.
 
 Later a list of all currently supported widgets will be presented.
-
 
 \subsubsection{Class \codename{UserClassAdapter}}
 
@@ -634,9 +638,19 @@ Widget type & Property type & Notes\\[0.5ex]
 \codename{gtk.Entry} & String & Current entry content \\
 \codename{gtk.Expander} &  \codename{types.BooleanType} & True if expanded\\
 \codename{gtk.Label} & String or number & Label content \\
-\codename{gtk.ToggleButton} &  \codename{types.BooleanType} & Current toggle state \\
+\codename{gtk.ToggleButton} &  \codename{types.BooleanType} & Current
+toggle state \\
+\codename{gtk.FileChooserButton} & \codename{types.StringType} &
+Selected file name \\ 
+\codename{gtk.ComboBox} & \codename{types.IntType} & Model index of
+the currently selected item \\
 \hline
 \end{tabular} 
 \end{center}
+
+Fur further information about default adapters, see module
+\codename{adapters.default} and functions
+\codename{adapters.default.add\_adapter} and
+\codename{adapters.default.remove\_adapter}.
 
 

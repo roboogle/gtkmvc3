@@ -259,12 +259,19 @@ class PropertyMeta (type):
 
         if isinstance(val, tuple):
             # this might be a class instance to be wrapped
-            if len(val) == 3 and \
-               isinstance(val[1], val[0]) and \
-               (isinstance(val[2], tuple) or isinstance(val[2], list)):
-                res = wrappers.ObsUserClassWrapper(val[1], val[2])
-                if model: res.__set_model__(model, prop_name)
-                return res
+            # (thanks to Tobias Weber <towb ta celvina tod de> for
+            # providing a bug fix to avoid TypeError (in 1.99.1)
+            if len(val) == 3:
+                try: 
+                    wrap_instance = isinstance(val[1], val[0]) and \
+                        (isinstance(val[2], tuple) or
+                         isinstance(val[2], list))
+                except TypeError: pass # type are not recognized
+                if wrap_instance:
+                    res = wrappers.ObsUserClassWrapper(val[1], val[2])
+                    if model: res.__set_model__(model, prop_name)
+                    return res
+                pass
             pass
         
         elif isinstance(val, list):

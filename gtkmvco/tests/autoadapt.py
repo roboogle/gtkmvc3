@@ -14,6 +14,11 @@ import gtkmvc
 import gtk
 class MyView (gtkmvc.View):
 
+    def __init__(self):
+        gtkmvc.View.__init__(self)
+        self.setup_widgets()
+        return
+    
     def setup_widgets(self):
         self['window'] = gtk.Window()
         self['window'].set_title("A damned small example")

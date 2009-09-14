@@ -210,7 +210,14 @@ class Controller (Observer):
             dic[name] = method
             pass
 
-        for xml in self.view.xmlWidgets: xml.signal_autoconnect(dic) 
+        # autoconnects glade in the view (if available any)
+        for xml in self.view.glade_xmlWidgets: xml.signal_autoconnect(dic)
+
+        # autoconnects builder if available
+        if self.view._builder is not None:
+            self.view._builder.connect_signals(dic)
+            pass
+        
         return
 
     

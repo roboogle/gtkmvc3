@@ -23,35 +23,63 @@
 #  or email to the author Roberto Cavada <cavada@fbk.eu>.
 #  Please report bugs to <cavada@fbk.eu>.
 
+from gtkmvc.support.log import logger
 
-import gtk.glade
+try:
+    import gtk.glade
+    __glade_is_available__ = True
+except ImportError: __glade_is_available = False
+
+try:
+    from gtk import Builder
+    __builder_is_available__ = True
+except ImportError: __builder_is_available__ = False
+
+# verbose message
+if not __glade_is_available__ or not __builder_is_available__:
+    logger.warn({(False, False) : "both glade and gtk.Builder are not available: relying only on manual widgets in views",
+              (False, True) : "gtk.Builder is not available, relying on manual and glade based views only", 
+              (True, False) : "glade is not available, relying on manual and gtk.Builder based views only", 
+}[(__builder_is_available__, __glade_is_available__)])
+    pass
+    
 import types
+# ----------------------------------------------------------------------
 
 class View (object):
     glade = None
     top=None
-
-    def __init__(self, glade=None, top=None, 
+    builder=None
+    
+    def __init__(self, glade=None, top=None,
+                 builder=None,
                  parent=None, 
                  controller=None):
-        """If glade filename is not given (or None) next parameter
-        top must be not given neither (or None). In that case
-        widgets must be connected manually. top can be either a
-        string name or list of names, representing the name of the
-        top level widget, or a list of names of top level widgets
-        in the glade file. If parent is another View instance used
-        to create a hierarchy of views. If controller is passed,
-        then self will register itself within it. This is provided
-        for backward compatibility when controllers had to be
-        created before views (DO NOT USE IN NEW CODE)."""
+        """If glade filename is not given (or None) next parameter top
+        must be not given neither (or None). builder can be a filename
+        for gtk.Builder, or an instance of a gtk.Builder.  If glade
+        and builder are both None or not given, widgets must be
+        connected manually. top can be either a string name or list of
+        names, representing the name of the top level widget, or a
+        list of names of top level widgets in the glade file. Notice
+        that until gtk.Builder will not support method
+        add_objects_from_file, top can be used only when glade is
+        specified. parent is another View instance used to create a
+        hierarchy of views. If controller is passed, then self will
+        register itself within it. This is provided for backward
+        compatibility when controllers had to be created before views
+        (DO NOT USE IN NEW CODE)."""
 
         self.manualWidgets = {}
-        self.autoWidgets = None
-
-        self.xmlWidgets = []
-
+        self.autoWidgets = {}
+        self.__autoWidgets_calculated = False
+        
+        self.glade_xmlWidgets = []
+        
         # Sets a callback for custom widgets
-        gtk.glade.set_custom_handler(self._custom_widget_create)
+        if __glade_is_available__:
+            gtk.glade.set_custom_handler(self._custom_widget_create)
+            pass
 
         if top: _top = top
         else: _top = self.top
@@ -62,12 +90,36 @@ class View (object):
         # retrieves XML objects from glade
         if glade: _glade = glade
         else: _glade = self.glade
-        if _glade is not None:
-            for i in range(0,len(wids)):
-                self.xmlWidgets.append(gtk.glade.XML(_glade, wids[i]))
-                pass
-            pass        
 
+        if _glade is not None:
+            if not __glade_is_available__:
+                logger.critical("Module gtk.glade was required, by not available")
+                sys.exit(1)
+                pass
+            for wid in wids:
+                self.glade_xmlWidgets.append(gtk.glade.XML(_glade, wid))
+                pass
+            pass
+
+        # retrieves objects from builder if available
+        if builder: _builder = builder
+        else: _builder = self.builder
+        if _builder is not None:
+            if not __builder_is_available__:
+                log.critical("gtk.Builder was required, by not available")
+                sys.exit(1)
+                pass
+            # if the user passed a Builder, use it as it is, otherwise
+            # build one
+            if isinstance(_builder, gtk.Builder):
+                self._builder = _builder
+            else:
+                self._builder = gtk.Builder()
+                self._builder.add_from_file(_builder)
+                pass
+            pass
+        else: self._builder = None # no gtk builder
+            
         # top widget list or singleton:
         if _top is not None:
             if len(wids) > 1:
@@ -85,7 +137,6 @@ class View (object):
             import warnings
             warnings.warn("Controller specified in View constructor is no longer expected",
                           DeprecationWarning)
-
             import gobject
             gobject.idle_add(controller._register_view, self)
             pass
@@ -97,22 +148,34 @@ class View (object):
     def __getitem__(self, key):
         wid = None
 
-        if self.autoWidgets:
-            if self.autoWidgets.has_key(key): wid = self.autoWidgets[key]
+        # first try with manually-added widgets:
+        if self.manualWidgets.has_key(key):
+            wid = self.manualWidgets[key]
             pass
-        else:            
-            for xml in self.xmlWidgets:
-                wid = xml.get_widget(key)
-                if wid is not None: break
+        pass
+        
+        if wid is None:
+            # then try with glade and builder, starting from memoized 
+            if self.autoWidgets.has_key(key): wid = self.autoWidgets[key]
+            else:
+                # try with glade
+                for xml in self.glade_xmlWidgets:
+                    wid = xml.get_widget(key)
+                    if wid is not None:
+                        self.autoWidgets[wid.get_name()] = wid
+                        break
+                    pass
+
+                # try with gtk.builder                
+                if wid is None and self._builder is not None:
+                    wid = self._builder.get_object(key)
+                    if wid is not None:
+                        self.autoWidgets[wid.get_name()] = wid
+                        pass
+                    pass                            
                 pass
             pass
         
-        if wid is None:
-            # try with manually-added widgets:
-            if self.manualWidgets.has_key(key):
-                wid = self.manualWidgets[key]
-                pass
-            pass
         return wid
     
     # You can also add a single widget:
@@ -145,7 +208,6 @@ class View (object):
     # Returns the top-level widget, or a list of top widgets
     def get_top_widget(self):
         return self.m_topWidget
-
 
     # Set parent view:
     def set_parent_view(self, parent_view):
@@ -190,31 +252,41 @@ class View (object):
 
     # implements the iteration protocol
     def __iter__(self):
-        # pre-calculates the auto widgets if needed:
-        if self.autoWidgets is None:
-            self.autoWidgets = {}
+        # precalculates if needed
+        self.__extract_autoWidgets()
 
-            for xml in self.xmlWidgets:
+        import itertools
+        for i in itertools.chain(self.manualWidgets, self.autoWidgets): yield i
+        return
+
+    def __extract_autoWidgets(self):
+        """Extract autoWidgets map if needed, out of the glade
+        specifications and gtk builder"""
+        if self.__autoWidgets_calculated: return
+
+        if __glade_is_available__:
+            for xml in self.glade_xmlWidgets:
                 for wid in xml.get_widget_prefix(""):
                     wname = gtk.glade.get_widget_name(wid)
-                    assert not self.autoWidgets.has_key(wname)
-                    self.autoWidgets[wname] = wid
+                    if wname not in self.autoWidgets:
+                        self.autoWidgets[wname] = wid
+                        pass                    
                     pass
                 pass
             pass
-            
-        self.__idx = 0
-        self.__max1 = len(self.autoWidgets)
-        self.__max2 = self.__max1 + len(self.manualWidgets)
-        return self
 
-    # implements the iteration protocol
-    def next(self):
-        if self.__idx >= self.__max2: raise StopIteration()
-        if self.__idx >= self.__max1: m = self.manualWidgets
-        else: m = self.autoWidgets
-        self.__idx += 1
-        return m.keys()[self.__idx-1]
-
+        if self._builder is not None:
+            for wid in self._builder.get_objects():
+                name = wid.get_name()
+                if name in self.autoWidgets and self.autoWidgets[name] != wid:
+                    log.error("Widget '%s' in builder also found in glade specification" % name)
+                    sys.exit(1)
+                    pass
+                self.autoWidgets[name] = wid
+                pass
+            pass
+        
+        self.__autowidgets_calculated = True
+        return
     
     pass # end of class View

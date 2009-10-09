@@ -31,35 +31,41 @@ import new
 class ObsWrapperBase (object):
     """
     This class is a base class wrapper for user-defined classes and
-    containers like lists and maps.
+    containers like lists, maps, signals, etc.
     """
     
     def __init__(self):
-        self.__prop_name = None
-        self.__gtkmvc_model = None
+
+        # all model instances owning self (can be multiple due to
+        # inheritance). Each element of the set is a pair (model,
+        # property-name)
+        self.__models = set()
         return
 
-    def __set_model__(self, model, prop_name):
-        self.__prop_name = prop_name
-        self.__gtkmvc_model = model
+    def __add_model__(self, model, prop_name):
+        """Registers the given model to hold the wrapper among its
+        properties, within a property whose name is given as well"""
+        
+        self.__models.add((model, prop_name))
         return
 
-    def __get_prop_name__(self): return self.__prop_name
-    def __get_model__(self): return self.__gtkmvc_model
+    def __get_models__(self): return self.__models
 
     def _notify_method_before(self, instance, name, args, kwargs):
-        self.__get_model__().notify_method_before_change(self.__prop_name,
-                                                         instance, 
-                                                         name, args, kwargs)
+        for m,n in self.__get_models__():
+            m.notify_method_before_change(n, instance, name,
+                                          args, kwargs)
+            pass
         return
 
     def _notify_method_after(self, instance, name, res_val, args, kwargs):
-        self.__get_model__().notify_method_after_change(self.__prop_name,
-                                                        instance, 
-                                                        name, res_val, args, kwargs)
+        for m,n in self.__get_models__():
+            m.notify_method_after_change(n, instance, name, res_val,
+                                         args, kwargs)
+            pass
         return
     
-    pass
+    pass # end of class
     
 
 # ----------------------------------------------------------------------
@@ -67,7 +73,6 @@ class ObsWrapper (ObsWrapperBase):
     """
     Base class for wrappers, like user-classes and sequences. 
     """
-
 
     def __init__(self, obj, method_names):
         ObsWrapperBase.__init__(self)
@@ -88,7 +93,7 @@ class ObsWrapper (ObsWrapperBase):
             pass
 
         return
-
+   
     def __get_wrapper_code(self, name):
         return """def %(name)s(self, *args, **kwargs):
  self._notify_method_before(self._obj, "%(name)s", args, kwargs)

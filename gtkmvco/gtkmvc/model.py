@@ -91,7 +91,7 @@ class Model (Observer):
         prop = getattr(self, "_prop_%s" % name, None)
             
         if isinstance(prop, ObsWrapperBase):
-            prop.__set_model__(self, name)
+            prop.__add_model__(self, name)
 
             if isinstance(prop, Signal):
                 if not self.__signal_notif.has_key(name):

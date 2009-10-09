@@ -64,7 +64,9 @@ class Signal (Observable):
 
     def emit(self, arg=None):
         """Emits the signal, passing the optional argument"""
-        return self.__get_model__().notify_signal_emit(
-            self.__get_prop_name__(), arg)
+        for model,name in self.__get_models__():
+            model.notify_signal_emit(name, arg)
+            pass
+        return
     pass # end of class
 

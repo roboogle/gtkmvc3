@@ -269,19 +269,19 @@ class PropertyMeta (type):
                 except TypeError: pass # type are not recognized
                 if wrap_instance:
                     res = wrappers.ObsUserClassWrapper(val[1], val[2])
-                    if model: res.__set_model__(model, prop_name)
+                    if model: res.__add_model__(model, prop_name)
                     return res
                 pass
             pass
         
         elif isinstance(val, list):
             res = wrappers.ObsListWrapper(val)
-            if model: res.__set_model__(model, prop_name)
+            if model: res.__add_model__(model, prop_name)
             return res
 
         elif isinstance(val, dict):            
             res = wrappers.ObsMapWrapper(val)
-            if model: res.__set_model__(model, prop_name)
+            if model: res.__add_model__(model, prop_name)
             return res
 
         return val

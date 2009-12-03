@@ -113,10 +113,18 @@ class ObsWrapper (ObsWrapperBase):
 class ObsSeqWrapper (ObsWrapper):
     def __init__(self, obj, method_names):
         ObsWrapper.__init__(self, obj, method_names)
+        
+        for _m in "lt le eq ne gt ge len iter add mul".split():
+            meth = "__%s__" % _m
+            assert hasattr(self._obj, meth)
+            setattr(self.__class__, meth, getattr(self._obj, meth))
+            pass
         return
 
-    def __setitem__(self, key, val):
-        
+    def __radd__(self, other): return other.__add__(self._obj)
+    def __rmul__(self, other): return self._obj.__mul__(other)
+    
+    def __setitem__(self, key, val):        
         self._notify_method_before(self._obj, "__setitem__", (key,val), {})
         res = self._obj.__setitem__(key, val)
         self._notify_method_after(self._obj, "__setitem__", res, (key,val), {})
@@ -128,10 +136,9 @@ class ObsSeqWrapper (ObsWrapper):
         self._notify_method_after(self._obj, "__delitem__", res, (key,), {})
         return res
 
-
     def __getitem__(self, key):
         return self._obj.__getitem__(key)
-
+    
     pass #end of class
 
 

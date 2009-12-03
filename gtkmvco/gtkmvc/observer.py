@@ -48,7 +48,7 @@ def observes(*args):
 class Observer (object):
     """Use this class as base class of all observers"""
 
-    # these is internal
+    # these are internal
     _CUST_OBS_ = "__custom_observes__"
     __CUST_OBS_MAP = {}
     
@@ -114,7 +114,7 @@ class Observer (object):
     def get_custom_observing_methods(self, prop_name):
         """Given a property name, returns the set of methods that have
         been explicitly marked to be observables of it. This method is
-        called by model when searching for notification methods."""
+        called by models when searching for notification methods."""
         return self.__CUST_OBS_MAP.get(prop_name, set())
     
     pass # end of class

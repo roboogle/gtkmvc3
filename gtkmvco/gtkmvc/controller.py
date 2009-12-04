@@ -248,21 +248,27 @@ class Controller (Observer):
         if isinstance(wid, gtk.Calendar):
             # calendar creates three adapter for year, month and day
             ad = RoUserClassAdapter(self.model, prop_name,
-                                    lambda d: d.year, lambda d,y: d.replace(year=y))
+                                    lambda d: d.year,
+                                    lambda d,y: d.replace(year=y),
+                                    spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[0],
                               lambda c,y: c.select_month(c.get_date()[1], y),
                               "day-selected")
             res.append(ad) # year
             
             ad = RoUserClassAdapter(self.model, prop_name,
-                                    lambda d: d.month, lambda d,m: d.replace(month=m))
+                                    lambda d: d.month,
+                                    lambda d,m: d.replace(month=m),
+                                    spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[1]+1,
                               lambda c,m: c.select_month(m-1, c.get_date()[0]),
                               "day-selected")
             res.append(ad) # month
 
             ad = RoUserClassAdapter(self.model, prop_name,
-                                  lambda d: d.day, lambda d,v: d.replace(day=v))
+                                    lambda d: d.day,
+                                    lambda d,v: d.replace(day=v),
+                                    spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[2],
                               lambda c,d: c.select_day(d),
                               "day-selected")
@@ -271,13 +277,15 @@ class Controller (Observer):
 
             
         try: # tries with StaticContainerAdapter
-            ad = StaticContainerAdapter(self.model, prop_name)
+            ad = StaticContainerAdapter(self.model, prop_name,
+                                        spurious=self.accepts_spurious_change())
             ad.connect_widget(wid)
             res.append(ad)
             
         except TypeError:
             # falls back to a simple adapter
-            ad = Adapter(self.model, prop_name)
+            ad = Adapter(self.model, prop_name,
+                         spurious=self.accepts_spurious_change())
             ad.connect_widget(wid)
             res.append(ad)
             pass

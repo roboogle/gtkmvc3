@@ -50,13 +50,14 @@ class StaticContainerAdapter (UserClassAdapter):
     occur in the view-side.
     """
     def __init__(self, model, prop_name,
-                 prop_read=None, prop_write=None, value_error=None):
+                 prop_read=None, prop_write=None, value_error=None,
+                 spurious=False):
 
         UserClassAdapter.__init__(self, model, prop_name,
                                   lambda c,i: c.__getitem__(i),
                                   lambda c,v,i: c.__setitem__(i,v),
                                   prop_read, prop_write, 
-                                  value_error)
+                                  value_error, spurious)
 
         prop =  Adapter._get_property(self)
         #prop =  self._get_property() # bug fix reported by A. Dentella

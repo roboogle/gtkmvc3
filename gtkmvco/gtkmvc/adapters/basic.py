@@ -35,7 +35,8 @@ class Adapter (Observer):
 
     def __init__(self, model, prop_name,
                  prop_read=None, prop_write=None, 
-                 value_error=None):
+                 value_error=None,
+                 spurious=False):
         """
         Creates a new adapter that handles setting of value of a
         model single model property when a corresponding widgets set
@@ -68,11 +69,15 @@ class Adapter (Observer):
         wrong value for the property inside the model. The function
         will receive: the adapter, the property name and the value
         coming from the widget that offended the model.
+
+        spurious controls if the adapter should receive spurious
+        changes from the model (see spuriousness in class Observer for
+        further information).
         """
 
         # registration is delayed, as we need to create possible
         # listener before:
-        Observer.__init__(self)        
+        Observer.__init__(self, spurious=spurious)        
 
         self._prop_name = prop_name
         self._prop_read = prop_read
@@ -208,7 +213,7 @@ class Adapter (Observer):
     def _get_observer_src(self, prop_name):
         """This is the code for an value change observer"""
         return """def property_%s_value_change(self, model, old, new):
- if self._itsme or old == new: return
+ if self._itsme: return
  self._on_prop_changed()""" % prop_name
 
 
@@ -339,10 +344,11 @@ class UserClassAdapter (Adapter):
     def __init__(self, model, prop_name,
                  getter, setter, 
                  prop_read=None, prop_write=None,                   
-                 value_error=None):
+                 value_error=None, spurious=False):
 
         Adapter.__init__(self, model, prop_name,
-                         prop_read, prop_write, value_error)
+                         prop_read, prop_write, value_error,
+                         spurious)
 
         self._getter = self._resolve_to_func(getter)
         self._setter = self._resolve_to_func(setter)
@@ -415,11 +421,12 @@ class RoUserClassAdapter (UserClassAdapter):
     def __init__(self, model, prop_name,
                  getter, setter, 
                  prop_read=None, prop_write=None,                   
-                 value_error=None):
+                 value_error=None, spurious=False):
 
         UserClassAdapter.__init__(self, model, prop_name,
                                   getter, setter,
-                                  prop_read, prop_write, value_error)
+                                  prop_read, prop_write, value_error,
+                                  spurious)
 
         return
 

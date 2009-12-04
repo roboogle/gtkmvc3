@@ -6,13 +6,19 @@ from gtkmvc import Model, Observer
 
 class MyModel(Model):
     seq = []
-    __observables__ = ("seq", )
+    dic = {}
+    __observables__ = ("seq", "dic")
     pass
 
 class MyObserver(Observer):
-    calls = 0
+    seq_calls = 0
+    dic_calls = 0
     def property_seq_before_change(self, model, instance, name, args, kwargs):
-        self.calls += 1
+        self.seq_calls += 1
+        return
+
+    def property_dic_after_change(self, model, instance, name, res, args, kwargs):
+        self.dic_calls += 1
         return
     pass
 
@@ -20,40 +26,48 @@ class MyObserver(Observer):
 import unittest
 class TestSeq(unittest.TestCase):   
     seq = range(5)
-
+    dic = dict(zip(map(str, seq), seq))
     def setUp(self):
         self.m = MyModel()
         self.o = MyObserver(self.m)
 
         self.m.seq = []
-        for i in self.seq: self.m.seq.append(i)
+        for i in self.seq:
+            self.m.seq.append(i)
+            self.m.dic[str(i)] = i
         return
     
     def testcmp(self):
-        # checks insertions
+        # checks comparison
         self.assert_(self.m.seq < list(self.seq) + [1])
         self.assert_(self.m.seq <= list(self.seq))
         self.assert_(self.m.seq == list(self.seq))
         self.assert_(self.m.seq >= list(self.seq))
         self.assert_(self.m.seq > list(self.seq)[:-1])
         self.assert_(self.m.seq != list(self.seq[:-1]))
+
+        self.assert_(self.m.dic == self.dic)
         return
 
     def testnotify(self):
         # tests notifications have been processed
-        self.assertEqual(self.o.calls, len(self.seq))
+        self.assertEqual(self.o.seq_calls, len(self.seq))
+        self.assertEqual(self.o.dic_calls, len(self.dic))
         return
 
     def testlen(self):
-        self.assertEqual(self.o.calls, len(self.seq))
+        self.assertEqual(len(self.m.seq), len(self.seq))
+        self.assertEqual(len(self.m.dic), len(self.dic))
         return
     
     def testiteration(self):
         for i,j in zip(self.seq, self.m.seq): self.assertEqual(i, j)
+        for i,j in zip(self.dic, self.m.dic): self.assertEqual(i, j)
         return
         
     def testcontains(self):
         for i in self.seq: self.assert_(i in self.m.seq)
+        for i in self.dic: self.assert_(i in self.m.dic)
         return
 
     def testops(self):

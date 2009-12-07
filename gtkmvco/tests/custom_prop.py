@@ -28,7 +28,14 @@ class MyModel (Model):
         the sake of simplicity, this is called from the controller
         when a button is pressed, but in a real example this got
         called by the external data source"""
+        old = self.data_source
         self.data_source += 1 # this changes the data (unfair, but simple!)
+
+        #self.notify_property_value_change('external', old, self.data_source)
+
+        # The previous call could be substituted by a spurious
+        # assignment, which would require spuriousness in observers,
+        # though:
         self.external = self.data_source # here the property got in sync
         return
     
@@ -77,6 +84,10 @@ class MyCtrl (Controller):
 # Test code
 m = MyModel()
 v = MyView()
-c = MyCtrl(m, v, spurious=True)
+#c = MyCtrl(m, v)
+
+# Spuriousness acceptance is required if notify_property_value_change
+# is not used in the model:
+c = MyCtrl(m, v, spurious=True) 
 
 gtk.main()

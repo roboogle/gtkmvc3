@@ -28,7 +28,7 @@ from gtkmvc.support.log import logger
 try:
     import gtk.glade
     __glade_is_available__ = True
-except ImportError: __glade_is_available = False
+except ImportError: __glade_is_available__ = False
 
 try:
     from gtk import Builder

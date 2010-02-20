@@ -24,9 +24,10 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 from gtkmvc.support.log import logger
+import gtk
 
 try:
-    import gtk.glade
+    from gtk import glade as gtkglade
     __glade_is_available__ = True
 except ImportError: __glade_is_available__ = False
 
@@ -78,7 +79,7 @@ class View (object):
         
         # Sets a callback for custom widgets
         if __glade_is_available__:
-            gtk.glade.set_custom_handler(self._custom_widget_create)
+            gtkglade.set_custom_handler(self._custom_widget_create)
             pass
 
         if top: _top = top
@@ -93,11 +94,11 @@ class View (object):
 
         if _glade is not None:
             if not __glade_is_available__:
-                logger.critical("Module gtk.glade was required, by not available")
+                logger.critical("Module gtk.glade was required, but not available")
                 sys.exit(1)
                 pass
             for wid in wids:
-                self.glade_xmlWidgets.append(gtk.glade.XML(_glade, wid))
+                self.glade_xmlWidgets.append(gtkglade.XML(_glade, wid))
                 pass
             pass
 
@@ -185,18 +186,21 @@ class View (object):
         return
 
     def show(self):
-        ret = True
+        """Shows the top level widget(s) if parameter top was
+        specified at construction time."""
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
-                if t is not None: ret = ret and t.show()
+                if t is not None: t.show()
                 pass
-        elif (top is not None): ret = top.show_all()
-        else:                   ret = False
-        return ret
+        elif (top is not None): top.show_all()
+        return
         
         
     def hide(self):
+        """Hides the top level widget(s) if parameter top was
+        specified at construction time. Returns True if succesfully
+        hidden, or False otherwise."""
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
@@ -267,7 +271,7 @@ class View (object):
         if __glade_is_available__:
             for xml in self.glade_xmlWidgets:
                 for wid in xml.get_widget_prefix(""):
-                    wname = gtk.glade.get_widget_name(wid)
+                    wname = gtkglade.get_widget_name(wid)
                     if wname not in self.autoWidgets:
                         self.autoWidgets[wname] = wid
                         pass                    

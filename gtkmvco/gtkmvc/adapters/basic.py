@@ -435,12 +435,21 @@ class RoUserClassAdapter (UserClassAdapter):
     # ----------------------------------------------------------------------
     # Private methods 
     # ----------------------------------------------------------------------
+    # suggested by Tobias Weber
+    def _get_observer_src(self, prop_name):
+        """Restore Adapter's behaviour to make possible to receive
+        value change notifications"""
+        return Adapter._get_observer_src(self, prop_name)
+    
+    def _on_prop_changed(self):
+        """Again to restore behaviour of Adapter"""
+        return Adapter._on_prop_changed(self)
 
     def _set_property(self, val, *args):
         """Private method that sets the value currently of the property"""
         val = UserClassAdapter._set_property(self, val, *args)
         if val: Adapter._set_property(self, val, *args)
         return val
-    
+
     pass # end of class RoUserClassAdapter
 # ----------------------------------------------------------------------

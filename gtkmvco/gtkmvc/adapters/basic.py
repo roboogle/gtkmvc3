@@ -254,8 +254,10 @@ class Adapter (Observer):
         # 'finally' would be better here, but not supported in 2.4 :(
         try: 
             totype = type(self._get_property(*args))
-            val_prop = self._cast_value(val, totype)
-            if self._prop_write: val_prop = self._prop_write(val_prop)
+
+            # patched by Tobias Weber
+            if self._prop_write: val_prop = self._prop_write(val)
+            else: val_prop = self._cast_value(val, totype)
 
             self._itsme = True
             self._set_property(val_prop, *args)

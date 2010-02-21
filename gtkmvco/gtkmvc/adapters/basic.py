@@ -25,6 +25,7 @@
 import types
 import gtk
 import time
+import new
 
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
@@ -198,7 +199,9 @@ class Adapter (Observer):
         # is it observable?
         if model.has_property(prop):
             # we need to create an observing method before registering
-            self._add_method(self._get_observer_src(prop))
+            meth = new.instancemethod(self.__get_observer_fun(prop),
+                                      self, self.__class__)
+            setattr(self, "property_%s_value_change" % prop, meth)
             pass
 
         self._prop = getattr(model, prop)
@@ -209,25 +212,13 @@ class Adapter (Observer):
         self.observe_model(model)
         return
     
-
-    def _get_observer_src(self, prop_name):
+    def __get_observer_fun(self, prop_name):
         """This is the code for an value change observer"""
-        return """def property_%s_value_change(self, model, old, new):
- if self._itsme: return
- self._on_prop_changed()""" % prop_name
-
-
-    def _add_method(self, src):
-        """Private service to add a new method to the instance,
-        given method code"""
-        
-        from gtkmvc.support.utils import get_function_from_source
-        import new
-        
-        func = get_function_from_source(src)
-        meth = new.instancemethod(func, self, self.__class__)
-        setattr(self, func.__name__, meth)
-        return
+        def _observer_fun(self, model, old, new):
+            if self._itsme: return
+            self._on_prop_changed()
+            return
+        return _observer_fun
 
     def _get_property(self):
         """Private method that returns the value currently stored

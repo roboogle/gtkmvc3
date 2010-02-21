@@ -79,27 +79,24 @@ class ObsWrapper (ObsWrapperBase):
         
         self._obj = obj
         self.__doc__ = obj.__doc__
-
+        
         for name in method_names:
             if hasattr(self._obj, name):
-                src = self.__get_wrapper_code(name)
-                exec src
-                
-                code = eval("%s.func_code" % name)
-                func = new.function(code, globals())
-                meth = new.instancemethod(func, self, type(self).__name__)
+                meth = new.instancemethod(self.__get_wrapper(name), self,
+                                          type(self).__name__)
                 setattr(self, name, meth)
                 pass
             pass
 
         return
    
-    def __get_wrapper_code(self, name):
-        return """def %(name)s(self, *args, **kwargs):
- self._notify_method_before(self._obj, "%(name)s", args, kwargs)
- res = self._obj.%(name)s(*args, **kwargs)
- self._notify_method_after(self._obj, "%(name)s", res, args, kwargs)
- return res""" % {'name' : name}
+    def __get_wrapper(self, name):
+        def _wrapper_fun(self, *args, **kwargs):
+            self._notify_method_before(self._obj, name, args, kwargs)
+            res = getattr(self._obj, name)(*args, **kwargs)
+            self._notify_method_after(self._obj, name, res, args, kwargs)
+            return res
+        return _wrapper_fun
 
     # For all fall backs
     def __getattr__(self, name): return getattr(self._obj, name)

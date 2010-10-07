@@ -1,9 +1,10 @@
-MVC for pygtk2
+MVC with Observer pattern for pygtk2
 =====
 Author: Roberto Cavada <cavada AT fbk.eu>
 
-If you have any enhancements implemented or still in mind, or bug
-reports, please email me at cavada AT isrt.itc.it.
+In 2010 Tobias Weber <towb AT celvina.de> has joined the development
+"team".
+
 
 New Versions
 ============
@@ -24,15 +25,17 @@ See the provided examples, read the documentation and tutorial
 
 Contacting the Author
 =====================
-You can contact me at the email address <cavada AT fbk.eu>.  I'll
-try to answer quickly, but occasionally there will be a bit
-of a delay.  If you have an idea for a way to extend this framework,
-have found a problem with the code/docs, or would like to contribute
-some code/docs, please feel free to contact me.
+If you have any enhancements implemented or still in mind, or bug
+reports, please see contact information at the URL: 
+http://sourceforge.net/apps/trac/pygtkmvc
 
 
 Many thanks to
 ==============
+* Tobias Weber <towb AT celvina.de> for providing such valuable
+  support, patches, feedback, and for finally joining the project
+  development.
+
 * Ionutz Borcoman <borco AT go.ro> 
   for setup.sh and other installation/packaging issues.
 

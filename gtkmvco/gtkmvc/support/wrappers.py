@@ -1,8 +1,8 @@
 #  -------------------------------------------------------------------------
 #  Author: Roberto Cavada <cavada@fbk.eu>
 #
-#  Copyright (C) 2006 by Roberto Cavada
-#
+#  Copyright (C) 2010 by Roberto Cavada
+#  Copyright (C) 2010 by Tobias Weber
 #  pygtkmvc is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
@@ -83,7 +83,7 @@ class ObsWrapper (ObsWrapperBase):
         for name in method_names:
             if hasattr(self._obj, name):
                 meth = new.instancemethod(self.__get_wrapper(name), self,
-                                          type(self).__name__)
+                                          self.__class__)
                 setattr(self, name, meth)
                 pass
             pass

@@ -290,14 +290,12 @@ class Adapter (Observer):
         t = type(val)
         if issubclass(t, totype): return val
         if issubclass(totype, types.StringType): return str(val)
-        if issubclass(t, types.StringType): 
-            if issubclass(totype, types.IntType):
-                if val: return int(float(val))
-                return 0
-            if issubclass(totype, types.FloatType):
-                if val: return float(val)
-                return 0.0
-            pass
+        if issubclass(totype, types.UnicodeType): return unicode(val)
+
+        if (issubclass(totype, (types.IntType, types.FloatType)) and 
+            issubclass(t, (types.StringType, types.UnicodeType, 
+                           types.IntType, types.FloatType))):
+                return totype(float(val) if val else 0.0)
         
         raise TypeError("Not able to cast " + str(t) + " to " + str(totype))
 

@@ -21,7 +21,7 @@
 #  or email to the author Roberto Cavada <cavada@fbk.eu>.
 #  Please report bugs to <cavada@fbk.eu>.
 
-
+import inspect
 
 def get_function_from_source(source):
     """Given source code of a function, a function object is
@@ -37,3 +37,20 @@ def get_function_from_source(source):
     code = eval("%s.func_code" % name)
     import new
     return new.function(code, globals(), name)    
+
+
+def getmembers(_object, _predicate):
+    """This is an implementation of inspect.getmembers, as in some versions 
+    of python it may be buggy. 
+    See issue at http://bugs.python.org/issue1785"""
+    # This should be:
+    #return inspect.getmembers(_object, _predicate)
+    
+    # ... and it is re-implemented as:
+    observers = []
+    for key in dir(_object):
+        try: m = getattr(object, key)
+        except AttributeError: continue
+        if _predicate(m): observers.append((key, m))
+        pass
+    return observers

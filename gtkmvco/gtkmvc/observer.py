@@ -23,7 +23,7 @@
 #  Please report bugs to <cavada@fbk.eu>.
 #  -------------------------------------------------------------------------
 
-from support import decorators
+from support import decorators, utils
 from types import MethodType, StringType
 import inspect
 
@@ -45,6 +45,7 @@ def observes(*args):
 # ----------------------------------------------------------------------
 
 
+# ----------------------------------------------------------------------
 class Observer (object):
     """Use this class as base class of all observers"""
 
@@ -81,9 +82,10 @@ class Observer (object):
         self.__accepts_spurious__ = spurious
 
         # searches all custom observer methods:
-        observers = inspect.getmembers(self,
-                                       lambda m: inspect.ismethod(m) and
-                                       hasattr(m, Observer._CUST_OBS_))
+        observers = utils.getmembers(self,
+                                     lambda m: inspect.ismethod(m) and
+                                     hasattr(m, Observer._CUST_OBS_))
+        
         for name, obs in observers:
             for prop_name in getattr(obs, Observer._CUST_OBS_):
                 if not self.__CUST_OBS_MAP.has_key(prop_name):

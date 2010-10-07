@@ -266,11 +266,14 @@ class PropertyMeta (type):
                     wrap_instance = isinstance(val[1], val[0]) and \
                         (isinstance(val[2], tuple) or
                          isinstance(val[2], list))
-                except TypeError: pass # type are not recognized
-                if wrap_instance:
-                    res = wrappers.ObsUserClassWrapper(val[1], val[2])
-                    if model: res.__add_model__(model, prop_name)
-                    return res
+                except TypeError: 
+                    pass # not recognized, it must be another type of tuple
+                else:
+                    if wrap_instance:
+                        res = wrappers.ObsUserClassWrapper(val[1], val[2])
+                        if model: res.__add_model__(model, prop_name)
+                        return res
+                    pass
                 pass
             pass
         

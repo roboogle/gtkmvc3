@@ -153,8 +153,7 @@ class View (object):
         if self.manualWidgets.has_key(key):
             wid = self.manualWidgets[key]
             pass
-        pass
-        
+
         if wid is None:
             # then try with glade and builder, starting from memoized 
             if self.autoWidgets.has_key(key): wid = self.autoWidgets[key]
@@ -163,7 +162,7 @@ class View (object):
                 for xml in self.glade_xmlWidgets:
                     wid = xml.get_widget(key)
                     if wid is not None:
-                        self.autoWidgets[wid.get_name()] = wid
+                        self.autoWidgets[key] = wid
                         break
                     pass
 
@@ -171,7 +170,7 @@ class View (object):
                 if wid is None and self._builder is not None:
                     wid = self._builder.get_object(key)
                     if wid is not None:
-                        self.autoWidgets[wid.get_name()] = wid
+                        self.autoWidgets[key] = wid
                         pass
                     pass                            
                 pass
@@ -281,7 +280,11 @@ class View (object):
 
         if self._builder is not None:
             for wid in self._builder.get_objects():
-                name = wid.get_name()
+                # General workaround for issue
+                # https://bugzilla.gnome.org/show_bug.cgi?id=607492
+                try: name = wid.get_name()
+                except AttributeError: continue
+                
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:
                     log.error("Widget '%s' in builder also found in glade specification" % name)
                     sys.exit(1)

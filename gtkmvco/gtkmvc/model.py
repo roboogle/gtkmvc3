@@ -480,16 +480,30 @@ class TextBufferModel (Model, gtk.TextBuffer):
 
 
 # ----------------------------------------------------------------------
-try:
-  __connection__ = "sqlite:/:memory:"
-  from sqlobject.inheritance import InheritableSQLObject
-  class SQLObjectModel (InheritableSQLObject, Model):
-      __metaclass__ = support.metaclasses.ObservablePropertyMetaSQL
+try: 
+    from sqlobject.inheritance import InheritableSQLObject
+except: pass # sqlobject not available
+else:
+    class SQLObjectModel(InheritableSQLObject, Model):
+        """
+        SQLObject uses a class's name for the corresponding table, so
+        subclasses of this need application-wide unique names, no
+        matter what package they're in!
 
-      def __init__(self, *args, **kargs):
-          InheritableSQLObject.__init__(self, *args, **kargs)
-          Model.__init__(self)
-          return
-      pass # end of class
-  SQLObjectModel.createTable()
-except: pass
+        After defining subclasses (not before!) you have to call
+        .createTable on each, including SQLObjectModel itself.
+        """
+
+        __metaclass__ = support.metaclasses.ObservablePropertyMetaSQL
+
+        def _init(self, *args, **kargs):
+            # Using __init__ or not calling super _init results in incomplete
+            # objects. Model init will then raise missing _SO_writeLock.
+            InheritableSQLObject._init(self, *args, **kargs)
+            Model.__init__(self)
+            return
+        
+        pass # end of class
+    pass 
+# ----------------------------------------------------------------------
+

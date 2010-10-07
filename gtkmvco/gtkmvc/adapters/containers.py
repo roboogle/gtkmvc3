@@ -60,9 +60,12 @@ class StaticContainerAdapter (UserClassAdapter):
                                   value_error, spurious)
 
         prop =  Adapter._get_property(self)
+
         #prop =  self._get_property() # bug fix reported by A. Dentella
         if not (hasattr(prop, "__getitem__") and
                 hasattr(prop, "__setitem__")):
+            # before giving up, unregisters itself as an observer
+            self.relieve_model(model)
             raise TypeError("Property " + self._prop_name +
                             " is not a valid container")
 

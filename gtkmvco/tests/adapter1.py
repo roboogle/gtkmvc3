@@ -1,3 +1,8 @@
+"""
+Test shows an entry, label and button. The label should always be two times
+the entry. The button should increment the entry by one. Typing a non-float
+should print an error and reset the entry.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
@@ -8,27 +13,16 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window1")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window1"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'en1' : 10.0,
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
-    pass
+    en1 = 10.0
+    __observables__ = ("en1",)
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def on_button1_clicked(self, button):
         self.model.en1 += 1
@@ -43,12 +37,14 @@ def myerr(adapt, name, val):
     adapt.update_widget()
     
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 a1 = Adapter(m, "en1",
-             prop_read=lambda v: v/2.0, prop_write=lambda v: v*2,
-             value_error=myerr)
+    # gtkmvc recently changed prop_write to take the value directly from the
+    # widget instead of after an automatic cast.
+    prop_read=lambda v: v/2.0, prop_write=lambda v: float(v)*2,
+    value_error=myerr)
 a1.connect_widget(v["entry1"])
 
 a2 = Adapter(m, "en1")

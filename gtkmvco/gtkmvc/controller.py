@@ -23,8 +23,11 @@
 
 
 from gtkmvc.observer import Observer
+from gtkmvc.support.log import logger
+
 import types
 import gobject
+import sys
 
 class Controller (Observer):
     """
@@ -120,8 +123,8 @@ class Controller (Observer):
            underscore (_) and CapitalizedWords. For example property
            'prop' will match widget 'cb_prop'. If no matches or
            multiple matches are found, a ValueError will be raised.
-           The way names are matched can be customized by deriving
-           method match_prop_name.
+           The way names are matched can be customized by overriding
+           method _find_widget_match.
 
         4. Two strings can be passed, respectively containing the
            name of an observable property in the model, and the name
@@ -144,11 +147,21 @@ class Controller (Observer):
             props = self.model.get_properties()
             # matches all properties not previoulsy adapter by the user:
             for prop_name in filter(lambda p: p not in self.__user_props, props):
-                wid_name = self.__find_widget_match(prop_name)
-                #print "Auto-adapting property",prop_name, "and widget", wid_name
-                adapters += self.__create_adapters__(prop_name, wid_name)                
+                try: wid_name = self._find_widget_match(prop_name)
+                except TooManyCandidatesError, e:
+                    # multiple candidates, gives up
+                    logger.error(e[0])
+                    sys.exit(1)
+                except ValueError, e: 
+                    # no widgets found for given property, continue after emitting a warning
+                    logger.warn(e[0])
+                else:
+                    logger.debug("Auto-adapting property %s and widget %s" % \
+                                     (prop_name, wid_name))
+                    adapters += self.__create_adapters__(prop_name, wid_name)                
+                    pass
                 pass
-
+            
         elif n == 1: #one argument
             from gtkmvc.adapters.basic import Adapter
             
@@ -156,10 +169,10 @@ class Controller (Observer):
 
             elif isinstance(args[0], types.StringType):
                 prop_name = args[0]
-                wid_name = self.__find_widget_match(prop_name)
+                wid_name = self._find_widget_match(prop_name)
                 adapters = self.__create_adapters__(prop_name, wid_name)
                 pass
-            else: raise TypeError("Argument of adapt() must be an Adapter or a string")
+            else: raise TypeError("Argument of adapt() must be either an Adapter or a string")
 
         else: # two arguments
             if not (isinstance(args[0], types.StringType) and
@@ -179,10 +192,23 @@ class Controller (Observer):
         
         return
 
-    def __find_widget_match(self, prop_name):
+    def _find_widget_match(self, prop_name):
         """Given a property name, searches into the view for a
         possible corresponding widget to adapt with. This is called by
-        adapt. Returns the matching candidate widget name"""
+        adapt. Returns the matching candidate widget name. Raises
+        TooManyCandidatesError when there are more than one
+        candidates. Raises ValueError when no widgets (0) are found.
+        """
+
+        class TooManyCandidatesError (ValueError):
+            """This class is used for distinguishing between a
+            multiple candidates matched and no candidates matched. The
+            latter is not necessarily an issue, as a missed match can
+            be skipped when searching for a match for *all* the
+            properties in the model (no params to adapt()), which may
+            fail in one single view, as multiple views may be used to
+            represent different parts of the model"""  
+            pass
 
         names = []
         for wid_name in self.view:
@@ -191,9 +217,13 @@ class Controller (Observer):
             if wid_name.lower().endswith(prop_name.lower()): names.append(wid_name)
             pass
 
-        if len(names) != 1:
-            raise ValueError("%d widget candidates match property '%s': %s" % \
-                                 (len(names), prop_name, names))
+        if len(names) == 0:
+            raise ValueError("No widget candidates match property '%s': %s" % \
+                                 (prop_name, names))
+
+        if len(names) > 1:
+            raise TooManyCandidatesError("%d widget candidates match property '%s': %s" % \
+                                             (len(names), prop_name, names))
         
         return names[0]
 
@@ -221,14 +251,6 @@ class Controller (Observer):
         return
 
     
-    def __match_prop_name(self, prop_name, wid_name):
-        """
-        Used internally when searching for a suitable widget. To customize
-        its behaviour, re-implement this method into derived classes
-        """
-        return 
-
-
     def __create_adapters__(self, prop_name, wid_name):
         """
         Private service that looks at property and widgets types,

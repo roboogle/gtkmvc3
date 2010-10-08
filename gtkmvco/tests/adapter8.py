@@ -1,21 +1,20 @@
+"""
+Like adapter3.py but having StaticContainerAdapter created by Controller.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window3")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window3"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'box' : [0,1,2]
-        }
+    box = [0,1,2]
+    __observables__ = ("box",)
 
     def __init__(self):
         Model.__init__(self)
@@ -24,9 +23,6 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
         self.adapt("box", "hbox1")
@@ -42,8 +38,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

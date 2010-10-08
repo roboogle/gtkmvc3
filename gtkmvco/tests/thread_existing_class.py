@@ -33,6 +33,11 @@
 # instance is stored into the model as an observable class, we 'wrap' it
 # into a tuple of 3 elements, as shown in this simple example
 # ----------------------------------------------------------------------
+"""
+Test should print:
+obj before change! <id 1> change () {}
+obj after change! <id 1> change None () {}
+"""
 
 import _importer
 
@@ -57,11 +62,10 @@ class ExistingClass (object):
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        # the tuple contains: class name, instance and the list of
-        # method names that we want to have observed:
-        'obj' : (ExistingClass, ExistingClass(), ('change',)),
-        }
+    # the tuple contains: class name, instance and the list of
+    # method names that we want to have observed:
+    obj = (ExistingClass, ExistingClass(), ('change',))
+    __observables__ = ("obj",)
 
     def __init__(self):
         Model.__init__(self)

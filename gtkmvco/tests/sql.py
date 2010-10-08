@@ -1,3 +1,9 @@
+"""
+Test should print:
+<Person 1 fname='John' mi=None lname='Doe'>
+fname CHANGED! John Ciccio
+<Person 1 fname='Ciccio' mi=None lname='Doe'>
+"""
 import _importer
 
 from sqlobject import *
@@ -12,7 +18,7 @@ class Person (SQLObjectModel):
   mi = StringCol(length=1, default=None)
   lname = StringCol()
 
-  __observable__ = ['?name']    
+  __observables__ = ['?name']
   pass
 
 
@@ -27,7 +33,7 @@ class PersonObs (Observer):
       return
   pass
 
-Person.createTable()
+SQLObjectModel.createTables(ifNotExists=True)
 
 p = Person(fname="John", lname="Doe")
 print p

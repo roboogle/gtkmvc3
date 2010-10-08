@@ -25,6 +25,7 @@
 
 from gtkmvc.support.log import logger
 import gtk
+import sys
 
 try:
     from gtk import glade as gtkglade
@@ -107,7 +108,7 @@ class View (object):
         else: _builder = self.builder
         if _builder is not None:
             if not __builder_is_available__:
-                log.critical("gtk.Builder was required, by not available")
+                logger.critical("gtk.Builder was required, by not available")
                 sys.exit(1)
                 pass
             # if the user passed a Builder, use it as it is, otherwise
@@ -286,7 +287,7 @@ class View (object):
                 except AttributeError: continue
                 
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:
-                    log.error("Widget '%s' in builder also found in glade specification" % name)
+                    logger.error("Widget '%s' in builder also found in glade specification" % name)
                     sys.exit(1)
                     pass
                 self.autoWidgets[name] = wid

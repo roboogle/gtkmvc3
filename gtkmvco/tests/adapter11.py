@@ -1,3 +1,7 @@
+"""
+Test shows a variety of widgets with at least two per model property. Changing
+any should affect others.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
@@ -6,20 +10,16 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window9")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window9"
 
-import datetime
 class MyModel (Model):
-    __properties__ = {
-        'expan' : True,
-        'toggle' : True,
-        'color' : gtk.gdk.color_parse("black"),
-        'url' : "http://www.google.com",
-        'spin' : 5.0,
-        }
+    expan = True
+    toggle = True
+    color = gtk.gdk.color_parse("black")
+    url = "http://www.google.com"
+    spin = 5.0
+    __observables__ = ("expan", "toggle", "color", "url", "spin")
 
     def __init__(self):
         Model.__init__(self)
@@ -28,9 +28,6 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
         
@@ -62,8 +59,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

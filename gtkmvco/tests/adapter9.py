@@ -1,21 +1,21 @@
+"""
+Test shows a button and an arrow. Pressing the button should rotate the arrow
+90 degrees clockwise.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window8")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window8"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'dir' : gtk.ARROW_UP,
-        }
+    dir = gtk.ARROW_UP
+    __observables__ = ("dir",)
 
     def __init__(self):
         Model.__init__(self)
@@ -24,12 +24,9 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
-        self.adapt("dir")
+        self.adapt("dir2")
         return
 
     def on_button5_clicked(self, button):
@@ -42,8 +39,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

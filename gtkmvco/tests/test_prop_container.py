@@ -1,3 +1,10 @@
+"""
+Test should print:
+property_mylist_before_change:
+<id 1> [] append (10,) {}
+property_mylist_before_change:
+<id 2> [] append (20,) {}
+"""
 import _importer
 from gtkmvc import Model, Observer
 

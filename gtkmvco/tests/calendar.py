@@ -1,3 +1,7 @@
+"""
+Like adapter10.py with an additional button. Pressing it should increment the
+date by one day.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 import gtk

@@ -1,9 +1,14 @@
+"""
+Test shows an entry and a spinner. Changing the latter should print a
+notification. Closing the window should exit the program.
+"""
 # MyModel.py
+import _importer
 import gtkmvc
 class MyModel (gtkmvc.Model):
     name = "Roberto"
     age = 0
-    __observable__ = ["name", "age" ] 
+    __observables__ = ["name", "age" ]
 
     pass # end of class
 
@@ -30,10 +35,9 @@ class MyCtrl (gtkmvc.Controller):
 import gtkmvc
 import gtk
 class MyView (gtkmvc.View):
-    def __init__(self, ctrl):
-        super(MyView, self).__init__(ctrl, register=False)
+    def __init__(self):
+        super(MyView, self).__init__()
         self.__create_manual_widgets()
-        ctrl.register_view(self)
         return
 
     def __create_manual_widgets(self):
@@ -67,8 +71,8 @@ class MyObserver (gtkmvc.Observer):
 
 # main.py
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 o = MyObserver(m)
 

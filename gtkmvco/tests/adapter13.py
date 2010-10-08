@@ -1,3 +1,9 @@
+"""
+Like adapter12.py but uses functions to add a defaults adapter. Should print:
+REMOVED  <int>
+NOT REMOVED
+APPENDED!
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
@@ -11,7 +17,6 @@ class MyView (View):
         return
     pass
 
-import datetime
 class MyModel (Model):
     file = "(please select a file)"
     __observables__ = ('file', )

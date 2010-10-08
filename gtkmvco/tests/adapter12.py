@@ -1,3 +1,8 @@
+"""
+Test shows a FileChooserButton and a label. After choosing a file the label
+should show its path. It should work even if adapters.default doesn't contain
+FileChooserButton.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
@@ -11,7 +16,6 @@ class MyView (View):
         return
     pass
 
-import datetime
 class MyModel (Model):
     file = "(please select a file)"
     __observables__ = ('file', )

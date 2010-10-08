@@ -28,6 +28,20 @@
 # The example does not need a view and a controller, as only
 # the model side (and an observer) is used. 
 # ----------------------------------------------------------------------
+"""
+Test should print:
+int changed!
+a_list before change! [] append (10,) {}
+a_list after change! [10] append None (10,) {}
+a_list before change! [10] __setitem__ (0, 11) {}
+a_list after change! [11] __setitem__ None (0, 11) {}
+a_map before change! {} __setitem__ ('hello', 30) {}
+a_map after change! {'hello': 30} __setitem__ None ('hello', 30) {}
+a_map before change! {'hello': 30} update ({'bye': 50},) {}
+a_map after change! {'bye': 50, 'hello': 30} update None ({'bye': 50},) {}
+a_map before change! {'bye': 50, 'hello': 30} __delitem__ ('hello',) {}
+a_map after change! {'bye': 50} __delitem__ None ('hello',) {}
+"""
 
 import _importer
 from gtkmvc import ModelMT
@@ -40,11 +54,10 @@ class MyModel (ModelMT):
     observable properties. When changed, observers' methods
     property_<name>_{before,after}_change will be called if found."""
     
-    __properties__ = {
-        'a_int'  : 0, 
-        'a_list' : [],
-        'a_map'  : {},
-        }
+    int = 0
+    a_list = []
+    a_map = {}
+    __observables__ = ("a_*", "int")
 
     def __init__(self):
         ModelMT.__init__(self)

@@ -1,3 +1,10 @@
+"""
+Test should print:
+obj after change: <id 1> change None (<id 1>,) {}
+obj value changed from: <id 1> to: <id 2>
+obj after change: <id 2> change None (<id 2>,) {}
+obj after change: <id 2> change None (<id 2>,) {}
+"""
 import _importer
 
 from gtkmvc import Model
@@ -22,9 +29,8 @@ class AdHocClass (observable.Observable):
 
 # ----------------------------------------------------------------------
 class MyModel (Model):
-    __properties__ = {
-        'obj' : AdHocClass(),
-        }
+    obj = AdHocClass()
+    __observables__ = ("obj",)
 
     def __init__(self):
         Model.__init__(self)
@@ -42,7 +48,6 @@ class MyObserver (Observer):
         print "obj value changed from:", old, "to:", new 
         new.change() # XXX
         model.obj.change() # XXX
-        self.model.obj.change() # XXX
         return
 
     def property_obj_after_change(self, model, instance, name, res,

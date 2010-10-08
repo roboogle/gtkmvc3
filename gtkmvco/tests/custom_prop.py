@@ -4,6 +4,10 @@
 
 # This file tests custom properties used in combination with adapters
 # This was used to check bug fix made in rev.150
+"""
+Test shows an entry and a button. Changing the entry should print the value.
+Pressing the button should increment the entry and print.
+"""
 
 import _importer
 from gtkmvc import Model, Controller, View

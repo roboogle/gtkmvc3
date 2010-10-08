@@ -1,3 +1,6 @@
+"""
+Like adapter1.py but inside controller.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
@@ -7,16 +10,13 @@ import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window1")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window1"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'en1' : 10.0,
-        }
+    en1 = 10.0
+    __observables__ = ("en1",)
 
     def __init__(self):
         Model.__init__(self)
@@ -29,13 +29,10 @@ def myerr(adapt, name, val):
     adapt.update_widget()
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
         a1 = Adapter(self.model, "en1",
-                     prop_read=lambda v: v/2.0, prop_write=lambda v: v*2,
+                     prop_read=lambda v: v/2.0, prop_write=lambda v: float(v)*2,
                      value_error=myerr)
         a1.connect_widget(self.view["entry1"])
         self.adapt(a1)
@@ -57,8 +54,8 @@ class MyCtrl (Controller):
 
     
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

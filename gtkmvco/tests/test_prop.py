@@ -1,3 +1,9 @@
+"""
+Test should print:
+<class '__main__.AA'>
+<unbound method AA.foo>
+foo
+"""
 
 
 class Meta (type):

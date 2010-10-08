@@ -1,3 +1,8 @@
+"""
+Test shows an entry and a button. Pressing the button should increment the
+entry by one. Changing the entry manually to a value > 10 will print a message,
+doing it by pressing the button will raise ValueError in the signal handler.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import UserClassAdapter
@@ -25,27 +30,16 @@ class UserClass (observable.Observable):
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window2")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window2"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'x'   : UserClass(10), 
-        }
-
-    def __init__(self):
-        Model.__init__(self)
-        return
-    pass
+    x = UserClass(10)
+    __observables__ = ("x",)
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def on_button2_clicked(self, button):
         self.model.x.set_x(self.model.x.get_x() + 1)
@@ -60,8 +54,8 @@ def myerr(adapt, name, val):
     adapt.update_widget()
     
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 a1 = UserClassAdapter(m, "x", "get_x", "set_x", value_error=myerr)
 a1.connect_widget(v["en2"])

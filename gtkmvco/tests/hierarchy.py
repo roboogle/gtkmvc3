@@ -1,3 +1,12 @@
+"""
+Test should print:
+name changed from Roberto to Cavada
+age changed from 0 to 1
+age changed from 10 to 11
+name changed from Roberto to Cavada2
+days changed from 12 to 17
+days changed from 17 to 22
+"""
 # MyModel.py
 import _importer
 import gtkmvc
@@ -20,7 +29,7 @@ class MyModelDer1 (MyModelBase):
 
 class MyModelDer2 (MyModelDer1):
     #days = 1000
-    __observables__ = [ "days", "pippo" ]
+    #__observables__ = [ "days", "pippo" ]
 
     #def get_days_value(self): return self.__val
     #def set_days_value(self, val):self.__val = val

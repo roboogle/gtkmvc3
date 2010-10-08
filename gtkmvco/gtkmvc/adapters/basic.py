@@ -31,6 +31,7 @@ from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc import Model
 
+
 # ----------------------------------------------------------------------
 class Adapter (Observer):
 
@@ -199,9 +200,9 @@ class Adapter (Observer):
         # is it observable?
         if model.has_property(prop):
             # we need to create an observing method before registering
-            meth = new.instancemethod(self.__get_observer_fun(prop),
+            meth = new.instancemethod(self._get_observer_fun(prop),
                                       self, self.__class__)
-            setattr(self, "property_%s_value_change" % prop, meth)
+            setattr(self, meth.__name__, meth)
             pass
 
         self._prop = getattr(model, prop)
@@ -212,12 +213,15 @@ class Adapter (Observer):
         self.observe_model(model)
         return
     
-    def __get_observer_fun(self, prop_name):
+    def _get_observer_fun(self, prop_name):
         """This is the code for an value change observer"""
         def _observer_fun(self, model, old, new):
             if self._itsme: return
             self._on_prop_changed()
             return
+        
+        # doesn't affect stack traces
+        _observer_fun.__name__ = "property_%s_value_change" % prop_name
         return _observer_fun
 
     def _get_property(self):
@@ -365,13 +369,14 @@ class UserClassAdapter (Adapter):
         return what
     
 
-    def _get_observer_src(self, prop_name):
-        """This is the code for a method after_change observer"""
-        return """def property_%s_after_change(self, model, \
-   instance, meth_name, res, args, kwargs):
- if self._itsme: return
- self._on_prop_changed(instance, meth_name, res, args, kwargs)""" % prop_name
+    def _get_observer_fun(self, prop_name):
+        def _observer_fun(self, model, instance, meth_name, res, args, kwargs):
+            if self._itsme: return
+            self._on_prop_changed(instance, meth_name, res, args, kwargs)
+            return
 
+        _observer_fun.__name__ = "property_%s_after_change" % prop_name
+        return _observer_fun
     
     def _on_prop_changed(self, instance, meth_name, res, args, kwargs):
         """Called by the observation code, when a modifying method
@@ -425,10 +430,10 @@ class RoUserClassAdapter (UserClassAdapter):
     # Private methods 
     # ----------------------------------------------------------------------
     # suggested by Tobias Weber
-    def _get_observer_src(self, prop_name):
+    def _get_observer_fun(self, prop_name):
         """Restore Adapter's behaviour to make possible to receive
         value change notifications"""
-        return Adapter._get_observer_src(self, prop_name)
+        return Adapter._get_observer_fun(self, prop_name)
     
     def _on_prop_changed(self):
         """Again to restore behaviour of Adapter"""

@@ -33,6 +33,10 @@
 # want to monitor (for example, those that change the class instance)
 # by using a decorator.
 # ----------------------------------------------------------------------
+"""
+Test should print:
+obj after change! <id 1> change None (<id 1>,) {}
+"""
 
 
 import _importer
@@ -63,9 +67,8 @@ class AdHocClass (observable.Observable):
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        'obj' : AdHocClass(),
-        }
+    obj = AdHocClass()
+    __observables__ = ("obj",)
 
     def __init__(self):
         Model.__init__(self)

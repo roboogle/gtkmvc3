@@ -1,9 +1,14 @@
+"""
+Test should print:
+Changed  <id 1> 0 10
+"""
 import _importer
 from gtkmvc import ModelMT, Observer
 
 class MyModel (ModelMT):
 
-    __properties__ = { 'test' : 0 }
+    test = 0
+    __observables__ = ("test",)
 
     def __init__(self):
         ModelMT.__init__(self)

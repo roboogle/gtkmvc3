@@ -1,21 +1,21 @@
+"""
+Test shows a calendar and a button. Pressing the button should print the
+selected date with the time of launching the program.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import gtk
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window5")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window5"
 
 import datetime
 class MyModel (Model):
-    __properties__ = {
-        'data' : datetime.datetime.today()
-        }
+    data = datetime.datetime.today()
+    __observables__ = ("data",)
 
     def __init__(self):
         Model.__init__(self)
@@ -24,9 +24,6 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
         self.adapt("data", "calendar")
@@ -39,8 +36,8 @@ class MyCtrl (Controller):
 # ----------------------------------------------------------------------
 
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

@@ -31,6 +31,11 @@
 # version 1.0.0 adds "signals" as special kind of observable
 # properties. The example shows how signals can be used. 
 # ----------------------------------------------------------------------
+"""
+Test should print:
+Signal! <id 1> None
+Signal! <id 1> hello!
+"""
 
 
 import _importer
@@ -42,9 +47,8 @@ import gtkmvc.observable as observable
 # ----------------------------------------------------------------------
 class MyModel (Model):
 
-    __properties__ = {
-        'sgn'  : observable.Signal(),
-        }
+    sgn = observable.Signal()
+    __observables__ = ("sgn",)
 
     def __init__(self):
         Model.__init__(self)

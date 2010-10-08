@@ -1,22 +1,23 @@
+"""
+Test shows an entry, a label, and two buttons. Undo is not hooked up. Pressing
+the other button should increment the entry by one. The label should show the
+same value.
+"""
 import _importer
 from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.basic import Adapter
 
 import gtk
 
 
 
 class MyView (View):
-    def __init__(self, ctrl):
-        View.__init__(self, ctrl, "adapters.glade", "window7")
-        return
-    pass
+    glade = "adapters.glade"
+    top = "window7"
 
 
 class MyModel (Model):
-    __properties__ = {
-        'en1' : 10.0,
-        }
+    en1 = 10.0
+    __observables__ = ("en1",)
 
     def __init__(self):
         Model.__init__(self)
@@ -25,9 +26,6 @@ class MyModel (Model):
 
 
 class MyCtrl (Controller):
-    def __init__(self, m):
-        Controller.__init__(self, m)
-        return
 
     def register_adapters(self):
         self.adapt('en1', 'label7')        
@@ -44,8 +42,8 @@ class MyCtrl (Controller):
 
     
 m = MyModel()
-c = MyCtrl(m)
-v = MyView(c)
+v = MyView()
+c = MyCtrl(m, v)
 
 gtk.main()
 

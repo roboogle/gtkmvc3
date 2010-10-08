@@ -1,3 +1,7 @@
+"""
+Test should show two entries and a button. Pressing it should print both
+values.
+"""
 
 import _importer, gtkmvc
 

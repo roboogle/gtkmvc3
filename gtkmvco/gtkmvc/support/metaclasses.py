@@ -419,7 +419,7 @@ class ObservablePropertyMeta (PropertyMeta):
  old = """ + getter + """
  new = type(self).create_value('%(prop_name)s', val, self)
  """ + setter + """
- if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s')
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s', old)
  self.notify_property_value_change('%(prop_name)s', old, val)
  return
 """) % {'setter_name':setter_name, 'prop_name':prop_name}
@@ -472,7 +472,7 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
  self._prop_lock.acquire()
  """ + setter + """
  self._prop_lock.release()
- if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s')
+ if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s', old)
  self.notify_property_value_change('%(prop_name)s', old, val)
  return
 """) % {'setter_name':setter_name, 'prop_name':prop_name}

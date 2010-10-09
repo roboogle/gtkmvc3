@@ -49,6 +49,12 @@ class ObsWrapperBase (object):
         self.__models.add((model, prop_name))
         return
 
+    def __remove_model__(self, model, prop_name):
+        """Unregisters the given model, to release the wrapper. This
+        method reverts the effect of __add_model__""" 
+        self.__models.remove((model, prop_name))
+        return
+
     def __get_models__(self): return self.__models
 
     def _notify_method_before(self, instance, name, args, kwargs):
@@ -79,15 +85,13 @@ class ObsWrapper (ObsWrapperBase):
         
         self._obj = obj
         self.__doc__ = obj.__doc__
-        
-        for name in method_names:
-            if hasattr(self._obj, name):
-                meth = new.instancemethod(self.__get_wrapper(name), self,
-                                          self.__class__)
-                setattr(self, name, meth)
-                pass
-            pass
 
+        # Creates a derived class which is a singleton which self is
+        # going to be an instance of. All method_names are then
+        # wrapped within it.
+        # See http://stackoverflow.com/questions/1022499/emulating-membership-test-in-python-delegating-contains-to-contained-object
+        d = dict((name, self.__get_wrapper(name)) for name in method_names)
+        self.__class__ = type(self.__class__.__name__, (self.__class__,), d)
         return
    
     def __get_wrapper(self, name):

@@ -145,11 +145,19 @@ class Model (Observer):
         return
 
 
-    def _reset_property_notification(self, prop_name):
+    def _reset_property_notification(self, prop_name, old=None):
         """Called when it has be done an assignment that changes the
         type of a property or the instance of the property has been
         changed to a different instance. In this case it must be
-        unregistered and registered again"""
+        unregistered and registered again. Optional parameter old has
+        to be used when the old value is an instance (derived from 
+        ObsWrapperBase) which needs to unregisters from the model, via
+        a call to method old.__remove_model__(model, prop_name)"""
+
+        # unregister_property
+        if isinstance(old, ObsWrapperBase): 
+            old.__remove_model__(self, prop_name)
+            pass
 
         self.register_property(prop_name)
 

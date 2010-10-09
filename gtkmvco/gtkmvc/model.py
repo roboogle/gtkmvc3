@@ -22,6 +22,8 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 import gtk
+import inspect
+
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
 from observer import Observer
@@ -195,8 +197,15 @@ class Model (Observer):
         # a method or value is decided from number of
         # arguments. This is not particularly robust.
         # self, model, prop_name, old, new
-        for meth in (m for m in cust_methods
-                     if m.im_func.func_code.co_argcount == 5):
+        _CUST_METH_ARGS_COUNT = 5
+        for meth in cust_methods:
+            args, varargs, _, _ = inspect.getargspec(meth)
+            if varargs:
+                logger.warn("Ignoring notification '%s' as variable"
+                            " arguments were used (pattern not recognized,"
+                            " exactly %d arguments were expected)", 
+                            meth.__name__, _CUST_METH_ARGS_COUNT)
+            if args != _CUST_METH_ARGS_COUNT: continue
                 
             pair = (_obs_explicit, meth)
             if pair not in self.__value_notifications[prop_name]:

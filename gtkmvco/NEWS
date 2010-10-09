@@ -1,4 +1,67 @@
 **********************************************************************
+* Since the 1.99.0 release *
+**********************************************************************
+
+* New
+
+  - adapt FileChooserButton
+  - adapt ComboBox
+  - API to extend default adapter list
+  - more widget types now correctly cast when adapted to
+    unicode/int/float properties.
+  - enable RoUserClassAdapter to update the widget.
+    It used to only do it when connecting, not on property changes.
+    This makes the built-in support for gtk.Calendar work in both
+    directions.
+  - Controller's method adapt() allows auto-adaption even if the view
+    does not have corresponding widgets for *all* properties in the
+    model.
+
+* Changed
+
+  - support GtkBuilder in addition to libglade, which is no longer
+    required.
+    This changed the signature of the View constructor. The two
+    formats are not equivalent, as GTK cannot build only parts of a
+    file.
+
+  - allow creation of adapters that act on spurious notifications.
+
+  - if an adapter was passed prop_write on creation this is now called
+    *instead of* casting the value from the widget to the type of the
+    old property value. It used to be called after the cast.
+    This was the intended behaviour all along, but breaks even some of
+    our sample code.
+
+  - use less eval(codestring)
+    This changed how adapters create observer functions. If you have
+    adapter subclasses you will have to adjust them.
+
+* Fixed
+
+  - assigning a tuple with length 3 to a property no longer raises
+
+  - pass the correct model when emitting notifications for an
+    inherited signal.
+    This changes how all property wrappers track their owners, but
+    your code should not be affected.
+
+  - wrapped sequences lacked crucial special methods like len and
+    iter.
+
+  - inspecting wrappers no longer omits the class name
+
+  - various changes to make SQLObjectModel actually usable
+
+  - wrapping more than one sequence class could cause the wrong
+    methods to be called on all but the last instance created. This
+    did not affect programs that only use the built-in list type.
+
+  - mutable instances that used to be assigned to properties would
+    notify of their changes even after being replaced in the model.
+
+
+**********************************************************************
 *  Apr 1 2009                                                        * 
 **********************************************************************
 

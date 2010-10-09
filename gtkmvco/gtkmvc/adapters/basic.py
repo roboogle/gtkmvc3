@@ -308,7 +308,7 @@ class Adapter (Observer):
     # Callbacks and observation
     # ----------------------------------------------------------------------
 
-    def _on_wid_changed(self, wid):
+    def _on_wid_changed(self, wid, *args):
         """Called when the widget is changed"""
         if self._itsme: return
         self.update_model()

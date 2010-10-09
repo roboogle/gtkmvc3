@@ -31,6 +31,33 @@ from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc.support.wrappers import ObsMapWrapper
 
+# Just importing gtk only works for Builder, not glade.
+try: import gtk.glade
+except ImportError: pass
+
+# this tries solving the issue in gtk about Builder not setting name
+# correctly. See https://bugzilla.gnome.org/show_bug.cgi?id=591085
+def _get_name(widget):
+    try:
+        name = gtk.glade.get_widget_name(widget)
+        if name is not None:
+            # Widget was loaded from XML.
+            return name
+    except AttributeError:
+        # Library wasn't successfully imported.
+        pass
+
+    try:
+        # Will be kind instead of name if it wasn't loaded from XML :(
+        return gtk.Buildable.get_name(widget)
+    except AttributeError:
+        # Gtk is too old.
+        pass
+    
+    raise NotImplementedError("StaticContainerAdapter doesn't support "
+                              "manually created widgets")
+
+
 # ----------------------------------------------------------------------
 class StaticContainerAdapter (UserClassAdapter):
     """
@@ -100,7 +127,7 @@ class StaticContainerAdapter (UserClassAdapter):
 
         # prepares the mappings:
         for idx, w in enumerate(self._widgets):
-            if self._prop_is_map: idx=w.get_name()
+            if self._prop_is_map: idx=_get_name(w)
             self._idx2wid[idx] = w
             self._wid2idx[w] = idx
             pass
@@ -189,7 +216,7 @@ class StaticContainerAdapter (UserClassAdapter):
             val = []
             for w in self._widgets:
                 if par.has_key(w): val.append(par[w])
-                elif par.has_key(w.get_name()): val.append(par[w.get_name()])
+                elif par.has_key(_get_name(w)): val.append(par[_get_name(w)])
                 else: val.append(None)
                 pass
             par = val

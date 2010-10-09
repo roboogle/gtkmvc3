@@ -283,7 +283,7 @@ class View (object):
             for wid in self._builder.get_objects():
                 # General workaround for issue
                 # https://bugzilla.gnome.org/show_bug.cgi?id=607492
-                try: name = wid.get_name()
+                try: name = gtk.Buildable.get_name(wid)
                 except AttributeError: continue
                 
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:

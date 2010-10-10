@@ -519,6 +519,22 @@ else:
             InheritableSQLObject._init(self, *args, **kargs)
             Model.__init__(self)
             return
+
+        @classmethod
+        def createTables(cls, *args, **kargs):
+            """
+            Recursively calls InheritableSQLObject.createTable on this
+            and all subclasses, passing any arguments on.
+
+            Call this during startup, after setting up the DB
+            connection and importing all your persistent models. Pass
+            ifNotExists=True unless you want to wipe the database.
+            """
+            cls.createTable(*args, **kargs)
+            for child in cls.__subclasses__():
+                child.createTables(*args, **kargs)
+                pass
+            return
         
         pass # end of class
     pass 

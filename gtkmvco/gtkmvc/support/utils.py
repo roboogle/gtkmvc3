@@ -49,7 +49,7 @@ def getmembers(_object, _predicate):
     # ... and it is re-implemented as:
     observers = []
     for key in dir(_object):
-        try: m = getattr(object, key)
+        try: m = getattr(_object, key)
         except AttributeError: continue
         if _predicate(m): observers.append((key, m))
         pass

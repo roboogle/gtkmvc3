@@ -205,7 +205,7 @@ class Model (Observer):
                             " arguments were used (pattern not recognized,"
                             " exactly %d arguments were expected)", 
                             meth.__name__, _CUST_METH_ARGS_COUNT)
-            if args != _CUST_METH_ARGS_COUNT: continue
+            if len(args) != _CUST_METH_ARGS_COUNT: continue
                 
             pair = (_obs_explicit, meth)
             if pair not in self.__value_notifications[prop_name]:

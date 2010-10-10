@@ -1,6 +1,6 @@
 """
 Test shows an entry, label and button. The label should always be two times
-the entry. The button should increment the entry by one. Typing a non-float
+the entry. The button should increment the entry by 0.5. Typing a non-float
 should print an error and reset the entry.
 """
 import _importer

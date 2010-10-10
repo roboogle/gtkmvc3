@@ -26,7 +26,7 @@ class MyModel (Model):
 class MyCtrl (Controller):
 
     def register_adapters(self):
-        self.adapt("dir2")
+        self.adapt("dir")
         return
 
     def on_button5_clicked(self, button):

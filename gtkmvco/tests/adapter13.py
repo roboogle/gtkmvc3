@@ -68,6 +68,7 @@ assert res
 res = gtkmvc.adapters.default.remove_adapter(gtk.FileChooserButton)
 assert not res
 
+# Broken for old GTK, which needs "selection-changed" signal.
 gtkmvc.adapters.default.add_adapter(
     gtk.FileChooserButton, "file-set",
     gtk.FileChooserButton.get_filename,

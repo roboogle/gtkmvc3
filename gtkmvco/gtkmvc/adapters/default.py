@@ -21,12 +21,20 @@ __def_adapter = [ # class, default signal, getter, setter, value type
     (gtk.Expander, "activate", lambda w: not w.get_expanded(), gtk.Expander.set_expanded, types.BooleanType),
     (gtk.ColorButton, "color-set", gtk.ColorButton.get_color, gtk.ColorButton.set_color, gtk.gdk.Color),
     (gtk.ColorSelection, "color-changed", gtk.ColorSelection.get_current_color, gtk.ColorSelection.set_current_color, gtk.gdk.Color),    
-    # FileChooserButton and ComboBox were proposed by Tobias Weber <towb TA celvina TOD de>:
-    (gtk.FileChooserButton, "file-set" if gtk.gtk_version >= (2,12,0) else "selection-changed", 
-     gtk.FileChooserButton.get_filename, gtk.FileChooserButton.set_filename, types.StringType),
     (gtk.ComboBox, "changed", gtk.ComboBox.get_active, gtk.ComboBox.set_active, types.IntType),
     ]
 
+if gtk.gtk_version >= (2,12,0):
+    __def_adapter.append(
+        (gtk.FileChooserButton, "file-set", gtk.FileChooserButton.get_filename,
+        gtk.FileChooserButton.set_filename, types.StringType))
+    pass
+else:
+    __def_adapter.append(
+        (gtk.FileChooserButton, "selection-changed",
+        gtk.FileChooserButton.get_filename,
+        gtk.FileChooserButton.set_filename, types.StringType))
+    pass
 if gtk.gtk_version >= (2,10,0):
     # conditionally added support
     __def_adapter.append(

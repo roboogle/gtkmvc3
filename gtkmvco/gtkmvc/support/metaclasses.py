@@ -24,7 +24,6 @@
 import new
 import re
 import types
-import warnings
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import get_function_from_source
@@ -109,10 +108,10 @@ class PropertyMeta (type):
 
         # Generates code for all properties (but not for derived props):
         props = getattr(cls, PROPS_MAP_NAME, {})            
-        if len(props) > 0: warnings.warn("In class %s.%s the use of attribute '%s' in models is deprecated."\
-                                             " Use the tuple '%s' instead (see the manual)" %
-                                         (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
-                                         DeprecationWarning)
+        if len(props) > 0: logger.warning("In class %s.%s the use of attribute '%s' in models is deprecated."
+                                          " Use the tuple '%s' instead (see the manual)" %
+                                          (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
+                                          DeprecationWarning)
 
         # processes all names in __properties__ (deprecated,
         # overloaded by __observables__)
@@ -165,12 +164,13 @@ class PropertyMeta (type):
             pass
         
         # finally, there might entries that have no corresponding
-        # value, but there exist getter and setter methods. These
-        # entries are valid only if they do not contain wilcards
+        # value, but there exist getter and setter methods (i.e. the
+        # set of logical properties). These entries are valid only if
+        # they do not contain wilcards
         wilcards = frozenset("[]!*?")
         for name, nameset in zip(not_found, (frozenset(x) for x in not_found)):
             if len(nameset & wilcards) == 0: # no wilcards in the name
-                # has property getter and setter :
+                # has property name-based getter and setter (old stye):
                 if ((hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and 
                      hasattr(cls, SET_PROP_NAME % {'prop_name' : name}))
                     or # has generic getter and setter 

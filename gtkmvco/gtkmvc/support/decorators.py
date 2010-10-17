@@ -24,9 +24,10 @@
 #  -------------------------------------------------------------------------
 
 
-
 # This file contains decorators to be used (privately) by other parts
 # of the framework
+
+import types
 
 def good_decorator(decorator):
     """This decorator makes decorators behave well wrt to decorated
@@ -36,6 +37,27 @@ def good_decorator(decorator):
         g.__name__ = f.__name__
         g.__doc__ = f.__doc__
         g.__dict__.update(f.__dict__)
+        return g
+    
+    new_decorator.__name__ = decorator.__name__
+    new_decorator.__doc__ = decorator.__doc__
+    new_decorator.__dict__.update(decorator.__dict__)
+    return new_decorator
+
+
+def good_decorator_accepting_args(decorator):
+    """This decorator makes decorators behave well wrt to decorated
+    functions names, doc, etc. 
+
+    Differently from good_decorator, this accepts decorators possibly
+    accepting arguments""" 
+    def new_decorator(*f):
+        g = decorator(*f)
+        if 1 == len(f) and isinstance(f[0], types.FunctionType):
+            g.__name__ = f[0].__name__
+            g.__doc__ = f[0].__doc__
+            g.__dict__.update(f[0].__dict__)
+            pass
         return g
     
     new_decorator.__name__ = decorator.__name__

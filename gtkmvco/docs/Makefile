@@ -1,10 +1,11 @@
 # Makefile for building all docs
 
-DESTDIR = build
+DESTDIR = _build
 
-PDF_SRC = user-man/gtkmvc-userman.pdf \
-          tutorial/tex/gtkmvc-tutorial.pdf \
-          quickstart/build/latex/gtkmvc-quickstart.pdf
+PDF_SRC = manual/_build/latex/gtkmvc-userman.pdf \
+          tutorial/_build/latex//gtkmvc-tutorial.pdf \
+          quickstart/_build/latex/gtkmvc-quickstart.pdf \
+          api/_build/latex/gtkmvc-reference.pdf
 # ----------------------------------------------------------------------
 
 HTML_DESTDIR = ${DESTDIR}/html
@@ -18,24 +19,22 @@ pdf: ${PDF_DESTS}
 html: htmldest
 
 clean: 
-	cd user-man && ${MAKE} clean
-	cd tutorial/tex && ${MAKE} clean
+	cd manual && ${MAKE} clean
+	cd tutorial && ${MAKE} clean
 	cd quickstart && ${MAKE} clean 
+	cd api && ${MAKE} clean
 
-distclean: 
+distclean: clean
 	rm -rf ${DESTDIR}
-	cd user-man && ${MAKE} distclean
-	cd tutorial/tex && ${MAKE} distclean
-	cd quickstart && ${MAKE} clean
 
 # --------------------------------------------------------------------
 ${PDF_SRC} : pdfbuild
 
 pdfbuild:
-	cd user-man && ${MAKE} pdf
-	cd tutorial/tex && ${MAKE} pdf
-	cd quickstart && ${MAKE} latex && cd build/latex && \
-	   ${MAKE} all-pdf && mv quickstart.pdf gtkmvc-quickstart.pdf
+	cd manual && ${MAKE} latex && cd _build/latex && ${MAKE} all-pdf
+	cd tutorial && ${MAKE} latex && cd _build/latex && ${MAKE} all-pdf
+	cd quickstart && ${MAKE} latex && cd _build/latex && ${MAKE} all-pdf
+	cd api && ${MAKE} latex && cd _build/latex && ${MAKE} all-pdf
 
 ${PDF_DESTS} : ${PDF_SRC} ${PDF_DESTDIR}
 	cp ${PDF_SRC} ${PDF_DESTDIR}/
@@ -50,14 +49,17 @@ ${HTML_DESTDIR}:
 
 
 htmlbuild: 
-	cd user-man && ${MAKE} html
-	cd tutorial/tex && ${MAKE} html
+	cd manual && ${MAKE} html
+	cd tutorial && ${MAKE} html
 	cd quickstart && ${MAKE} html
+	cd api && ${MAKE} html
 
 htmldest: htmlbuild ${HTML_DESTDIR}
 	rm -rf ${HTML_DESTDIR}/userman
-	cp -r user-man/html ${HTML_DESTDIR}/userman
+	cp -r manual/_build/html ${HTML_DESTDIR}/userman
 	rm -rf ${HTML_DESTDIR}/tutorial
-	cp -r tutorial/tex/html ${HTML_DESTDIR}/tutorial
+	cp -r tutorial/_build/html ${HTML_DESTDIR}/tutorial
 	rm -rf ${HTML_DESTDIR}/quickstart
-	cp -r quickstart/build/html ${HTML_DESTDIR}/quickstart
+	cp -r quickstart/_build/html ${HTML_DESTDIR}/quickstart
+	rm -rf ${HTML_DESTDIR}/reference
+	cp -r api/_build/html ${HTML_DESTDIR}/reference

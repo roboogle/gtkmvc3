@@ -1,5 +1,0 @@
-To generate pdf pdflatex is used.
-To generate html, htlatex is used.
-
-To generate all:
-$> make

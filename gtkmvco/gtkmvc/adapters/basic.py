@@ -38,7 +38,7 @@ class Adapter (Observer):
     def __init__(self, model, prop_name,
                  prop_read=None, prop_write=None, 
                  value_error=None,
-                 spurious=False):
+                 spurious=False, prop_cast=True):
         """
         Creates a new adapter that handles setting of value of a
         model single model property when a corresponding widgets set
@@ -82,6 +82,7 @@ class Adapter (Observer):
         Observer.__init__(self, spurious=spurious)        
 
         self._prop_name = prop_name
+        self._prop_cast = prop_cast
         self._prop_read = prop_read
         self._prop_write = prop_write
         self._value_error = value_error
@@ -245,21 +246,21 @@ class Adapter (Observer):
         accodingly to prop_write function when specified at
         construction-time. A try to cast the value to the property
         type is given."""
-
+        val_wid = val
         # 'finally' would be better here, but not supported in 2.4 :(
         try: 
             totype = type(self._get_property(*args))
 
-            # patched by Tobias Weber
-            if self._prop_write: val_prop = self._prop_write(val)
-            else: val_prop = self._cast_value(val, totype)
+            if self._prop_cast or not self._prop_write:
+                val = self._cast_value(val, totype)
+            if self._prop_write: val = self._prop_write(val)
 
             self._itsme = True
-            self._set_property(val_prop, *args)
+            self._set_property(val, *args)
 
         except ValueError:
             self._itsme = False
-            if self._value_error: self._value_error(self, self._prop_name, val)
+            if self._value_error: self._value_error(self, self._prop_name, val_wid)
             else: raise
             pass
 

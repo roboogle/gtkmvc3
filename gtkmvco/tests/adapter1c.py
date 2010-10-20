@@ -1,7 +1,5 @@
 """
-Test shows an entry, label and button. The label should always be two times
-the entry. The button should increment the entry by 0.5. Typing a non-float
-should print an error and reset the entry.
+Like adapter1.py but using old prop_write semantics.
 """
 import _importer
 from gtkmvc import Model, Controller, View
@@ -41,10 +39,8 @@ v = MyView()
 c = MyCtrl(m, v)
 
 a1 = Adapter(m, "en1",
-    # gtkmvc recently changed prop_write to take the value directly from the
-    # widget instead of after an automatic cast.
-    prop_read=lambda v: v/2.0, prop_write=lambda v: float(v)*2,
-    value_error=myerr, prop_cast=False)
+    prop_read=lambda v: v/2.0, prop_write=lambda v: v*2,
+    value_error=myerr)
 a1.connect_widget(v["entry1"])
 
 a2 = Adapter(m, "en1")

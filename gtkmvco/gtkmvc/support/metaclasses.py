@@ -28,7 +28,7 @@ import inspect
 import sys
 
 import gtkmvc.support.wrappers as wrappers
-from gtkmvc.support.utils import get_function_from_source
+from gtkmvc.support.utils import get_function_from_source, getmembers
 from gtkmvc.support.log import logger
 
 
@@ -215,7 +215,7 @@ class PropertyMeta (type):
         _observables = getattr(cls, OBS_TUPLE_NAME, tuple())
 
         # the list of getters and setters
-        lp_accessors = inspect.getmembers(cls, 
+        lp_accessors = getmembers(cls, 
                                           lambda m: inspect.ismethod(m) and \
                                               hasattr(m, GETTER_SETTER_ATTR_MARKER))
 

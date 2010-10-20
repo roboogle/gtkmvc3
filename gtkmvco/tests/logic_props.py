@@ -4,30 +4,33 @@ logical properties
 """
 
 import _importer
-from gtkmvc import Model, getter, setter
-from gtkmvc import model
+from gtkmvc import Model
+from gtkmvc.support import metaclasses
 
 import unittest
 
 class MyModel (Model):
 
-    @getter
+    __observables__ = ("prop1", "prop2", "prop3")
+
+    @Model.getter
     def get_prop1(self): return 0
     
-    @setter
+    @Model.setter
     def set_prop1(self, val): return
 
-    @getter("prop2", "prop3")
+    @Model.getter("prop2", "prop3")
     def getter_for_props(self, name): return name
 
-    @setter("prop2")
+    @Model.setter("prop2")
     def setter_for_prop2(self, name, val): return
 
-    @setter("prop3")
+    @Model.setter("prop3")
     def setter_for_prop3(self, name, val): return
 
     pass # end of class
 # ----------------------------------------------------------------------
+
 
 class LogicalProps(unittest.TestCase):
     def setUp(self): 
@@ -35,49 +38,49 @@ class LogicalProps(unittest.TestCase):
         
     def test_prop1_markers(self):
         self.assertEqual(getattr(MyModel.get_prop1, 
-                                 model.GETTER_SETTER_ATTR_MARKER),
-                         model.GETTER_MARKER_VAL)
+                                 metaclasses.GETTER_SETTER_ATTR_MARKER),
+                         metaclasses.GETTER_NOARGS_MARKER)
 
         self.assertEqual(getattr(MyModel.set_prop1, 
-                                 model.GETTER_SETTER_ATTR_MARKER),
-                         model.SETTER_MARKER_VAL)
+                                 metaclasses.GETTER_SETTER_ATTR_MARKER),
+                         metaclasses.SETTER_NOARGS_MARKER)
         return
 
     def test_prop1_names(self):
         self.assertEqual(getattr(MyModel.get_prop1, 
-                                 model.GETTER_SETTER_ATTR_PROP_NAMES),
+                                 metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop1",))
 
         self.assertEqual(getattr(MyModel.set_prop1, 
-                                 model.GETTER_SETTER_ATTR_PROP_NAMES),
+                                 metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop1",))
         return
 
     def test_prop23_markers(self):
         self.assertEqual(getattr(MyModel.getter_for_props,
-                                 model.GETTER_SETTER_ATTR_MARKER),
-                         model.GETTER_MARKER_VAL)
+                                 metaclasses.GETTER_SETTER_ATTR_MARKER),
+                         metaclasses.GETTER_ARGS_MARKER)
 
         self.assertEqual(getattr(MyModel.setter_for_prop2,
-                                 model.GETTER_SETTER_ATTR_MARKER),
-                         model.SETTER_MARKER_VAL)
+                                 metaclasses.GETTER_SETTER_ATTR_MARKER),
+                         metaclasses.SETTER_ARGS_MARKER)
 
         self.assertEqual(getattr(MyModel.setter_for_prop3,
-                                 model.GETTER_SETTER_ATTR_MARKER),
-                         model.SETTER_MARKER_VAL)
+                                 metaclasses.GETTER_SETTER_ATTR_MARKER),
+                         metaclasses.SETTER_ARGS_MARKER)
         return
 
     def test_prop23_names(self):
         self.assertEqual(getattr(MyModel.getter_for_props, 
-                                 model.GETTER_SETTER_ATTR_PROP_NAMES),
+                                 metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop2","prop3"))
 
         self.assertEqual(getattr(MyModel.setter_for_prop2, 
-                                 model.GETTER_SETTER_ATTR_PROP_NAMES),
+                                 metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop2",))
 
         self.assertEqual(getattr(MyModel.setter_for_prop3, 
-                                 model.GETTER_SETTER_ATTR_PROP_NAMES),
+                                 metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop3",))
         return
 

@@ -70,6 +70,165 @@ class Model (Observer):
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
     __properties__ = {} # override this
     
+
+    @classmethod
+    @decorators.good_decorator_accepting_args
+    def getter(cls, *args):
+        """
+        Decorator used for defining a logical properties' getter methods
+        in Models.
+        
+        This decorators comes in two flavors: 
+        
+        1. Without arguments: for name-dependent getters (getters which
+        contain the property name in the method name, like in
+        "get_<name>(self)")
+
+        2. With arguments: for name-independent getters, which receive the
+        name of the property when called. E.g. "my_getter(self, name)".
+        In this case the decorator's arguments are the names of the
+        properties which the decorated method is a getter for.
+        """
+
+        @decorators.good_decorator
+        def __decorator(_func):
+            # name is the (optional) name of the property, which is used
+            # with decorators with arguments
+            def _wrapper(self, *name):
+                res = _func(self, *name)
+                return res
+
+            print "In __decorator", cls, _func
+
+            # names is an array which is set in the outer frame. 
+            # Here the normalized names are associated with the getter
+            if 0 == len(names):
+                # No args, extracts the property name from the getter name
+                parts = _func.__name__.split("get_", 1)[1:]
+                if 1 != len(parts): 
+                    raise SyntaxError("Getter '%s' has invalid name "
+                                      "(should be 'get_<name>'). Fix the name, "
+                                      "or use 'getter' decorator with argument(s)" \
+                                          % _func.__name__)
+                # here the name is extracted in 'parts'
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
+                        tuple(parts))
+
+                # Marks the method to be a getter without arguments
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                        support.metaclasses.GETTER_NOARGS_MARKER)
+
+            else: # args were used
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
+                        names)
+
+                # Marks the method to be a getter with arguments
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                        support.metaclasses.GETTER_ARGS_MARKER)
+                
+                pass
+            
+            return _wrapper
+
+        assert 0 < len(args)
+        if 1 == len(args) and isinstance(args[0], types.FunctionType):
+            # decorator is used without arguments (args[0] contains
+            # the decorated function)
+            names = [] # names is used in __decorator
+            return __decorator(args[0])
+    
+        # Here decorator is used with arguments
+        # checks arguments types
+        for arg in args: 
+            if not isinstance(arg, types.StringType): 
+                raise TypeError("Arguments of decorator must be strings")
+            pass
+        names = args # names is used in __decorator
+        return __decorator
+    # ----------------------------------------------------------------------
+
+
+    @classmethod
+    @decorators.good_decorator_accepting_args
+    def setter(cls, *args):
+        """
+        Decorator used for defining a logical properties' setter methods
+        in Models.
+        
+        This decorators comes in two flavors: 
+        
+        1. Without arguments: for name-dependent setters (setters which
+        contain the property name in the method name, like in
+        "set_<name>(self, val)")
+
+        2. With arguments: for name-independent setters, which receive the
+        name of the property when called. E.g. "my_setter(self, name, val)".
+        In this case the decorator's arguments are the names of the
+        properties which the decorated method is a setter for.
+        """
+        
+        @decorators.good_decorator
+        def __decorator(_func):
+            # name_value is the value to be set, and the optional name of
+            # the property, which is used with decorators with arguments
+            def _wrapper(self, *name_value):
+                _func(self, *name_value)
+                return
+
+            # names is an array which is set in the outer frame. 
+            # Here the normalized names are associated with the setter
+            if 0 == len(names):
+                # No args, extracts the property name from the setter name
+                parts = _func.__name__.split("set_", 1)[1:]
+                if 1 != len(parts): 
+                    raise SyntaxError("Setter '%s' has invalid name "
+                                      "(should be 'set_<name>'). Fix the name, "
+                                      "or use 'setter' decorator with argument(s)" \
+                                          % _func.__name__)
+                # here the name is extracted in 'parts'
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
+                        tuple(parts))
+
+                # Marks the method to be a setter without args
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                        support.metaclasses.SETTER_NOARGS_MARKER)
+
+            else: # args were used
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
+                        names)
+
+                # Marks the method to be a setter with args
+                setattr(_wrapper, 
+                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                        support.metaclasses.SETTER_ARGS_MARKER)
+                pass
+
+            return _wrapper
+
+        assert 0 < len(args)
+        if 1 == len(args) and isinstance(args[0], types.FunctionType):
+            # decorator is used without arguments (args[0] contains
+            # the decorated function)
+            names = [] # names is used in __decorator
+            return __decorator(args[0])
+    
+        # Here decorator is used with arguments
+        # checks arguments types
+        for arg in args: 
+            if not isinstance(arg, types.StringType): 
+                raise TypeError("Arguments of decorator must be strings")
+            pass
+        names = args # names is used in __decorator
+        return __decorator
+    # ----------------------------------------------------------------------
+
     def __init__(self):
         Observer.__init__(self)
         
@@ -542,143 +701,3 @@ else:
         pass # end of class
     pass 
 # ----------------------------------------------------------------------
-
-# These are the field names used internally (in models and in
-# metaclasses)
-GETTER_SETTER_ATTR_PROP_NAMES = "names"
-GETTER_SETTER_ATTR_MARKER = "lp_meth_type"
-GETTER_MARKER_VAL = 0
-SETTER_MARKER_VAL = 1
-
-@decorators.good_decorator_accepting_args
-def getter(*args):
-    """
-    Decorator used for defining a logical properties' getter methods
-    in Models.
-
-    This decorators comes in two flavors: 
-
-    1. Without arguments: for name-dependent getters (getters which
-    contain the property name in the method name, like in
-    "get_<name>(self)")
-
-    2. With arguments: for name-independent getters, which receive the
-       name of the property when called. E.g. "my_getter(self, name)".
-       In this case the decorator's arguments are the names of the
-       properties which the decorated method is a getter for.
-       """
-
-    @decorators.good_decorator
-    def __decorator(_func):
-        # name is the (optional) name of the property, which is used
-        # with decorators with arguments
-        def _wrapper(self, *name):
-            print "Calling getter", _func.__name__
-            res = _func(self, *name)
-            print "End of getter call"
-            return res
-
-        # names is an array which is set in the outer frame. 
-        # Here the normalized names are associated with the getter
-        if 0 == len(names):
-            # No args, extracts the property name from the getter name
-            parts = _func.__name__.split("get_", 1)[1:]
-            if 1 != len(parts): 
-                raise SyntaxError("Getter '%s' has invalid name "
-                                  "(should be 'get_<name>'). Fix the name, "
-                                  "or use 'getter' decorator with argument(s)" \
-                                      % _func.__name__)
-            # here the name is extracted in 'parts'
-            setattr(_wrapper, GETTER_SETTER_ATTR_PROP_NAMES, tuple(parts))
-
-        else: # args were used
-            setattr(_wrapper, GETTER_SETTER_ATTR_PROP_NAMES, names)
-            pass
-
-        # Marks the method to be a getter
-        setattr(_wrapper, GETTER_SETTER_ATTR_MARKER, GETTER_MARKER_VAL)
-
-        return _wrapper
-
-    assert 0 < len(args)
-    if 1 == len(args) and isinstance(args[0], types.FunctionType):
-        # decorator is used without arguments            
-        names = [] # names is used in __decorator
-        return __decorator(args[0])
-    
-    # Here decorator is used with arguments
-    # checks arguments types
-    for arg in args: 
-        if not isinstance(arg, types.StringType): 
-            raise TypeError("Arguments of decorator must be strings")
-        pass
-    names = args # names is used in __decorator
-    return __decorator
-# ----------------------------------------------------------------------
-
-
-@decorators.good_decorator_accepting_args
-def setter(*args):
-    """
-    Decorator used for defining a logical properties' setter methods
-    in Models.
-
-    This decorators comes in two flavors: 
-
-    1. Without arguments: for name-dependent setters (setters which
-    contain the property name in the method name, like in
-    "set_<name>(self, val)")
-
-    2. With arguments: for name-independent setters, which receive the
-       name of the property when called. E.g. "my_setter(self, name, val)".
-       In this case the decorator's arguments are the names of the
-       properties which the decorated method is a setter for.
-       """
-    
-    @decorators.good_decorator
-    def __decorator(_func):
-        # name_value is the value to be set, and the optional name of
-        # the property, which is used with decorators with arguments
-        def _wrapper(self, *name_value):
-            print "Calling setter", _func.__name__
-            _func(self, *name_value)
-            print "End of setter call"
-            return
-
-        # names is an array which is set in the outer frame. 
-        # Here the normalized names are associated with the setter
-        if 0 == len(names):
-            # No args, extracts the property name from the setter name
-            parts = _func.__name__.split("set_", 1)[1:]
-            if 1 != len(parts): 
-                raise SyntaxError("Setter '%s' has invalid name "
-                                  "(should be 'set_<name>'). Fix the name, "
-                                  "or use 'setter' decorator with argument(s)" \
-                                      % _func.__name__)
-            # here the name is extracted in 'parts'
-            setattr(_wrapper, GETTER_SETTER_ATTR_PROP_NAMES, tuple(parts))
-
-        else: # args were used
-            setattr(_wrapper, GETTER_SETTER_ATTR_PROP_NAMES, names)
-            pass
-
-        # Marks the method to be a setter
-        setattr(_wrapper, GETTER_SETTER_ATTR_MARKER, SETTER_MARKER_VAL)
-
-        return _wrapper
-
-    assert 0 < len(args)
-    if 1 == len(args) and isinstance(args[0], types.FunctionType):
-        # decorator is used without arguments            
-        names = [] # names is used in __decorator
-        return __decorator(args[0])
-    
-    # Here decorator is used with arguments
-    # checks arguments types
-    for arg in args: 
-        if not isinstance(arg, types.StringType): 
-            raise TypeError("Arguments of decorator must be strings")
-        pass
-    names = args # names is used in __decorator
-    return __decorator
-

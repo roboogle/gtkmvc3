@@ -45,12 +45,18 @@ class MyModel (Model):
     # its values are got and set by a general methods pair.
     __observables__ = ["internal", "external_spec", "external_gen"]
 
-    def get_external_spec_value(self): return "some value for external_spec"
-    def set_external_spec_value(self, val):
+    @Model.getter
+    def get_external_spec(self): return "some value for external_spec"
+
+    @Model.setter
+    def set_external_spec(self, val):
         print "specific setter has been called"
         return
 
+    @Model.getter("external_gen")
     def get__value(self, name): return "some value for generic " + name
+
+    @Model.setter("external_gen")
     def set__value(self, name, value):
         print "generic setter for %s has been called" % name
         return

@@ -24,6 +24,8 @@
 import new
 import re
 import types
+import inspect
+import sys
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import get_function_from_source
@@ -44,13 +46,19 @@ ALL_OBS_SET = "__all_observables__"
 # name of the variable that hold a property value
 PROP_NAME = "_prop_%(prop_name)s"
 
-# These are the names for property getter/setter methods that depend on property name
-GET_PROP_NAME = "get_%(prop_name)s_value"
-SET_PROP_NAME = "set_%(prop_name)s_value"
+# These are the field names used internally (in models and in
+# metaclasses) to mark logical properties' accessors methods
+GETTER_SETTER_ATTR_PROP_NAMES = "__names"
+GETTER_SETTER_ATTR_MARKER = "__lp_meth_type"
+GETTER_NOARGS_MARKER, \
+GETTER_ARGS_MARKER,   \
+SETTER_NOARGS_MARKER, \
+SETTER_ARGS_MARKER    \
+= range(4)
 
-# There are the names for generic property getter/setter methods
-GET_GENERIC_NAME = "get__value"
-SET_GENERIC_NAME = "set__value"
+# this is the name of the internal map associating logical
+# properties names to their (getter, setter) pair
+LOGICAL_ACCESSORS_MAP_NAME = "__log_accessors_map__"
 
 
 class PropertyMeta (type):
@@ -107,11 +115,14 @@ class PropertyMeta (type):
             pass
 
         # Generates code for all properties (but not for derived props):
-        props = getattr(cls, PROPS_MAP_NAME, {})            
-        if len(props) > 0: logger.warning("In class %s.%s the use of attribute '%s' in models is deprecated."
-                                          " Use the tuple '%s' instead (see the manual)" %
-                                          (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
-                                          DeprecationWarning)
+        props = getattr(cls, PROPS_MAP_NAME, {})      
+        if len(props) > 0: 
+            import warnings
+            warnings.warn("In class %s.%s the use of attribute '%s' in models is deprecated."
+                          " Use the tuple '%s' instead (see the manual)" \
+                              % (cls.__module__, cls.__name__,  PROPS_MAP_NAME, OBS_TUPLE_NAME), 
+                          DeprecationWarning)
+            pass
 
         # processes all names in __properties__ (deprecated,
         # overloaded by __observables__)
@@ -124,8 +135,8 @@ class PropertyMeta (type):
         # class (also from bases)
         for base in bases: obs |= getattr(base, ALL_OBS_SET, set())
         setattr(cls, ALL_OBS_SET, obs)
-        logger.debug("class %s.%s has observables: %s", cls.__module__,
-                     cls.__name__, obs)
+        logger.debug("class %s.%s has observables: %s" \
+                         % (cls.__module__, cls.__name__, obs))
         return
 
 
@@ -162,7 +173,11 @@ class PropertyMeta (type):
                 if fnmatch.fnmatch(name, pat): res_set.add(name) 
                 pass
             pass
-        
+
+        # produces the getter/setter map
+        cls.__create_logical_accessors_info()
+        getters_setters_map = getattr(cls, LOGICAL_ACCESSORS_MAP_NAME)
+
         # finally, there might entries that have no corresponding
         # value, but there exist getter and setter methods (i.e. the
         # set of logical properties). These entries are valid only if
@@ -171,23 +186,118 @@ class PropertyMeta (type):
         for name, nameset in zip(not_found, (frozenset(x) for x in not_found)):
             if len(nameset & wilcards) == 0: # no wilcards in the name
                 # has property name-based getter and setter (old stye):
-                if ((hasattr(cls, GET_PROP_NAME % {'prop_name' : name}) and 
-                     hasattr(cls, SET_PROP_NAME % {'prop_name' : name}))
-                    or # has generic getter and setter 
-                    (hasattr(cls, GET_GENERIC_NAME) and 
-                     hasattr(cls, SET_GENERIC_NAME))): res_set.add(name)
+                if getters_setters_map.has_key(name): res_set.add(name)
                 else: # the observable was not found!
                     logger.warning("In class %s.%s ignoring observable '%s' "\
                                        "which has no corresponding attribute"\
-                                       " or custom getter/setter pair" %
+                                       " or user-defined getter/setter pair" %
                                    (cls.__module__, cls.__name__, name))
                     pass
-                pass                               
+                pass 
             pass
 
         return res_set
 
         
+    def __create_logical_accessors_info(cls):
+        """Here logical properties are handled. First we collect
+        all methods marked by the getter/setter decorators, and
+        associate each pair with the corresponding logical
+        property. The association is made through internal maps
+        which can then be accessed at class level. 
+
+        This method produces a resulting map name -> (getter,
+        setter) which is stored internally to the class in the
+        attribute whose name is given by
+        LOGICAL_ACCESSORS_MAP_NAME.                
+        """
+
+        _observables = getattr(cls, OBS_TUPLE_NAME, tuple())
+
+        # the list of getters and setters
+        lp_accessors = inspect.getmembers(cls, 
+                                          lambda m: inspect.ismethod(m) and \
+                                              hasattr(m, GETTER_SETTER_ATTR_MARKER))
+
+        # list of (getter, properties)
+        getter_props = [(m, getattr(m, GETTER_SETTER_ATTR_PROP_NAMES))
+                        for n, m in lp_accessors 
+                        if getattr(m, GETTER_SETTER_ATTR_MARKER) \
+                            in (GETTER_NOARGS_MARKER, GETTER_ARGS_MARKER) ]
+
+        # retrieves the getters map: name -> getter
+        log_getters = {}
+        for m, names in getter_props:
+            for name in names:
+                # the property has to be existing
+                if name not in _observables: 
+                    raise ValueError("In class %s.%s method %s is marked "
+                                     "as getter for non-existing property '%s'"\
+                                         % (cls.__module__, cls.__name__, m.__name__, name))
+                # the property have only one getter
+                if log_getters.has_key(name): 
+                    logger.error("Class %s.%s has multiple getters for property '%s'"\
+                                     % (cls.__module__, cls.__name__, name))
+                    sys.exit(1)
+                    pass
+
+                log_getters[name] = m
+                pass
+            pass
+
+        
+
+        # list of (setter, properties)
+        setter_props = [(m, getattr(m, GETTER_SETTER_ATTR_PROP_NAMES)) 
+                        for n, m in lp_accessors 
+                        if getattr(m, GETTER_SETTER_ATTR_MARKER) \
+                            in (SETTER_NOARGS_MARKER, SETTER_ARGS_MARKER)]
+        
+        # retrieves the setters map: name -> setter
+        log_setters = {}
+        for m, names in setter_props:
+            for name in names:
+                # the property has to be existing
+                if name not in _observables: 
+                    raise ValueError("In class %s.%s method %s is marked "
+                                     "as setter for non-existing property '%s'"\
+                                         % (cls.__module__, cls.__name__, m.__name__, name))
+                # the property have only one setter
+                if log_setters.has_key(name): 
+                    raise ValueError("Class %s.%s has multiple setters for property '%s'"\
+                                         % (cls.__module__, cls.__name__, name))
+                log_setters[name] = m
+                pass
+            pass
+
+        # checks that each property has the corresponding pair
+        getters_set = frozenset(log_getters)
+        setters_set = frozenset(log_setters)
+        if (getters_set - setters_set): 
+            logger.error("Logical properties have getters, "
+                         "but no corresponding setters:\n" + \
+                             str(getters_set - setters_set))
+            sys.exit(1)
+            pass
+
+        if (setters_set - getters_set): 
+            logger.error("Logical properties have setters, "
+                         "but no corresponding getters:\n" + \
+                             str(setters_set - getters_set))
+            sys.exit(1)
+            pass
+        
+        # constructs the result out of the two maps for getters and setters
+        log_getters_setters = {}
+        for name, getter in log_getters.iteritems():
+            log_getters_setters[name] = (getter, log_setters[name])
+            pass
+
+        # stores the resulting map into the class
+        setattr(cls, LOGICAL_ACCESSORS_MAP_NAME, log_getters_setters)
+        return
+
+
     def __create_prop_accessors__(cls, prop_name, default_val):
         """Private method that creates getter and setter, and the
         corresponding property"""
@@ -202,8 +312,8 @@ class PropertyMeta (type):
             func = get_function_from_source(src)
             setattr(cls, getter_name, func)
         else:
-            logger.debug("Custom member '%s' overloads generated getter of property '%s'", 
-                         getter_name, prop_name)
+            logger.debug("Custom member '%s' overloads generated getter of property '%s'" \
+                             % (getter_name, prop_name))
             pass
 
         if setter_name not in members_names:
@@ -211,8 +321,8 @@ class PropertyMeta (type):
             func = get_function_from_source(src)
             setattr(cls, setter_name, func)
         else:
-            logger.warning("Custom member '%s' overloads generated setter of property '%s'",
-                           setter_name, prop_name)
+            logger.warning("Custom member '%s' overloads generated setter of property '%s'" \
+                               % (setter_name, prop_name))
             pass
 
         prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
@@ -222,8 +332,9 @@ class PropertyMeta (type):
         if has_prop_variable:
             varname = PROP_NAME % {'prop_name' : prop_name}
             if not varname in members_names: cls.__create_property(varname, default_val)
-            else: logger.warning("In class %s.%s automatic property builder found a possible clashing with attribute '%s'",
-                                 cls.__module__, cls.__name__, varname)
+            else: logger.warning("In class %s.%s automatic property builder found a "
+                                 "possible clashing with attribute '%s'" \
+                                     % (cls.__module__, cls.__name__, varname))
             pass
         
         return
@@ -349,76 +460,73 @@ class ObservablePropertyMeta (PropertyMeta):
 
   def get_getter_source(cls, getter_name, prop_name):
       """This implementation returns the PROP_NAME value if there
-      exists such property. If there exist a pair of methods
-      __get_<prop_name>_value__ and __set_<prop_name>_value__ the
-      value is taken from the getter. Otherwise if there exists the
-      generic pair __get_value__ and __set_value__ the gettter is
-      called. The getter method (specific or general) is called _only_
-      if there exists no variable called PROP_NAME (see the user
-      manual)"""
+      exists such property. If there exist a pair of defined
+      logical getters/setters the value is taken from the
+      getter."""
 
+      getters_setters_map = getattr(cls, LOGICAL_ACCESSORS_MAP_NAME)
+      getter, setter = getters_setters_map.get(prop_name, (None, None))
       has_prop_variable = cls.has_prop_attribute(prop_name)
 
-      has_specific_getter = (
-          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
-          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
-
-      has_general_getter = (
-          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
-          hasattr(cls, SET_GENERIC_NAME))
-
-      assert has_prop_variable or has_specific_getter or has_general_getter, "no var/methods for '%s'" % prop_name
+      assert has_prop_variable or (getter and setter), "no var/methods for '%s'" % prop_name
       
       # when property variable is given, it overrides all getters
       if has_prop_variable:
-          getter = "self." + PROP_NAME
-          if has_specific_getter: logger.warning("In class %s.%s ignoring custom getter/setter pair for property '%s' as a corresponding attribute exists" % (cls.__module__, cls.__name__, prop_name))
-
-      # specific getter ovverides the general one
-      elif has_specific_getter: getter = "self." + GET_PROP_NAME + "()" 
-
-      # generic getter
-      else: getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
-
+          str_getter = "self." + PROP_NAME
+          if getter and setter: logger.warning("In class %s.%s ignoring custom logical getter/setter"
+                                               "pair for property '%s' as a corresponding "
+                                               "attribute exists" \
+                                                   % (cls.__module__, cls.__name__, prop_name))
+          pass
+      
+      # uses logical getter. Sees if the getter needs to receive
+      # the property name (i.e. if the getter is used for multiple
+      # properties)
+      elif getattr(getter, GETTER_SETTER_ATTR_MARKER) == GETTER_ARGS_MARKER:
+          str_getter = "self." + getter.__name__ + "('%(prop_name)s')"
+      else: str_getter = "self." + getter.__name__ + "()" 
+      
       # general getter ovverides the general one
-      return ("def %(getter_name)s(self): return " + getter) % \
+      return ("def %(getter_name)s(self): return " + str_getter) % \
         {'getter_name' : getter_name, 'prop_name' : prop_name}
-          
+
   
   def get_setter_source(cls, setter_name, prop_name):
-      """The setter follows the rules of the getter. First search for
-      property variable, then specific getter/seter pair methods, and
-      finally the generic getter/setter pair (see the user manual)"""
-
+      """The setter follows the rules of the getter. First search
+      for property variable, then logical custom getter/seter pair
+      methods"""
+      getters_setters_map = getattr(cls, LOGICAL_ACCESSORS_MAP_NAME)
+      getter, setter = getters_setters_map.get(prop_name, (None, None))
       has_prop_variable = cls.has_prop_attribute(prop_name)
 
-      has_specific_setter = (
-          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
-          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
-
-      has_general_setter = (
-          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
-          hasattr(cls, SET_GENERIC_NAME))
-
-      assert has_prop_variable or has_specific_setter or has_general_setter
+      assert has_prop_variable or (getter and setter), "no var/methods for '%s'" % prop_name
 
       if has_prop_variable:
-          getter = "self._prop_%(prop_name)s"
-          setter = "self._prop_%(prop_name)s = new"
+          str_getter = "self._prop_%(prop_name)s"
+          str_setter = "self._prop_%(prop_name)s = new"
+          if getter and setter: logger.warning("In class %s.%s ignoring custom logical getter/setter"
+                                               "pair for property '%s' as a corresponding "
+                                               "attribute exists" \
+                                                   % (cls.__module__, cls.__name__, prop_name))
+          pass
 
-      elif has_specific_setter:
-          getter = "self." + GET_PROP_NAME + "()"
-          setter = "self." + SET_PROP_NAME + "(new)"
-          
+      # uses logical setter. Sees if the getter seeds to receive
+      # the property name (i.e. if the setter is used for multiple
+      # properties)
       else:
-          getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
-          setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
-          pass          
+          if getattr(getter, GETTER_SETTER_ATTR_MARKER) == GETTER_ARGS_MARKER:
+              str_getter = "self." + getter.__name__ + "('%(prop_name)s')"
+          else: str_getter = "self." + getter.__name__ + "()" 
+
+          if getattr(setter, GETTER_SETTER_ATTR_MARKER) == SETTER_ARGS_MARKER:
+              str_setter = "self." + setter.__name__ + "('%(prop_name)s', new)"
+          else: str_setter = "self." + setter.__name__ + "(new)" 
+          pass
       
       return ("""def %(setter_name)s(self, val):
- old = """ + getter + """
+ old = """ + str_getter + """
  new = type(self).create_value('%(prop_name)s', val, self)
- """ + setter + """
+ """ + str_setter + """
  if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s', old)
  self.notify_property_value_change('%(prop_name)s', old, val)
  return
@@ -441,36 +549,44 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
     
   def get_setter_source(cls, setter_name, prop_name):
       """Setter for MT.""" 
+
+  def get_setter_source(cls, setter_name, prop_name):
+      """The setter follows the rules of the getter. First search
+      for property variable, then logical custom getter/seter pair
+      methods"""
+      getters_setters_map = getattr(cls, LOGICAL_ACCESSORS_MAP_NAME)
+      getter, setter = getters_setters_map.get(prop_name, (None, None))
       has_prop_variable = cls.has_prop_attribute(prop_name)
 
-      has_specific_setter = (
-          hasattr(cls, GET_PROP_NAME % {'prop_name' : prop_name}) and # has property getter and setter 
-          hasattr(cls, SET_PROP_NAME % {'prop_name' : prop_name}))
-
-      has_general_setter = (
-          hasattr(cls, GET_GENERIC_NAME) and # has generic getter and setter 
-          hasattr(cls, SET_GENERIC_NAME))
-
-      assert has_prop_variable or has_specific_setter or has_general_setter
+      assert has_prop_variable or (getter and setter), "no var/methods for '%s'" % prop_name
 
       if has_prop_variable:
-          getter = "self._prop_%(prop_name)s"
-          setter = "self._prop_%(prop_name)s = new"
+          str_getter = "self._prop_%(prop_name)s"
+          str_setter = "self._prop_%(prop_name)s = new"
+          if getter and setter: logger.warning("In class %s.%s ignoring custom logical getter/setter"
+                                               "pair for property '%s' as a corresponding "
+                                               "attribute exists" \
+                                                   % (cls.__module__, cls.__name__, prop_name))
+          pass
 
-      elif has_specific_setter:
-          getter = "self." + GET_PROP_NAME + "()"
-          setter = "self." + SET_PROP_NAME + "(new)"
-          
+      # uses logical setter. Sees if the getter seeds to receive
+      # the property name (i.e. if the setter is used for multiple
+      # properties)
       else:
-          getter = "self." + GET_GENERIC_NAME + "('%(prop_name)s')"
-          setter = "self." + SET_GENERIC_NAME + "('%(prop_name)s', new)"
-          pass          
+          if getattr(getter, GETTER_SETTER_ATTR_MARKER) == GETTER_ARGS_MARKER:
+              str_getter = "self." + getter.__name__ + "('%(prop_name)s')"
+          else: str_getter = "self." + getter.__name__ + "()" 
+
+          if getattr(setter, GETTER_SETTER_ATTR_MARKER) == SETTER_ARGS_MARKER:
+              str_setter = "self." + setter.__name__ + "('%(prop_name)s', new)"
+          else: str_setter = "self." + setter.__name__ + "(new)" 
+          pass
       
       return ("""def %(setter_name)s(self, val): 
- old = """ + getter + """
+ old = """ + str_getter + """
  new = type(self).create_value('%(prop_name)s', val, self)
  self._prop_lock.acquire()
- """ + setter + """
+ """ + str_setter + """
  self._prop_lock.release()
  if type(self).check_value_change(old, new): self._reset_property_notification('%(prop_name)s', old)
  self.notify_property_value_change('%(prop_name)s', old, val)

@@ -35,7 +35,10 @@ class AdHocClass (observable.Observable):
     methods which we are interested in monitoring are decorated
     accordingly"""
 
-    def __init__(self): self.val = 0
+    def __init__(self): 
+        observable.Observable.__init__(self)
+        self.val = 0
+        return
 
     @observable.observed # this way the method is declared as 'observed'
     def change(self): self.val += 1

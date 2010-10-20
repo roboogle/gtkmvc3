@@ -18,11 +18,13 @@ class MyModel (Model):
     
     __observables__ = ("external",)
 
-    def get_external_value(self):
+    @Model.getter("external")
+    def get_external_value(self, name):
         # gets the data from the external source
         return self.data_source
     
-    def set_external_value(self, value):
+    @Model.setter
+    def set_external(self, value):
         # sends the data to the external source
         self.data_source = value        
         return

@@ -118,6 +118,7 @@ In the picture you can see how a middle/large GUI application can be
 organized and decomposed with gtkmvc.
 
 .. image:: images/diagram.png
+   :scale: 60
 
 Spend some time looking at this funny image. On the left, models
 designed as a pair of separate hierarchies. One of the model in the

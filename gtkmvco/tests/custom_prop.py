@@ -18,13 +18,21 @@ class MyModel (Model):
     
     __observables__ = ("external",)
 
-    @Model.getter("external")
-    def get_external_value(self, name):
+    # Old style getter
+     #@Model.getter
+    def get_external_value(self):
+        # gets the data from the external source
+        return self.data_source
+
+    # this is for testing shadowing warnings 
+    @Model.getter
+    def get_external(self):
         # gets the data from the external source
         return self.data_source
     
-    @Model.setter
-    def set_external(self, value):
+    # Old style getter (have to emit a warning)
+    #@Model.setter
+    def set_external_value(self, value):
         # sends the data to the external source
         self.data_source = value        
         return

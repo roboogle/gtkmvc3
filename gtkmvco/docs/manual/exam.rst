@@ -17,7 +17,7 @@ how the application should appear.
 .. _EX:f:
 
 .. figure:: images/example.png
-   :width: 4 cm
+   :width: 6 cm
    :align: center
 
    The sample Application
@@ -34,7 +34,7 @@ The sample *GUI* has only one top-level window (named
 .. _GL:f:
 
 .. figure:: images/example_glade.png
-   :width: 12 cm
+   :width: 15 cm
    :align: center
 
    Designing the example by means of *Glade* for GTK2

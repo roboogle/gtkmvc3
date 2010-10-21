@@ -38,7 +38,7 @@ change.
 .. _F:OBS:
 
 .. figure:: images/obs.png
-   :width: 10 cm
+   :width: 14 cm
    :align: center
 
    Observable models and Observers
@@ -51,9 +51,8 @@ notified of all changes of the observable properties. The Observers
 will be notified only of the property changes that they are actually
 interested in observing.
 
-An implicit syntactical rule binds observable property names to
-notifications sockets inside Observers. This rule allows an automatic
-connection, and fixes a sort of "rule" for methods names.
+Observable properties are then syntactically bounded to
+notifications sockets inside Observers.
 
 Later in this document, some implementation details are discussed, and
 further details about observable properties are presented. Finally,

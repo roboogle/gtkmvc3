@@ -64,7 +64,7 @@ keep low the complexity of controllers.
 .. _ADAP_f:
 
 .. figure:: images/adap.png
-   :width: 10 cm
+   :width: 12 cm
    :align: center
 
    Schematic simple adapter
@@ -154,7 +154,7 @@ know how to fully exploit and control this new feature.
 .. _ADAP1_f:
 
 .. figure:: images/adap1.png
-   :width: 10 cm
+   :width: 12 cm
    :align: center
 
    Simple adapter at work
@@ -215,7 +215,7 @@ classes.
 .. _ADAPuml_f:
 
 .. figure:: images/adapuml.png
-   :width: 7 cm
+   :width: 10 cm
    :align: center
 
    Adapters class hierarchy
@@ -462,7 +462,7 @@ label and a ``SpinButton``.
 .. _ADAP2_f:
 
 .. figure:: images/adap2.png
-   :width: 4 cm
+   :width: 6 cm
    :align: center
 
    ``StaticContainerAdapter`` at work
@@ -528,7 +528,7 @@ label ``"lbl"`` shows its value. ::
 .. _ADAP3_f:
 
 .. figure:: images/adap3.png
-   :width: 4 cm
+   :width: 6 cm
    :align: center
 
    Customized setter for the label

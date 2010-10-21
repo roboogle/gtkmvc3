@@ -8,7 +8,7 @@ Engineering Theory [#theory]_.
 .. _MVC_f:
 
 .. figure:: images/mvc.png
-   :width: 6 cm
+   :width: 8 cm
    :align: center
 
    Simplified Model-View-Controller Pattern

@@ -28,9 +28,8 @@ like for example ``TextBuffer`` or ``TreeModel``
 objects. However in general the model part is indenpended on the
 specific graphical toolkit.
 
-Lower layers supply several functionalities concerning the graphical
-toolkit (GTK and *Glade*) and the Scripting Environment (namely
-Python).
-
-
+Lower layers supply several functionalities concerning the
+graphical toolkit (GTK and *Glade*), Object Relational Mapping
+(ORM) libraries, the Scripting Environment (namely Python), and
+other possible libraries providing application-specific features.
 

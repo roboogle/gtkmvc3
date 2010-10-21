@@ -24,6 +24,7 @@
 
 from gtkmvc.observer import Observer
 from gtkmvc.support.log import logger
+from gtkmvc.support.exceptions import TooManyCandidatesError
 
 import types
 import gobject
@@ -150,8 +151,7 @@ class Controller (Observer):
                 try: wid_name = self._find_widget_match(prop_name)
                 except TooManyCandidatesError, e:
                     # multiple candidates, gives up
-                    logger.error(e[0])
-                    sys.exit(1)
+                    raise e
                 except ValueError, e: 
                     # no widgets found for given property, continue after emitting a warning
                     logger.warn(e[0])
@@ -199,17 +199,6 @@ class Controller (Observer):
         TooManyCandidatesError when there are more than one
         candidates. Raises ValueError when no widgets (0) are found.
         """
-
-        class TooManyCandidatesError (ValueError):
-            """This class is used for distinguishing between a
-            multiple candidates matched and no candidates matched. The
-            latter is not necessarily an issue, as a missed match can
-            be skipped when searching for a match for *all* the
-            properties in the model (no params to adapt()), which may
-            fail in one single view, as multiple views may be used to
-            represent different parts of the model"""  
-            pass
-
         names = []
         for wid_name in self.view:
             # if widget names ends with given property name: we skip

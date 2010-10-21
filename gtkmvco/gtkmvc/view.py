@@ -24,6 +24,8 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 from gtkmvc.support.log import logger
+from gtkmvc.support.exceptions import ViewError
+
 import gtk
 import sys
 
@@ -95,9 +97,7 @@ class View (object):
 
         if _glade is not None:
             if not __glade_is_available__:
-                logger.critical("Module gtk.glade was required, but not available")
-                sys.exit(1)
-                pass
+                raise ViewError("Module gtk.glade was required, but not available")
             for wid in wids:
                 self.glade_xmlWidgets.append(gtkglade.XML(_glade, wid))
                 pass
@@ -108,9 +108,8 @@ class View (object):
         else: _builder = self.builder
         if _builder is not None:
             if not __builder_is_available__:
-                logger.critical("gtk.Builder was required, by not available")
-                sys.exit(1)
-                pass
+                raise ViewError("gtk.Builder was required, by not available")
+
             # if the user passed a Builder, use it as it is, otherwise
             # build one
             if isinstance(_builder, gtk.Builder):
@@ -287,9 +286,8 @@ class View (object):
                 except AttributeError: continue
                 
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:
-                    logger.error("Widget '%s' in builder also found in glade specification" % name)
-                    sys.exit(1)
-                    pass
+                    raise ViewError("Widget '%s' in builder also found in glade specification" % name)
+
                 self.autoWidgets[name] = wid
                 pass
             pass

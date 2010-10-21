@@ -92,13 +92,16 @@ class Model (Observer):
 
         @decorators.good_decorator
         def __decorator(_func):
+
             # name is the (optional) name of the property, which is used
             # with decorators with arguments
             def _wrapper(self, *name):
                 res = _func(self, *name)
                 return res
 
-            print "In __decorator", cls, _func
+            # takes into account that the user may have decorated
+            # the same getter method multiple times.
+            old_names = getattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, ())
 
             # names is an array which is set in the outer frame. 
             # Here the normalized names are associated with the getter
@@ -109,29 +112,33 @@ class Model (Observer):
                     raise SyntaxError("Getter '%s' has invalid name "
                                       "(should be 'get_<name>'). Fix the name, "
                                       "or use 'getter' decorator with argument(s)" \
-                                          % _func.__name__)
+                                          % _func.__name__)                
+                    
                 # here the name is extracted in 'parts'
                 setattr(_wrapper, 
                         support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        tuple(parts))
-
-                # Marks the method to be a getter without arguments
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                        support.metaclasses.GETTER_NOARGS_MARKER)
+                        old_names+tuple(parts))
+                # Marks the method to be a getter without args
+                marker = support.metaclasses.GETTER_NOARGS_MARKER
 
             else: # args were used
                 setattr(_wrapper, 
                         support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        names)
+                        old_names+names)
 
-                # Marks the method to be a getter with arguments
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                        support.metaclasses.GETTER_ARGS_MARKER)
-                
+                marker = support.metaclasses.GETTER_ARGS_MARKER
                 pass
-            
+                
+            setattr(_wrapper, 
+                    support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                    marker)
+                
+            # remove attributes in nested decorated functions
+            if old_names:
+                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_MARKER)
+                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES)
+                pass
+
             return _wrapper
 
         assert 0 < len(args)
@@ -179,6 +186,10 @@ class Model (Observer):
                 _func(self, *name_value)
                 return
 
+            # takes into account that the user may have decorated
+            # the same setter method multiple times.
+            old_names = getattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, ())
+
             # names is an array which is set in the outer frame. 
             # Here the normalized names are associated with the setter
             if 0 == len(names):
@@ -192,22 +203,27 @@ class Model (Observer):
                 # here the name is extracted in 'parts'
                 setattr(_wrapper, 
                         support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        tuple(parts))
-
+                        old_names+tuple(parts))
                 # Marks the method to be a setter without args
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                        support.metaclasses.SETTER_NOARGS_MARKER)
+                marker = support.metaclasses.SETTER_NOARGS_MARKER
 
             else: # args were used
                 setattr(_wrapper, 
                         support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        names)
+                        old_names+names)
 
                 # Marks the method to be a setter with args
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                        support.metaclasses.SETTER_ARGS_MARKER)
+                marker = support.metaclasses.SETTER_ARGS_MARKER
+                pass
+
+            setattr(_wrapper, 
+                    support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
+                    marker)
+                
+            # remove attributes in nested decorated functions
+            if old_names:
+                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_MARKER)
+                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES)
                 pass
 
             return _wrapper
@@ -228,6 +244,7 @@ class Model (Observer):
         names = args # names is used in __decorator
         return __decorator
     # ----------------------------------------------------------------------
+
 
     def __init__(self):
         Observer.__init__(self)

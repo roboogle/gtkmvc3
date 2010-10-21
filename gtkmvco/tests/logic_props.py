@@ -13,11 +13,13 @@ class MyModel (Model):
 
     __observables__ = ("prop1", "prop2", "prop3")
 
+    _value = 0
+
     @Model.getter
-    def get_prop1(self): return 0
+    def get_prop1(self): return self._value
     
     @Model.setter
-    def set_prop1(self, val): return
+    def set_prop1(self, val): self._value = val
 
     @Model.getter("prop2", "prop3")
     def getter_for_props(self, name): return name
@@ -32,11 +34,28 @@ class MyModel (Model):
 # ----------------------------------------------------------------------
 
 
+# this class checks that hierarchies are not broken
+class MyModel2 (MyModel):
+    
+    __observables__ = ("prop4",)
+
+    # this is used to check overriding in derivated classes
+    def get_prop1(self): return 1
+    
+    @Model.setter
+    def set_prop4(self, val): return
+
+    @Model.getter("*")
+    def getter_for_all_props(self, name): return name
+    pass
+
+
 class LogicalProps(unittest.TestCase):
     def setUp(self): 
         return
         
     def test_prop1_markers(self):
+        # checks that getter/setter decorator correctly mark methods
         self.assertEqual(getattr(MyModel.get_prop1, 
                                  metaclasses.GETTER_SETTER_ATTR_MARKER),
                          metaclasses.GETTER_NOARGS_MARKER)
@@ -47,6 +66,7 @@ class LogicalProps(unittest.TestCase):
         return
 
     def test_prop1_names(self):
+        # checks that getter/setter decorator correctly mark methods
         self.assertEqual(getattr(MyModel.get_prop1, 
                                  metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop1",))
@@ -57,6 +77,7 @@ class LogicalProps(unittest.TestCase):
         return
 
     def test_prop23_markers(self):
+        # checks that getter/setter decorator correctly mark methods
         self.assertEqual(getattr(MyModel.getter_for_props,
                                  metaclasses.GETTER_SETTER_ATTR_MARKER),
                          metaclasses.GETTER_ARGS_MARKER)
@@ -71,6 +92,7 @@ class LogicalProps(unittest.TestCase):
         return
 
     def test_prop23_names(self):
+        # checks that getter/setter decorator correctly mark methods
         self.assertEqual(getattr(MyModel.getter_for_props, 
                                  metaclasses.GETTER_SETTER_ATTR_PROP_NAMES),
                                  ("prop2","prop3"))
@@ -84,7 +106,35 @@ class LogicalProps(unittest.TestCase):
                                  ("prop3",))
         return
 
+    def test_prop_base_rw(self):
+        # test read/write in base
+        m = MyModel()
+        m.prop1 = 10
+        self.assertEqual(m.prop1, 10)
+        return
+
+    def test_prop_der_rw(self):
+        # test read/write in derivated
+        m = MyModel2()
+        m.prop1 = 10
+        self.assertEqual(m._value, 10)
+        return
+
+    def test_prop_der_overriding(self):
+        # tests getter overriding works
+        m = MyModel2()
+        m.prop1 = 10
+        self.assertEqual(m.prop1, 1)
+        return
+        
+    # tests that derivated properties are handled
+    def test_prop_der_local(self):
+        m = MyModel2()
+        m.prop4 = "ciao" # setters is dummy
+        self.assertEqual(m.prop4, "prop4")
+        return
+    pass
+
 
 if __name__ == "__main__":
     unittest.main()
-

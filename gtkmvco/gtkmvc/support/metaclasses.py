@@ -26,11 +26,12 @@ import re
 import types
 import inspect
 import sys
+import fnmatch
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import get_function_from_source, getmembers
 from gtkmvc.support.log import logger
-
+from gtkmvc.support.exceptions import DecoratorError
 
 # ----------------------------------------------------------------------
 
@@ -144,7 +145,6 @@ class PropertyMeta (type):
         """Returns a set of strings by expanding wilcards found
         in class field __observables__. Expansion works only with
         names not prefixed with __"""
-        import fnmatch
         res_set = set()
 
         not_found = []
@@ -190,7 +190,7 @@ class PropertyMeta (type):
                 else: # the observable was not found!
                     logger.warning("In class %s.%s ignoring observable '%s' "\
                                        "which has no corresponding attribute"\
-                                       " or user-defined getter/setter pair" %
+                                       " nor user-defined getter/setter pair" %
                                    (cls.__module__, cls.__name__, name))
                     pass
                 pass 
@@ -209,16 +209,24 @@ class PropertyMeta (type):
         This method produces a resulting map name -> (getter,
         setter) which is stored internally to the class in the
         attribute whose name is given by
-        LOGICAL_ACCESSORS_MAP_NAME.                
+        LOGICAL_ACCESSORS_MAP_NAME.   
+
+        Note: this code is very long and complex. It is very likely
+        it could be rewritten more concisely.
         """
 
-        _observables = getattr(cls, OBS_TUPLE_NAME, tuple())
-
+        log_props = frozenset([x for x in getattr(cls, OBS_TUPLE_NAME, tuple())
+                               if not hasattr(cls, x) or \
+                                   type(getattr(cls, x)) != property])
+        
         # the list of getters and setters
-        lp_accessors = getmembers(cls, 
-                                          lambda m: inspect.ismethod(m) and \
-                                              hasattr(m, GETTER_SETTER_ATTR_MARKER))
+        lp_accessors = [ (n, m) for n, m in cls.__dict__.iteritems() 
+                         if type(m) is types.FunctionType and 
+                         hasattr(m, GETTER_SETTER_ATTR_MARKER) ]
 
+        # ----------------------------------------------------------------------
+        # Here getters are handled
+        #
         # list of (getter, properties)
         getter_props = [(m, getattr(m, GETTER_SETTER_ATTR_PROP_NAMES))
                         for n, m in lp_accessors 
@@ -227,26 +235,62 @@ class PropertyMeta (type):
 
         # retrieves the getters map: name -> getter
         log_getters = {}
+        log_notfound = {}
         for m, names in getter_props:
             for name in names:
                 # the property has to be existing
-                if name not in _observables: 
-                    raise ValueError("In class %s.%s method %s is marked "
-                                     "as getter for non-existing property '%s'"\
-                                         % (cls.__module__, cls.__name__, m.__name__, name))
-                # the property have only one getter
-                if log_getters.has_key(name): 
-                    logger.error("Class %s.%s has multiple getters for property '%s'"\
-                                     % (cls.__module__, cls.__name__, name))
-                    sys.exit(1)
+                if name not in log_props: 
+                    log_notfound[name] = m
+                else:              
+                    # Found the property, now check that is has only one getter
+                    if log_getters.has_key(name) and log_getters[name] != m:
+                        raise DecoratorError("Class %s.%s has multiple getters for property '%s'"\
+                                              % (cls.__module__, cls.__name__, name))
+                    log_getters[name] = m
                     pass
-
-                log_getters[name] = m
                 pass
             pass
 
-        
+        # processes not found property, to see if they match
+        # missing logical properties through wilcards. First the
+        # set of not already-assigned properties is calculated, and
+        # then we verify that every possible match is unique, to
+        # avoid any possible ambiguity
+        missing_logical_props = log_props - set(log_getters)
+        if missing_logical_props:
+            for pattern, m in log_notfound.iteritems():
+                matches = fnmatch.filter(missing_logical_props, pattern)
+                if matches:
+                    for name in matches: 
+                        if log_getters.has_key(name) and log_getters[name] != m:
+                            raise DecoratorError("Class %s.%s has multiple getters for property '%s'"\
+                                                  % (cls.__module__, cls.__name__, name))
 
+                        logger.debug("In class %s.%s associating pattern '%s' "
+                                     "with property '%s' for getter method '%s'"\
+                                         % (cls.__module__, cls.__name__, 
+                                            pattern, name, str(m)))
+                        log_getters[name] = m
+                        pass
+                    pass # for all matches
+                else: # no match was found
+                    logger.warning("In class %s.%s method %s is marked "
+                                   "as getter for non-existing property '%s'"\
+                                       % (cls.__module__, cls.__name__, m.__name__, pattern))
+                    pass
+                pass
+            pass
+        else: # here there may be not found names, but all
+              # properties have been matched already
+            for pattern, m in log_notfound.iteritems():
+                logger.warning("In class %s.%s method %s is marked "
+                               "as getter but no property matches pattern '%s'"\
+                                   % (cls.__module__, cls.__name__, m.__name__, pattern))
+            pass
+
+        # ----------------------------------------------------------------------
+        # Here setters are handled
+        #
         # list of (setter, properties)
         setter_props = [(m, getattr(m, GETTER_SETTER_ATTR_PROP_NAMES)) 
                         for n, m in lp_accessors 
@@ -255,37 +299,75 @@ class PropertyMeta (type):
         
         # retrieves the setters map: name -> setter
         log_setters = {}
+        log_notfound = {}
         for m, names in setter_props:
+
             for name in names:
                 # the property has to be existing
-                if name not in _observables: 
-                    raise ValueError("In class %s.%s method %s is marked "
-                                     "as setter for non-existing property '%s'"\
-                                         % (cls.__module__, cls.__name__, m.__name__, name))
-                # the property have only one setter
-                if log_setters.has_key(name): 
-                    raise ValueError("Class %s.%s has multiple setters for property '%s'"\
-                                         % (cls.__module__, cls.__name__, name))
-                log_setters[name] = m
+                if name not in log_props: 
+                    log_notfound[name] = m
+                else:
+                    # Found the property, now check that is has only one setter
+                    if log_setters.has_key(name) and log_setters[name] != m:
+                        raise DecoratorError("Class %s.%s has multiple setters for property '%s'"\
+                                              % (cls.__module__, cls.__name__, name))
+
+                    log_setters[name] = m
+                    pass
                 pass
             pass
+        
+
+        # processes not found property, to see if they match
+        # missing logical properties through wilcards. First the
+        # set of not already-assigned properties is calculated, and
+        # then we verify that every possible match is unique, to
+        # avoid any possible ambiguity
+        missing_logical_props = log_props - set(log_setters)
+        if missing_logical_props:
+            for pattern, m in log_notfound.iteritems():
+                matches = fnmatch.filter(missing_logical_props, pattern)
+                if matches:
+                    for name in matches: 
+                        if log_setters.has_key(name) and log_setters[name] != m:
+                            raise DecoratorError("Class %s.%s has multiple setters for property '%s'"\
+                                                  % (cls.__module__, cls.__name__, name))
+
+                        logger.debug("In class %s.%s associating pattern '%s' "
+                                     "with property '%s' for setter method '%s'"\
+                                         % (cls.__module__, cls.__name__, 
+                                            pattern, name, str(m)))
+                        log_setters[name] = m
+                        pass
+                    pass # for all matches
+                else: # no match was found
+                    logger.warning("In class %s.%s method %s is marked "
+                                   "as setter for non-existing property '%s'"\
+                                       % (cls.__module__, cls.__name__, m.__name__, pattern))
+                    pass
+                pass
+            pass
+        else: # here there may be not found names, but all
+              # properties have been matched already
+            for pattern, m in log_notfound.iteritems():
+                logger.warning("In class %s.%s method %s is marked "
+                               "as setter but no property matches pattern '%s'"\
+                                   % (cls.__module__, cls.__name__, m.__name__, pattern))
+            pass
+        # ----------------------------------------------------------------------
 
         # checks that each property has the corresponding pair
         getters_set = frozenset(log_getters)
         setters_set = frozenset(log_setters)
         if (getters_set - setters_set): 
-            logger.error("Logical properties have getters, "
-                         "but no corresponding setters:\n" + \
-                             str(getters_set - setters_set))
-            sys.exit(1)
-            pass
+            raise DecoratorError("Logical properties have getters, "
+                              "but no corresponding setters: " + \
+                                  ", ".join((str(x) for x in getters_set - setters_set)))
 
         if (setters_set - getters_set): 
-            logger.error("Logical properties have setters, "
-                         "but no corresponding getters:\n" + \
-                             str(setters_set - getters_set))
-            sys.exit(1)
-            pass
+            raise DecoratorError("Logical properties have setters, "
+                                 "but no corresponding getters: " + \
+                                     ", ".join((str(x) for x in setters_set - getters_set)))
         
         # constructs the result out of the two maps for getters and setters
         log_getters_setters = {}

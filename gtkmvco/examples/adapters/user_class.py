@@ -25,9 +25,8 @@
 
 
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc import Model, Controller, View, Observable
 from gtkmvc.adapters import UserClassAdapter
-from gtkmvc import observable
 
 import gtk
 
@@ -44,14 +43,14 @@ import gtk
 # parameter. Try to set a value greater than 10 by editing the text
 # entry.
 
-class UserClass (observable.Observable):
+class UserClass (Observable):
     def __init__(self, max_val):
-        observable.Observable.__init__(self)
+        Observable.__init__(self)
         self.__x = 0
         self.max_val = max_val
         return
 
-    @observable.observed
+    @Observable.observed
     def set_x(self, v):
         if v > self.max_val:
             raise ValueError("x cannot be greater than %d" % self.max_val)

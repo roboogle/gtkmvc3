@@ -96,14 +96,9 @@ What's missing is now an observer, to be notified when the property
 changes. To create an observer, derive your class from base class
 ``gtkmvc.Observer``. ::
 
- from gtkmvc import observer
+ from gtkmvc import Observer
  
- class AnObserver (observer.Observer):
-   def __init__(self, model):
-     Observer.__init__(self, model)
- 
-     # ...
-     return
+ class AnObserver (Observer):
  
    def property_name_value_change(self, model, old, new):
      print "Property name changed from '%s' to '%s"' % (old, new)
@@ -126,11 +121,11 @@ Instead of using an implicit naming convention for the notification
 methods, is also possible to declare that a method within the observer
 is interested in receiving notifications for a bunch of properties: ::
 
- from gtkmvc import observer
+ from gtkmvc import Observer
  
- class AnObserver (observer.Observer):
+ class AnObserver (Observer):
  
-   @observer.observes('name', ...)
+   @Observer.observes('name', ...)
    def an_observing_method(self, model, prop_name, old, new):
      print "Property '%s' changed from '%s' to '%s"' % (prop_name, old, new)
      return
@@ -427,16 +422,17 @@ Two mechanism are provided by the framework:
 
 Examples for new classes: ::
 
- from gtkmvc import Model
- from gtkmvc import Observer
- from gtkmvc import observable
- 
+ from gtkmvc import Model, Observer, Observable
+
  # ----------------------------------------------------------------------
- class AdHocClass (observable.Observable):
-     def __init__(self): self.val = 0
+ class AdHocClass (Observable):
+     def __init__(self): 
+         Observable.__init__(self)
+         self.val = 0
+         return
  
      # this way the method is declared as 'observed':
-     @observable.observed 
+     @Observable.observed 
      def change(self): self.val += 1
  
      # this is NOT observed:
@@ -483,9 +479,9 @@ readability):
  from: <__main__.AdHocClass object at 0xb7d91e8c> to: None
 
 As you can see, declaring a class as *observable* is as simple as
-deriving from ``gtkmvc.observable.Observable`` and decorating
+deriving from ``gtkmvc.Observable`` and decorating
 those class methods that must be observed with the decorator 
-``gtkmvc.observable.observe`` (decorators are supported by
+``gtkmvc.Observable.observed`` (decorators are supported by
 Python version 2.4 and later only). 
 
 
@@ -531,8 +527,8 @@ To declare an *OP* as a signal, the value of the *OP* must be
 ``gtkmvc.observable.Signal()``. To notify an event, the model
 can then invoke method ``emit`` of the *OP*. The observers will
 be notified by calling method
-``property_<name>_signal_emit`` that will also receive any
-parameter passed to the ``emit`` method. For example: ::
+``property_<name>_signal_emit`` that will also receive one 
+parameter optionally passed to the ``emit`` method. For example: ::
 
  from gtkmvc import Model
  from gtkmvc import Observer
@@ -549,8 +545,8 @@ parameter passed to the ``emit`` method. For example: ::
  class MyObserver (Observer):
  
      # notification
-     def property_sgn_signal_emit(self, model, args, kwargs):
-         print "Signal:", model, args, kwargs
+     def property_sgn_signal_emit(self, model, arg):
+         print "Signal:", model, arg
          return
  
      pass # end of class
@@ -560,13 +556,13 @@ parameter passed to the ``emit`` method. For example: ::
      m = MyModel()
      c = MyObserver(m)
      m.sgn.emit() # we emit a signal
-     m.sgn.emit("hello!", key=10) # with arguments
+     m.sgn.emit("hello!") # with argument
      pass
  
 The execution of this example will produce:
  
- Signal: <__main__.MyModel object at 0xb7de564c> () {}
- Signal: <__main__.MyModel object at 0xb7de564c> ('hello!',) {'key': 10}
+ Signal: <__main__.MyModel object at 0x...> None
+ Signal: <__main__.MyModel object at 0x...> hello!
 
 
 In the ``examples``, there are several examples that show how

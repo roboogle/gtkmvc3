@@ -9,17 +9,16 @@ import _importer
 
 from gtkmvc import Model
 from gtkmvc import Observer
-from gtkmvc import observable
-
+from gtkmvc import Observable
 
 # ----------------------------------------------------------------------
-class AdHocClass (observable.Observable):
+class AdHocClass (Observable):
     def __init__(self):
-        observable.Observable.__init__(self)
+        Observable.__init__(self)
         self.val = 0
 
     # this way the method is declared as 'observed':
-    @observable.observed 
+    @Observable.observed 
     def change(self): self.val += 1
 
     # this is NOT observed:

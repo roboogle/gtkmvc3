@@ -42,11 +42,11 @@ obj after change! <id 1> change None (<id 1>,) {}
 import _importer
 
 from gtkmvc import ModelMT as Model
-from gtkmvc.observer import Observer
-import gtkmvc.observable as observable
+from gtkmvc import Observer, Observable
+from gtkmvc import observable 
 
 # ----------------------------------------------------------------------
-class AdHocClass (observable.Observable):
+class AdHocClass (Observable):
 
     """This is a class that is thought to be integrated into the
     observer pattern. It is declared to be 'observable' and the
@@ -54,11 +54,11 @@ class AdHocClass (observable.Observable):
     accordingly"""
 
     def __init__(self):
-        observable.Observable.__init__(self)
+        Observable.__init__(self)
         self.val = 0
         pass
     
-    @observable.observed # this way the method is declared as 'observed'
+    @Observable.observed # this way the method is declared as 'observed'
     def change(self): self.val += 1
 
     pass #end of class

@@ -1,8 +1,7 @@
 import _importer
-from gtkmvc import Model, observer
+from gtkmvc import Model, Observer
 from gtkmvc.model import SQLObjectModel
 from gtkmvc.adapters.basic import Adapter
-from gtkmvc import observable
 from gtkmvc.support.metaclasses import ObservablePropertyMetaSQL
 from sqlobject import *
 from sqlobject.inheritance import InheritableSQLObject
@@ -27,9 +26,9 @@ class Person(SQLObjectModel):
   pass
 
 
-class PersonObserver(observer.Observer):
+class PersonObserver(Observer):
 
-  @observer.observes("fname", "lname", )
+  @Observer.observes("fname", "lname", )
   def property_value_change(self, model, prop_name, old, new):
       print "CHANGED", prop_name, old, new
       return

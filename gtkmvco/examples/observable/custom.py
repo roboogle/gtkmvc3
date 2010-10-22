@@ -25,10 +25,10 @@ import _importer
 
 from gtkmvc import Model
 from gtkmvc import Observer
-from gtkmvc import observer
-from gtkmvc import observable
+from gtkmvc import Observable
+from gtkmvc.observable import Signal
 
-class AdHocClass (observable.Observable):
+class AdHocClass (Observable):
 
     """This is a class that is thought to be integrated into the
     observer pattern. It is declared to be 'observable' and the
@@ -36,11 +36,11 @@ class AdHocClass (observable.Observable):
     accordingly"""
 
     def __init__(self): 
-        observable.Observable.__init__(self)
+        Observable.__init__(self)
         self.val = 0
         return
 
-    @observable.observed # this way the method is declared as 'observed'
+    @Observable.observed # this way the method is declared as 'observed'
     def change(self): self.val += 1
     pass #end of class
 
@@ -49,7 +49,7 @@ class MyModel (Model):
 
     a_value = 1
     a_value2 = 1
-    a_signal = observable.Signal()
+    a_signal = Signal()
     a_class = AdHocClass()
 
     __observables__ = ("a_*",)
@@ -59,33 +59,33 @@ class MyModel (Model):
 class MyObserver (Observer):
     _for_test = 0 # this is acounter to count the notifications
 
-    @observer.observes("a_value", "a_value2", "pippo")
+    @Observer.observes("a_value", "a_value2", "pippo")
     def observer_for_value(self, model, prop_name, old, new):
         print "observer_for_value", model, prop_name, old, new
         self._for_test += 1
         return
 
     # multiple observes work!
-    @observer.observes("a_value")
-    @observer.observes("a_value2")
+    @Observer.observes("a_value")
+    @Observer.observes("a_value2")
     def observer_for_value2(self, model, prop_name, old, new):
         print "observer_for_value2", model, prop_name, old, new
         self._for_test += 1
         return
         
-    @observer.observes("a_signal")
+    @Observer.observes("a_signal")
     def observer_for_signal(self, model, prop_name, arg):
         print "observer_for_signal", model, prop_name, arg
         self._for_test += 1
         return
 
-    @observer.observes("a_signal")
+    @Observer.observes("a_signal")
     def observer_for_signal2(self, model, prop_name, arg):
         print "observer_for_signal2", model, prop_name, arg
         self._for_test += 1
         return
     
-    @observer.observes("a_class")
+    @Observer.observes("a_class")
     def observer_for_method_before(self, model, prop_name,
                                    instance, meth_name, args, kwargs):
         print "observer_for_method_before", model, prop_name, \
@@ -93,7 +93,7 @@ class MyObserver (Observer):
         self._for_test += 1
         return
 
-    @observer.observes("a_class")
+    @Observer.observes("a_class")
     def observer_for_method_after(self, model, prop_name,
                                   instance, meth_name, res, args, kwargs):
         print "observer_for_method_after", model, prop_name, \

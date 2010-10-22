@@ -23,11 +23,34 @@
 #  -------------------------------------------------------------------------
 
 
-from support import decorators
+from support import decorators, log
 from support.wrappers import ObsWrapperBase
 
 # ----------------------------------------------------------------------
 class Observable (ObsWrapperBase):
+
+    @classmethod
+    @decorators.good_classmethod_decorator
+    def observed(cls, _func):
+        """Use this decorator to make your class methods observable.
+        
+        Your observer will receive at most two notifications:
+        - property_<name>_before_change
+        - property_<name>_after_change        
+        """
+
+        def wrapper(*args, **kwargs):
+            self = args[0]
+            assert(isinstance(self, Observable))
+            
+            self._notify_method_before(self, _func.__name__, args, kwargs)
+            res = _func(*args, **kwargs)
+            self._notify_method_after(self, _func.__name__, res, args, kwargs)
+            return res    
+
+        return wrapper
+    
+
     def __init__(self):
         ObsWrapperBase.__init__(self)
         return
@@ -52,6 +75,9 @@ def observed(func):
         res = func(*args, **kwargs)
         self._notify_method_after(self, func.__name__, res, args, kwargs)
         return res    
+
+    log.logger.warning("Decorator observable.observed is deprecated:"
+                       "use Observable.observed instead")
     return wrapper
 
 

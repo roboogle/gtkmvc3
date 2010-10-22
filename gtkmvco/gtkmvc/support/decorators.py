@@ -38,10 +38,28 @@ def good_decorator(decorator):
         g.__doc__ = f.__doc__
         g.__dict__.update(f.__dict__)
         return g
-    
+        
     new_decorator.__name__ = decorator.__name__
     new_decorator.__doc__ = decorator.__doc__
     new_decorator.__dict__.update(decorator.__dict__)
+
+    return new_decorator
+
+
+def good_classmethod_decorator(decorator):
+    """This decorator makes class method decorators behave well wrt
+    to decorated class method names, doc, etc.""" 
+    def new_decorator(cls, f):
+        g = decorator(cls, f)
+        g.__name__ = f.__name__
+        g.__doc__ = f.__doc__
+        g.__dict__.update(f.__dict__)
+        return g
+        
+    new_decorator.__name__ = decorator.__name__
+    new_decorator.__doc__ = decorator.__doc__
+    new_decorator.__dict__.update(decorator.__dict__)
+
     return new_decorator
 
 
@@ -50,7 +68,10 @@ def good_decorator_accepting_args(decorator):
     functions names, doc, etc. 
 
     Differently from good_decorator, this accepts decorators possibly
-    accepting arguments""" 
+    receiving arguments.
+
+    This decorato can be used indifferently with class methods and
+    functions.""" 
     def new_decorator(*f):
         g = decorator(*f)
         if 1 == len(f) and isinstance(f[0], types.FunctionType):

@@ -38,10 +38,10 @@
 import _importer
 
 import _importer
-from gtkmvc import Model, Observer, observable
+from gtkmvc import Model, Observer, Observable
 
 # ----------------------------------------------------------------------
-class AdHocClass (observable.Observable):
+class AdHocClass (Observable):
 
     """This is a class that is thought to be integrated into the
     observer pattern. It is declared to be 'observable' and the
@@ -49,11 +49,11 @@ class AdHocClass (observable.Observable):
     accordingly"""
 
     def __init__(self): 
-        observable.Observable.__init__(self)
+        Observable.__init__(self)
         self.val = 0
         return
 
-    @observable.observed # this way the method is declared as 'observed'
+    @Observable.observed # this way the method is declared as 'observed'
     def change(self): self.val += 1
 
     pass #end of class

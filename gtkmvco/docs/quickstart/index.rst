@@ -390,8 +390,8 @@ Of course it is needed to declare method
 ``SomeOtherClass.some_method_changing_the_instance`` to be
 observable. For example::
 
- from gtkmvc.model import Model, observable
- class SomeOtherClass (observable.Observable):
+ from gtkmvc.model import Model, Observable
+ class SomeOtherClass (Observable):
     """This is a class that is thought to be integrated into the
     observer pattern. It is declared to be 'observable' and the
     methods which we are interested in monitoring are decorated
@@ -399,14 +399,14 @@ observable. For example::
 
     val = 0
 
-    @observable.observed # this way the method is declared as 'observed'
+    @Observable.observed # this way the method is declared as 'observed'
     def change(self): self.val += 1
 
     pass #end of class
 
 Observable properties derive from class ``Observable`` and methods
 that change the content of the instance can be declared by using the
-``observed`` decorator like in the example. 
+``Observable.observed`` decorator like in the example. 
 
 Ok, but what if my class is already existing? It is less natural, but
 gtkmvc supports observable properties of already existing classes'
@@ -476,14 +476,14 @@ different types of notifications:
 In the example you find value, before call, after call and signal
 notifications, presented in both flavours explicit and implicit::
 
- from gtkmvc import observer
+ from gtkmvc import Observer
 
- class MyObserver (observer.Observer):
+ class MyObserver (Observer):
 
     # ------------------------------------------------------
     #    Value change
     # ------------------------------------------------------   
-    @observer.observes("data1", "data2")
+    @Observer.observes("data1", "data2")
     def my_observing_value_method(self, model, prop_name, old, new):
     	print "Explicit value observer:", prop_name, old, new
  
@@ -494,7 +494,7 @@ notifications, presented in both flavours explicit and implicit::
     # ------------------------------------------------------
     #    Before method call
     # ------------------------------------------------------   
-    @observer.observes("data3",)
+    @Observer.observes("data3",)
     def my_observing_before_call_method(self, model, prop_name, instance, name, args, kwargs):
     	print "Explicit before call observer:", prop_name, instance, name
         return
@@ -506,7 +506,7 @@ notifications, presented in both flavours explicit and implicit::
     # ------------------------------------------------------
     #    After method call
     # ------------------------------------------------------   
-    @observer.observes("data3",)
+    @Observer.observes("data3",)
     def my_observing_after_call_method(self, model, prop_name, instance, name, res, args, kwargs):
     	print "Explicit after call observer:", prop_name, instance, name, res
         return
@@ -518,7 +518,7 @@ notifications, presented in both flavours explicit and implicit::
     # ------------------------------------------------------
     #    Signal emitted 
     # ------------------------------------------------------   
-    @observer.observes("sgn",)	
+    @Observer.observes("sgn",)	
     def property_sgn_signal_emit(self, model, signal_name, arg):
     	print "Explicit signal observer", signal_name, arg
 	return

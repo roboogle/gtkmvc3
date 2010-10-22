@@ -22,18 +22,25 @@
 #  Please report bugs to <cavada@fbk.eu>.
 
 
-__all__ = ["model", "view", "controller", "observable", "observer", "support"]
+__all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel", 
+           "ModelMT",
+           "Controller", "View", "Observer",
+           "Observable",
+           "observable", "observer", "adapters", # packages
+           ]
 
 __version = (1,99,0)
 
+# visible classes
 from model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
 from model_mt import ModelMT
 from controller import Controller
 from view import View
 from observer import Observer
-import observer
-import observable
-import adapters
+from observable import Observable
+
+# visible modules
+import observable, observer, adapters
 
 def get_version(): return __version
 

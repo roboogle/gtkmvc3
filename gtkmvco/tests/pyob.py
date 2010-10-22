@@ -9,7 +9,7 @@ CHANGED aaa 1 2
 <Student 2 year='1974' fname='rob' mi=None lname='bibo'>]
 """
 import _importer
-from gtkmvc import Model, observer
+from gtkmvc import Model, Observer
 from gtkmvc.model import SQLObjectModel
 from gtkmvc.adapters.basic import Adapter
 from gtkmvc import observable
@@ -38,9 +38,9 @@ class Person(SQLObjectModel):
   pass
 
 
-class PersonObserver(observer.Observer):
+class PersonObserver(Observer):
 
-  @observer.observes("fname", "lname", 'aaa')
+  @Observer.observes("fname", "lname", 'aaa')
   def property_value_change(self, model, prop_name, old, new):
       print "CHANGED", prop_name, old, new
       return

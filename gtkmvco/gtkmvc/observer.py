@@ -23,10 +23,11 @@
 #  Please report bugs to <cavada@fbk.eu>.
 #  -------------------------------------------------------------------------
 
-from support import decorators, utils
+from support import decorators, utils, log
 from types import MethodType, StringType
 import inspect
 
+@decorators.good_decorator_accepting_args
 def observes(*args):
     """Use this decorator with methods in observers that are
     intended to be used for notifications. args is an arbitrary
@@ -41,6 +42,8 @@ def observes(*args):
         setattr(_notified, Observer._CUST_OBS_, _set)
         return _notified
 
+    log.logger.warning("Decorator observer.observers is deprecated:"
+                       "use Observer.observes instead")
     return _decorator
 # ----------------------------------------------------------------------
 
@@ -52,6 +55,24 @@ class Observer (object):
     # these are internal
     _CUST_OBS_ = "__custom_observes__"
     __CUST_OBS_MAP = {}
+
+    @classmethod
+    @decorators.good_decorator_accepting_args
+    def observes(cls, *args):
+        """Use this decorator with methods in observers that are
+        intended to be used for notifications. args is an arbitrary
+        number of arguments with the names of the observable
+        properties to be observed"""
+
+        @decorators.good_decorator
+        def _decorator(_notified):
+            # marks the method with observed properties
+            _set = getattr(_notified, Observer._CUST_OBS_, set())
+            _set |=  set(args)
+            setattr(_notified, Observer._CUST_OBS_, _set)
+            return _notified        
+        return _decorator
+    # ----------------------------------------------------------------------
     
     def __init__(self, model=None, spurious=False):
         """

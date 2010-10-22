@@ -35,7 +35,8 @@ Python and the pygtk toolkit.
 
 1. It helps you to organize the source code of your application.
 2. It provides some support for making views out of glade files.
-3. It separates the data/logic of your application (the *model*) from the presentation layer (the *view*).
+3. It separates the data/logic of your application (the *model*)
+   from the presentation layer (the *view*).
 4. It tries to be as much transparent as possible wrt your application. 
 
 Some terminology
@@ -48,8 +49,6 @@ Some terminology
 
         * The list of the mp3 file names.
         * The methods for playing the files in the list.
-        * The methods for contacting a server in the Internet for
-          downloading some new music file.
 
 **Observer**
         It is an entity interested in observing some parts of one or
@@ -61,27 +60,25 @@ Some terminology
         *observable* by one or more observers connected to the model.
         For example:
 
-        * The property ``current_mp3_file`` that is the currently
-          played mp3 file name.
         * The property ``current_perc`` holding the % of the mp3 file
           that is being played.
+
+        Observable properties can be *concrete* (data is phisically
+        stored in the model), or *logical* (data is function of
+        other properties, or stored outside the model, like in a
+        database.)
 
 **View**
         Contains a set of widgets, and the methods for
         manipulating them. The set of widgets can be build out of a
-        *glade* file. E.g:
+        *GtkBuilder* file, or *glade* file.
 
-        * A method for making a bunch of widgets visible/invisible
-        * A method for making the view appearing in same manner under
-          some circumstances.
 
 **Controller**
-        It is a particular kind of observer, connected to one model
+        It is a particular kind of Observer, connected to one model
         and to one or more views. It contains the GUI logic, and all
         handlers for GUI signals. E.g.
 
-        * A method for making the model play selected file when the
-          ``play`` button is clicked.
         * The code that makes a progress bar advance in the view
           as the music file is played by the model. 
 
@@ -103,16 +100,13 @@ Some terminology
 
 What is all this complexity for?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The final goal is to get your life as a designer/programmer. Designing
-a complex GUI is an easy task only in principle. In fact it is hard to
-decouple logic and presentation layers, and even harder to separate
-control code that *should* be separate. And in the end, it is easy to get
-spaghetti code especially in the control flow part of the GUI.
 
-Even if gtkmvc tries to stay behind the scene, it imposes structure
-and barriers to the application that may be perceived as complex
-artifacts to beginners. However the application can grow up with a
-good structure that allows for clean control and data flows.
+The final goal is to improve your life as a
+designer/programmer. Designing a complex GUI is an easy task only
+in principle. In fact it is hard to decouple logic and presentation
+layers, and even harder to separate control code that *should* be
+separate. And in the end, it is easy to get spaghetti code
+especially in the control flow part of the GUI.
 
 In the picture you can see how a middle/large GUI application can be
 organized and decomposed with gtkmvc.
@@ -121,17 +115,17 @@ organized and decomposed with gtkmvc.
    :scale: 60
 
 Spend some time looking at this funny image. On the left, models
-designed as a pair of separate hierarchies. One of the model in the
-left hierarchy observes one model into the other hierarchy.
+designed as a pair of separate hierarchies lay. One of the model in
+the left hierarchy observes one model into the other hierarchy.
 
 On the right, the presentation layer is designed as a hierarchy of
-three views. Each view can be based on one glade file that can be
-shared among views. 
+three views. Each view may be based on one GtkBuilder/glade file
+that can be shared among views.
 
 The model and the view sides do not see each other as they are
-separated by the two depicted barriers. Those barriers avoid the model
-to be involved in the presentation layer, and the view to be tempted
-to access the model part.
+separated by the two depicted barriers. Those red barriers avoid
+the model to be involved in the presentation layer, and the view to
+be tempted to access the model part.
 
 In the middle, the control part live. The controllers within it can
 see through the barriers. Controllers observe some parts of the logic
@@ -162,15 +156,14 @@ A view is a class that is intended to be a container for widgets. ::
  from gtkmvc import View
 
  class MyView (View):
-    glade = "view_glade_file.glade"
-    top = "name_of_top_level_widget"
+    builder = "gtk_builder_file.xml"
 
     def __init__(self):
         View.__init__(self)
         
         # possible construction of manual widgets
         self['name_of_new_label'] = gtk.Label("A label manually constructed!")
-        self['some_container_in_glade_file'].pack_start(self['name_of_new_label'])
+        self['some_container_in_builder_file'].pack_start(self['name_of_new_label'])
 
         # possible setup of all widgets
         # ...
@@ -187,14 +180,14 @@ A view is a class that is intended to be a container for widgets. ::
 Your view is derived from base class ``gtkmvc.View`` that offers
 several services:
 
-1. Attributes ``glade`` that is used to tell the view which glade file
-   its widgets are taken from.
-2. Attributes ``top`` that is used to tell which is the widget name in
-   the glade file tree to be taken as the root widget. It is also
-   possible to specify a list of names to pick a set of trees.
-3. The view instance can be used a container (a dictionary) of
-   widgets, both for accessing named widgets in glade files, and for
-   creating new widgets manually.
+1. Attributes ``builder`` that is used to tell the view which
+   GtkBuilder file its widgets are taken from. as an alternative,
+   attribute ``glade`` can be used for deprecated glade files.
+2. The view instance can be used a container (a dictionary) of
+   widgets, both for accessing named widgets in GtkBuilder files,
+   and for creating new widgets manually.
+
+:TODO: check top_level with GtkBuilder files
 
 Views can be decomposed into a hierarchy of views. For example::
 
@@ -202,8 +195,7 @@ Views can be decomposed into a hierarchy of views. For example::
  from gtkmvc import View
 
  class MySuperView (View):
-    glade = "view1.glade"
-    top = "view1_top_widget"
+    builder = "view1.xml"
 
     def __init__(self):
         View.__init__(self)

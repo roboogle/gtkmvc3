@@ -32,7 +32,7 @@ class MyCtrl (Controller):
 
     def register_adapters(self):
         a1 = Adapter(self.model, "en1",
-                     prop_read=lambda v: v/2.0, prop_write=lambda v: float(v)*2,
+                     prop_read=lambda v: v/2.0, prop_write=lambda v: v*2,
                      value_error=myerr)
         a1.connect_widget(self.view["entry1"])
         self.adapt(a1)

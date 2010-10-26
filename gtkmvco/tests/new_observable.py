@@ -1,6 +1,9 @@
 """
 Test shows an entry and a spinner. Changing the latter should print a
 notification. Closing the window should exit the program.
+
+WARNING tested on GTK 2.18.2 because with GTK 2.10.4 SpinButton emits "changed"
+twice as often! The first notification always resets the value to zero.
 """
 # MyModel.py
 import _importer

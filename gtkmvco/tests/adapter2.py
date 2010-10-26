@@ -4,20 +4,21 @@ entry by one. Changing the entry manually to a value > 10 will print a message,
 doing it by pressing the button will raise ValueError in the signal handler.
 """
 import _importer
-from gtkmvc import Model, Controller, View, Observable
+from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import UserClassAdapter
+from gtkmvc import observable
 
 import gtk
 
 
-class UserClass (Observable):
+class UserClass (observable.Observable):
     def __init__(self, max_val):
-        Observable.__init__(self)
+        observable.Observable.__init__(self)
         self.x = 0
         self.max_val = max_val
         return
 
-    @Observable.observed
+    @observable.observed
     def set_x(self, v):
         if v > self.max_val:
             raise ValueError("x cannot be greater than %d" % self.max_val)

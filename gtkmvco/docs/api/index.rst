@@ -43,13 +43,21 @@ The :mod:`gtkmvc` Module
    with the module name.
 
 .. class:: Model
+   :noindex:
 .. class:: ModelMT
+   :noindex:
 .. class:: TextBufferModel
+   :noindex:
 .. class:: ListStoreModel
+   :noindex:
 .. class:: TreeStoreModel
+   :noindex:
 .. class:: View
+   :noindex:
 .. class:: Controller
+   :noindex:
 .. class:: Observer
+   :noindex:
 
    These are shortcuts to classes from other modules. They are documented there.
 

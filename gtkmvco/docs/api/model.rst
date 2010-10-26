@@ -8,8 +8,8 @@ to a :class:`Controller`.
 
 .. autoclass:: Model
     :members:
-    :undoc-members:
     :show-inheritance:
+    :exclude-members: register_property
 
 Persistence
 -----------

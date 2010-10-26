@@ -103,6 +103,7 @@ class Controller (Observer):
         There are four ways to call this:
 
         .. method:: adapt()
+           :noindex:
 
            Take properties from the model for which ``adapt`` has not yet been
            called, match them to the view by name, and create adapters fitting
@@ -116,6 +117,7 @@ class Controller (Observer):
               widget is found.
 
         .. method:: adapt(ad)
+           :noindex:
         
            Keep track of manually created adapters for future ``adapt()``
            calls.
@@ -123,12 +125,14 @@ class Controller (Observer):
            *ad* is an adapter instance already connected to a widget.
 
         .. method:: adapt(prop_name)
+           :noindex:
 
            Like ``adapt()`` for a single property.
 
            *prop_name* is a string.
 
         .. method:: adapt(prop_name, wid_name)
+           :noindex:
 
            Like ``adapt(prop_name)`` but without widget name matching.
            

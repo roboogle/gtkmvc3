@@ -40,32 +40,16 @@ _obs_explicit = 1
 
 class Model (Observer):
     """
-    This class is the application model base class. It handles a set
-    of observable properties which you are interested in showing by
-    one ore more view - via one or more observers of course. The
-    mechanism is the following:
-
-    1. You are interested in showing a set of model property, that
-       you can declare in the __properties__ member map.
-
-    2. You define one or more observers that observe one or more
-       properties you registered. When someone changes a property
-       value the model notifies the changing to each observer.
-
-    The property-observer[s] association is given by the implicit
-    rule in observers method names: if you want the model notified
-    the changing event of the value of the property 'p' you have to
-    define the method called 'property_p_value_change' in each
-    listening observer class.
-
-    The Model is also an observer (typically, of itself and of
-    other models. 
+    .. attribute:: __observables__
     
-    Notice that tipically 'controllers' implement the observer
-    pattern. The notification method gets the emitting model, the
-    old value for the property and the new one.  Properties
-    functionalities are automatically provided by the
-    ObservablePropertyMeta meta-class."""
+       Class attribute. A list or tuple of name strings. The metaclass 
+       :class:`~gtkmvc.support.metaclasses.ObservablePropertyMeta` uses it to create
+       properties.
+       
+       *Value properties* have to exist as an attribute with an initial value,
+       which may be ``None``.
+       *Logical properties* require both a getter and a setter method in the class.
+    """
 
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
     __properties__ = {} # override this
@@ -75,19 +59,21 @@ class Model (Observer):
     @decorators.good_decorator_accepting_args
     def getter(cls, *args):
         """
-        Decorator used for defining a logical properties' getter methods
-        in Models.
-        
-        This decorators comes in two flavors: 
-        
-        1. Without arguments: for name-dependent getters (getters which
-        contain the property name in the method name, like in
-        "get_<name>(self)")
+        Decorate a method as a logical property getter. Comes in two flavours:
 
-        2. With arguments: for name-independent getters, which receive the
-        name of the property when called. E.g. "my_getter(self, name)".
-        In this case the decorator's arguments are the names of the
-        properties which the decorated method is a getter for.
+        .. method:: getter()
+           :noindex:
+           
+           Uses the name of the method, minus the required prefix ``get_``, as the
+           property name.
+           The method must not require arguments.
+
+        .. method:: getter(one, two, ...)
+           :noindex:
+           
+           Takes a variable number of strings as the property name(s). The name of
+           the method does not matter.
+           The method must take a property name as its sole argument.
         """
 
         @decorators.good_decorator
@@ -163,19 +149,22 @@ class Model (Observer):
     @decorators.good_decorator_accepting_args
     def setter(cls, *args):
         """
-        Decorator used for defining a logical properties' setter methods
-        in Models.
-        
-        This decorators comes in two flavors: 
-        
-        1. Without arguments: for name-dependent setters (setters which
-        contain the property name in the method name, like in
-        "set_<name>(self, val)")
+        Decorate a method as a logical property setter. The counterpart to
+        :meth:`getter`. Also comes in two flavours:
 
-        2. With arguments: for name-independent setters, which receive the
-        name of the property when called. E.g. "my_setter(self, name, val)".
-        In this case the decorator's arguments are the names of the
-        properties which the decorated method is a setter for.
+        .. method:: setter()
+           :noindex:
+           
+           Uses the name of the method, minus the required prefix ``set_``, as the
+           property name.
+           The method must take one argument, the new value.
+
+        .. method:: getter(one, two, ...)
+           :noindex:
+           
+           Takes a variable number of strings as the property name(s). The name of
+           the method does not matter.
+           The method must take two arguments, the property name and new value.
         """
         
         @decorators.good_decorator
@@ -294,13 +283,13 @@ class Model (Observer):
 
     def has_property(self, name):
         """Returns true if given property name refers an observable
-        property inside self or inside derived classes"""
+        property inside self or inside derived classes."""
         return name in self.get_properties()
 
 
     def register_observer(self, observer):
         """Register given observer among those observers which are
-        interested in observing the model"""
+        interested in observing the model."""
         if observer in self.__observers: return # not already registered
 
         assert isinstance(observer, Observer)
@@ -314,7 +303,7 @@ class Model (Observer):
 
     def unregister_observer(self, observer):
         """Unregister the given observer that is no longer interested
-        in observing the model"""
+        in observing the model."""
         assert isinstance(observer, Observer)
 
         if observer not in self.__observers: return
@@ -350,8 +339,11 @@ class Model (Observer):
     
 
     def get_properties(self):
-        """Returns a list of all observable properties accessible
-        from the model"""
+        """
+        All observable properties accessible from this instance.
+
+        :rtype: list of strings
+        """
         return list(getattr(self, support.metaclasses.ALL_OBS_SET, []))
 
     
@@ -566,6 +558,11 @@ class Model (Observer):
     # -------------------------------------------------------------
     
     def notify_property_value_change(self, prop_name, old, new):
+        """
+        Send a notification to all registered observers.
+
+        *old* the value before the change occured.
+        """
         assert(self.__value_notifications.has_key(prop_name))
         for flag, method in self.__value_notifications[prop_name] :
             obs = method.im_self
@@ -584,6 +581,13 @@ class Model (Observer):
 
     def notify_method_before_change(self, prop_name, instance, meth_name,
                                     args, kwargs):
+        """
+        Send a notification to all registered observers.
+
+        *instance* the object stored in the property.
+
+        *meth_name* name of the method we are about to call on *instance*.
+        """
         assert(self.__instance_notif_before.has_key(prop_name))
         for flag, method in self.__instance_notif_before[prop_name]:
             # notifies the change
@@ -600,6 +604,13 @@ class Model (Observer):
 
     def notify_method_after_change(self, prop_name, instance, meth_name,
                                    res, args, kwargs):
+        """
+        Send a notification to all registered observers.
+
+        *args* the arguments we just passed to *meth_name*.
+
+        *res* the return value of the method call.
+        """
         assert(self.__instance_notif_after.has_key(prop_name))
         for flag, method in self.__instance_notif_after[prop_name]:
             # notifies the change
@@ -616,6 +627,14 @@ class Model (Observer):
         return
 
     def notify_signal_emit(self, prop_name, arg):
+        """
+        Emit a signal to all registered observers.
+
+        *prop_name* the property storing the :class:`~gtkmvc.observable.Signal`
+        instance.
+
+        *arg* one arbitrary argument passed to observing methods.
+        """
         assert(self.__signal_notif.has_key(prop_name))
         
         for flag, method in self.__signal_notif[prop_name]:
@@ -687,7 +706,7 @@ else:
         matter what package they're in!
 
         After defining subclasses (not before!) you have to call
-        .createTable on each, including SQLObjectModel itself.
+        ``.createTable`` on each, including SQLObjectModel itself.
         """
 
         __metaclass__ = support.metaclasses.ObservablePropertyMetaSQL
@@ -707,7 +726,7 @@ else:
 
             Call this during startup, after setting up the DB
             connection and importing all your persistent models. Pass
-            ifNotExists=True unless you want to wipe the database.
+            ``ifNotExists=True unless`` you want to wipe the database.
             """
             cls.createTable(*args, **kargs)
             for child in cls.__subclasses__():

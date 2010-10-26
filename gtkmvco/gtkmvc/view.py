@@ -56,24 +56,34 @@ class View (object):
     builder=None
     
     def __init__(self, glade=None, top=None,
-                 builder=None,
                  parent=None, 
-                 controller=None):
-        """If glade filename is not given (or None) next parameter top
-        must be not given neither (or None). builder can be a filename
-        for gtk.Builder, or an instance of a gtk.Builder.  If glade
-        and builder are both None or not given, widgets must be
-        connected manually. top can be either a string name or list of
-        names, representing the name of the top level widget, or a
-        list of names of top level widgets in the glade file. Notice
-        that until gtk.Builder will not support method
-        add_objects_from_file, top can be used only when glade is
-        specified. parent is another View instance used to create a
-        hierarchy of views. If controller is passed, then self will
-        register itself within it. This is provided for backward
-        compatibility when controllers had to be created before views
-        (DO NOT USE IN NEW CODE)."""
+                 builder=None):
+        """
+        Only the first three may be given as positional arguments. If an
+        argument is empty a class attribute of the same name is used. This
+        does not work for *parent*.
 
+        *glade* is a path to an XML file defining widgets in libglade format.
+        
+           .. deprecated:: 1.99.1
+
+        *builder* is a path to an XML file defining widgets in GtkBuilder
+        format.
+
+           .. versionadded:: 1.99.1
+
+        *top* is a string or a list of strings containing the names of our top
+        level widgets. When using libglade only their children are loaded.
+
+        *parent* is used to call :meth:`set_parent_view`.
+
+        The last two only work if *glade* or *builder* are used, not if you
+        intend to create widgets later from code.
+
+        .. deprecated:: 1.99.1
+           In future versions the functionality will be split into the new class
+           :class:`ManualView` and its child :class:`BuilderView`.
+        """
         self.manualWidgets = {}
         self.autoWidgets = {}
         self.__autoWidgets_calculated = False
@@ -133,20 +143,16 @@ class View (object):
        
         if parent is not None: self.set_parent_view(parent)
 
-        if controller: 
-            # this is deprecated
-            import warnings
-            warnings.warn("Controller specified in View constructor is no longer expected",
-                          DeprecationWarning)
-            import gobject
-            gobject.idle_add(controller._register_view, self)
-            pass
-
         return
        
-    # Gives us the ability to do: view['widget_name'].action()
-    # Returns None if no widget name has been found.
     def __getitem__(self, key):
+        """
+        Return the widget named *key*, or ``None``.
+        
+        .. note::
+        
+           In future versions this will likely change to raise ``KeyError``.
+        """
         wid = None
 
         # first try with manually-added widgets:
@@ -178,15 +184,22 @@ class View (object):
         
         return wid
     
-    # You can also add a single widget:
     def __setitem__(self, key, wid):
+        """
+        Add a widget. This overrides widgets of the same name that were loaded
+        fom XML. It does not affect GTK container/child relations.
+        
+        If no top widget is known, this sets it.
+        """
         self.manualWidgets[key] = wid
         if (self.m_topWidget is None): self.m_topWidget = wid
         return
 
     def show(self):
-        """Shows the top level widget(s) if parameter top was
-        specified at construction time."""
+        """
+        Call `show()` on each top widget or `show_all()` if only one is known. 
+        Otherwise does nothing.
+        """
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
@@ -197,9 +210,9 @@ class View (object):
         
         
     def hide(self):
-        """Hides the top level widget(s) if parameter top was
-        specified at construction time. Returns True if succesfully
-        hidden, or False otherwise."""
+        """
+        Call `hide_all()` on all known top widgets.
+        """
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
@@ -208,12 +221,17 @@ class View (object):
         elif top is not None: top.hide_all()
         return
 
-    # Returns the top-level widget, or a list of top widgets
     def get_top_widget(self):
+        """
+        Return a widget or list of widgets.
+        """
         return self.m_topWidget
 
-    # Set parent view:
     def set_parent_view(self, parent_view):
+        """
+        Set ``self.``:meth:`get_top_widget` transient for 
+        ``parent_view.get_top_widget()``.
+        """
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
@@ -227,8 +245,11 @@ class View (object):
         
         return
 
-    # Set the transient for the view:
     def set_transient(self, transient_view):
+        """
+        Set ``transient_view.get_top_widget()`` transient for
+        ``self.``:meth:`get_top_widget`.
+        """
         top = self.get_top_widget()
         if type(top) in (types.ListType, types.TupleType):
             for t in top:
@@ -253,8 +274,15 @@ class View (object):
             pass        
         return None
 
-    # implements the iteration protocol
     def __iter__(self):
+        """
+        Return an iterator over widgets added with :meth:`__setitem__` and
+        those loaded from XML.
+        
+        .. note::
+           In case of name conflicts this yields widgets that are not 
+           accessible via :meth:`__getitem__`.
+        """
         # precalculates if needed
         self.__extract_autoWidgets()
 

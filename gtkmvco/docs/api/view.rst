@@ -5,7 +5,6 @@ The View
 
 .. autoclass:: gtkmvc.view.View
     :members:
-    :undoc-members:
 
     .. automethod:: __getitem__
     .. automethod:: __setitem__

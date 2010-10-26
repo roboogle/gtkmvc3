@@ -5,5 +5,6 @@ The Controller
 
 .. autoclass:: Controller
     :members:
-    :undoc-members:
     :show-inheritance:
+
+    .. automethod:: _find_widget_match

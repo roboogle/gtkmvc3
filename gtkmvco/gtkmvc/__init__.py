@@ -29,7 +29,7 @@ __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
            "observable", "observer", "adapters", # packages
            ]
 
-__version = (1,99,0)
+__version = (1,99,1)
 
 # visible classes
 from model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
@@ -44,13 +44,33 @@ import observable, observer, adapters
 
 def get_version(): return __version
 
-def require(ver):
-    if isinstance(ver, str): ver = ver.split(".")
-    ver = tuple(map(int, ver))
+def require(request):
+    """
+    Raise :exc:`AssertionError` is gtkmvc version is not compatible.
     
-    if get_version() < ver:
-        raise AssertionError("gtkmvc required version '%s', found '%s'"\
-                             % (ver, get_version()))
+    *request* a dotted string or iterable of string or integers representing the
+    minimum version you need. ::
+    
+     require("1.0")
+     require(("1", "2", "2"))
+     require([1,99,0])
+    """
+    try:
+        request = request.split(".")
+    except AttributeError:
+        pass
+    request = map(int, request)
+
+    provide = list(__version)
+
+    if request[0] != 1:
+        raise ValueError("gtkmvc %s is not a valid version" % request)
+    if request[1] < 3:
+        raise AssertionError("gtkmvc %s is very different from %s" % (
+            provide, request))
+    if request > provide:
+        raise AssertionError("gtkmvc required version %s, found %s" % (
+            request, provide))
         pass
     return
 

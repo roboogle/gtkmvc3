@@ -31,23 +31,28 @@ import gobject
 import sys
 
 class Controller (Observer):
-    """
-    We put all of our gtk signal handlers into a class.  This lets
-    us bind all of them at once, because their names are in the
-    class dict.  This class automatically register its instances as
-    observers into the corresponding model.  Also, when a view is
-    passed, method register_view got called, which can be
-    oveloaded in order to connect signals and perform other specific
-    operation. A controller possibly handles and contains also a set
-    of adapters that makes easier to connect widgets and observable
-    properties into the model.
+    def __init__(self, model, view, spurious=False, auto_adapt=False):
+        """
+        Two positional and two optional keyword arguments.
+        
+        *model* will have the new instance registered as an observer.
+        It is made available as an attribute.
+        
+        *view* may contain signal connections loaded from XML. The handler
+        methods have to exist in this class.
+        
+        *spurious* denotes whether notifications in this class will be called
+        if a property of *model* is set to the same value it already has.
+        
+        *auto_adapt* denotes whether to call :meth:`adapt` with no arguments
+        as part of the view registration process.
 
-    parameter spurious controls the way spurious value change
-    notifications are handled. If True, assignments to observable
-    properties that do not actually change the value are
-    notified anyway."""
-
-    def __init__(self, model, view=None, spurious=False, auto_adapt=False):
+        View registration consists of connecting signal handlers,
+        :meth:`register_view` and :meth:`register_adapters`, and is scheduled
+        with the GTK main loop. It happens as soon as possible but after the
+        constructor returns. When it starts *view* is available as an
+        attribute.
+        """
         Observer.__init__(self, model, spurious)
 
         self.model = model
@@ -57,7 +62,7 @@ class Controller (Observer):
         self.__user_props = set()
         self.__auto_adapt = auto_adapt
         
-        if view: gobject.idle_add(self._idle_register_view, view, priority=gobject.PRIORITY_HIGH)
+        gobject.idle_add(self._idle_register_view, view, priority=gobject.PRIORITY_HIGH)
         return
 
     def _idle_register_view(self, view):
@@ -74,10 +79,11 @@ class Controller (Observer):
 
     def register_view(self, view):
         """
-        This method is called by the framework when registering a
-        view. Derived classes can exploit this call to connect
-        signals manually, create and connect treeview, textview,
-        etc.
+        This does nothing. Subclasses can override it to connect signals
+        manually or modify widgets loaded from XML, like adding columns to a
+        TreeView. No super call necessary.
+        
+        *view* is a shortcut for ``self.view``.
         """
         assert(self.model is not None)
         assert(self.view is not None)
@@ -85,12 +91,8 @@ class Controller (Observer):
 
     def register_adapters(self):
         """
-        This method is called by register_view during view
-        registration process, when it is time to possibly create all
-        adapters. model and view can safely be taken from self.model
-        and self.view. Derived classes can specilize this method. In
-        this implementation the method does auto-adaptation if
-        requested.
+        This does nothing. Subclasses can override it to create adapters.
+        No super call necessary.
         """
         assert(self.model is not None)
         assert(self.view is not None)
@@ -98,45 +100,39 @@ class Controller (Observer):
 
     def adapt(self, *args):
         """
-        Adapts a set of (observable) properties and a set of
-        widgets, by connecting them.
+        There are four ways to call this:
 
-        This method can be used to simplify the creation of one or
-        more adapters, by letting the framework do most of the work
-        needed to connect ('adapt') properties from one hand, and
-        widgets on the other.
+        .. method:: adapt()
 
-        This method is provided in four flavours:
+           Take properties from the model for which ``adapt`` has not yet been
+           called, match them to the view by name, and create adapters fitting
+           for the respective widget type.
+           
+           That information comes from :mod:`gtkmvc.adapters.default`.
+           See :meth:`_find_widget_match` for name patterns.
 
-        1. No arguments. All properties in observed model will be
-           checked for possible widgets to be adapted with.
+           .. versionchanged:: 1.99.1
+              Allow incomplete auto-adaption, meaning properties for which no
+              widget is found.
 
-        2. An instance of an Adapter class can be created by the
-           caller and passed as a unique argument. The adapter must
-           be already fully configured.
+        .. method:: adapt(ad)
+        
+           Keep track of manually created adapters for future ``adapt()``
+           calls.
+        
+           *ad* is an adapter instance already connected to a widget.
 
-        3. The name of a model's property is passed as a unique
-           argument.  A correponding widget name is searched and if
-           found, an adapter is created. Name matching is performed
-           by searching into view's widget names for words that end
-           with the given property name. Matching is case
-           insensitive and words can be separated by spaces,
-           underscore (_) and CapitalizedWords. For example property
-           'prop' will match widget 'cb_prop'. If no matches or
-           multiple matches are found, a ValueError will be raised.
-           The way names are matched can be customized by overriding
-           method _find_widget_match.
+        .. method:: adapt(prop_name)
 
-        4. Two strings can be passed, respectively containing the
-           name of an observable property in the model, and the name
-           of a widget in the view.
+           Like ``adapt()`` for a single property.
 
-        Flavour 2 allows for a full control, but flavour 1, 3 and 4
-        make easier to create adpaters with basic (default)
-        behaviour.
+           *prop_name* is a string.
 
-        This method can be called into the method register_adapters
-        which derived classes can specialise.
+        .. method:: adapt(prop_name, wid_name)
+
+           Like ``adapt(prop_name)`` but without widget name matching.
+           
+           *wid_name* has to exist in the view.
         """
         
         # checks arguments
@@ -193,11 +189,19 @@ class Controller (Observer):
         return
 
     def _find_widget_match(self, prop_name):
-        """Given a property name, searches into the view for a
-        possible corresponding widget to adapt with. This is called by
-        adapt. Returns the matching candidate widget name. Raises
-        TooManyCandidatesError when there are more than one
-        candidates. Raises ValueError when no widgets (0) are found.
+        """
+        Used to search ``self.view`` when :meth:`adapt` is not given a widget 
+        name.
+        
+        *prop_name* is the name of a property in the model.
+        
+        Returns a string with the best match. Raises
+        :class:`TooManyCandidatesError` or ``ValueError`` when nothing is
+        found.
+
+        Subclasses can customise this. No super call necessary. The default
+        implementation converts *prop_name* to lower case and allows prefixes
+        like ``entry_``.
         """
         names = []
         for wid_name in self.view:

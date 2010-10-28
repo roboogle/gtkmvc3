@@ -26,14 +26,12 @@
 # installed.
 
 if __name__ != "__main__":
-    try: import gtkmvc
-    except:
-        import os.path; import sys
-        top_dir = os.path.dirname(os.path.abspath(".."))
+    import os.path; import sys
+    top_dir = os.path.dirname(os.path.abspath(".."))
+    if os.path.exists(os.path.join(top_dir, "gtkmvc")):
         sys.path = [top_dir] + sys.path
-        import gtkmvc
-        pass
+    import gtkmvc
 
-    gtkmvc.require("1.1.0")
+    gtkmvc.require("1.99.0")
 pass
 

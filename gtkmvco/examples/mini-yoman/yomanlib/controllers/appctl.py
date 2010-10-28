@@ -159,7 +159,8 @@ class NoteCtrl(Controller):
 		return
 
 	def register_view(self, view):
-		self.view['textview_note'].set_buffer(self.model)
+# Doesn't seem to be necessary and crashes GTK, except the old one on RHEL.
+#		self.view['textview_note'].set_buffer(self.model)
 		self.view['entry_title'].set_text(self.model.title)
 		self.update_view()
 		return

@@ -40,6 +40,6 @@ if __name__ != "__main__":
         import gtkmvc
         pass
 
-    gtkmvc.require("1.0.0")
+    gtkmvc.require("1.99.0")
 pass
 

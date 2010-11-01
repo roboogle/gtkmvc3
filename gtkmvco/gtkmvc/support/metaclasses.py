@@ -636,7 +636,7 @@ class ObservablePropertyMeta (PropertyMeta):
       # properties)
       else:
           if (has_specific_getter or 
-              getattr(getter, GETTER_SETTER_ATTR_MARKER) == GETTER_NOARGS_MARKER):
+              getattr(getter, GETTER_SETTER_ATTR_MARKER, None) == GETTER_NOARGS_MARKER):
               str_getter = "self." + getter.__name__ + "()"
           else: str_getter = "self." + getter.__name__ + "('%(prop_name)s')"
           pass
@@ -680,12 +680,12 @@ class ObservablePropertyMeta (PropertyMeta):
       # properties)
       else:
           if (has_specific_getter or 
-              getattr(getter, GETTER_SETTER_ATTR_MARKER) == GETTER_NOARGS_MARKER):
+              getattr(getter, GETTER_SETTER_ATTR_MARKER, None) == GETTER_NOARGS_MARKER):
               str_getter = "self." + getter.__name__ + "()"
           else: str_getter = "self." + getter.__name__ + "('%(prop_name)s')" 
 
           if (has_specific_setter or 
-              getattr(setter, GETTER_SETTER_ATTR_MARKER) == SETTER_NOARGS_MARKER):
+              getattr(setter, GETTER_SETTER_ATTR_MARKER, None) == SETTER_NOARGS_MARKER):
               str_setter = "self." + setter.__name__ + "(new)" 
           else: str_setter = "self." + setter.__name__ + "('%(prop_name)s', new)"
           pass

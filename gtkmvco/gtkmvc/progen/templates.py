@@ -197,7 +197,7 @@ def setup_path():
 
 def check_requirements():
     """Checks versions and other requirements"""
-    import gtkmvc; gtkmvc.require("1.2.0")
+    import gtkmvc; gtkmvc.require("1.99.0")
     return
 
 def main(*args, **kargs):

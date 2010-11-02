@@ -311,7 +311,7 @@ class View (object):
                 # General workaround for issue
                 # https://bugzilla.gnome.org/show_bug.cgi?id=607492
                 try: name = gtk.Buildable.get_name(wid)
-                except AttributeError: continue
+                except TypeError: continue
                 
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:
                     raise ViewError("Widget '%s' in builder also found in glade specification" % name)

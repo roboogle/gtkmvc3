@@ -22,6 +22,7 @@ __def_adapter = [ # class, default signal, getter, setter, value type
     (gtk.ColorButton, "color-set", gtk.ColorButton.get_color, gtk.ColorButton.set_color, gtk.gdk.Color),
     (gtk.ColorSelection, "color-changed", gtk.ColorSelection.get_current_color, gtk.ColorSelection.set_current_color, gtk.gdk.Color),    
     (gtk.ComboBox, "changed", gtk.ComboBox.get_active, gtk.ComboBox.set_active, types.IntType),
+    (gtk.Adjustment, "value-changed", gtk.Adjustment.get_value, gtk.Adjustment.set_value, types.FloatType),
     ]
 
 if gtk.gtk_version >= (2,12,0):

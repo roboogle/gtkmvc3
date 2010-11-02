@@ -154,7 +154,11 @@ class Controller (Observer):
                     raise e
                 except ValueError, e: 
                     # no widgets found for given property, continue after emitting a warning
-                    logger.warn(e[0])
+                    if e.args:
+                        logger.warn(e[0])
+                    else:
+                        logger.warn("No widget candidates match property '%s'"
+                            % prop_name)
                 else:
                     logger.debug("Auto-adapting property %s and widget %s" % \
                                      (prop_name, wid_name))

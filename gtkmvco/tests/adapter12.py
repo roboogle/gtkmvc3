@@ -1,77 +1,69 @@
-"""
-Test shows a FileChooserButton and a label. After choosing a file the label
-should show its path. It should work even if adapters.default doesn't contain
-FileChooserButton.
-"""
-import _importer
-from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.basic import Adapter
+import unittest
 
 import gtk
 
-# This test uses only the tree rooted by 'window10'
-class MyView (View):
-    def __init__(self):
-        View.__init__(self, "adapters.glade", "window10")
-        return
-    pass
+from _importer import refresh_gui
 
-class MyModel (Model):
-    file = "(please select a file)"
-    __observables__ = ('file', )
+import gtkmvc
+# Importing this as default.__def_adapter or __def_adapter would get mangled
+# with the name of the test class, because double underscores get replaced
+# very early.
+from gtkmvc.adapters.default import __def_adapter as DEF
 
-    def __init__(self):
-        Model.__init__(self)
-        return
-    pass
+BAR = (gtk.Toolbar, "style-changed", gtk.Toolbar.get_style,
+    gtk.Toolbar.set_style, gtk.ToolbarStyle)
 
+class Model(gtkmvc.Model):
+    bar = gtk.TOOLBAR_TEXT
+    __observables__ = ["bar"]
 
-class MyCtrl (Controller):
-    def __init__(self, m, v):
-        Controller.__init__(self, m, v)
-        return
+class Defaults(unittest.TestCase):
+    def setUp(self):
+        # Copy.
+        self.backup = tuple(DEF)
 
-    def register_view(self, v):
-        v['window10'].connect('delete-event', self.on_delete_event)
-        return
-    
-    def register_adapters(self):
-        """Adapts both the File chooser button and the underneat label
-        showing the file name"""
-        self.adapt("file", "fcb_file")
-        
-        ad = Adapter(self.model, "file")
-        ad.connect_widget(self.view["lbl_file"], setter=lambda w,v: \
-                            w.set_markup("<b>%s</b>" % v))
-        self.adapt(ad)
-        return
+        self.m = Model()
+        self.v = gtkmvc.View()
+        self.v["bar"] = gtk.Toolbar()
+        # Relying on auto_adapt=False as the default.
+        self.c = gtkmvc.Controller(self.m, self.v)
+        refresh_gui()
 
-    def on_delete_event(self, w, e):
-        gtk.main_quit()
-        return True
-    
-    pass
+    def tearDown(self):
+        # Replace in place.
+        DEF[0:len(DEF)] = self.backup
+        # TODO remove memoization from framework because the speed increase is
+        # minimal and it likely messes up remove_adapter.
+        gtkmvc.adapters.default.__memoize__ = {} 
 
-# ----------------------------------------------------------------------
-# For [TW]:
-# Sorry, this is necessarily tricky, and needs a better support to be
-# integrated in future.
-# This must be done *before* creating any controller using the added
-# information for the adapter
-from gtkmvc.adapters.default import __def_adapter
-import types
-__def_adapter.append(
-    (gtk.FileChooserButton, "file-set",
-     gtk.FileChooserButton.get_filename, gtk.FileChooserButton.set_filename,
-     types.StringType))
-# ----------------------------------------------------------------------
+    def adapterTest(self):
+        """
+        Not called by the unittest.main()
+        """
+        self.c.adapt()
+        self.assertEqual(gtk.TOOLBAR_TEXT, self.v["bar"].get_style())
+        self.v["bar"].set_style(gtk.TOOLBAR_ICONS)
+        self.assertEqual(gtk.TOOLBAR_ICONS, self.m.bar)
 
+    def testNegative(self):
+        # Adapting toolbars doesn't make sense, so there shouldn't be a
+        # default in the framework.
+        self.assertRaises(TypeError, lambda: self.c.adapt())
 
-m = MyModel()
-v = MyView()
-c = MyCtrl(m, v)
+    def testManual(self):
+        DEF.append(BAR)
+        self.adapterTest()
 
-gtk.main()
+    def testCall(self):
+        # TODO test insertion/overriding an existing default.
+        gtkmvc.adapters.default.add_adapter(*BAR)
+        self.adapterTest()
 
+    def testAPI(self):
+        self.assertFalse(gtkmvc.adapters.default.remove_adapter(gtk.Toolbar))
+        gtkmvc.adapters.default.add_adapter(*BAR)
+        self.assertTrue(gtkmvc.adapters.default.remove_adapter(gtk.Toolbar))
+        self.assertRaises(TypeError, lambda: self.c.adapt())
 
-
+if __name__ == "__main__":
+    unittest.main()

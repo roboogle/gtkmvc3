@@ -25,6 +25,16 @@
 # This module is used only as a utility to import gtkmvc when not
 # installed.
 
+import time
+
+import gtk
+
+# http://unpythonic.blogspot.com/2007/03/unit-testing-pygtk.html
+def refresh_gui(delay=0):
+    while gtk.events_pending():
+        gtk.main_iteration_do(block=False)
+    time.sleep(delay)
+
 if __name__ != "__main__":
     import os.path; import sys
     top_dir = os.path.dirname(os.path.abspath("."))

@@ -57,14 +57,12 @@ def add_adapter(widget_class, signal_name, getter, setter, value_type):
     for it,tu in enumerate(__def_adapter):
         if issubclass(tu[WIDGET], widget_class):
             # found an insertion point, iteration is over after inserting
-            print "INSERTED in position ",it
             __def_adapter.insert(it, new_tu)
             return
         pass
 
     # simply append it
     __def_adapter.append(new_tu)
-    print "APPENDED!"
     return
 
 
@@ -83,10 +81,8 @@ def remove_adapter(widget_class):
     for it,tu in enumerate(__def_adapter):
         if widget_class == tu[WIDGET]:
             del __def_adapter[it]
-            print "REMOVED ",it
             return True
         pass
-    print "NOT REMOVED "
     return False # no adapter was found
 
 

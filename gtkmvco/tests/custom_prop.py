@@ -26,12 +26,13 @@ class MyModel (Model):
 
     # this is for testing shadowing warnings 
     @Model.getter
-    def get_external(self):
+    def external(self):
         # gets the data from the external source
         return self.data_source
     
     # Old style getter (have to emit a warning)
     #@Model.setter
+    #def external(self, value):
     def set_external_value(self, value):
         # sends the data to the external source
         self.data_source = value        

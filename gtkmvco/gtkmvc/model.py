@@ -42,18 +42,46 @@ class Model (Observer):
     """
     .. attribute:: __observables__
     
-       Class attribute. A list or tuple of name strings. The metaclass 
-       :class:`~gtkmvc.support.metaclasses.ObservablePropertyMeta` uses it to create
-       properties.
+       Class attribute. A list or tuple of name strings. The metaclass
+       :class:`~gtkmvc.support.metaclasses.ObservablePropertyMeta`
+       uses it to create properties.
        
-       *Value properties* have to exist as an attribute with an initial value,
-       which may be ``None``.
-       *Logical properties* require both a getter and a setter method in the class.
+       *Value properties* have to exist as an attribute with an
+       initial value, which may be ``None``.
+
+       *Logical properties* require at least a getter (and optionally
+        a setter) method in the class.
     """
 
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
     __properties__ = {} # override this
-    
+
+    # these are used internally only
+    GS_GETTER_NOARGS, GS_GETTER_ARGS, GS_SETTER_NOARGS, GS_SETTER_ARGS = \
+        (1,2,4,8) # values are not supposed to be changed
+
+    # this class is used internally and by metaclass only
+    class __getset: 
+        fget=None; fset=None; mask=0
+        def merge(self, other):
+            """This method will merge two gs (other within self,
+            with side-effects on self only). Merging will work only
+            if none of their fields collide. E.g. if both have fget
+            set, mergin will be not carried out. If the merge
+            cannot happen, raises a ValueError exception"""
+            if self.fget is None: 
+                self.fget = other.fget
+                self.mask |= (other.mask & (Model.GS_GETTER_NOARGS | Model.GS_GETTER_ARGS))
+            elif other.fget is not None:
+                raise ValueError("Merging not allowed: colliding getters")
+
+            if self.fset is None: 
+                self.fset = other.fset
+                self.mask |= (other.mask & (Model.GS_SETTER_NOARGS | Model.GS_SETTER_ARGS))
+            elif other.fset is not None:
+                raise ValueError("Merging not allowed: colliding setters")            
+            return
+        pass # end of class
 
     @classmethod
     @decorators.good_decorator_accepting_args
@@ -64,68 +92,46 @@ class Model (Observer):
         .. method:: getter()
            :noindex:
            
-           Uses the name of the method, minus the required prefix ``get_``, as the
-           property name.
+           Uses the name of the method, minus the required prefix
+           ``get_``, as the property name.
            The method must not require arguments.
 
         .. method:: getter(one, two, ...)
            :noindex:
            
-           Takes a variable number of strings as the property name(s). The name of
-           the method does not matter.
+           Takes a variable number of strings as the property
+           name(s). The name of the method does not matter.
            The method must take a property name as its sole argument.
         """
 
         @decorators.good_decorator
         def __decorator(_func):
-
-            # name is the (optional) name of the property, which is used
-            # with decorators with arguments
-            def _wrapper(self, *name):
-                res = _func(self, *name)
-                return res
-
-            # takes into account that the user may have decorated
-            # the same getter method multiple times.
-            old_names = getattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, ())
+            # creates the getset dictionary if needed 
+            _getsetdict = getattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, None)
+            if _getsetdict is None:
+                _getsetdict = dict()
+                setattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, _getsetdict)
+                pass
 
             # names is an array which is set in the outer frame. 
-            # Here the normalized names are associated with the getter
-            if 0 == len(names):
-                # No args, extracts the property name from the getter name
-                parts = _func.__name__.split("get_", 1)[1:]
-                if 1 != len(parts): 
-                    raise SyntaxError("Getter '%s' has invalid name "
-                                      "(should be 'get_<name>'). Fix the name, "
-                                      "or use 'getter' decorator with argument(s)" \
-                                          % _func.__name__)                
-                    
-                # here the name is extracted in 'parts'
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        old_names+tuple(parts))
-                # Marks the method to be a getter without args
-                marker = support.metaclasses.GETTER_NOARGS_MARKER
+            if 0 == len(names): 
+                gs = _getsetdict.get(_func.__name__, cls.__getset())
+                gs.fget = _func
+                gs.mask |= cls.GS_GETTER_NOARGS
+                _getsetdict[_func.__name__] = gs
+            else: 
+                # annotates getters for all names
+                for name in names:
+                    gs = _getsetdict.get(name, cls.__getset())
+                    gs.fget = _func
+                    gs.mask |= cls.GS_GETTER_ARGS
+                    _getsetdict[name] = gs
+                    pass
 
-            else: # args were used
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        old_names+names)
-
-                marker = support.metaclasses.GETTER_ARGS_MARKER
-                pass
-                
-            setattr(_wrapper, 
-                    support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                    marker)
-                
-            # remove attributes in nested decorated functions
-            if old_names:
-                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_MARKER)
-                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES)
-                pass
-
-            return _wrapper
+            # here we can return whatever, it will in anycase
+            # substituted by the metaclass constructor, to be a
+            # property
+            return _func
 
         assert 0 < len(args)
         if 1 == len(args) and isinstance(args[0], types.FunctionType):
@@ -141,6 +147,7 @@ class Model (Observer):
                 raise TypeError("Arguments of decorator must be strings")
             pass
         names = args # names is used in __decorator
+
         return __decorator
     # ----------------------------------------------------------------------
 
@@ -155,67 +162,46 @@ class Model (Observer):
         .. method:: setter()
            :noindex:
            
-           Uses the name of the method, minus the required prefix ``set_``, as the
-           property name.
+           Uses the name of the method, minus the required prefix
+           ``set_``, as the property name.
            The method must take one argument, the new value.
 
         .. method:: getter(one, two, ...)
            :noindex:
            
-           Takes a variable number of strings as the property name(s). The name of
-           the method does not matter.
+           Takes a variable number of strings as the property
+           name(s). The name of the method does not matter.
            The method must take two arguments, the property name and new value.
         """
         
         @decorators.good_decorator
         def __decorator(_func):
-            # name_value is the value to be set, and the optional name of
-            # the property, which is used with decorators with arguments
-            def _wrapper(self, *name_value):
-                _func(self, *name_value)
-                return
-
-            # takes into account that the user may have decorated
-            # the same setter method multiple times.
-            old_names = getattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, ())
+            # creates the getset dictionary if needed 
+            _getsetdict = getattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, None)
+            if _getsetdict is None:
+                _getsetdict = dict()
+                setattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, _getsetdict)
+                pass
 
             # names is an array which is set in the outer frame. 
-            # Here the normalized names are associated with the setter
-            if 0 == len(names):
-                # No args, extracts the property name from the setter name
-                parts = _func.__name__.split("set_", 1)[1:]
-                if 1 != len(parts): 
-                    raise SyntaxError("Setter '%s' has invalid name "
-                                      "(should be 'set_<name>'). Fix the name, "
-                                      "or use 'setter' decorator with argument(s)" \
-                                          % _func.__name__)
-                # here the name is extracted in 'parts'
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        old_names+tuple(parts))
-                # Marks the method to be a setter without args
-                marker = support.metaclasses.SETTER_NOARGS_MARKER
+            if 0 == len(names): 
+                gs = _getsetdict.get(_func.__name__, cls.__getset())
+                gs.fset = _func
+                gs.mask |= cls.GS_SETTER_NOARGS
+                _getsetdict[_func.__name__] = gs
+            else: 
+                # annotates getters for all names
+                for name in names:
+                    gs = _getsetdict.get(name, cls.__getset())
+                    gs.fset = _func
+                    gs.mask |= cls.GS_SETTER_ARGS
+                    _getsetdict[name] = gs
+                    pass
 
-            else: # args were used
-                setattr(_wrapper, 
-                        support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES, 
-                        old_names+names)
-
-                # Marks the method to be a setter with args
-                marker = support.metaclasses.SETTER_ARGS_MARKER
-                pass
-
-            setattr(_wrapper, 
-                    support.metaclasses.GETTER_SETTER_ATTR_MARKER, 
-                    marker)
-                
-            # remove attributes in nested decorated functions
-            if old_names:
-                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_MARKER)
-                delattr(_func, support.metaclasses.GETTER_SETTER_ATTR_PROP_NAMES)
-                pass
-
-            return _wrapper
+            # here we can return whatever, it will in anycase
+            # substituted by the metaclass constructor, to be a
+            # property
+            return _func
 
         assert 0 < len(args)
         if 1 == len(args) and isinstance(args[0], types.FunctionType):
@@ -342,9 +328,9 @@ class Model (Observer):
         """
         All observable properties accessible from this instance.
 
-        :rtype: list of strings
+        :rtype: frozenset of strings
         """
-        return list(getattr(self, support.metaclasses.ALL_OBS_SET, []))
+        return getattr(self, support.metaclasses.ALL_OBS_SET, frozenset())
 
     
     def __add_observer_notification(self, observer, prop_name):

@@ -23,21 +23,6 @@
 
 import inspect
 
-def get_function_from_source(source):
-    """Given source code of a function, a function object is
-    returned"""
-
-    import re
-    m = re.compile("def\s+(\w+)\s*\(.*\):").match(source)
-    if m is None: raise ValueError("Given source is not a valid function:\n"+
-                                   source)
-    name = m.group(1)
-    
-    exec source
-    code = eval("%s.func_code" % name)
-    import new
-    return new.function(code, globals(), name)    
-
 
 def getmembers(_object, _predicate):
     """This is an implementation of inspect.getmembers, as in some versions 

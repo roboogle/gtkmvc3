@@ -1,13 +1,15 @@
 <big><b>A non-trivial example of gtkmvc</b></big>
 
 <i>Copyright (C) 2006 by Roberto Cavada 
-cavada@irst.itc.it</i>
+cavada@fbk.eu</i>
 
-The idea of this example is to design 
-and develop a simple currency
-converter. The idea is to split 
-the logics and the presentation (<i>GUI</i>)
-layers of the application. 
+This example shows how the design 
+and the development of a simple currency
+converter can be done with <i>gtkmvc</i>. 
+
+The idea is to split the logics and the 
+presentation (<i>GUI</i>)layers of 
+the application. 
 This allows users to use the application 
 in both interactive and batch mode 
 (i.e. from a command line).

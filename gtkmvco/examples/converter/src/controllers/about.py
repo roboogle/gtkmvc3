@@ -51,6 +51,7 @@ class AboutCtrl (Controller):
         sw = self.view['sw_scroller']
         if sw is None: return False # destroyed!        
         vadj = sw.get_vadjustment()
+        if vadj is None: return False
         val = vadj.get_value()
         
         # is scrolling over?

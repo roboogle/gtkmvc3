@@ -24,7 +24,7 @@
 #  -------------------------------------------------------------------------
 
 from support import decorators, utils, log
-from types import MethodType, StringType
+from types import MethodType, StringType, FunctionType
 import inspect
 
 @decorators.good_decorator_accepting_args
@@ -54,7 +54,6 @@ class Observer (object):
 
     # these are internal
     _CUST_OBS_ = "__custom_observes__"
-    __CUST_OBS_MAP = {}
 
     @classmethod
     @decorators.good_decorator_accepting_args
@@ -62,15 +61,25 @@ class Observer (object):
         """Use this decorator with methods in observers that are
         intended to be used for notifications. args is an arbitrary
         number of arguments with the names of the observable
-        properties to be observed"""
-
+        properties to be observed. If empty, the name of the
+        property must be equal to the name of the observing
+        method."""
+        
         @decorators.good_decorator
         def _decorator(_notified):
             # marks the method with observed properties
             _set = getattr(_notified, Observer._CUST_OBS_, set())
-            _set |=  set(args)
+            _set |=  set(names)
             setattr(_notified, Observer._CUST_OBS_, _set)
             return _notified        
+
+        # this handle the case of empty args
+        if 1 == len(args) and type(args[0]) is FunctionType:
+            names = ()
+            return _decorator(args[0])
+
+        # this is the case with arguments
+        names = args
         return _decorator
     # ----------------------------------------------------------------------
     
@@ -102,19 +111,54 @@ class Observer (object):
 
         self.__accepts_spurious__ = spurious
 
-        # searches all custom observer methods:
-        observers = utils.getmembers(self,
-                                     lambda m: inspect.ismethod(m) and
-                                     hasattr(m, Observer._CUST_OBS_))
-        
-        for name, obs in observers:
-            for prop_name in getattr(obs, Observer._CUST_OBS_):
-                if not self.__CUST_OBS_MAP.has_key(prop_name):
-                    self.__CUST_OBS_MAP[prop_name] = set()
+        self.__CUST_OBS_MAP = {}
+
+        # searches all custom observer methods: (method-name, method, property-names)        
+        processed_props = set() # tracks already processed properties
+        for cls in inspect.getmro(type(self)):
+            meths = [ (name, meth, getattr(meth, Observer._CUST_OBS_))
+                      for name, meth in cls.__dict__.iteritems()
+                      if inspect.isfunction(meth) and hasattr(meth, Observer._CUST_OBS_)]
+
+            # props processed in this class. This is used to avoid
+            # processing the same props in base classes.
+            cls_processed_props = set() 
+            
+            # since this is traversed top-bottom in the mro, the
+            # first found match is the one to care
+            for name, meth, pnames in meths:
+                if 0 == len(pnames):
+                    # no args were specified in the decorator. In this
+                    # case the method does not take the prop name among
+                    # its arguments, and the property name is taken
+                    # from the method name.
+                    if name not in processed_props:
+                        if not self.__CUST_OBS_MAP.has_key(name):
+                            self.__CUST_OBS_MAP[name] = set()
+                            pass
+                        self.__CUST_OBS_MAP[name].add((geattr(self, name), 0))
+                        cls_processed_props.add(name)
+                        pass
                     pass
-                self.__CUST_OBS_MAP[prop_name].add(obs)
-                pass
-            pass
+                else: 
+                    if 1 == len(pnames): args = 0
+                    else: args = 1
+                    for prop_name in pnames:
+                        if prop_name not in processed_props:
+                            if not self.__CUST_OBS_MAP.has_key(prop_name):
+                                self.__CUST_OBS_MAP[prop_name] = set()
+                                pass
+                            # (method-name, does_it_take_name)
+                            self.__CUST_OBS_MAP[prop_name].add((getattr(self, name), args))
+                            cls_processed_props.add(prop_name)
+                            pass
+                        pass
+                    pass
+                pass 
+            
+            # accumulates props processed in this class
+            processed_props |= cls_processed_props
+            pass # end of loop over classes in the mro
 
         if model: self.observe_model(model)
         return
@@ -135,8 +179,13 @@ class Observer (object):
         return self.__accepts_spurious__
 
     def get_custom_observing_methods(self, prop_name):
-        """Given a property name, returns the set of methods that have
-        been explicitly marked to be observables of it. This method is
+        """Given a property name, returns a set of pairs (method,
+        num-of-additional-args). Each method in the pair has one
+        equivalent menthod in the mro explicitly marked to be
+        observables of the given property. num-of-additional-args
+        is the number of additional arguments which the method
+        receives (can be 0 or 1) if receives also the name of the
+        property (used for multi-properties).  This method is
         called by models when searching for notification methods."""
         return self.__CUST_OBS_MAP.get(prop_name, set())
     

@@ -48,9 +48,10 @@ ALL_OBS_SET = "__all_observables__"
 # name of the variable that hold a property value
 PROP_NAME = "_prop_%(prop_name)s"
 
-# this is the name of the internal map associating logical
-# properties names to their (getter, setter) pair
-LOGICAL_ACCESSORS_MAP_NAME = "_getsetdict"
+# these are the names of the internal maps associating logical
+# properties names to their getters/setters
+LOGICAL_GETTERS_MAP_NAME = "_getdict"
+LOGICAL_SETTERS_MAP_NAME = "_setdict"
 
 # WARNING! These variables and code using them is deprecated These are
 # the names for property getter/setter methods that depend on property
@@ -61,6 +62,9 @@ SET_PROP_NAME = "set_%(prop_name)s_value"
 # There are the names for generic property getter/setter methods
 GET_GENERIC_NAME = "get__value"
 SET_GENERIC_NAME = "set__value"
+
+# this used for pattern matching
+WILDCARDS = frozenset("[]!*?")
 
 
 class PropertyMeta (type):
@@ -116,13 +120,16 @@ class PropertyMeta (type):
 
         # processes all logical properties, and adds the actual log
         # properties to the list of all observables
-        _getsetdict = getattr(cls, LOGICAL_ACCESSORS_MAP_NAME, dict())
-        real_log_props = type(cls).__create_log_props(cls, log_props, _getsetdict)
+        _getdict = getattr(cls, LOGICAL_GETTERS_MAP_NAME, dict())
+        _setdict = getattr(cls, LOGICAL_SETTERS_MAP_NAME, dict())
+        real_log_props = type(cls).__create_log_props(cls, log_props, 
+                                                      _getdict, _setdict)
         obs |= real_log_props
 
-        # after using the map, it is time to clear it to make
-        # it available to the next class in the mro.
-        _getsetdict.clear()
+        # after using the maps, it is time to clear them to make
+        # them available to the next class in the mro.
+        _getdict.clear()
+        _setdict.clear()
 
         # processes all names in __properties__ (deprecated,
         # overloaded by __observables__)
@@ -152,15 +159,14 @@ class PropertyMeta (type):
 
     def __get_observables_sets__(cls):
         """Returns a pair of frozensets. First set of strings is the set
-        of concrete properties, obtained by expanding wilcards
+        of concrete properties, obtained by expanding wildcards
         found in class field __observables__. Expansion works only
         with names not prefixed with __.
 
         Second set of strings contains the names of the logical
         properties. This set may still contain logical properties
         which have not been associated with a getter (and
-        optionally with a setter). Method __resolve_logical_props
-        will do all the checking work.
+        optionally with a setter).
         """
         conc_prop_set = set()
         log_prop_set = set()
@@ -184,10 +190,7 @@ class PropertyMeta (type):
                 conc_prop_set.add(name)
             else: not_found.append(name)
             pass
-        
-        # this used for pattern matching
-        wilcards = frozenset("[]!*?")
-        
+                
         # now searches all possible matches for those that have not
         # been found, and collects all logical properties as well
         # (those which do not match, and do not contain patterns)
@@ -199,7 +202,7 @@ class PropertyMeta (type):
                                 x not in conc_prop_set)]
 
         for pat in not_found:
-            if frozenset(pat) & wilcards:
+            if frozenset(pat) & WILDCARDS:
                 matches = fnmatch.filter(concrete_members, pat)
                 if 0 == len(matches):
                     logger.warning("In class %s.%s observable pattern '%s' " \
@@ -215,14 +218,14 @@ class PropertyMeta (type):
         return (frozenset(conc_prop_set), frozenset(log_prop_set))
 
 
-    def __create_log_props(cls, log_props, _getsetmap):
+    def __create_log_props(cls, log_props, _getdict, _setdict):
         """Creates all the logical property. 
 
         The list of names of properties to be created is passed
-        with log_props. The getter/setter information is taken from
-        _getsetmap.
+        with frozenset log_props. The getter/setter information is
+        taken from _{get,set}dict.
 
-        This method resolves also wilcards in names, and performs
+        This method resolves also wildcards in names, and performs
         all checks to ensure correctness.
 
         Returns the frozen set of the actually created properties
@@ -231,70 +234,72 @@ class PropertyMeta (type):
         """
         
         real_log_props = set()
-        resolved_getsetmap = {}
-        
-        for pat, gs in _getsetmap.iteritems():
-            if pat not in log_props:
-                # matches only not already matched names
-                # e.g. 
-                # @Model.getter("*") # does not match 'p1'
-                # def p23(...)
-                # @Model.getter("p1")
-                # def p1(...)
-                matches = [x for x in fnmatch.filter(log_props, pat)]
+        resolved_getdict = {} 
+        resolved_setdict = {} 
 
-                if matches:
-                    for match in matches:
-                        if match in resolved_getsetmap:
-                            # possibly multiple matches
-                            gs_resolved, orig_pat = resolved_getsetmap[match]
-                            try: gs.merge(gs_resolved)
-                            except ValueError:  
-                                raise NameError("In class %s.%s getter/setter pattern '%s' " 
-                                                "matches property '%s' previously "
-                                                "matched by pattern '%s'." % \
-                                                    (cls.__module__, cls.__name__, pat, 
-                                                     match, orig_pat))
-                            pass
+        for _dict_name, _dict, _resolved_dict in (("getter", _getdict, resolved_getdict), 
+                                                  ("setter", _setdict, resolved_setdict)):
+            # first resolve all wildcards
+            for pat, ai in ((pat, ai) 
+                            for pat, ai in _dict.iteritems()
+                            if frozenset(pat) & WILDCARDS):
+                matches = fnmatch.filter(log_props, pat)
+                for match in matches:
+                    if match in _resolved_dict:
+                        raise NameError("In class %s.%s %s property '%s' "
+                                        "is matched multiple times by patterns" % \
+                                        (cls.__module__, cls.__name__, _dict_name, match))
+                    _resolved_dict[match] = ai
+                    pass
 
-                        resolved_getsetmap[match] = (gs, pat)
-                        pass
+                if not matches:
+                    logger.warning("In class %s.%s %s pattern '%s' " 
+                                   "did not match any existing logical property." % \
+                                   (cls.__module__, cls.__name__, _dict_name, pat))
                     pass
-                else:
-                    logger.warning("In class %s.%s getter/setter pattern '%s' " \
-                                       "did not match any existing logical property." % \
-                                       (cls.__module__, cls.__name__, pat))
-                    pass
-            else:
-                resolved_getsetmap[pat] = (gs, pat)
+                pass
+
+            # now adds the exact matches (no wilcards) which override
+            # the pattern-matches
+            _resolved_dict.update((name, ai)
+                                  for name, ai in _dict.iteritems()
+                                  if name in log_props)
+
+            # checks that all getter/setter have a corresponding logical property
+            not_found = [name for name in _resolved_dict 
+                         if name not in log_props]
+
+            if not_found:
+                logger.warning("In class %s.%s logical %s were declared for"\
+                                   "non-existant observables: %s" % \
+                                   (cls.__module__, cls.__name__, _dict_name, str(not_found)))
                 pass
             pass
-
-        # checks that all getter/setter have a corresponding logical property
-        not_found = [name for name in resolved_getsetmap 
-                     if name not in log_props]
-
-        if not_found:
-            logger.warning("In class %s.%s logical getter/setter were declared for"\
-                               "non-existant observables: %s" % \
-                               (cls.__module__, cls.__name__, str(not_found)))
+        
+        # checks that all setters have a getter
+        setters_no_getters = (set(resolved_setdict) - set(resolved_getdict)) & log_props
+        if setters_no_getters:
+            logger.warning("In class %s.%s logical setters have no getters: %s" % \
+                               (cls.__module__, cls.__name__, ", ".join(setters_no_getters)))
             pass
-
+        
         # creates the properties (new style)
-        for name, gs_pat in resolved_getsetmap.iteritems():
-            gs = gs_pat[0]
-            _getter = type(cls).get_getter(cls, name, gs.fget, gs.mask & cls.GS_GETTER_ARGS)
-            _setter = type(cls).get_setter(cls, name, 
-                                           gs.fset, gs.mask & cls.GS_SETTER_ARGS,
-                                           gs.fget, gs.mask & cls.GS_GETTER_ARGS)
-
+        for name, ai_get in resolved_getdict.iteritems():
+            _getter = type(cls).get_getter(cls, name, ai_get.func, ai_get.has_args)
+            ai_set = resolved_setdict.get(name, None)
+            if ai_set:
+                _setter =  type(cls).get_setter(cls, name, 
+                                                ai_set.func, ai_set.has_args,
+                                                ai_get.func, ai_get.has_args)
+            else: _setter = None
+            
             prop = property(_getter, _setter)
             setattr(cls, name, prop)
-            real_log_props.add(name)
+            real_log_props.add(name)                
             pass
 
         # finally, here remaining (old-style) properties are created
-        for name in log_props - set(resolved_getsetmap):
+        for name in log_props - set(resolved_getdict):
             _getter = type(cls).get_getter(cls, name)
             if _getter is not None:
                 _setter = type(cls).get_setter(cls, name)

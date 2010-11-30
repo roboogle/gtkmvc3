@@ -34,8 +34,8 @@ from support import decorators
 
 
 # these constants are used internally
-_obs_implicit = 0
-_obs_explicit = 1
+_obs_without_name = 0
+_obs_with_name = 1
 
 
 class Model (Observer):
@@ -56,32 +56,12 @@ class Model (Observer):
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
     __properties__ = {} # override this
 
-    # these are used internally only
-    GS_GETTER_NOARGS, GS_GETTER_ARGS, GS_SETTER_NOARGS, GS_SETTER_ARGS = \
-        (1,2,4,8) # values are not supposed to be changed
-
     # this class is used internally and by metaclass only
-    class __getset: 
-        fget=None; fset=None; mask=0
-        def merge(self, other):
-            """This method will merge two gs (other within self,
-            with side-effects on self only). Merging will work only
-            if none of their fields collide. E.g. if both have fget
-            set, mergin will be not carried out. If the merge
-            cannot happen, raises a ValueError exception"""
-            if self.fget is None: 
-                self.fget = other.fget
-                self.mask |= (other.mask & (Model.GS_GETTER_NOARGS | Model.GS_GETTER_ARGS))
-            elif other.fget is not None:
-                raise ValueError("Merging not allowed: colliding getters")
-
-            if self.fset is None: 
-                self.fset = other.fset
-                self.mask |= (other.mask & (Model.GS_SETTER_NOARGS | Model.GS_SETTER_ARGS))
-            elif other.fset is not None:
-                raise ValueError("Merging not allowed: colliding setters")            
-            return
-        pass # end of class
+    class __accinfo: 
+        func=None; has_args=False
+        def __init__(self, func, has_attr): 
+            self.func = func; self.has_attr = has_attr
+        pass
 
     @classmethod
     @decorators.good_decorator_accepting_args
@@ -106,28 +86,27 @@ class Model (Observer):
 
         @decorators.good_decorator
         def __decorator(_func):
-            # creates the getset dictionary if needed 
-            _getsetdict = getattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, None)
-            if _getsetdict is None:
-                _getsetdict = dict()
-                setattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, _getsetdict)
+            # creates the getters dictionary if needed 
+            _dict = getattr(cls, support.metaclasses.LOGICAL_GETTERS_MAP_NAME, None)
+            if _dict is None:
+                _dict = dict()
+                setattr(cls, support.metaclasses.LOGICAL_GETTERS_MAP_NAME, _dict)
                 pass
 
             # names is an array which is set in the outer frame. 
             if 0 == len(names): 
-                gs = _getsetdict.get(_func.__name__, cls.__getset())
-                gs.fget = _func
-                gs.mask |= cls.GS_GETTER_NOARGS
-                _getsetdict[_func.__name__] = gs
+                if _dict.has_key(_func.__name__):
+                    # error: the name is used multiple times
+                    raise ValueError("The same pattern is used multiple times")
+                _dict[_func.__name__] = cls.__accinfo(_func, False)
             else: 
                 # annotates getters for all names
-                for name in names:
-                    gs = _getsetdict.get(name, cls.__getset())
-                    gs.fget = _func
-                    gs.mask |= cls.GS_GETTER_ARGS
-                    _getsetdict[name] = gs
-                    pass
-
+                for name in names: 
+                    if _dict.has_key(name):
+                        # error: the name is used multiple times
+                        raise ValueError("The same pattern is used multiple times")
+                    _dict[name] = cls.__accinfo(_func, True)
+                pass
             # here we can return whatever, it will in anycase
             # substituted by the metaclass constructor, to be a
             # property
@@ -176,27 +155,28 @@ class Model (Observer):
         
         @decorators.good_decorator
         def __decorator(_func):
-            # creates the getset dictionary if needed 
-            _getsetdict = getattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, None)
-            if _getsetdict is None:
-                _getsetdict = dict()
-                setattr(cls, support.metaclasses.LOGICAL_ACCESSORS_MAP_NAME, _getsetdict)
+            # creates the setters dictionary if needed 
+            _dict = getattr(cls, support.metaclasses.LOGICAL_SETTERS_MAP_NAME, None)
+            if _dict is None:
+                _dict = dict()
+                setattr(cls, support.metaclasses.LOGICAL_SETTERS_MAP_NAME, _dict)
                 pass
 
             # names is an array which is set in the outer frame. 
             if 0 == len(names): 
-                gs = _getsetdict.get(_func.__name__, cls.__getset())
-                gs.fset = _func
-                gs.mask |= cls.GS_SETTER_NOARGS
-                _getsetdict[_func.__name__] = gs
+                if _dict.has_key(_func.__name__):
+                    # error: the name is used multiple times
+                    raise ValueError("The same pattern is used multiple times")
+                _dict[_func.__name__] = cls.__accinfo(_func, False)
             else: 
                 # annotates getters for all names
-                for name in names:
-                    gs = _getsetdict.get(name, cls.__getset())
-                    gs.fset = _func
-                    gs.mask |= cls.GS_SETTER_ARGS
-                    _getsetdict[name] = gs
+                for name in names: 
+                    if _dict.has_key(name):
+                        # error: the name is used multiple times
+                        raise ValueError("The same pattern is used multiple times")
+                    _dict[name] = cls.__accinfo(_func, True)
                     pass
+                pass
 
             # here we can return whatever, it will in anycase
             # substituted by the metaclass constructor, to be a
@@ -337,12 +317,9 @@ class Model (Observer):
         """Searches in the observer for any possible listener, and
         stores the notification methods to be called later"""
 
-        # retrieves the set of custom observing methods 
-        cust_methods = observer.get_custom_observing_methods(prop_name)
-
         method_name = "property_%s_value_change" % prop_name
         if hasattr(observer, method_name):
-            pair = (_obs_implicit, getattr(observer, method_name))
+            pair = (_obs_without_name, getattr(observer, method_name))
             if pair not in self.__value_notifications[prop_name]:
                 list.append(self.__value_notifications[prop_name], pair)
                 logger.debug("Added implicit value change notification '%s'",
@@ -350,21 +327,26 @@ class Model (Observer):
                 pass
             pass
 
+        # retrieves the set of custom observing methods 
+        cust_methods = observer.get_custom_observing_methods(prop_name)
+
         # checks for custom observing methods. If it is a signal,
         # a method or value is decided from number of
         # arguments. This is not particularly robust.
-        # self, model, prop_name, old, new
-        _CUST_METH_ARGS_COUNT = 5
-        for meth in cust_methods:
+        # self, model, old, new
+        _CUST_METH_ARGS_COUNT = 4
+        for meth, addional_args in cust_methods:
             args, varargs, _, _ = inspect.getargspec(meth)
             if varargs:
                 logger.warn("Ignoring notification '%s' as variable"
                             " arguments were used (pattern not recognized,"
-                            " exactly %d arguments were expected)", 
-                            meth.__name__, _CUST_METH_ARGS_COUNT)
-            if len(args) != _CUST_METH_ARGS_COUNT: continue
-                
-            pair = (_obs_explicit, meth)
+                            " exactly %d arguments are expected)", 
+                            meth.__name__, _CUST_METH_ARGS_COUNT+addional_args)
+                pass
+            if len(args) != _CUST_METH_ARGS_COUNT + addional_args: continue
+            
+            if addional_args > 0: pair = (_obs_with_name, meth)
+            else: pair = (_obs_without_name, meth)
             if pair not in self.__value_notifications[prop_name]:
                 list.append(self.__value_notifications[prop_name], pair)
                 logger.debug("Added explicit value change notification '%s'",
@@ -377,7 +359,7 @@ class Model (Observer):
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name
             if hasattr(observer, method_name):
-                pair = (_obs_implicit, getattr(observer, method_name))
+                pair = (_obs_without_name, getattr(observer, method_name))
                 if pair not in self.__signal_notif[prop_name]:
                     list.append(self.__signal_notif[prop_name], pair)
                     logger.debug("Added implicit signal emit notification '%s'",
@@ -389,38 +371,41 @@ class Model (Observer):
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, signal_name, arg
-            for meth in (m for m in cust_methods
-                         if m.im_func.func_code.co_argcount == 4):
-                
-                pair = (_obs_explicit, meth)
+            for meth, with_args in ((meth, addional_args > 0)
+                                    for meth, addional_args in cust_methods
+                                    if meth.im_func.func_code.co_argcount == 3+addional_args):
+                if with_args: pair = (_obs_with_name, meth)
+                else: pair = (_obs_without_name, meth)
+
                 if pair not in self.__signal_notif[prop_name]:
                     list.append(self.__signal_notif[prop_name], pair)
                     logger.debug("Added explicit signal emit notification '%s'",
                                  meth.im_func.__name__)
                     pass
-                pass                    
+                pass
             pass
         
         # is it an instance change notification type?
         elif isinstance(orig_prop, ObsWrapperBase):
             method_name = "property_%s_before_change" % prop_name
             if hasattr(observer, method_name):
-                pair = (_obs_implicit, getattr(observer, method_name))
+                pair = (_obs_without_name, getattr(observer, method_name))
                 if pair not in self.__instance_notif_before[prop_name]:
                     list.append(self.__instance_notif_before[prop_name], pair)
                     logger.debug("Added implicit before call notification '%s'",
                                  method_name)
                     pass
                 pass
-
+            
             # checks for custom observing methods. If it is a signal,
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, prop_name, instance, meth_name, args, kwargs
-            for meth in (m for m in cust_methods
-                         if m.im_func.func_code.co_argcount == 7):
-                
-                pair = (_obs_explicit, meth)
+            for meth, with_args in ((meth, addional_args > 0)
+                                    for meth, addional_args in cust_methods
+                                    if meth.im_func.func_code.co_argcount == 7+addional_args):
+                if with_args: pair = (_obs_with_name, meth)
+                else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_before[prop_name]:
                     list.append(self.__instance_notif_before[prop_name], pair)
                     logger.debug("Added explicit before call notification '%s'",
@@ -430,7 +415,7 @@ class Model (Observer):
 
             method_name = "property_%s_after_change" % prop_name
             if hasattr(observer, method_name):
-                pair = (_obs_implicit, getattr(observer, method_name))
+                pair = (_obs_without_name, getattr(observer, method_name))
                 if pair not in self.__instance_notif_after[prop_name]:
                     list.append(self.__instance_notif_after[prop_name], pair)
                     logger.debug("Added implicit after call notification '%s'",
@@ -442,17 +427,17 @@ class Model (Observer):
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, prop_name, instance, meth_name, res, args, kwargs
-            for meth in (m for m in cust_methods
-                         if m.im_func.func_code.co_argcount == 8):
-                
-                pair = (_obs_explicit, meth)
+            for meth, with_args in ((meth, addional_args > 0)
+                                    for meth, addional_args in cust_methods
+                                    if meth.im_func.func_code.co_argcount == 8+addional_args):
+                if with_args: pair = (_obs_with_name, meth)
+                else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_after[prop_name]:
                     list.append(self.__instance_notif_after[prop_name], pair)
                     logger.debug("Added explicit after call notification '%s'",
                                  meth.im_func.__name__)
                     pass
-                pass                    
-            
+                pass
             pass
 
         return
@@ -463,8 +448,8 @@ class Model (Observer):
         # retrieves the set of custom observing methods
         # and removes corresponding the notification methods
         cust_methods = observer.get_custom_observing_methods(prop_name)
-        for meth in cust_methods:
-            pair = (_obs_explicit, meth)
+        for meth, addional_args in cust_methods:
+            pair = (_obs_with_name, meth)
             for _map in (self.__value_notifications,
                          self.__signal_notif,
                          self.__instance_notif_before,
@@ -478,7 +463,7 @@ class Model (Observer):
         if self.__value_notifications.has_key(prop_name):
             method_name = "property_%s_value_change" % prop_name
             if hasattr(observer, method_name):
-                pair = (_obs_implicit, getattr(observer, method_name))
+                pair = (_obs_without_name, getattr(observer, method_name))
                 if pair in self.__value_notifications[prop_name]:
                     self.__value_notifications[prop_name].remove(pair)
                     logger.debug("Removed implicit value change notification '%s'",
@@ -493,7 +478,7 @@ class Model (Observer):
         if isinstance(orig_prop, Signal):
             method_name = "property_%s_signal_emit" % prop_name
             if hasattr(observer, method_name):
-                pair = (_obs_implicit, getattr(observer, method_name))
+                pair = (_obs_without_name, getattr(observer, method_name))
                 if pair in self.__signal_notif[prop_name]:
                     self.__signal_notif[prop_name].remove(pair)
                     logger.debug("Removed implicit signal emit notification '%s'",
@@ -507,7 +492,7 @@ class Model (Observer):
             if self.__instance_notif_before.has_key(prop_name):
                 method_name = "property_%s_before_change" % prop_name
                 if hasattr(observer, method_name):
-                    pair = (_obs_implicit, getattr(observer, method_name))
+                    pair = (_obs_without_name, getattr(observer, method_name))
                     if pair in self.__instance_notif_before[prop_name]:
                         self.__instance_notif_before[prop_name].remove(pair)
                         logger.debug("Removed implicit before call "\
@@ -519,7 +504,7 @@ class Model (Observer):
             if self.__instance_notif_after.has_key(prop_name):
                 method_name = "property_%s_after_change" % prop_name
                 if hasattr(observer, method_name):
-                    pair = (_obs_implicit, getattr(observer, method_name))
+                    pair = (_obs_without_name, getattr(observer, method_name))
                     if pair in self.__instance_notif_after[prop_name]:
                         self.__instance_notif_after[prop_name].remove(pair)
                         logger.debug("Removed after call notification '%s'",
@@ -554,7 +539,7 @@ class Model (Observer):
             obs = method.im_self
             # notification occurs checking spuriousness of the observer
             if old != new or obs.accepts_spurious_change():
-                if flag == _obs_implicit: 
+                if flag == _obs_without_name: 
                     self.__notify_observer__(obs, method,
                                              self, old, new) # notifies the change
                 else: # explicit (custom) notification
@@ -577,7 +562,7 @@ class Model (Observer):
         assert(self.__instance_notif_before.has_key(prop_name))
         for flag, method in self.__instance_notif_before[prop_name]:
             # notifies the change
-            if flag == _obs_implicit: 
+            if flag == _obs_without_name: 
                 self.__notify_observer__(method.im_self, method,
                                          self, instance,
                                          meth_name, args, kwargs)
@@ -600,7 +585,7 @@ class Model (Observer):
         assert(self.__instance_notif_after.has_key(prop_name))
         for flag, method in self.__instance_notif_after[prop_name]:
             # notifies the change
-            if flag == _obs_implicit: 
+            if flag == _obs_without_name: 
                 self.__notify_observer__(method.im_self, method,
                                          self, instance,
                                          meth_name, res, args, kwargs) 
@@ -625,7 +610,7 @@ class Model (Observer):
         
         for flag, method in self.__signal_notif[prop_name]:
             # notifies the signal emit
-            if flag == _obs_implicit:
+            if flag == _obs_without_name:
                 self.__notify_observer__(method.im_self, method,
                                          self, arg)
             else: # explicit (custom) notification

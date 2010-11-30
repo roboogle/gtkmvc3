@@ -1,5 +1,5 @@
 Introduction
-============
+************
 
 This document contains information about the functionalities and the
 architecture of a Model-View-Controller and Observer Infrastructure

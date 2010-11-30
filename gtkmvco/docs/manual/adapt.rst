@@ -1,12 +1,12 @@
 Adapters
-========
+********
 
 Version 1.2 introduces *Adapters*, a powerful feature that
 makes the framework perform some standard and boring activities
 autonomously.
 
 Introduction
-------------
+============
 
 Previous sections presented the framework and its main feature, that
 is -- to recap it once again -- to provide a full support for
@@ -53,7 +53,7 @@ reciprocal loop.
 It is in this context that adapters become pretty nifty. 
 
 What are Adapters
------------------
+=================
 
 *Adapters* are the generalization of the the code that handles
 autonomously the connection between a set of widgets and a
@@ -183,7 +183,7 @@ get updated accordingly.
 
 
 Module ``adapters``
--------------------
+===================
 
 Currently, module ``adapters`` contains a few adapters
 classes.
@@ -549,7 +549,7 @@ in the model is carried out by looking at names, and not position.
 
 
 Support for adapter instantiation
----------------------------------
+=================================
 
 As already seen, since version 1.2 class ``Controller``
 offers two new methods to support instantiation of adapters. 
@@ -587,7 +587,7 @@ adapt(...)
 .. _SUPW:
 
 Supported widgets
------------------
+=================
 
 Here follows the list of those widgets that are currently supported
 by the framework out of the box. In method

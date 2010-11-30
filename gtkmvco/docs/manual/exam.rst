@@ -1,5 +1,5 @@
 A simple application
-====================
+********************
 
 This section describes the process of creation of a sample
 application, from the design with *Glade*, to the integration of views
@@ -25,7 +25,7 @@ how the application should appear.
 .. _GLEX:
 
 Glade
------
+=====
 
 Figure :ref:`GL:f` shows *Glade* and a project named ``example``.
 The sample *GUI* has only one top-level window (named
@@ -52,7 +52,7 @@ have to supply this function in order to handle the ``click``
 event occurring in ``button1``.
 
 Implementation
---------------
+==============
 
 The implementation is slightly elaborate for this example, because the
 goal here is to show how the sample application can be implemented by
@@ -67,7 +67,7 @@ More description section is :doc:`impl`.
 
 
 View
-^^^^
+----
 
 In the example, the View is implemented inside the class
 ``ExampleView`` shown below. ::
@@ -90,7 +90,7 @@ Class memebers ``glade`` and ``top`` are used instead of
 calling ``View`` constructor directly.
 
 Model
-^^^^^
+-----
 
 Class ``ExampleModel`` is as simple as class
 ``ExampleView``.  As for ``ExampleView``, it extends a
@@ -150,7 +150,7 @@ couples. This variable was used in older versions of *gtkmvc* and
 now should be avoided.
 
 Controller
-^^^^^^^^^^
+----------
 
 Class ``ExampleController`` contains the *logic* of the
 application. The controller handles two signals and the observable

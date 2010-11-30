@@ -1,5 +1,5 @@
 progen: A Project Generator
-===========================
+***************************
 
 Since version 1.2 a little application called *gtkmvc-progen*
 is provided. Goal of *gtkmvc-progen* is to generate the skeleton

@@ -1,5 +1,5 @@
 Architectural Overview
-======================
+**********************
 
 Figure :ref:`HLA_f` shows the high level software architecture for an
 application based on *PyGTK* and the supplied ``mvco`` Infrastructure. It

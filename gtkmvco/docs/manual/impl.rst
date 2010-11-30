@@ -112,10 +112,10 @@ gtkmvc.TextBufferModelMT
 Controllers
 -----------
 
-User's controllers must derive from this class.  A controller is
-always associated with one model, that the controller can monitor and
-modify. At the other side the controller can control a View.  Two
-members called ``model`` and ``view`` hold the
+User's controllers must derive from this class. A controller is
+always associated with one model, that the controller can
+monitor and modify. At the other side the controller can control a
+View.  Two members called ``model`` and ``view`` hold the
 corresponding instances.
 
 The controller holds all the code that lives between data in model and

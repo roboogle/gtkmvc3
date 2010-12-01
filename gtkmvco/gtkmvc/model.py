@@ -49,8 +49,8 @@ class Model (Observer):
        *Value properties* have to exist as an attribute with an
        initial value, which may be ``None``.
 
-       *Logical properties* require at least a getter (and optionally
-        a setter) method in the class.
+       *Logical properties* require a getter and maye have
+        a setter method in the class.
     """
 
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
@@ -72,8 +72,7 @@ class Model (Observer):
         .. method:: getter()
            :noindex:
            
-           Uses the name of the method, minus the required prefix
-           ``get_``, as the property name.
+           Uses the name of the method as the property name.
            The method must not require arguments.
 
         .. method:: getter(one, two, ...)
@@ -141,8 +140,7 @@ class Model (Observer):
         .. method:: setter()
            :noindex:
            
-           Uses the name of the method, minus the required prefix
-           ``set_``, as the property name.
+           Uses the name of the method as the property name.
            The method must take one argument, the new value.
 
         .. method:: getter(one, two, ...)
@@ -343,7 +341,11 @@ class Model (Observer):
                             " exactly %d arguments are expected)", 
                             meth.__name__, _CUST_METH_ARGS_COUNT+addional_args)
                 pass
-            if len(args) != _CUST_METH_ARGS_COUNT + addional_args: continue
+            if len(args) != _CUST_METH_ARGS_COUNT + addional_args:
+                logger.warn("Ignoring notification '%s': exactly %d"
+                            " arguments are expected", 
+                            meth.__name__, _CUST_METH_ARGS_COUNT+addional_args)
+                pass
             
             if addional_args > 0: pair = (_obs_with_name, meth)
             else: pair = (_obs_without_name, meth)

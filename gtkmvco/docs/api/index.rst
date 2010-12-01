@@ -17,8 +17,6 @@ GTK MVC |version| documentation
    observer
    support
    metaclasses
-   factories
-   controlflow
 
 Installation
 ============

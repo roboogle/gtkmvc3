@@ -1,66 +1,58 @@
-"""
-Test should print:
-obj after change: <id 1> change None (<id 1>,) {}
-obj value changed from: <id 1> to: <id 2>
-obj after change: <id 2> change None (<id 2>,) {}
-obj after change: <id 2> change None (<id 2>,) {}
-"""
+import unittest
+
 import _importer
+import gtkmvc
 
-from gtkmvc import Model
-from gtkmvc import Observer
-from gtkmvc import Observable
+# Despite the name this superclass does not work directly with Observer but
+# only in a Model property.
+class Custom(gtkmvc.Observable):
+    x = 0
 
-# ----------------------------------------------------------------------
-class AdHocClass (Observable):
-    def __init__(self):
-        Observable.__init__(self)
-        self.val = 0
+    @gtkmvc.Observable.observed
+    def touch(self):
+        self.x += 1
 
-    # this way the method is declared as 'observed':
-    @Observable.observed 
-    def change(self): self.val += 1
+    def reset(self):
+        self.x = 5
 
-    # this is NOT observed:
-    def is_val(self, val): return self.val == val
-
-    pass #end of class
-
-# ----------------------------------------------------------------------
-class MyModel (Model):
-    obj = AdHocClass()
-    __observables__ = ("obj",)
+class Model(gtkmvc.Model):
+    y = None
+    __observables__ = ["y"]
 
     def __init__(self):
-        Model.__init__(self)
-        return    
+        gtkmvc.Model.__init__(self)
 
-    pass # end of class
+        self.y = Custom()
 
-# ----------------------------------------------------------------------
-class MyObserver (Observer):
+class Observer(gtkmvc.Observer):
     def __init__(self, model):
-        Observer.__init__(self, model)
-        return
+        gtkmvc.Observer.__init__(self, model)
 
-    def property_obj_value_change(self, model, old, new):
-        print "obj value changed from:", old, "to:", new 
-        new.change() # XXX
-        model.obj.change() # XXX
-        return
+        self.notified = []
 
-    def property_obj_after_change(self, model, instance, name, res,
-                                  args, kwargs):
-        print "obj after change:", instance, name, res, args, kwargs
-        return
+    def property_y_value_change(self, model, old, new):
+        self.notified.append(new)
+        # Not suppressed.
+        new.touch()
+        model.y.touch()
 
-    pass
+    def property_y_after_change(self, model, instance, name, res,
+        args, kwargs):
+        self.notified.append((instance, name))
 
-# Look at what happens to the observer
+class AdHoc(unittest.TestCase):
+    def setUp(self):
+        self.m = Model()
+        self.c = Observer(self.m)
+
+    def testTouch(self):
+        self.m.y.touch()
+        self.assertEqual(1, self.m.y.x)
+        self.assertEqual([(self.m.y, "touch")], self.c.notified)
+
+    def testAssign(self):
+        self.m.y = Custom()
+        self.assertEqual(3, len(self.c.notified))
+
 if __name__ == "__main__":
-    m = MyModel()
-    c = MyObserver(m)
-    m.obj.change()
-    m.obj = AdHocClass() # XXX
-    pass
-
+    unittest.main()

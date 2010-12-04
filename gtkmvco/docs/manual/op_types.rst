@@ -1,11 +1,56 @@
 
 .. _KOBS:DET:
 
+Class vs Instance members as OPs 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+So far in our examples, all OPs were class members: ::
+
+ from gtkmvc import Model
+
+ class MyModel (Model):
+     prop1 = 10
+     prop2 = []
+     __observables__ = ("prop?",)
+     pass # end of class
+
+Using class vs instance attributes is not an issue when they are
+assigned: ::
+ m1 = MyModel()
+ m2 = MyModel()
+ m1.prop1 = 5
+ m2.prop1 = 15
+
+In this case after the assignment `m1` and `m2` will have their own
+value for attribute `prop1`.
+
+However, when dealing with attributes whose type is a class instances,
+like for example a list, you must keep in mind the attribute sharing.::
+ m1.prop2.append(1)
+ print m2.prop2 # prints [1]
+
+If attribute sharing is not what you want, simply assign OPs in the
+model's constructor: ::
+ class MyModel (Model):
+     prop1 = 10
+     prop2 = [] # may be any value actually
+     __observables__ = ("prop?",)
+
+     def __init__(self):
+       MyModel.__init__(self)
+       self.prop2 = []
+       return
+     pass # end of class
+
+Now `m1.prop2` and `m2.prop2` are different objects, and sharing no
+longer occurs.
+
+
 Types of Observable Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In section :ref:`KOBS` we anticipated that there exist several types
-of *OP*. In the examples so far we have seen only *value* *OPs*,
+of *OP*s. In the examples so far we have seen only *value* *OPs*,
 meaning that observers will be notified of any change of *value*
 assigned to the corresponding *OP*. What would happen if the value of
 the property would be a complex object like a list, or a user-defined
@@ -234,7 +279,7 @@ Examples for new classes: ::
      pass
  
 The execution prints out (slightly modified for the sake of
-readability):
+readability): ::
  
  obj after change: <__main__.AdHocClass object at 0xb7d91e8c> 
  change None (<__main__.AdHocClass object at 0xb7d91e8c>,) {}

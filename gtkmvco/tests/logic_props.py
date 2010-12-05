@@ -46,7 +46,7 @@ class MyModel (Model):
     def set_prop7_value(self, val): self._prop7 = val
     @Model.getter("prop7")
     def prop7_named(self, name): 
-        assert name is "prop7"
+        assert "prop7" == name
         return self._prop7
 
     _prop8 = 8
@@ -54,7 +54,7 @@ class MyModel (Model):
     def get_prop8_value(self): return self._prop8
     @Model.setter("prop8")
     def prop8_named(self, name, val): 
-        assert name is "prop8"
+        assert "prop8" == name
         self._prop8 = val
         return
     

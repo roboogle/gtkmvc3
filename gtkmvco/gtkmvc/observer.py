@@ -25,6 +25,8 @@
 
 from support import decorators, utils, log
 from types import MethodType, StringType, FunctionType
+from collections import Iterable
+
 import inspect
 
 @decorators.good_decorator_accepting_args
@@ -111,11 +113,25 @@ class Observer (object):
 
         self.__accepts_spurious__ = spurious
 
-        self.__CUST_OBS_MAP = {}
+        # NOTE: In rev. 202 these maps were unified into
+        #   __CUST_OBS_MAP only (the map contained pairs (method,
+        #   args). However, this broke backward compatibility of code
+        #   accessing the map through
+        #   get_custom_observing_methods. Now the informatio is split
+        #   and the original information restored. To access the
+        #   additional information (number of additional arguments
+        #   required by observing methods) use the newly added methods.
 
-        # searches all custom observer methods: (method-name, method, property-names)        
+        # Private maps: do not change/access them directly, use
+        # methods to access them:
+        self.__CUST_OBS_MAP = {} # prop name --> set of observing methods
+        self.__CUST_OBS_ARGS = {} # observing method --> flag 
+
         processed_props = set() # tracks already processed properties
+
+        # searches all custom observer methods
         for cls in inspect.getmro(type(self)):
+            # list of (method-name, method-object, list-of-properties-the-method-observes)
             meths = [ (name, meth, getattr(meth, Observer._CUST_OBS_))
                       for name, meth in cls.__dict__.iteritems()
                       if inspect.isfunction(meth) and hasattr(meth, Observer._CUST_OBS_)]
@@ -124,6 +140,8 @@ class Observer (object):
             # processing the same props in base classes.
             cls_processed_props = set() 
             
+            # TODO: fix this code to call add_custom_observing_method
+
             # since this is traversed top-bottom in the mro, the
             # first found match is the one to care
             for name, meth, pnames in meths:
@@ -136,20 +154,31 @@ class Observer (object):
                         if not self.__CUST_OBS_MAP.has_key(name):
                             self.__CUST_OBS_MAP[name] = set()
                             pass
-                        self.__CUST_OBS_MAP[name].add((geattr(self, name), 0))
+                        _me = getattr(self, name)
+                        self.__CUST_OBS_MAP[name].add(_me)
+                        
+                        # first hit matters
+                        if not self.__CUST_OBS_ARGS.has_key(_me):
+                            self.__CUST_OBS_ARGS[_me] = False # no additional args
+                            pass
                         cls_processed_props.add(name)
                         pass
                     pass
                 else: 
-                    if 1 == len(pnames): args = 0
-                    else: args = 1
+                    takes_arg = 1 < len(pnames)
                     for prop_name in pnames:
                         if prop_name not in processed_props:
                             if not self.__CUST_OBS_MAP.has_key(prop_name):
                                 self.__CUST_OBS_MAP[prop_name] = set()
                                 pass
-                            # (method-name, does_it_take_name)
-                            self.__CUST_OBS_MAP[prop_name].add((getattr(self, name), args))
+                            _me = getattr(self, name)
+                            self.__CUST_OBS_MAP[prop_name].add(_me)
+
+                            # first hit matters
+                            if not self.__CUST_OBS_ARGS.has_key(_me):
+                                self.__CUST_OBS_ARGS[_me] = takes_arg
+                                pass
+                            
                             cls_processed_props.add(prop_name)
                             pass
                         pass
@@ -178,16 +207,91 @@ class Observer (object):
         notifying a value change."""
         return self.__accepts_spurious__
 
+    def add_custom_observing_method(self, method, 
+                                    prop_name_or_names):
+        """Adds a custom osberving method to self. prop_name_or_names
+        can be either:
+        1. string name of a property which the method observes
+        2. a sequence of string names which the given method observes.
+
+        If a sequence of names is passed, then the method will also
+        receive the property name among its arguments. Otherwise if a
+        string name is passed, the method will not receive the name of
+        the property, as the method is assumed to handle only
+        notifications for one specific property.
+
+        Multiple methods can be observing the same properties set.
+        This method can be used to add observing method dynamically.
+
+        Methods get_custom_observing_methods and
+        does_observing_method_receive_prop_name can be used to
+        retrieve information about the method later.
+
+        If the given method has already be added before, information
+        internally stored in the previous call will be substituted by
+        the new call.
+        """
+
+        if isinstance(prop_name_or_names, StringType):
+            takes_name = False
+            prop_names = (prop_name_or_names,)
+        else:
+            assert isinstance(prop_name_or_names, Iterable), \
+                "prop_name_or_names must be either a string or an iterable"
+            takes_name = True
+            prop_names = prop_name_or_names
+            pass
+                          
+        for prop_name in prop_names:
+            if not self.__CUST_OBS_MAP.has_key(prop_name):
+                self.__CUST_OBS_MAP[prop_name] = set()
+                pass
+            self.__CUST_OBS_MAP[prop_name].add(method)
+            pass
+        self.__CUST_OBS_ARGS[method] = takes_name
+        return
+
+    def remove_custom_observing_method(self, method, prop_names):
+        """Removes the given method from the observing methods
+        set. Removal is performed for the observation of the given
+        property names.
+
+        This mthod can be used to revert (even partially) the effects
+        of add_custom_observing_method.
+        """
+        for prop_name in prop_names:
+            _set = self.__CUST_OBS_MAP.get(prop_name, set())
+            if method in _set: _set.remove(method)
+            pass
+        
+        if method in self.__CUST_OBS_ARGS: del self.__CUST_OBS_ARGS[method]
+        return
+
+    def is_custom_observing_method(self, method):
+        """Returns True if given method has been previously added as
+        observing method."""
+        return self.__CUST_OBS_ARGS.has_key(method)
+    
     def get_custom_observing_methods(self, prop_name):
-        """Given a property name, returns a set of pairs (method,
-        num-of-additional-args). Each method in the pair has one
-        equivalent menthod in the mro explicitly marked to be
-        observables of the given property. num-of-additional-args
-        is the number of additional arguments which the method
-        receives (can be 0 or 1) if receives also the name of the
-        property (used for multi-properties).  This method is
-        called by models when searching for notification methods."""
+        """Given a property name, returns a set of methods, Each
+        method is an observing method, either explicitly marked to be
+        observable with decorators, or added at runtime. Whether each
+        method receive also the name of the property (for
+        multi-properties observer methods) can be known by calling
+        does_observing_method_receive_prop_name.
+
+        This method is called by models when searching for
+        notification methods."""
         return self.__CUST_OBS_MAP.get(prop_name, set())
+
+    def does_observing_method_receive_prop_name(self, method):
+        """Returns True iff the given observing method receives also
+        the name of the property, i.e. it is a multi-properties
+        observing method.
+        This method is called by models when dealingsearching for
+        notification methods.
+        """
+        return self.__CUST_OBS_ARGS[method]
     
     pass # end of class
 

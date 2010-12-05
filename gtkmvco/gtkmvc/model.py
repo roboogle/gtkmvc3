@@ -32,6 +32,7 @@ from observable import Signal
 from support.log import logger
 from support import decorators
 
+import itertools
 
 # these constants are used internally
 _obs_without_name = 0
@@ -58,9 +59,8 @@ class Model (Observer):
 
     # this class is used internally and by metaclass only
     class __accinfo: 
-        func=None; has_args=False
-        def __init__(self, func, has_attr): 
-            self.func = func; self.has_attr = has_attr
+        def __init__(self, func, has_args): 
+            self.func = func; self.has_args = has_args
         pass
 
     @classmethod
@@ -333,7 +333,11 @@ class Model (Observer):
         # arguments. This is not particularly robust.
         # self, model, old, new
         _CUST_METH_ARGS_COUNT = 4
-        for meth, addional_args in cust_methods:
+        for meth in cust_methods:
+            if observer.does_observing_method_receive_prop_name(meth):
+                addional_args = 1
+            else: addional_args = 0
+
             args, varargs, _, _ = inspect.getargspec(meth)
             if varargs:
                 logger.warn("Ignoring notification '%s' as variable"
@@ -373,9 +377,13 @@ class Model (Observer):
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, signal_name, arg
-            for meth, with_args in ((meth, addional_args > 0)
-                                    for meth, addional_args in cust_methods
-                                    if meth.im_func.func_code.co_argcount == 3+addional_args):
+            meth_arg = [(meth, observer.does_observing_method_receive_prop_name(meth))
+                        for meth in cust_methods]
+            
+            # warning: here we exploit polimorphism of +(Int, Boolean)
+            for meth, with_arg in itertools.ifilter(lambda (m,a): \
+                                m.im_func.func_code.co_argcount == 3+a,
+                                                    meth_arg):
                 if with_args: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)
 
@@ -399,13 +407,17 @@ class Model (Observer):
                     pass
                 pass
             
+            meth_arg = [(meth, observer.does_observing_method_receive_prop_name(meth))
+                        for meth in cust_methods]
+
             # checks for custom observing methods. If it is a signal,
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, prop_name, instance, meth_name, args, kwargs
-            for meth, with_args in ((meth, addional_args > 0)
-                                    for meth, addional_args in cust_methods
-                                    if meth.im_func.func_code.co_argcount == 7+addional_args):
+            # warning: here we exploit polimorphism of +(Int, Boolean)
+            for meth, with_arg in itertools.ifilter(lambda (m,a): \
+                                m.im_func.func_code.co_argcount == 7+a,
+                                                    meth_arg):
                 if with_args: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_before[prop_name]:
@@ -429,9 +441,10 @@ class Model (Observer):
             # a method or value is decided from number of
             # arguments. This is not particularly robust.
             # self, model, prop_name, instance, meth_name, res, args, kwargs
-            for meth, with_args in ((meth, addional_args > 0)
-                                    for meth, addional_args in cust_methods
-                                    if meth.im_func.func_code.co_argcount == 8+addional_args):
+            # warning: here we exploit polimorphism of +(Int, Boolean)
+            for meth, with_arg in itertools.ifilter(lambda (m,a): \
+                                m.im_func.func_code.co_argcount == 8+a,
+                                                    meth_arg):
                 if with_args: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_after[prop_name]:
@@ -449,8 +462,7 @@ class Model (Observer):
 
         # retrieves the set of custom observing methods
         # and removes corresponding the notification methods
-        cust_methods = observer.get_custom_observing_methods(prop_name)
-        for meth, addional_args in cust_methods:
+        for meth in observer.get_custom_observing_methods(prop_name):
             pair = (_obs_with_name, meth)
             for _map in (self.__value_notifications,
                          self.__signal_notif,

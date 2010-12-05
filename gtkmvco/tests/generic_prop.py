@@ -18,14 +18,15 @@ class Generic(gtkmvc.Model):
         self.real[key] = value
 
 class Trigger(gtkmvc.Observer):
+    def __init__(self, m):
+        gtkmvc.Observer.__init__(self, m)
+
+        self.add_custom_observing_method(self.property_value_change, 
+                                         m.get_properties())
+        return
+
     def property_value_change(self, model, prop_name, old, new):
         setattr(self, prop_name, (old, new))
-
-    def get_custom_observing_methods(self, prop_name):
-        if prop_name in Generic.__observables__:
-            return set([self.property_value_change])
-        else:
-            return set()
 
 class Hack(unittest.TestCase):
     def testAccess(self):

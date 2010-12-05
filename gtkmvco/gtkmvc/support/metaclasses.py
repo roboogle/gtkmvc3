@@ -122,6 +122,7 @@ class PropertyMeta (type):
         # properties to the list of all observables
         _getdict = getattr(cls, LOGICAL_GETTERS_MAP_NAME, dict())
         _setdict = getattr(cls, LOGICAL_SETTERS_MAP_NAME, dict())
+
         real_log_props = type(cls).__create_log_props(cls, log_props, 
                                                       _getdict, _setdict)
         obs |= real_log_props
@@ -237,8 +238,10 @@ class PropertyMeta (type):
         resolved_getdict = {} 
         resolved_setdict = {} 
 
-        for _dict_name, _dict, _resolved_dict in (("getter", _getdict, resolved_getdict), 
-                                                  ("setter", _setdict, resolved_setdict)):
+        for _dict_name, _dict, _resolved_dict in (("getter", 
+                                                   _getdict, resolved_getdict), 
+                                                  ("setter", 
+                                                   _setdict, resolved_setdict)):
             # first resolve all wildcards
             for pat, ai in ((pat, ai) 
                             for pat, ai in _dict.iteritems()
@@ -276,41 +279,63 @@ class PropertyMeta (type):
                 pass
             pass
         
-        # checks that all setters have a getter
-        setters_no_getters = (set(resolved_setdict) - set(resolved_getdict)) & log_props
-        if setters_no_getters:
-            logger.warning("In class %s.%s logical setters have no getters: %s" % \
-                               (cls.__module__, cls.__name__, ", ".join(setters_no_getters)))
-            pass
-        
-        # creates the properties (new style)
-        for name, ai_get in resolved_getdict.iteritems():
-            _getter = type(cls).get_getter(cls, name, ai_get.func, ai_get.has_args)
+        # creates the properties
+        for name in log_props:
+            # finds the getter
+            ai_get = resolved_getdict.get(name, None)
+            if ai_get: 
+                # decorator-based
+                _getter = type(cls).get_getter(cls, name, ai_get.func, 
+                                               ai_get.has_args)
+            else: 
+                # old style
+                _getter = type(cls).get_getter(cls, name)
+                if _getter is None:
+                    logger.warning("In class %s.%s logical observable '%s' "\
+                                       "has no getter method" % \
+                                       (cls.__module__, cls.__name__, name))
+                    pass
+                pass
+            
+            # finds the setter
             ai_set = resolved_setdict.get(name, None)
             if ai_set:
-                _setter =  type(cls).get_setter(cls, name, 
-                                                ai_set.func, ai_set.has_args,
-                                                ai_get.func, ai_get.has_args)
-            else: _setter = None
+                # decorator-based
+                if ai_get:
+                    _setter =  type(cls).get_setter(cls, name, 
+                                                    ai_set.func, ai_set.has_args,
+                                                    ai_get.func, ai_get.has_args)
+                else:
+                    # the getter is old style. _getter is already
+                    # resolved wrt the name it may take, so
+                    # getter_takes_name is False
+                    _setter =  type(cls).get_setter(cls, name, 
+                                                    ai_set.func, ai_set.has_args,
+                                                    _getter, False)
+                    pass
+            else:
+                # old style setter
+                if ai_get: 
+                    _setter =  type(cls).get_setter(cls, name, 
+                                                    None, None,
+                                                    ai_get.func, 
+                                                    ai_get.has_args)
+                else: _setter =  type(cls).get_setter(cls, name)
+                pass
             
+            # here _setter can be None            
             prop = property(_getter, _setter)
             setattr(cls, name, prop)
             real_log_props.add(name)                
             pass
 
-        # finally, here remaining (old-style) properties are created
-        for name in log_props - set(resolved_getdict):
-            _getter = type(cls).get_getter(cls, name)
-            if _getter is not None:
-                _setter = type(cls).get_setter(cls, name)
-                prop = property(_getter, _setter)
-                setattr(cls, name, prop)
-                real_log_props.add(name)
-            else:
-                logger.warning("In class %s.%s logical observable '%s' "\
-                                   "has no getter method" % \
-                                   (cls.__module__, cls.__name__, name))
-                pass
+        # checks that all setters have a getter
+        setters_no_getters = (set(resolved_setdict) - real_log_props) & log_props
+        if setters_no_getters:
+            logger.warning("In class %s.%s logical setters have no "
+                           "getters: %s" % \
+                               (cls.__module__, cls.__name__, 
+                                ", ".join(setters_no_getters)))
             pass
 
         return frozenset(real_log_props)
@@ -605,7 +630,7 @@ class ObservablePropertyMeta (PropertyMeta):
                                               user_getter, getter_takes_name)      
 
 
-      _inner_getter = type(cls).get_getter(cls, prop_name, user_getter, getter_takes_name)      
+      _inner_getter = type(cls).get_getter(cls, prop_name, user_getter, getter_takes_name) 
 
       def _setter(self, val):
           old = _inner_getter(self)

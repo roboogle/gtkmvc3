@@ -1,5 +1,6 @@
 .. _OPD:
 
+==============================
 Concrete Observable Properties
 ==============================
 
@@ -9,8 +10,7 @@ from outside (e.g. from a database).
 
 *Values* of OP are declared as class attributes in models, and OP
 *names* are declared in a special class member
-*``__observables__``. ::
-
+`__observables__`. ::
  from gtkmvc import Model
  # ----------------------------
  class MyModel (Model):
@@ -22,7 +22,6 @@ from outside (e.g. from a database).
 
     __observables__ = "name surname energy".split()
     pass # end of class
-
 
 In the example, ``name``, ``surname`` and ``energy`` are all
 observable, whereas ``status`` is not observable.
@@ -55,7 +54,6 @@ starting with a double underscore ``__`` will be not matched.
           pass # end of class
 
 This is another example showing the usage of wildcards in names: ::
-
  from gtkmvc import Model
  # ----------------------------
  class MyModel (Model):
@@ -76,7 +74,7 @@ declared to be observable.
 
 
 Concrete OP and inheritance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 Things so far are easy enough, but they get a bit complicated when
 you derive custom models from other custom models. For example,

@@ -50,3 +50,4 @@ be described in details in the following sections.
 .. include:: op_concrete.rst
 .. include:: op_logical.rst
 .. include:: op_types.rst
+.. include:: op_special.rst

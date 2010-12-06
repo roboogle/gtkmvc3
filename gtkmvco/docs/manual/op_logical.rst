@@ -1,3 +1,4 @@
+=============================
 Logical Observable Properties
 =============================
 
@@ -49,7 +50,7 @@ by exploiting a naming convention.
 
 
 Use of decorators for defining getters and/or setters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------------------
 
 Decorators ``@Model.getter`` and ``@Model.setter`` can be used for
 defining logical OPs getter and setter respectively. The syntax and
@@ -161,7 +162,7 @@ wilcards.
 
 
 Use of naming convention for defining getters and/or setters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------
 
 In some cases, the use of decorators for defining getters/setters
 can be a limitation. For example, when the model is built

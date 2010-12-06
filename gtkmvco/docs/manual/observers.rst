@@ -1,3 +1,60 @@
+FROM OPS TYPES
+--------------
+
+*Mutable sequential types* and *User classes* are also supported by
+the *Observer* pattern of *gtkmvc*, but the name of the notified
+method in the controller has to be changed accordingly.  The idea is
+to provide two methods to be notified:
+
+property_``name``_before_change
+   That is called
+   immediately *before* a method that changes the instance is
+   called on the *OP* called ``name``.
+
+property_``name``_after_change
+   That is called
+   immediately *after* a method that changes the instance is
+   called on the *OP* called ``name``.
+
+Of course, it is not needed to define both of the two methods in the
+observer class, as only the actually defined methods will be called. 
+
+The signature of these methods is: ::
+
+ def property_<name>_before_change(self, model, instance, name,
+                                   args, kwargs)
+ 
+ def property_<name>_after_change(self, model, instance, name, 
+                                  res, args, kwargs)
+
+self
+   The Observer class instance defining the method.
+model
+   The Model instance containing the *OP* called
+    ``<name>`` that is being changed.
+instance
+   The object instance that is assigned to the *OP* called
+   ``<name>``.
+name
+   The name of the method that is being called. This
+   is different from ``<name>`` that is the name of the *OP*
+   contained in the model. 
+res
+   (Only for *after* notification) the value returned by
+   the method *name* that has been called on the *OP*
+   *instance*.
+args
+   List of arguments of the method *name*.
+kwargs
+   Map of keyword arguments of the method *name*.
+
+As it can be noticed, the only difference between these two method
+signatures is the parameter *res* that is obviously available only
+for notification method *after*.
+
+CONTINUING OLD DOC
+------------------
+
 This means that you may use the property in this way: ::
 
  m = MyModel()

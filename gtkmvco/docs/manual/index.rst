@@ -12,10 +12,11 @@ Contents:
    mvco   
    impl
    op
+   observers
    exam
    adapt
    progen
-
+  
 Indices and tables
 ==================
 

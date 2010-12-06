@@ -10,7 +10,8 @@ from outside (e.g. from a database).
 
 *Values* of OP are declared as class attributes in models, and OP
 *names* are declared in a special class member
-`__observables__`. ::
+``__observables__``. ::
+
  from gtkmvc import Model
  # ----------------------------
  class MyModel (Model):
@@ -54,6 +55,7 @@ starting with a double underscore ``__`` will be not matched.
           pass # end of class
 
 This is another example showing the usage of wildcards in names: ::
+
  from gtkmvc import Model
  # ----------------------------
  class MyModel (Model):
@@ -149,6 +151,7 @@ Second, method ``Base.prop1_changed`` is explicitly marked to
 observe property ``prop1``. An implicit declaration where the
 property name is taken from the method name is also possible, like
 in: ::
+
     @Observer.observes
     def prop1(self, model, old, new): ...
 
@@ -160,6 +163,7 @@ be presented in the section dedicated to observers.
 Third, in class ``Der`` only the OP ``prop2`` is declared, as
 ``prop1`` is inherited from class ``Base``.
 This is clearly visible in the output: ::
+
  <__main__.Der object  ...> prop1 changed from '1' to '10'
 
 It is possible to change type and default values of OPs in derived
@@ -178,6 +182,7 @@ class, by re-declaring the OSs. For example: ::
  # --------------------------------------------------------
 
 This would produce the output: ::
+
  <__main__.Der object  ...> prop2 changed from '2' to '20'
  <__main__.Der object  ...> prop1 changed from '3' to '30'
  <__main__.Base object ...> prop1 changed from '1' to '10'

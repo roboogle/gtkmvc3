@@ -1,3 +1,47 @@
+=========
+Observers
+=========
+
+If OPs live into ``Models``, ``Observers`` are the objects which are
+interested in being notified when an OP gets changed. An Observer
+observes one or more Models.
+
+Observer registration
+---------------------
+
+Registration is the mechanism which observers make model known about
+them. 
+
+There are a few methods which can be used when registering observers into models.
+
+.. method:: Observer.__init__(model=None, spurious=False)
+ 
+   Class constructor
+
+   :param model: is optional ``Model`` to observe.
+   :param spurious: when ``True`` make the interested in receiving
+   	  	    spurious notifications, i.e. when an obxserved OP
+   	  	    is assigned with the same value it got before the
+   	  	    assignment.
+
+.. method::  Observer.observe_model(model)
+
+   Observes the given model among the others already observed.
+
+   :param model: the Model instance to observe.
+
+.. method::  Observer.relieve_model(model)
+
+   Stops observing the given model which was being previously observed.
+
+   :param model: the Model instance to relieve.
+
+Since it is common to observe one model, the class constructor provide
+the possibility to specify it.
+
+
+:TODO:  Fix all the following text
+
 FROM OPS TYPES
 --------------
 

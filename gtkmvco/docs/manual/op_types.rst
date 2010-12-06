@@ -50,6 +50,7 @@ Mutable containers
 
 The framework *MVC-O* provides a full support for python mutable
 containers like *lists* and *maps*. For example: ::
+
  from gtkmvc import Model, Observer
  
  # ----------------------------------------------------------------------
@@ -203,6 +204,7 @@ So far in our examples, all OPs were class members: ::
 
 Using class vs instance attributes is not an issue when they are
 assigned: ::
+
  m1 = MyModel()
  m2 = MyModel()
  m1.prop1 = 5
@@ -212,12 +214,14 @@ In this case after the assignment `m1` and `m2` will have their own
 value for attribute `prop1`.
 
 However, when dealing with attributes whose type is a class instances,
-like for example a list, you must keep in mind the attribute sharing.::
+like for example a list, you must keep in mind the attribute sharing. ::
+
  m1.prop2.append(1)
  print m2.prop2 # prints [1]
 
 If attribute sharing is not what you want, simply assign OPs in the
 model's constructor: ::
+
  class MyModel (Model):
      prop1 = 10
      prop2 = [] # may be any value actually

@@ -326,7 +326,7 @@ class Model (Observer):
             pass
 
         # retrieves the set of custom observing methods 
-        cust_methods = observer.get_custom_observing_methods(prop_name)
+        cust_methods = observer.get_observing_methods(prop_name)
 
         # checks for custom observing methods. If it is a signal,
         # a method or value is decided from number of
@@ -462,7 +462,7 @@ class Model (Observer):
 
         # retrieves the set of custom observing methods
         # and removes corresponding the notification methods
-        for meth in observer.get_custom_observing_methods(prop_name):
+        for meth in observer.get_observing_methods(prop_name):
             pair = (_obs_with_name, meth)
             for _map in (self.__value_notifications,
                          self.__signal_notif,

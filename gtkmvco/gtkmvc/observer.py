@@ -117,7 +117,7 @@ class Observer (object):
         #   __CUST_OBS_MAP only (the map contained pairs (method,
         #   args). However, this broke backward compatibility of code
         #   accessing the map through
-        #   get_custom_observing_methods. Now the informatio is split
+        #   get_observing_methods. Now the informatio is split
         #   and the original information restored. To access the
         #   additional information (number of additional arguments
         #   required by observing methods) use the newly added methods.
@@ -140,7 +140,7 @@ class Observer (object):
             # processing the same props in base classes.
             cls_processed_props = set() 
             
-            # TODO: fix this code to call add_custom_observing_method
+            # TODO: fix this code to call add_observing_method
 
             # since this is traversed top-bottom in the mro, the
             # first found match is the one to care
@@ -207,12 +207,12 @@ class Observer (object):
         notifying a value change."""
         return self.__accepts_spurious__
 
-    def add_custom_observing_method(self, method, 
-                                    prop_name_or_names):
-        """Adds a custom osberving method to self. prop_name_or_names
+    def add_observing_method(self, method, 
+                             prop_name_or_names):
+        """Adds an observing method to self. prop_name_or_names
         can be either:
         1. string name of a property which the method observes
-        2. a sequence of string names which the given method observes.
+        2. or a sequence of string names which the given method observes.
 
         If a sequence of names is passed, then the method will also
         receive the property name among its arguments. Otherwise if a
@@ -223,7 +223,7 @@ class Observer (object):
         Multiple methods can be observing the same properties set.
         This method can be used to add observing method dynamically.
 
-        Methods get_custom_observing_methods and
+        Methods get_observing_methods and
         does_observing_method_receive_prop_name can be used to
         retrieve information about the method later.
 
@@ -251,13 +251,13 @@ class Observer (object):
         self.__CUST_OBS_ARGS[method] = takes_name
         return
 
-    def remove_custom_observing_method(self, method, prop_names):
+    def remove_observing_method(self, method, prop_names):
         """Removes the given method from the observing methods
         set. Removal is performed for the observation of the given
         property names.
 
         This mthod can be used to revert (even partially) the effects
-        of add_custom_observing_method.
+        of add_observing_method.
         """
         for prop_name in prop_names:
             _set = self.__CUST_OBS_MAP.get(prop_name, set())
@@ -267,12 +267,12 @@ class Observer (object):
         if method in self.__CUST_OBS_ARGS: del self.__CUST_OBS_ARGS[method]
         return
 
-    def is_custom_observing_method(self, method):
+    def is_observing_method(self, method):
         """Returns True if given method has been previously added as
-        observing method."""
+        observing method, either dynamically or via decorator."""
         return self.__CUST_OBS_ARGS.has_key(method)
     
-    def get_custom_observing_methods(self, prop_name):
+    def get_observing_methods(self, prop_name):
         """Given a property name, returns a set of methods, Each
         method is an observing method, either explicitly marked to be
         observable with decorators, or added at runtime. Whether each
@@ -283,6 +283,9 @@ class Observer (object):
         This method is called by models when searching for
         notification methods."""
         return self.__CUST_OBS_MAP.get(prop_name, set())
+
+    # this is done to keep backward compatibility
+    get_custom_observing_methods = get_observing_methods
 
     def does_observing_method_receive_prop_name(self, method):
         """Returns True iff the given observing method receives also

@@ -46,7 +46,7 @@ def get_version(): return __version
 
 def require(request):
     """
-    Raise :exc:`AssertionError` is gtkmvc version is not compatible.
+    Raise :exc:`AssertionError` if gtkmvc version is not compatible.
     
     *request* a dotted string or iterable of string or integers representing the
     minimum version you need. ::
@@ -54,6 +54,12 @@ def require(request):
      require("1.0")
      require(("1", "2", "2"))
      require([1,99,0])
+
+    .. note::
+
+       For historical reasons this does not take API changes into account.
+       Those are caught by the argument checks in View and Controller
+       constructors.
     """
     try:
         request = request.split(".")
@@ -63,11 +69,6 @@ def require(request):
 
     provide = list(__version)
 
-    if request[0] != 1:
-        raise ValueError("gtkmvc %s is not a valid version" % request)
-    if request[1] < 3:
-        raise AssertionError("gtkmvc %s is very different from %s" % (
-            provide, request))
     if request > provide:
         raise AssertionError("gtkmvc required version %s, found %s" % (
             request, provide))

@@ -53,6 +53,12 @@ class Controller (Observer):
         constructor returns. When it starts *view* is available as an
         attribute.
         """
+        # In 1.99.0 the third parameter was optional. Now the interpreter will
+        # raise if it isn't given.
+        if view in (True, False):
+            raise NotImplementedError("This version of GTKMVC does not"
+                " support the 1.2 API")
+
         Observer.__init__(self, model, spurious)
 
         self.model = model

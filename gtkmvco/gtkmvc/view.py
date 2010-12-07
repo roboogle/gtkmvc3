@@ -23,6 +23,7 @@
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
+from gtkmvc.controller import Controller
 from gtkmvc.support.log import logger
 from gtkmvc.support.exceptions import ViewError
 
@@ -84,6 +85,16 @@ class View (object):
            In future versions the functionality will be split into the new class
            :class:`ManualView` and its child :class:`BuilderView`.
         """
+        if isinstance(glade, Controller):
+            raise NotImplementedError("This version of GTKMVC does not"
+                " support the 1.2 API")
+        if isinstance(builder, Controller):
+            raise NotImplementedError("This version of GTKMVC does not"
+                " support the 1.99.0 API")
+        if parent and not isinstance(parent, View):
+            raise NotImplementedError("This version of GTKMVC does not"
+                " support the unreleased first GtkBuilder API")
+
         self.manualWidgets = {}
         self.autoWidgets = {}
         self.__autoWidgets_calculated = False

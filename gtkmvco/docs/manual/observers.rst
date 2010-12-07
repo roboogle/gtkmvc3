@@ -36,8 +36,64 @@ There are a few methods which can be used when registering observers into models
 
    :param model: the Model instance to relieve.
 
-Since it is common to observe one model, the class constructor provide
+Since it is common to observe one model, the class constructor provides
 the possibility to specify it.
+
+
+Change Notifications
+--------------------
+
+When an OP gets changed, notifications are sent by the framework to
+observer's methods. As we see in previous chapter, changes can happen
+at:
+
+Value
+	When the value of an OP is changed, meaning that the OP is
+	assigned with a different value.
+
+Instance 
+	 When an object instance is changed internally. For example an
+	 element is added to a list, or a method modifying the
+	 instance is called.
+
+
+Value Notifications
+^^^^^^^^^^^^^^^^^^^
+
+Value notifications sent to methods whose propotype is: 
+
+.. method:: Observer.method_name([name,] model, old, new)
+
+   :param model: is the observed Model instance containing the OP
+                 which got changed.
+   :param old: is the old value the OP had before being changed.
+   :param new: is the current value the OP is assigned to.
+   :param name: is the name of the OP which got changed. It has to be
+   	  	specified when the method receives notifications for
+   	  	multiple OPs.
+
+How are methods receiving value change notifications bound to OPs?
+
+
+1. Statically with decorator Observer.observes: :: 
+     
+     from gtkmvc import Observer
+
+     class MyObserver (Observer):
+       @Observer.observes
+       def prop1(self, model, old, new):
+          # this is called when OP 'prop1' is changed
+
+       @Observer.observes('prop1', 'prop2')
+       def multiple_notifications(self, name, model, old, new):
+          # this is called when 'prop1' and 'prop2' are changed
+
+2. Statically with a naming convention, by naming the notification
+   method ``property_<name>_value_change`` (*deprecated*)
+
+3. Dynamically with method ``Observer.add_observing_method``
+
+
 
 
 :TODO:  Fix all the following text

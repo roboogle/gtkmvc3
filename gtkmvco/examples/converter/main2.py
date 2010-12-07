@@ -1,4 +1,4 @@
-#  Author: Roberto Cavada <cavada@fbk.eu>
+#  Author: Roberto Cavada <roboogle@gmail.com>
 #
 #  Copyright (c) 2006 by Roberto Cavada
 #
@@ -18,8 +18,8 @@
 #  Boston, MA 02110, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
-#  or email to the author <cavada@fbk.eu>.
-#  Please report bugs to <cavada@fbk.eu>.
+#  or email to the author <roboogle@gmail.com>.
+#  Please report bugs to <roboogle@gmail.com>.
 
 
 def setup_path():

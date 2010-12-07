@@ -1,4 +1,4 @@
-#  Author: Roberto Cavada <cavada@fbk.eu>
+#  Author: Roberto Cavada <roboogle@gmail.com>
 #  Modified by: Guillaume Libersat <glibersat AT linux62.org>
 #
 #  Copyright (c) 2005 by Roberto Cavada
@@ -20,8 +20,8 @@
 #  Boston, MA 02110, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
-#  or email to the author Roberto Cavada <cavada@fbk.eu>.
-#  Please report bugs to <cavada@fbk.eu>.
+#  or email to the author Roberto Cavada <roboogle@gmail.com>.
+#  Please report bugs to <roboogle@gmail.com>.
 
 from gtkmvc.support.log import logger
 from gtkmvc.support.exceptions import ViewError

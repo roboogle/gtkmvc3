@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.2.0 on Fri Oct  5 14:25:09 2007 by cavada@asia-->
+<!--Generated with glade3 3.2.0 on Fri Oct  5 14:25:09 2007 by roboogle@gmail.com-->
 <glade-interface>
   <widget class="GtkWindow" id="window_appl">
     <property name="visible">True</property>

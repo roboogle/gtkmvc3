@@ -1,4 +1,4 @@
-#  Author: Roberto Cavada <cavada@fbk.eu>
+#  Author: Roberto Cavada <roboogle@gmail.com>
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
@@ -18,8 +18,8 @@
 #  Boston, MA 02110, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
-#  or email to the author Roberto Cavada <cavada@fbk.eu>.
-#  Please report bugs to <cavada@fbk.eu>.
+#  or email to the author Roberto Cavada <roboogle@gmail.com>.
+#  Please report bugs to <roboogle@gmail.com>.
 
 
 import types

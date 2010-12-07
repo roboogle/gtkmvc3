@@ -1,5 +1,5 @@
 #  -------------------------------------------------------------------------
-#  Author: Roberto Cavada <cavada@fbk.eu>
+#  Author: Roberto Cavada <roboogle@gmail.com>
 #
 #  Copyright (C) 2010 by Roberto Cavada
 #  Copyright (C) 2010 by Tobias Weber
@@ -19,8 +19,8 @@
 #  Boston, MA 02110, USA.
 #
 #  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
-#  or email to the author Roberto Cavada <cavada@fbk.eu>.
-#  Please report bugs to <cavada@fbk.eu>.
+#  or email to the author Roberto Cavada <roboogle@gmail.com>.
+#  Please report bugs to <roboogle@gmail.com>.
 #  -------------------------------------------------------------------------
 
 

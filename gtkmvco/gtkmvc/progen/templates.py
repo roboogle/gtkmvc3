@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
 glade_file = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.2.0 on Thu Oct  4 16:50:42 2007 by cavada@asia-->
+<!--Generated with glade3 3.2.0 on Thu Oct  4 16:50:42 2007 by roboogle@gmail.com-->
 <glade-interface>
   <widget class="GtkWindow" id="${top_widget}">
     <property name="visible">True</property>

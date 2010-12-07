@@ -13,7 +13,7 @@ setup(name="python-gtkmvc",
       description="Model-View-Controller and Observer patterns "\
                   "for developing pygtk-based applications",
       author="Roberto Cavada",
-      author_email="cavada@fbk.eu",
+      author_email="roboogle@gmail.com",
       license="LGPL",
       url="http://pygtkmvc.sourceforge.net/",
       packages=['gtkmvc', 'gtkmvc.support', 'gtkmvc.adapters', 'gtkmvc.progen'],

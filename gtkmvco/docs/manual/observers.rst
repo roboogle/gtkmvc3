@@ -6,6 +6,7 @@ If OPs live into ``Models``, ``Observers`` are the objects which are
 interested in being notified when an OP gets changed. An Observer
 observes one or more Models.
 
+
 Observer registration
 ---------------------
 
@@ -74,26 +75,69 @@ Value notifications sent to methods whose propotype is:
 
 How are methods receiving value change notifications bound to OPs?
 
-
-1. Statically with decorator Observer.observes: :: 
-     
-     from gtkmvc import Observer
-
-     class MyObserver (Observer):
-       @Observer.observes
-       def prop1(self, model, old, new):
+1. **Statically** with decorator ``Observer.observes``::
+    
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
+      @Observer.observes
+      def prop1(self, model, old, new):
           # this is called when OP 'prop1' is changed
+          return
 
-       @Observer.observes('prop1', 'prop2')
-       def multiple_notifications(self, name, model, old, new):
-          # this is called when 'prop1' and 'prop2' are changed
+      @Observer.observes('prop1', 'prop2')
+      def multiple_notifications(self, name, model, old, new):
+          # this is called when 'prop1' or 'prop2' are changed
+          return
 
-2. Statically with a naming convention, by naming the notification
-   method ``property_<name>_value_change`` (*deprecated*)
+   Notice in this case the difference between the two cases
+   (with/without arguments passed to the decorators). Also notice that
+   an OP can be bound to multiple notifications, like ``prop1`` in the
+   example.
 
-3. Dynamically with method ``Observer.add_observing_method``
+#. **Statically** with a naming convention, by naming the notification
+   method ``property_<name>_value_change`` (*deprecated*)::
 
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
 
+      def property_prop1_value_change(self, model, old, new):
+          # this is called when OP 'prop1' is changed
+          return
+
+      def property_prop2_value_change(self, model, old, new):
+          # this is called when OP 'prop2' is changed
+          return
+   		
+   In this case each notification method has to be bound to one
+   specific OP only.
+   
+#. **Dynamically** with method ``Observer.add_observing_method``.
+   This is useful when the definition of the observer class happens
+   dynamically (e.g. in generated *proxies*), or when the OPs to be
+   observed are not known at static time. ::
+
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
+
+      def __init__(self, m):
+          Observer.__init__(self, m)
+          self.add_observing_method(self.prop1_change, "prop1")
+          self.add_observing_method(self.multiple_notifications, ("prop1", "prop2"))
+          return
+
+      def prop1_change(self, model, old, new):
+          # this is called when OP 'prop1' is changed
+          return
+
+      def multiple_notifications(self, name, model, old, new):
+          # this is called when OPs 'prop1' or 'prop2' are changed
+          return
+   
+   Notice the difference between the two cases, with
+   ``prop1_change`` not receiving the OP name as it is a notification
+   method for a specific OP, while ``multiple_notifications``
+   receiving the OP name. The difference is imposed when calling
+   ``add_observing_method``.
 
 
 :TODO:  Fix all the following text

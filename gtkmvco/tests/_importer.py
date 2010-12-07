@@ -44,6 +44,8 @@ if __name__ != "__main__":
         pass
     import gtkmvc
     gtkmvc.require("1.99.0")
+    import logging
+    logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
     pass
 
 

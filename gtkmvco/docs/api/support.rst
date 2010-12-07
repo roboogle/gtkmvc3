@@ -3,10 +3,10 @@ Little Helpers
 
 This page contains the Support Package documentation.
 
-Logging
--------
+The :mod:`log` Module
+---------------------
 
-The :mod:`gtkmvc.support.log` Module
+.. automodule:: gtkmvc.support.log
 
 The :mod:`utils` Module
 -----------------------

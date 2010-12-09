@@ -384,7 +384,7 @@ class Model (Observer):
             for meth, with_arg in itertools.ifilter(lambda (m,a): \
                                 m.im_func.func_code.co_argcount == 3+a,
                                                     meth_arg):
-                if with_args: pair = (_obs_with_name, meth)
+                if with_arg: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)
 
                 if pair not in self.__signal_notif[prop_name]:
@@ -418,7 +418,7 @@ class Model (Observer):
             for meth, with_arg in itertools.ifilter(lambda (m,a): \
                                 m.im_func.func_code.co_argcount == 7+a,
                                                     meth_arg):
-                if with_args: pair = (_obs_with_name, meth)
+                if with_arg: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_before[prop_name]:
                     list.append(self.__instance_notif_before[prop_name], pair)
@@ -445,7 +445,7 @@ class Model (Observer):
             for meth, with_arg in itertools.ifilter(lambda (m,a): \
                                 m.im_func.func_code.co_argcount == 8+a,
                                                     meth_arg):
-                if with_args: pair = (_obs_with_name, meth)
+                if with_arg: pair = (_obs_with_name, meth)
                 else: pair = (_obs_without_name, meth)                
                 if pair not in self.__instance_notif_after[prop_name]:
                     list.append(self.__instance_notif_after[prop_name], pair)

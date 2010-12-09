@@ -1,7 +1,11 @@
 Custom Observers
 ================
 
-.. automodule:: gtkmvc.observer
+.. module:: gtkmvc.observer
+
+.. autofunction:: observes(*args)
+
+.. autoclass:: Observer
     :members:
+    :exclude-members: get_custom_observing_methods
     :undoc-members:
-    :show-inheritance:

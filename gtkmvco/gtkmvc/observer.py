@@ -31,10 +31,17 @@ import inspect
 
 @decorators.good_decorator_accepting_args
 def observes(*args):
-    """Use this decorator with methods in observers that are
-    intended to be used for notifications. args is an arbitrary
-    number of arguments with the names of the observable
-    properties to be observed"""
+    """
+    Decorate a method in an :class:`Observer` subclass as a notification.
+    Takes one to many property names as strings. If any of them changes
+    in a model we observe, the method is called. If multiple names were given
+    the method will be passed the name of the property that changed.
+
+       .. versionadded:: 1.99.0
+
+       .. deprecated:: 1.99.1
+          Use :meth:`Observer.observes` instead.
+    """
 
     @decorators.good_decorator
     def _decorator(_notified):
@@ -52,20 +59,23 @@ def observes(*args):
 
 # ----------------------------------------------------------------------
 class Observer (object):
-    """Use this class as base class of all observers"""
-
     # these are internal
     _CUST_OBS_ = "__custom_observes__"
 
     @classmethod
     @decorators.good_decorator_accepting_args
     def observes(cls, *args):
-        """Use this decorator with methods in observers that are
-        intended to be used for notifications. args is an arbitrary
-        number of arguments with the names of the observable
-        properties to be observed. If empty, the name of the
-        property must be equal to the name of the observing
-        method."""
+        """
+        Decorate a method as a notification. Takes an arbitrary number of
+        property names as strings. If none are given, the name of the method
+        is used.
+        If a given property changes in a model we observe, the method is
+        called.
+        If multiple names were given the method will be passed the name of the
+        property that changed.
+
+           .. versionadded:: 1.99.1
+        """
         
         @decorators.good_decorator
         def _decorator(_notified):
@@ -87,28 +97,18 @@ class Observer (object):
     
     def __init__(self, model=None, spurious=False):
         """
-        When parameter spurious is set to False
-        (default value) the observer declares that it is not
-        interested in receiving value-change notifications when
-        property's value does not really change. This happens when a
-        property got assigned to a value that is the same it had
-        before being assigned.
+        *model* is passed to :meth:`observe_model` if given.
+        
+        *spurious* indicates interest to be notified even when
+        the value hasn't changed, like for: ::
 
-        A notification was used to be sent to the observer even in
-        this particular condition, because spurious (non-changing)
-        assignments were used as signals when signals were not
-        supported by early version of the framework. The observer
-        was in charge of deciding what to do with spurious
-        assignments, by checking if the old and new values were
-        different at the beginning of the notification code. With
-        latest version providing new notification types like
-        signals, this requirement seems to be no longer needed, and
-        delivering a notification is no longer a sensible
-        behaviour.
+         model.prop = model.prop
 
-        This is the reason for providing parameter spurious that
-        changes the previous behaviour but keeps availability of a
-        possible backward compatible feature.
+        .. versionadded:: 1.2.0
+           Before that observers had to filter out spurious
+           notifications themselves, as if the default was `True`. With
+           :class:`~gtkmvc.observable.Signal` support this is no longer
+           necessary.
         """
 
         self.__accepts_spurious__ = spurious
@@ -193,43 +193,48 @@ class Observer (object):
         return
     
     def observe_model(self, model):
-        """Starts observing the given model"""
+        """
+        Call :meth:`~gtkmvc.model.Model.register_observer` on *model*.
+        """
         return model.register_observer(self)
 
     def relieve_model(self, model):
-        """Stops observing the given model"""
+        """
+        Call :meth:`~gtkmvc.model.Model.unregister_observer` on *model*.
+        """
         return model.unregister_observer(self)
     
     def accepts_spurious_change(self):
         """
-        Returns True if this observer is interested in receiving
-        spurious value changes. This is queried by the model when
-        notifying a value change."""
+        Are we interested in spurious notifications?
+
+        :rtype: bool
+        """
         return self.__accepts_spurious__
 
     def add_observing_method(self, method, 
                              prop_name_or_names):
-        """Adds an observing method to self. prop_name_or_names
-        can be either:
-        1. string name of a property which the method observes
-        2. or a sequence of string names which the given method observes.
+        """
+        Add notifications at runtime.
+        
+        *method* is a callable bound to `self`.
+        
+        *prop_name_or_names* can be a string or a sequence of strings.
+        In the latter case the name of the property that changed will be
+        passed to the method during notifications.
+        
+        Multiple calls may add different methods for the same names as well as
+        additional names for the same method. However, the signature of the
+        method is always determined by the last call. ::
 
-        If a sequence of names is passed, then the method will also
-        receive the property name among its arguments. Otherwise if a
-        string name is passed, the method will not receive the name of
-        the property, as the method is assumed to handle only
-        notifications for one specific property.
+         def observes_one_property(self, model, old, new)
 
-        Multiple methods can be observing the same properties set.
-        This method can be used to add observing method dynamically.
+         def observes_multiple(self, model, prop_name, old, new)
 
-        Methods get_observing_methods and
-        does_observing_method_receive_prop_name can be used to
-        retrieve information about the method later.
+        .. note::
 
-        If the given method has already be added before, information
-        internally stored in the previous call will be substituted by
-        the new call.
+           Dynamic methods only work if you add/remove them before starting
+           to observer a model.
         """
 
         if isinstance(prop_name_or_names, StringType):
@@ -252,12 +257,18 @@ class Observer (object):
         return
 
     def remove_observing_method(self, method, prop_names):
-        """Removes the given method from the observing methods
-        set. Removal is performed for the observation of the given
-        property names.
+        """
+        Remove dynamic notifications.
+        
+        *method* a callable that was registered with 
+        :meth:`add_observing_method` or :meth:`observes`.
+        
+        *prop_names* a sequence of strings. This need not correspond to any
+        one `add` call.
 
-        This mthod can be used to revert (even partially) the effects
-        of add_observing_method.
+        .. note::
+
+           This can revert the effects of a decorator at runtime. Don't.
         """
         for prop_name in prop_names:
             _set = self.__CUST_OBS_MAP.get(prop_name, set())
@@ -268,31 +279,37 @@ class Observer (object):
         return
 
     def is_observing_method(self, method):
-        """Returns True if given method has been previously added as
-        observing method, either dynamically or via decorator."""
+        """
+        Was *method* registered with :meth:`add_observing_method` or
+        :meth:`observes`?
+
+        :rtype: bool
+        """
         return self.__CUST_OBS_ARGS.has_key(method)
     
     def get_observing_methods(self, prop_name):
-        """Given a property name, returns a set of methods, Each
-        method is an observing method, either explicitly marked to be
-        observable with decorators, or added at runtime. Whether each
-        method receive also the name of the property (for
-        multi-properties observer methods) can be known by calling
-        does_observing_method_receive_prop_name.
+        """
+        Return a possibly empty set of callables registered with
+        :meth:`add_observing_method` or :meth:`observes` for *prop_name*.
 
-        This method is called by models when searching for
-        notification methods."""
+        .. versionadded:: 1.99.1
+           Replaces :meth:`get_custom_observing_methods`.
+        """
         return self.__CUST_OBS_MAP.get(prop_name, set())
 
     # this is done to keep backward compatibility
     get_custom_observing_methods = get_observing_methods
 
     def does_observing_method_receive_prop_name(self, method):
-        """Returns True iff the given observing method receives also
-        the name of the property, i.e. it is a multi-properties
-        observing method.
-        This method is called by models when dealingsearching for
-        notification methods.
+        """
+        Does the notification contain two or three parameters?
+        
+        *method* a callable that was registered with
+        :meth:`add_observing_method`.
+        
+        :rtype: bool
+
+        This is the same for all property names!
         """
         return self.__CUST_OBS_ARGS[method]
     

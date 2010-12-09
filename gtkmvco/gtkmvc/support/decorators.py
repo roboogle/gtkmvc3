@@ -84,4 +84,6 @@ def good_decorator_accepting_args(decorator):
     new_decorator.__name__ = decorator.__name__
     new_decorator.__doc__ = decorator.__doc__
     new_decorator.__dict__.update(decorator.__dict__)
+    # Required for Sphinx' automodule.
+    new_decorator.__module__ = decorator.__module__
     return new_decorator

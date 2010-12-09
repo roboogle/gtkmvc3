@@ -59,6 +59,13 @@ def observes(*args):
 
 # ----------------------------------------------------------------------
 class Observer (object):
+    """
+    .. note::
+
+       Most methods in this class are used internally by the framework.
+       Do not override them in subclasses.
+    """
+
     # these are internal
     _CUST_OBS_ = "__custom_observes__"
 
@@ -234,7 +241,7 @@ class Observer (object):
         .. note::
 
            Dynamic methods only work if you add/remove them before starting
-           to observer a model.
+           to observe a model.
         """
 
         if isinstance(prop_name_or_names, StringType):
@@ -280,10 +287,8 @@ class Observer (object):
 
     def is_observing_method(self, method):
         """
-        Was *method* registered with :meth:`add_observing_method` or
-        :meth:`observes`?
-
-        :rtype: bool
+        Returns `True` if the given method was previously added as an
+        observing method, either dynamically or via decorator.
         """
         return self.__CUST_OBS_ARGS.has_key(method)
     
@@ -302,14 +307,14 @@ class Observer (object):
 
     def does_observing_method_receive_prop_name(self, method):
         """
-        Does the notification contain two or three parameters?
+        Will the method be passed the name of the property that changed on
+        notification? This additional argument is meant for methods that are
+        registered for more than one property.
         
         *method* a callable that was registered with
-        :meth:`add_observing_method`.
+        :meth:`add_observing_method` or :meth:`observes`.
         
         :rtype: bool
-
-        This is the same for all property names!
         """
         return self.__CUST_OBS_ARGS[method]
     

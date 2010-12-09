@@ -188,37 +188,6 @@ class DynamicWithName(gtkmvc.Observer):
         if prop_name == "after":
             self.after = name, args
 
-class Hack(gtkmvc.Observer):
-    # This fails because the method without "custom" is called, which we
-    # don't override.
-    # Even then it fails because we don't also override methods like
-    # does_observing_method_receive_prop_name.
-    def get_custom_observing_methods(self, prop_name):
-        if prop_name == "signal":
-            return set([self.a])
-        elif prop_name == "value":
-            return set([self.b])
-        elif prop_name == "before":
-            return set([self.c])
-        elif prop_name == "after":
-            return set([self.d])
-        else:
-            return set
-
-    def a(self, model, arg):
-        self.signal = arg
-
-    def b(self, model, old, new):
-        self.value = old, new
-
-    def c(self, model, instance, name,
-        args, kwargs):
-        self.before = name, args
-
-    def d(self, model, instance, name, res,
-        args, kwargs):
-        self.after = name, args
-
 class SingleTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
@@ -262,9 +231,6 @@ class SingleTest(unittest.TestCase):
 
     def testWithNameModule(self):
         self.notifications(WithNameModule(self.m))
-
-    def testHack(self):
-        self.notifications(Hack(self.m))
 
 class Dynamic(gtkmvc.Observer):
     def a(self, model, arg):

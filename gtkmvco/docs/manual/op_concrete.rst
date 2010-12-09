@@ -1,5 +1,3 @@
-.. _OPD:
-
 ==============================
 Concrete Observable Properties
 ==============================
@@ -90,6 +88,7 @@ Oriented rules:
 * Derived class can override any concrete *OP* in base classes.
 * If multiple base classes defines the same *OP*, only the
   first *OP* will be accessible from the derived class.
+
 
 For example: ::
 

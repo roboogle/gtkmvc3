@@ -1,5 +1,3 @@
-.. _KOBSDET:
-
 ==============================
 Types of Observable Properties
 ==============================

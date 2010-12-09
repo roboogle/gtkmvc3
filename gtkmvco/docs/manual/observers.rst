@@ -1,3 +1,5 @@
+.. _Observers:
+
 =========
 Observers
 =========
@@ -58,21 +60,23 @@ Instance
 	 instance is called.
 
 
-Value Notifications
-^^^^^^^^^^^^^^^^^^^
+.. _Observer_vcn:
+
+Value Change Notifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Value notifications sent to methods whose propotype is: 
 
-.. method:: Observer.method_name([name,] model, old, new)
+.. method:: Observer.method_name(model, [pname,] old, new)
 
    :param model: is the observed Model instance containing the OP
                  which got changed.
+   :param pname: is the name of the OP which got changed. It has to be
+   	  	         specified when the method receives notifications for
+   	  	         multiple OPs.
    :param old: is the old value the OP had before being changed.
    :param new: is the current value the OP is assigned to.
-   :param name: is the name of the OP which got changed. It has to be
-   	  	specified when the method receives notifications for
-   	  	multiple OPs.
-
+   
 How are methods receiving value change notifications bound to OPs?
 
 1. **Statically** with decorator ``Observer.observes``::
@@ -85,7 +89,7 @@ How are methods receiving value change notifications bound to OPs?
           return
 
       @Observer.observes('prop1', 'prop2')
-      def multiple_notifications(self, name, model, old, new):
+      def multiple_notifications(self, model, pname, old, new):
           # this is called when 'prop1' or 'prop2' are changed
           return
 
@@ -95,7 +99,7 @@ How are methods receiving value change notifications bound to OPs?
    example.
 
 #. **Statically** with a naming convention, by naming the notification
-   method ``property_<name>_value_change`` (*deprecated*)::
+   method ``property_<pname>_value_change`` (*deprecated*)::
 
     from gtkmvc import Observer    
     class MyObserver (Observer):
@@ -129,7 +133,7 @@ How are methods receiving value change notifications bound to OPs?
           # this is called when OP 'prop1' is changed
           return
 
-      def multiple_notifications(self, name, model, old, new):
+      def multiple_notifications(self, model, pname, old, new):
           # this is called when OPs 'prop1' or 'prop2' are changed
           return
    
@@ -140,15 +144,89 @@ How are methods receiving value change notifications bound to OPs?
    ``add_observing_method``.
 
 
-:TODO:  Fix all the following text
+Instance Change Notifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-FROM OPS TYPES
---------------
+In section :ref:`OPtypes` mutable instances were used as OP in
+models. When a mutable instance gets changed, notifications are made
+within observers, **before** and/or **after** the method changing the
+OP is called.
 
-*Mutable sequential types* and *User classes* are also supported by
-the *Observer* pattern of *gtkmvc*, but the name of the notified
-method in the controller has to be changed accordingly.  The idea is
-to provide two methods to be notified:
+A notification method which is called *before* a change has the following prototype in a
+class deriving from ``Observer``:
+
+.. method:: before_method_call(model, [pname,] instance, mname, args, kwargs)
+ 
+   This it the notification called when a mutable instance is being
+   changed, right before the call execution.
+
+   :param model: is the ``Model`` instance containing the mutable
+                 instance OP.
+   :param pname: is the name of the OP which got changed. It has to be
+   	  	specified when the method receives notifications for
+   	  	multiple OPs.
+   :param instance: is the mutable instance which is being changed.
+   :param mname: is the name of the instance's method which is being
+                called to change the instance.
+   :param args: List of arguments to the instance's method which is 
+                being called. 
+   :param kwargs: Keywords arguments to the instance's method which is 
+                being called. 
+
+A notification method which is called *after* a change has the
+following prototype in a class deriving from ``Observer``:
+
+.. method:: after_method_call(model, [pname,] instance, mname, res, args, kwargs)
+ 
+   This it the notification called when a mutable instance is being
+   changed, right before the call execution.
+
+   :param model: is the ``Model`` instance containing the mutable
+                 instance OP.
+   :param pname: is the name of the OP which got changed. It has to be
+   	  	specified when the method receives notifications for
+   	  	multiple OPs.
+   :param instance: is the mutable instance which has been changed.
+   :param mname: is the name of the instance's method which has been called
+                to change the instance.
+   :param res: value returned by the instance's method which has been called
+                to change the instance.
+   :param args: List of arguments to the instance's method which has 
+                been called. 
+   :param kwargs: Keywords arguments to the instance's method which has
+                been called. 
+
+Similarly to :ref:`_Observer_vcn`, there are different ways a method
+in ``Observer`` can be declared to be a instance change notification
+method:
+
+1. **Statically** with decorator ``Observer.observes``::
+
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
+      @Observer.observes
+      def prop1_before(self, model, instance, mname, args, kwargs):
+          # this is called before OP 'prop1' is changed by calling a changing method 
+          return
+
+      @Observer.observes('prop1', 'prop2')
+      def multiple_notifications_before(self, model, pname, instance, mname, args, kwargs):
+          # this is called before 'prop1' or 'prop2' are changed by calling a changing method
+          return
+
+      @Observer.observes
+      def prop4_after(self, model, instance, mname, res, args, kwargs):
+          # this is called after OP 'prop4' is changed by calling a changing method 
+          return
+
+      @Observer.observes('prop2', 'prop4')
+      def multiple_notifications_after(self, model, pname, instance, mname, res, args, kwargs):
+          # this is called after 'prop2' or 'prop4' are changed by calling a changing method 
+          return
+
+
+
+:TODO: Fix the following text
 
 property_``name``_before_change
    That is called

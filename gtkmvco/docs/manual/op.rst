@@ -1,4 +1,4 @@
-.. _OPD:
+.. _OP_top:
 
 Observable Properties
 *********************
@@ -10,6 +10,11 @@ The mechanism which allows a part of the data contained in models
 to be observed by entities called *Observers*. It is fully
 automatic, as its management is carried out transparently by the
 base class ``Model``.
+
+:Note: This section mainly focuses on OP in *Models*. The use of
+       `Observer` here is anticipated only for examples. The section
+       :ref:`Observers` presents full details about them.
+
 
 Here a quick example is shown here, later all details are
 presented. ::
@@ -47,7 +52,13 @@ complex. OPs can be *concrete* or *logical*, and can be values
 or user's classes. All these differences add complexity which will
 be described in details in the following sections.
 
+.. _OPconc:
 .. include:: op_concrete.rst
+
+.. _OPlog:
 .. include:: op_logical.rst
+
+.. _OPtypes:
 .. include:: op_types.rst
+
 .. include:: op_special.rst

@@ -55,7 +55,7 @@ Models
 
 Models must be used to hold the *data* or *logic* of the
 application. They can be connected to observers (like Controllers) by
-a mechanism detailed by section :ref:`OPD`.  It is important to note
+a mechanism detailed by section :ref:`OP_top`.  It is important to note
 that apart from during the registration phase, the model does not know
 that there exists a set observers connected to it.
 

@@ -449,7 +449,7 @@ class Model (Observer):
 
         def side_effect(seq):
             for flag, meth in reversed(seq):
-                if meth.__self__ is observer:
+                if meth.im_self is observer:
                     seq.remove((flag, meth))
                     yield meth
 

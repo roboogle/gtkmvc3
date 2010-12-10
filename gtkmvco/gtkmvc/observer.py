@@ -24,10 +24,9 @@
 #  -------------------------------------------------------------------------
 
 from support import decorators, utils, log
-from types import MethodType, StringType, FunctionType
-from collections import Iterable
 
 import inspect
+import types
 
 @decorators.good_decorator_accepting_args
 def observes(*args):
@@ -93,7 +92,7 @@ class Observer (object):
             return _notified        
 
         # this handle the case of empty args
-        if 1 == len(args) and type(args[0]) is FunctionType:
+        if 1 == len(args) and type(args[0]) is types.FunctionType:
             names = ()
             return _decorator(args[0])
 
@@ -244,12 +243,15 @@ class Observer (object):
            to observe a model.
         """
 
-        if isinstance(prop_name_or_names, StringType):
+        if isinstance(prop_name_or_names, types.StringType):
             takes_name = False
             prop_names = (prop_name_or_names,)
         else:
-            assert isinstance(prop_name_or_names, Iterable), \
-                "prop_name_or_names must be either a string or an iterable"
+            try:
+                iter(prop_name_or_names)
+            except TypeError:
+                raise AssertionError("prop_name_or_names must be either a"
+                    " string or an iterable")
             takes_name = True
             prop_names = prop_name_or_names
             pass

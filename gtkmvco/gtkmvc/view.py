@@ -129,7 +129,7 @@ class View (object):
         else: _builder = self.builder
         if _builder is not None:
             if not __builder_is_available__:
-                raise ViewError("gtk.Builder was required, by not available")
+                raise ViewError("gtk.Builder was used, but is not available")
 
             # if the user passed a Builder, use it as it is, otherwise
             # build one

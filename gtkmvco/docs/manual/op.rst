@@ -62,3 +62,8 @@ be described in details in the following sections.
 .. include:: op_types.rst
 
 .. include:: op_special.rst
+
+
+:TODO: Add a section about semantical constratins when OP are
+       involved. E.g. getter defined without a corrresponding
+       logical prop, etc.

@@ -224,60 +224,62 @@ method:
           # this is called after 'prop2' or 'prop4' are changed by calling a changing method 
           return
 
+   Again, notice that an OP's change can be notified to multiple
+   methods in the same observer.
+
+#. **Statically** with a naming convention, by naming the
+   notification methods ``property_<pname>_before_change`` and
+   ``property_<pname>_after_change`` (*deprecated*)::
+
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
+
+      def property_prop1_before_change(self, model, instance, mname, args, kwargs):
+          # this is called immediatelly before 'prop1' is changed by a method call
+          return
+
+      def property_prop2_after_change(self, model, instance, mname, res, args, kwargs):
+          # this is called immediatelly after 'prop2' is changed by a method call
+          return
+   		
+   In this case each notification method has to be bound to one
+   specific OP only.
+
+#. **Dynamically** with method ``Observer.add_observing_method``.
+   Exactly like in the case of value change, but the notification
+   methods have different prototypes::
+
+    from gtkmvc import Observer    
+    class MyObserver (Observer):
+
+      def __init__(self, m):
+          Observer.__init__(self, m)
+          self.add_observing_method(self.before_prop1_gets_changed, "prop1")
+          self.add_observing_method(self.multiple_after_change, ("prop1", "prop2"))
+          return
+
+      def before_prop1_gets_changed(self, model, instance, mname, args, kwargs):
+          # this is called immediatelly before 'prop1' is changed by a method call
+          return
+
+      def multiple_after_change(self, model, pname, instance, mname, res, args, kwargs):
+          # this is called immediatelly after 'prop1' or 'prop2'
+          # are changed by a method call. pname carries the name of
+          # the property which has been changed.
+          return
 
 
-:TODO: Fix the following text
+Of course, it is not needed to define both *before* and *after*
+notification methods in the observer class, as only the actually
+defined/declared methods will be called.
 
-property_``name``_before_change
-   That is called
-   immediately *before* a method that changes the instance is
-   called on the *OP* called ``name``.
 
-property_``name``_after_change
-   That is called
-   immediately *after* a method that changes the instance is
-   called on the *OP* called ``name``.
+Examples
+--------
 
-Of course, it is not needed to define both of the two methods in the
-observer class, as only the actually defined methods will be called. 
+:TODO: This subsection has to be extended largely
 
-The signature of these methods is: ::
-
- def property_<name>_before_change(self, model, instance, name,
-                                   args, kwargs)
- 
- def property_<name>_after_change(self, model, instance, name, 
-                                  res, args, kwargs)
-
-self
-   The Observer class instance defining the method.
-model
-   The Model instance containing the *OP* called
-    ``<name>`` that is being changed.
-instance
-   The object instance that is assigned to the *OP* called
-   ``<name>``.
-name
-   The name of the method that is being called. This
-   is different from ``<name>`` that is the name of the *OP*
-   contained in the model. 
-res
-   (Only for *after* notification) the value returned by
-   the method *name* that has been called on the *OP*
-   *instance*.
-args
-   List of arguments of the method *name*.
-kwargs
-   Map of keyword arguments of the method *name*.
-
-As it can be noticed, the only difference between these two method
-signatures is the parameter *res* that is obviously available only
-for notification method *after*.
-
-CONTINUING OLD DOC
-------------------
-
-This means that you may use the property in this way: ::
+You may use the property in this way: ::
 
  m = MyModel()
  print m.name  # prints 'Rob'

@@ -34,10 +34,9 @@ from support import decorators
 
 import itertools
 
-# these constants are used internally
-_obs_without_name = 0
-_obs_with_name = 1
-
+# Pass prop_name to this method?
+WITH_NAME = True
+WITHOUT_NAME = False
 
 class Model (Observer):
     """
@@ -312,224 +311,161 @@ class Model (Observer):
 
     
     def __add_observer_notification(self, observer, prop_name):
-        """Searches in the observer for any possible listener, and
-        stores the notification methods to be called later"""
+        """
+        Find observing methods and store them for later notification.
 
-        method_name = "property_%s_value_change" % prop_name
-        if hasattr(observer, method_name):
-            pair = (_obs_without_name, getattr(observer, method_name))
-            if pair not in self.__value_notifications[prop_name]:
-                list.append(self.__value_notifications[prop_name], pair)
-                logger.debug("Added implicit value change notification '%s'",
-                             method_name)
-                pass
-            pass
-
-        # retrieves the set of custom observing methods 
-        cust_methods = observer.get_observing_methods(prop_name)
-
-        # checks for custom observing methods. If it is a signal,
-        # a method or value is decided from number of
-        # arguments. This is not particularly robust.
-        # self, model, old, new
-        _CUST_METH_ARGS_COUNT = 4
-        for meth in cust_methods:
-            if observer.does_observing_method_receive_prop_name(meth):
-                addional_args = 1
-            else: addional_args = 0
-
-            args, varargs, _, _ = inspect.getargspec(meth)
-            if varargs:
-                logger.warn("Ignoring notification '%s' as variable"
-                            " arguments were used (pattern not recognized,"
-                            " exactly %d arguments are expected)", 
-                            meth.__name__, _CUST_METH_ARGS_COUNT+addional_args)
-                pass
-            if len(args) != _CUST_METH_ARGS_COUNT + addional_args:
-                logger.warn("Ignoring notification '%s': exactly %d"
-                            " arguments are expected", 
-                            meth.__name__, _CUST_METH_ARGS_COUNT+addional_args)
-                pass
-            
-            if addional_args > 0: pair = (_obs_with_name, meth)
-            else: pair = (_obs_without_name, meth)
-            if pair not in self.__value_notifications[prop_name]:
-                list.append(self.__value_notifications[prop_name], pair)
-                logger.debug("Added explicit value change notification '%s'",
-                             meth.im_func.__name__)
-                pass
-            pass
-
-        # is it a signal?
-        orig_prop = getattr(self, "_prop_%s" % prop_name, None)
-        if isinstance(orig_prop, Signal):
-            method_name = "property_%s_signal_emit" % prop_name
-            if hasattr(observer, method_name):
-                pair = (_obs_without_name, getattr(observer, method_name))
-                if pair not in self.__signal_notif[prop_name]:
-                    list.append(self.__signal_notif[prop_name], pair)
-                    logger.debug("Added implicit signal emit notification '%s'",
-                                 method_name)
-                    pass
-                pass
-
-            # checks for custom observing methods. If it is a signal,
-            # a method or value is decided from number of
-            # arguments. This is not particularly robust.
-            # self, model, signal_name, arg
-            meth_arg = [(meth, observer.does_observing_method_receive_prop_name(meth))
-                        for meth in cust_methods]
-            
-            # warning: here we exploit polimorphism of +(Int, Boolean)
-            for meth, with_arg in itertools.ifilter(lambda (m,a): \
-                                m.im_func.func_code.co_argcount == 3+a,
-                                                    meth_arg):
-                if with_arg: pair = (_obs_with_name, meth)
-                else: pair = (_obs_without_name, meth)
-
-                if pair not in self.__signal_notif[prop_name]:
-                    list.append(self.__signal_notif[prop_name], pair)
-                    logger.debug("Added explicit signal emit notification '%s'",
-                                 meth.im_func.__name__)
-                    pass
-                pass
-            pass
+        *observer* an instance.
         
-        # is it an instance change notification type?
-        elif isinstance(orig_prop, ObsWrapperBase):
-            method_name = "property_%s_before_change" % prop_name
-            if hasattr(observer, method_name):
-                pair = (_obs_without_name, getattr(observer, method_name))
-                if pair not in self.__instance_notif_before[prop_name]:
-                    list.append(self.__instance_notif_before[prop_name], pair)
-                    logger.debug("Added implicit before call notification '%s'",
-                                 method_name)
+        *prop_name* a string.
+
+        This checks for magic names as well as methods explicitly added through
+        decorators or at runtime. In the latter case the type of the notification
+        is inferred from the number of arguments it takes.
+        """
+        value = getattr(self, "_prop_%s" % prop_name, None)
+
+        def getmeth(format, numargs):
+            name = format % prop_name
+            meth = getattr(observer, name)
+            args, varargs, _, _ = inspect.getargspec(meth)
+            if varargs or len(args) != numargs:
+                logger.warn("Ignoring notification %s: exactly %d arguments"
+                    " are expected", name, numargs)
+                raise AttributeError
+            return meth
+
+        def add_value(notification):
+            if notification in self.__value_notifications[prop_name]:
+                return
+            logger.debug("Will call '%s' after assignment to %s",
+                notification[1].__name__, prop_name)
+            self.__value_notifications[prop_name].append(notification)
+
+        def add_before(notification):
+            if not isinstance(value, ObsWrapperBase) or \
+                isinstance(value, Signal):
+                return
+            if notification in self.__instance_notif_before[prop_name]:
+                return
+            logger.debug("Will call '%s' before mutation of %s",
+                notification[1].__name__, prop_name)
+            self.__instance_notif_before[prop_name].append(notification)
+
+        def add_after(notification):
+            if not isinstance(value, ObsWrapperBase) or \
+                isinstance(value, Signal):
+                return
+            if notification in self.__instance_notif_after[prop_name]:
+                return
+            logger.debug("Will call '%s' after mutation of %s",
+                notification[1].__name__, prop_name)
+            self.__instance_notif_after[prop_name].append(notification)
+
+        def add_signal(notification):
+            if not isinstance(value, Signal):
+                return
+            if notification in self.__signal_notif[prop_name]:
+                return
+            logger.debug("Will call '%s' after emit on %s",
+                notification[1].__name__, prop_name)
+            self.__signal_notif[prop_name].append(notification)
+
+        try:
+            notification = WITHOUT_NAME, getmeth("property_%s_signal_emit", 3)
+        except AttributeError:
+            pass
+        else:
+            add_signal(notification)
+
+        try:
+            notification = WITHOUT_NAME, getmeth("property_%s_value_change", 4)
+        except AttributeError:
+            pass
+        else:
+            add_value(notification)
+
+        try:
+            notification = WITHOUT_NAME, getmeth("property_%s_before_change", 6)
+        except AttributeError:
+            pass
+        else:
+            add_before(notification)
+
+        try:
+            notification = WITHOUT_NAME, getmeth("property_%s_after_change", 7)
+        except AttributeError:
+            pass
+        else:
+            add_after(notification)
+
+        for meth in observer.get_observing_methods(prop_name):
+            args, varargs, _, _ = inspect.getargspec(meth)
+            numargs = len(args)
+            if varargs:
+                logger.warn("Ignoring notification %s: variable arguments"
+                    " prevent type inference", meth.__name__)
+                continue
+            if observer.does_observing_method_receive_prop_name(meth):
+                notification = WITH_NAME, meth
+                if numargs == 4:
+                    add_signal(notification)
+                elif numargs == 5:
+                    add_value(notification)
+                elif numargs == 7:
+                    add_before(notification)
+                elif numargs == 8:
+                    add_after(notification)
+                else:
+                    logger.warn("Ignoring notification %s: wrong number of"
+                        " arguments (one is prop_name)", meth.__name__)
                     pass
                 pass
-            
-            meth_arg = [(meth, observer.does_observing_method_receive_prop_name(meth))
-                        for meth in cust_methods]
-
-            # checks for custom observing methods. If it is a signal,
-            # a method or value is decided from number of
-            # arguments. This is not particularly robust.
-            # self, model, prop_name, instance, meth_name, args, kwargs
-            # warning: here we exploit polimorphism of +(Int, Boolean)
-            for meth, with_arg in itertools.ifilter(lambda (m,a): \
-                                m.im_func.func_code.co_argcount == 7+a,
-                                                    meth_arg):
-                if with_arg: pair = (_obs_with_name, meth)
-                else: pair = (_obs_without_name, meth)                
-                if pair not in self.__instance_notif_before[prop_name]:
-                    list.append(self.__instance_notif_before[prop_name], pair)
-                    logger.debug("Added explicit before call notification '%s'",
-                                 meth.im_func.__name__)
-                    pass
-                pass                    
-
-            method_name = "property_%s_after_change" % prop_name
-            if hasattr(observer, method_name):
-                pair = (_obs_without_name, getattr(observer, method_name))
-                if pair not in self.__instance_notif_after[prop_name]:
-                    list.append(self.__instance_notif_after[prop_name], pair)
-                    logger.debug("Added implicit after call notification '%s'",
-                                 method_name)
-                    pass
-                pass
-
-            # checks for custom observing methods. If it is a signal,
-            # a method or value is decided from number of
-            # arguments. This is not particularly robust.
-            # self, model, prop_name, instance, meth_name, res, args, kwargs
-            # warning: here we exploit polimorphism of +(Int, Boolean)
-            for meth, with_arg in itertools.ifilter(lambda (m,a): \
-                                m.im_func.func_code.co_argcount == 8+a,
-                                                    meth_arg):
-                if with_arg: pair = (_obs_with_name, meth)
-                else: pair = (_obs_without_name, meth)                
-                if pair not in self.__instance_notif_after[prop_name]:
-                    list.append(self.__instance_notif_after[prop_name], pair)
-                    logger.debug("Added explicit after call notification '%s'",
-                                 meth.im_func.__name__)
+            else:
+                notification = WITHOUT_NAME, meth
+                if numargs == 3:
+                    add_signal(notification)
+                elif numargs == 4:
+                    add_value(notification)
+                elif numargs == 6:
+                    add_before(notification)
+                elif numargs == 7:
+                    add_after(notification)
+                else:
+                    logger.warn("Ignoring notification %s: wrong number of"
+                        " arguments (prop_name not passed)", meth.__name__)
                     pass
                 pass
             pass
-
         return
 
-    
     def __remove_observer_notification(self, observer, prop_name):
+        """
+        Remove all stored notifications.
+        
+        *observer* an instance.
+        
+        *prop_name* a string.
+        """
 
-        # retrieves the set of custom observing methods
-        # and removes corresponding the notification methods
-        for meth in observer.get_observing_methods(prop_name):
-            pair = (_obs_with_name, meth)
-            for _map in (self.__value_notifications,
-                         self.__signal_notif,
-                         self.__instance_notif_before,
-                         self.__instance_notif_after,):
-                         
-                if prop_name in _map and \
-                        pair in _map[prop_name]: _map[prop_name].remove(pair)
-                pass
-            pass
-            
-        if self.__value_notifications.has_key(prop_name):
-            method_name = "property_%s_value_change" % prop_name
-            if hasattr(observer, method_name):
-                pair = (_obs_without_name, getattr(observer, method_name))
-                if pair in self.__value_notifications[prop_name]:
-                    self.__value_notifications[prop_name].remove(pair)
-                    logger.debug("Removed implicit value change notification '%s'",
-                                 method_name)
-                    pass
-                pass
-            pass
+        def side_effect(seq):
+            for flag, meth in reversed(seq):
+                if meth.__self__ is observer:
+                    seq.remove((flag, meth))
+                    yield meth
 
+        for meth in side_effect(self.__value_notifications.get(prop_name, ())):
+            logger.debug("Stop calling '%s' after assignment", meth.__name__)
 
-        orig_prop = getattr(self, "_prop_%s" % prop_name, None)
-        # is it a signal?
-        if isinstance(orig_prop, Signal):
-            method_name = "property_%s_signal_emit" % prop_name
-            if hasattr(observer, method_name):
-                pair = (_obs_without_name, getattr(observer, method_name))
-                if pair in self.__signal_notif[prop_name]:
-                    self.__signal_notif[prop_name].remove(pair)
-                    logger.debug("Removed implicit signal emit notification '%s'",
-                                 method_name)
-                    pass
-                pass
-            pass
+        for meth in side_effect(self.__signal_notif.get(prop_name, ())):
+            logger.debug("Stop calling '%s' after emit", meth.__name__)
 
-        # is it an instance change notification type?
-        elif isinstance(orig_prop, ObsWrapperBase):
-            if self.__instance_notif_before.has_key(prop_name):
-                method_name = "property_%s_before_change" % prop_name
-                if hasattr(observer, method_name):
-                    pair = (_obs_without_name, getattr(observer, method_name))
-                    if pair in self.__instance_notif_before[prop_name]:
-                        self.__instance_notif_before[prop_name].remove(pair)
-                        logger.debug("Removed implicit before call "\
-                                         "notification '%s'", method_name)
-                        pass
-                    pass
-                pass
-            
-            if self.__instance_notif_after.has_key(prop_name):
-                method_name = "property_%s_after_change" % prop_name
-                if hasattr(observer, method_name):
-                    pair = (_obs_without_name, getattr(observer, method_name))
-                    if pair in self.__instance_notif_after[prop_name]:
-                        self.__instance_notif_after[prop_name].remove(pair)
-                        logger.debug("Removed after call notification '%s'",
-                                     method_name)
-                        pass
-                    pass
-                pass
-            pass
-            
-        return 
+        for meth in side_effect(self.__instance_notif_before.get(prop_name, ())):
+            logger.debug("Stop calling '%s' before mutation", meth.__name__)
 
+        for meth in side_effect(self.__instance_notif_after.get(prop_name, ())):
+            logger.debug("Stop calling '%s' after mutation", meth.__name__)
+
+        return
 
     def __notify_observer__(self, observer, method, *args, **kwargs):
         """This can be overridden by derived class in order to call
@@ -553,7 +489,7 @@ class Model (Observer):
             obs = method.im_self
             # notification occurs checking spuriousness of the observer
             if old != new or obs.accepts_spurious_change():
-                if flag == _obs_without_name: 
+                if flag == WITHOUT_NAME: 
                     self.__notify_observer__(obs, method,
                                              self, old, new) # notifies the change
                 else: # explicit (custom) notification
@@ -576,7 +512,7 @@ class Model (Observer):
         assert(self.__instance_notif_before.has_key(prop_name))
         for flag, method in self.__instance_notif_before[prop_name]:
             # notifies the change
-            if flag == _obs_without_name: 
+            if flag == WITHOUT_NAME: 
                 self.__notify_observer__(method.im_self, method,
                                          self, instance,
                                          meth_name, args, kwargs)
@@ -599,7 +535,7 @@ class Model (Observer):
         assert(self.__instance_notif_after.has_key(prop_name))
         for flag, method in self.__instance_notif_after[prop_name]:
             # notifies the change
-            if flag == _obs_without_name: 
+            if flag == WITHOUT_NAME: 
                 self.__notify_observer__(method.im_self, method,
                                          self, instance,
                                          meth_name, res, args, kwargs) 
@@ -624,7 +560,7 @@ class Model (Observer):
         
         for flag, method in self.__signal_notif[prop_name]:
             # notifies the signal emit
-            if flag == _obs_without_name:
+            if flag == WITHOUT_NAME:
                 self.__notify_observer__(method.im_self, method,
                                          self, arg)
             else: # explicit (custom) notification

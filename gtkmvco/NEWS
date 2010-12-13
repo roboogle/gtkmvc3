@@ -6,6 +6,7 @@
 
   - adapt FileChooserButton
   - adapt ComboBox
+  - adapt Adjustment
   - API to extend default adapter list
   - more widget types now correctly cast when adapted to
     unicode/int/float properties.
@@ -16,6 +17,13 @@
   - Controller's method adapt() allows auto-adaption even if the view
     does not have corresponding widgets for *all* properties in the
     model.
+  - Adapters can optionally call prop_write *instead of* casting the value from
+    the widget to the type of the old property value. This was the intended
+    behaviour all along. Default is still to call it after the cast.
+  - Decorators for property setters/getters in models. The methods can now have
+    arbitrary names and you are no longer limited to one property per method.
+  - A third manual, this one ordered by method. Use it for quick reference.
+  - Methods to declare methods as observing properties at runtime.
 
 * Changed
 
@@ -27,15 +35,15 @@
 
   - allow creation of adapters that act on spurious notifications.
 
-  - if an adapter was passed prop_write on creation this is now called
-    *instead of* casting the value from the widget to the type of the
-    old property value. It used to be called after the cast.
-    This was the intended behaviour all along, but breaks even some of
-    our sample code.
-
   - use less eval(codestring)
     This changed how adapters create observer functions. If you have
     adapter subclasses you will have to adjust them.
+
+  - Misuse of the framework that used to exit your application can now be caught
+    as exceptions.
+
+  - Fewer warnings printed by the framework. Remember to increase the logging
+    level during development.
 
 * Fixed
 
@@ -60,6 +68,9 @@
   - mutable instances that used to be assigned to properties would
     notify of their changes even after being replaced in the model.
 
+  - no more errors from static container adapters you didn't create.
+
+  - multiple concurrent iterators on views no longer steal each other widgets.
 
 **********************************************************************
 *  Apr 1 2009                                                        * 

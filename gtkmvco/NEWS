@@ -39,8 +39,8 @@
     This changed how adapters create observer functions. If you have
     adapter subclasses you will have to adjust them.
 
-  - Misuse of the framework that used to exit your application can now be caught
-    as exceptions.
+  - Misuse of the framework that used to exit your application can now be
+    caught as exceptions.
 
   - Fewer warnings printed by the framework. Remember to increase the logging
     level during development.
@@ -71,6 +71,8 @@
   - no more errors from static container adapters you didn't create.
 
   - multiple concurrent iterators on views no longer steal each other widgets.
+
+  - the decorator for observing methods only worked with multiple arguments.
 
 **********************************************************************
 *  Apr 1 2009                                                        * 

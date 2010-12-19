@@ -56,6 +56,157 @@ def observes(*args):
 # ----------------------------------------------------------------------
 
 
+# private metaclass, used to force read-only class-level properties.
+class __NTinfo_mc__ (type):
+    NT_AUTO  = property(lambda cls: 0) # for internal use only
+    NT_VALUE  = property(lambda cls: 1)
+    NT_BEFORE = property(lambda cls: 2)
+    NT_AFTER  = property(lambda cls: 4)
+    NT_SIGNAL = property(lambda cls: 8)
+    pass # end of metaclass
+
+
+class NTInfo (dict):
+    """Notification Type of observers' notification methods.
+
+    This class is used:
+
+    1. As class when defining notificaion methods in observers, as it
+       contains the constants for notification types.
+
+    2. As class instance as parameter when a notification methods is
+       called in observers.
+
+
+    Notification Type Constants
+    ===========================
+
+    Class `NTInfo` exports these notification type constants:
+    
+    NT_VALUE: For value-change notification types. 
+    NT_BEFORE: For before-method-call notification types.
+    NT_AFTER: For after-method-call notification types.
+    NT_SIGNAL: For signal-emit notification types.
+
+    
+    Instance content
+    ================
+
+    Instances of class `NTInfo` will be received as the last argument
+    (`info`) of any notification method::
+
+      def notification_method(self, model, name, info)
+
+    NTInfo is a dictionary (with some particular behaviour added),
+    containing some information which is independent on the
+    notification type, and some other information wich depends on the
+    notification type.
+
+
+    Common to all types
+    -------------------
+
+    For all notification types, NTInfo contains:
+
+      model : the model containing the observable property triggering
+              the notification. model is also passed as first argument
+              of the notification method.
+
+      name : the name of the observable property triggering the
+             notification. name is also passed as second argument of
+             the notification method.
+
+      type : The value identifying the type of the notification
+             method. This is generally one value among NT_VALUE,
+             NT_BEFORE, NT_AFTER and NT_SIGNAL, but more generally it
+             can be also a bitwise combination of these values.
+  
+    There are further information depending on the specific
+    notification type:
+
+    For NT_VALUE
+    ------------
+
+      old : the value that the observable property had before being
+            changed.
+
+      new : the new value that the observable property has been
+            changed to.
+
+
+    For NT_BEFORE
+    -------------
+
+      instance : the object instance which the method that is being
+                 called belongs to.
+
+      method_name : the name of the method that is being called. 
+
+      args : tuple of the arguments of the method that is being called. 
+
+      kwargs: dictionary of the keyword arguments of the method that
+              is being called.
+
+
+    For NT_AFTER
+    ------------
+
+      instance : the object instance which the method that has been 
+                 called belongs to.
+
+      method_name : the name of the method that has been called. 
+
+      args : tuple of the arguments of the method that has been called. 
+
+      kwargs: dictionary of the keyword arguments of the method that
+              has been called.
+      
+      result : the value returned by the method which has been called. 
+ 
+    For NT_SIGNAL
+    -------------
+
+      arg : the argument which was optionally specified when invoking
+            emit() on the signal observable property.
+  
+    Type queries
+    ============
+
+    As already told, the type carried by a NTInfo instance can be
+    accessed through attribute `type`, to be matched type constants
+    available in class `NTInfo`, possibly with bit masks.  However,
+    class `NTInfo` provides also predicates to query for type, like
+    methods `is_value`, `is_before`, etc.
+
+       .. versionadded:: 1.99.1
+
+    """
+
+    __metaclass__ = _NTinfo_mc
+    
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+        # if not already set, sets the default type
+        if 'type' not in self: self['type'] = NTInfo.NT_VALUE
+        return
+
+    def __getattr__(self, name): return self[name]
+
+    def is_value(self): 
+        return self['type'] & NTInfo.NT_VALUE != 0
+
+    def is_before(self): 
+        return self['type'] & NTInfo.NT_BEFORE != 0
+
+    def is_after(self): 
+        return self['type'] & NTInfo.NT_AFTER != 0
+
+    def is_signal(self): 
+        return self['type'] & NTInfo.NT_AFTER != 0
+    
+    pass # end of class
+    
+
 # ----------------------------------------------------------------------
 class Observer (object):
     """
@@ -70,15 +221,19 @@ class Observer (object):
 
     @classmethod
     @decorators.good_decorator_accepting_args
-    def observes(cls, *args):
+    def observes(cls, *args, **kwargs):
         """
-        Decorate a method as a notification. Takes an arbitrary number of
-        property names as strings. If none are given, the name of the method
-        is used.
-        If a given property changes in a model we observe, the method is
-        called.
-        If multiple names were given the method will be passed the name of the
-        property that changed.
+        Decorate a method as a notification. Takes an arbitrary number
+        of property names as strings. If none are given, the name of
+        the method is used. If a given property changes in a model we
+        observe, the method is called.
+
+        Keyword argument 'type' can be used to specify the type of the
+        notification. Values for type are type constants in class
+        `NTInfo`.  Values for `type` can be combined for declaring
+        notifications which can receive notification of several
+        types. If `type` is not specified, the default value is
+        `NTInfo.NT_VALUE`.
 
            .. versionadded:: 1.99.1
         """

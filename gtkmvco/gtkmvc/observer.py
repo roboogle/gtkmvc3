@@ -182,7 +182,7 @@ class NTInfo (dict):
 
     """
 
-    __metaclass__ = _NTinfo_mc
+    __metaclass__ = __NTinfo_mc__
     
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
@@ -190,7 +190,11 @@ class NTInfo (dict):
         if 'type' not in self: self['type'] = NTInfo.NT_VALUE
         return
 
-    def __getattr__(self, name): return self[name]
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError
 
     def is_value(self): 
         return self['type'] & NTInfo.NT_VALUE != 0
@@ -202,7 +206,7 @@ class NTInfo (dict):
         return self['type'] & NTInfo.NT_AFTER != 0
 
     def is_signal(self): 
-        return self['type'] & NTInfo.NT_AFTER != 0
+        return self['type'] & NTInfo.NT_SIGNAL != 0
     
     pass # end of class
     

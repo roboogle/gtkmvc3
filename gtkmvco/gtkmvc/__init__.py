@@ -37,7 +37,7 @@ from model_mt import ModelMT
 from controller import Controller
 from view import View
 from observer import Observer
-from observable import Observable
+from observable import Observable, Signal
 
 # visible modules
 import observable, observer, adapters

@@ -59,45 +59,43 @@ class MyModel (Model):
 class MyObserver (Observer):
     _for_test = 0 # this is acounter to count the notifications
 
-    @Observer.observes("a_value", "a_value2", "pippo")
-    def observer_for_value(self, model, prop_name, old, new):
-        print "observer_for_value", model, prop_name, old, new
+    @Observer.observe("a_value", assign=True)
+    @Observer.observe("a_value2", assign=True)
+    @Observer.observe("pippo", assign=True)
+    def observer_for_value(self, model, prop_name, info):
+        print "observer_for_value", model, prop_name, info
         self._for_test += 1
         return
 
     # multiple observes work!
-    @Observer.observes("a_value")
-    @Observer.observes("a_value2")
-    def observer_for_value2(self, model, prop_name, old, new):
-        print "observer_for_value2", model, prop_name, old, new
+    @Observer.observe("a_value", assign=True)
+    @Observer.observe("a_value2", assign=True)
+    def observer_for_value2(self, model, prop_name, info):
+        print "observer_for_value2", model, prop_name, info
         self._for_test += 1
         return
         
-    @Observer.observes("a_signal")
-    def observer_for_signal(self, model, prop_name, arg):
-        print "observer_for_signal", model, prop_name, arg
+    @Observer.observe("a_signal", signal=True)
+    def observer_for_signal(self, model, prop_name, info):
+        print "observer_for_signal", model, prop_name, info
         self._for_test += 1
         return
 
-    @Observer.observes("a_signal")
-    def observer_for_signal2(self, model, prop_name, arg):
-        print "observer_for_signal2", model, prop_name, arg
+    @Observer.observe("a_signal", signal=True)
+    def observer_for_signal2(self, model, prop_name, info):
+        print "observer_for_signal2", model, prop_name, info
         self._for_test += 1
         return
     
-    @Observer.observes("a_class")
-    def observer_for_method_before(self, model, prop_name,
-                                   instance, meth_name, args, kwargs):
-        print "observer_for_method_before", model, prop_name, \
-            instance, meth_name, args, kwargs
+    @Observer.observe("a_class", before=True)
+    def observer_for_method_before(self, model, prop_name, info):
+        print "observer_for_method_before", model, prop_name, info
         self._for_test += 1
         return
 
-    @Observer.observes("a_class")
-    def observer_for_method_after(self, model, prop_name,
-                                  instance, meth_name, res, args, kwargs):
-        print "observer_for_method_after", model, prop_name, \
-            instance, meth_name, res, args, kwargs
+    @Observer.observe("a_class", after=True)
+    def observer_for_method_after(self, model, prop_name, info):
+        print "observer_for_method_after", model, prop_name, info
         self._for_test += 1
         return
     

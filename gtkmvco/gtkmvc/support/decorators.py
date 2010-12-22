@@ -68,12 +68,12 @@ def good_decorator_accepting_args(decorator):
     functions names, doc, etc. 
 
     Differently from good_decorator, this accepts decorators possibly
-    receiving arguments.
+    receiving arguments and keyword arguments.
 
     This decorato can be used indifferently with class methods and
     functions.""" 
-    def new_decorator(*f):
-        g = decorator(*f)
+    def new_decorator(*f, **k):
+        g = decorator(*f, **k)
         if 1 == len(f) and isinstance(f[0], types.FunctionType):
             g.__name__ = f[0].__name__
             g.__doc__ = f[0].__doc__

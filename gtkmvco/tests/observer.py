@@ -32,161 +32,106 @@ class Implicit(gtkmvc.Observer):
         self.after = name, args
 
 class Explicit(gtkmvc.Observer):
-    @gtkmvc.Observer.observes
-    def signal(self, model, arg):
-        self.signal = arg
+    @gtkmvc.Observer.observe("signal", signal=True)
+    def notify_signal(self, model, name, info):
+        self.signal = info.arg
 
-    @gtkmvc.Observer.observes
-    def value(self, model, old, new):
-        self.value = old, new
+    @gtkmvc.Observer.observe("value", assign=True)
+    def notify_value(self, model, name, info):
+        self.value = info.old, info.new
 
-    @gtkmvc.Observer.observes
-    def before(self, model, instance, name,
-        args, kwargs):
-        self.before = name, args
+    @gtkmvc.Observer.observe("before", before=True)
+    def notify_before(self, model, name, info):
+        self.before = info.method_name, info.args
 
-    @gtkmvc.Observer.observes
-    def after(self, model, instance, name, res,
-        args, kwargs):
-        self.after = name, args
-
-class WithoutName(gtkmvc.Observer):
-    @gtkmvc.Observer.observes("signal")
-    def a(self, model, arg):
-        self.signal = arg
-
-    @gtkmvc.Observer.observes("value")
-    def b(self, model, old, new):
-        self.value = old, new
-
-    @gtkmvc.Observer.observes("before")
-    def c(self, model, instance, name,
-        args, kwargs):
-        self.before = name, args
-
-    @gtkmvc.Observer.observes("after")
-    def d(self, model, instance, name, res,
-        args, kwargs):
-        self.after = name, args
-
-class WithoutNameModule(gtkmvc.Observer):
-    @gtkmvc.observer.observes("signal")
-    def a(self, model, arg):
-        self.signal = arg
-
-    @gtkmvc.observer.observes("value")
-    def b(self, model, old, new):
-        self.value = old, new
-
-    @gtkmvc.observer.observes("before")
-    def c(self, model, instance, name,
-        args, kwargs):
-        self.before = name, args
-
-    @gtkmvc.observer.observes("after")
-    def d(self, model, instance, name, res,
-        args, kwargs):
-        self.after = name, args
+    @gtkmvc.Observer.observe("after", after=True)
+    def notify_after(self, model, name, info):
+        self.after = info.method_name, info.args
 
 class WithNameModule(gtkmvc.Observer):
-    @gtkmvc.observer.observes("signal", "iduna")
+    @gtkmvc.Observer.observe("signal", signal=True, old_style_call=True)
+    @gtkmvc.Observer.observe("iduna", signal=True, old_style_call=True)
     def a(self, model, prop_name, arg):
         if prop_name == "signal":
             self.signal = arg
 
-    @gtkmvc.observer.observes("value", "before")
-    def b(self, model, prop_name, old, new):
+    @gtkmvc.Observer.observe("value", assign=True)
+    @gtkmvc.Observer.observe("before", assign=True)
+    def b(self, model, prop_name, info):
         if prop_name == "value":
-            self.value = old, new
+            self.value = info.old, info.new
 
-    @gtkmvc.observer.observes("before", "after")
-    def c(self, model, prop_name, instance, name,
-        args, kwargs):
+    @gtkmvc.Observer.observe("before", before=True)
+    @gtkmvc.Observer.observe("after", after=True)
+    def c(self, model, prop_name, info):
         if prop_name == "before":
-            self.before = name, args
+            self.before = info.method_name, info.args
 
-    @gtkmvc.observer.observes("after", "before")
-    def d(self, model, prop_name, instance, name, res,
-        args, kwargs):
+    @gtkmvc.Observer.observe("before", before=True)
+    @gtkmvc.Observer.observe("after", after=True)
+    def d(self, model, prop_name, info):
         if prop_name == "after":
-            self.after = name, args
+            self.after = info.method_name, info.args
 
 class WithName(gtkmvc.Observer):
-    @gtkmvc.Observer.observes("signal", "iduna")
-    def a(self, model, prop_name, arg):
+    @gtkmvc.Observer.observe("signal", signal=True)
+    @gtkmvc.Observer.observe("iduna", signal=True)
+    def a(self, model, prop_name, info):
         if prop_name == "signal":
-            self.signal = arg
+            self.signal = info.arg
 
-    @gtkmvc.Observer.observes("value", "before")
-    def b(self, model, prop_name, old, new):
+    @gtkmvc.Observer.observe("value", assign=True)
+    @gtkmvc.Observer.observe("before", assign=True)
+    def b(self, model, prop_name, info):
         if prop_name == "value":
-            self.value = old, new
+            self.value = info.old, info.new
 
-    @gtkmvc.Observer.observes("before", "after")
-    def c(self, model, prop_name, instance, name,
-        args, kwargs):
+    @gtkmvc.Observer.observe("before", before=True)
+    @gtkmvc.Observer.observe("after", after=True)
+    def c(self, model, prop_name, info):
         if prop_name == "before":
-            self.before = name, args
+            self.before = info.method_name, info.args
 
-    @gtkmvc.Observer.observes("after", "before")
-    def d(self, model, prop_name, instance, name, res,
-        args, kwargs):
+    @gtkmvc.Observer.observe("before", before=True)
+    @gtkmvc.Observer.observe("after", after=True)
+    def d(self, model, prop_name, info):
         if prop_name == "after":
-            self.after = name, args
-
-class DynamicWithoutName(gtkmvc.Observer):
-    def __init__(self, model):
-        gtkmvc.Observer.__init__(self)
-
-        self.add_observing_method(self.a, "signal")
-        self.add_observing_method(self.b, "value")
-        self.add_observing_method(self.c, "before")
-        self.add_observing_method(self.d, "after")
-
-        self.observe_model(model)
-
-    def a(self, model, arg):
-        self.signal = arg
-
-    def b(self, model, old, new):
-        self.value = old, new
-
-    def c(self, model, instance, name,
-        args, kwargs):
-        self.before = name, args
-
-    def d(self, model, instance, name, res,
-        args, kwargs):
-        self.after = name, args
+            self.after = info.method_name, info.args
 
 class DynamicWithName(gtkmvc.Observer):
     def __init__(self, model):
         gtkmvc.Observer.__init__(self)
 
-        self.add_observing_method(self.a, ["signal", "iduna"])
-        self.add_observing_method(self.b, ["value", "before"])
-        self.add_observing_method(self.c, ("before", "after"))
-        self.add_observing_method(self.d, ("after", "before"))
+        for name in ("signal", "iduna"): 
+            self.observe(self.a, name, signal=True)
+            pass
+        for name in ("value", "before"):
+            self.observe(self.b, name, assign=True)
+            pass
+        for name in ("before", "after"):            
+            self.observe(self.c, name, before=True)
+            pass
+        for name in ("before", "after"):            
+            self.observe(self.d, name, after=True)
+            pass
 
         self.observe_model(model)
 
-    def a(self, model, prop_name, arg):
+    def a(self, model, prop_name, info):
         if prop_name == "signal":
-            self.signal = arg
+            self.signal = info.arg
 
-    def b(self, model, prop_name, old, new):
+    def b(self, model, prop_name, info):
         if prop_name == "value":
-            self.value = old, new
+            self.value = info.old, info.new
 
-    def c(self, model, prop_name, instance, name,
-        args, kwargs):
+    def c(self, model, prop_name, info):
         if prop_name == "before":
-            self.before = name, args
+            self.before = info.method_name, info.args
 
-    def d(self, model, prop_name, instance, name, res,
-        args, kwargs):
+    def d(self, model, prop_name, info):
         if prop_name == "after":
-            self.after = name, args
+            self.after = info.method_name, info.args
 
 class SingleTest(unittest.TestCase):
     def setUp(self):
@@ -212,39 +157,24 @@ class SingleTest(unittest.TestCase):
     def testExplicit(self):
         self.notifications(Explicit(self.m))
 
-    def testWithoutName(self):
-        self.notifications(WithoutName(self.m))
-
     def testWithName(self):
         self.notifications(WithName(self.m))
 
-    def testDynamicWithoutName(self):
-        self.notifications(DynamicWithoutName(self.m))
-
     def testDynamicWithName(self):
         self.notifications(DynamicWithName(self.m))
-
-    # The following test backwards compatibility.
-
-    def testWithoutNameModule(self):
-        self.notifications(WithoutNameModule(self.m))
 
     def testWithNameModule(self):
         self.notifications(WithNameModule(self.m))
 
 class Dynamic(gtkmvc.Observer):
-    def a(self, model, arg):
-        self.signal = arg
+    def a(self, model, prop_name, info):
+        self.signal = info.arg
 
 class DynamicTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
         self.c = Dynamic()
-        self.c.add_observing_method(self.c.a, "signal")
-
-    def testWithout(self):
-        self.assertFalse(
-            self.c.does_observing_method_receive_prop_name(self.c.a))
+        self.c.observe(self.c.a, "signal", signal=True)
 
     def testGet(self):
         self.assertEqual(self.c.a,

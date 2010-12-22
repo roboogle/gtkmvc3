@@ -22,9 +22,10 @@ class Trigger(Observer):
     def property_fname_value_change(self, model, old, new):
         self.fname = old, new
 
-    @Observer.observes("lname", "aaa")
-    def property_value_change(self, model, prop_name, old, new):
-        setattr(self, prop_name, (old, new))
+    @Observer.observe("lname", assign=True)
+    @Observer.observe("aaa", assign=True)
+    def property_value_change(self, model, prop_name, info):
+        setattr(self, prop_name, (info.old, info.new))
 
 class SQLite(unittest.TestCase):
     def setUp(self):

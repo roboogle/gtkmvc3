@@ -21,9 +21,11 @@ class Student (Person):
 class PersonObserver(Observer):
   _map = {}
     
-  @Observer.observes("fname", "lname", 'aaa')
-  def property_value_change(self, model, prop_name, old, new):
-      self._map[prop_name] = (old, new)
+  @Observer.observe("fname", assign=True)
+  @Observer.observe("lname", assign=True)
+  @Observer.observe("aaa", assign=True)
+  def property_value_change(self, model, prop_name, info):
+      self._map[prop_name] = (info.old, info.new)
       return
   pass
 # ----------------------------------------------------------------------

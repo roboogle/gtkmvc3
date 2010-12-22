@@ -27,66 +27,37 @@ from support import decorators, utils, log
 
 import inspect
 import types
-
-@decorators.good_decorator_accepting_args
-def observes(*args):
-    """
-    Decorate a method in an :class:`Observer` subclass as a notification.
-    Takes one to many property names as strings. If any of them changes
-    in a model we observe, the method is called. If multiple names were given
-    the method will be passed the name of the property that changed.
-
-       .. versionadded:: 1.99.0
-
-       .. deprecated:: 1.99.1
-          Use :meth:`Observer.observes` instead.
-    """
-
-    @decorators.good_decorator
-    def _decorator(_notified):
-        # marks the method with observed properties
-        _set = getattr(_notified, Observer._CUST_OBS_, set())
-        _set |=  set(args)
-        setattr(_notified, Observer._CUST_OBS_, _set)
-        return _notified
-
-    log.logger.warning("Decorator observer.observers is deprecated:"
-                       "use Observer.observes instead")
-    return _decorator
-# ----------------------------------------------------------------------
-
-
-# private metaclass, used to force read-only class-level properties.
-class __NTinfo_mc__ (type):
-    NT_AUTO  = property(lambda cls: 0) # for internal use only
-    NT_VALUE  = property(lambda cls: 1)
-    NT_BEFORE = property(lambda cls: 2)
-    NT_AFTER  = property(lambda cls: 4)
-    NT_SIGNAL = property(lambda cls: 8)
-    pass # end of metaclass
+import collections
 
 
 class NTInfo (dict):
     """Notification Type of observers' notification methods.
 
-    This class is used:
+    This class is a dictionary-like object used:
 
-    1. As class when defining notificaion methods in observers, as it
-       contains the constants for notification types.
+    1. As class when defining notification methods in observers, as it
+       contains the flags identifying the notification types.
 
     2. As class instance as parameter when a notification methods is
        called in observers.
 
 
-    Notification Type Constants
-    ===========================
-
-    Class `NTInfo` exports these notification type constants:
+    Notification Type Flags
+    =======================
     
-    NT_VALUE: For value-change notification types. 
-    NT_BEFORE: For before-method-call notification types.
-    NT_AFTER: For after-method-call notification types.
-    NT_SIGNAL: For signal-emit notification types.
+    Notification methods are declared either statically with decorator
+    `@Observer.observe` or dynamically calling the (same) method
+    `Observer.observe(...)`. In both cases the type of the
+    notification is defined by setting to `True` some flags. Flags can
+    be set in any combination for multi-type notification
+    methods. Flags are:
+
+      `assign` : For notifications issued when OPs are assigned.
+      `before` : For notifications called before a modifying method is
+                 called.
+      `after`  : For notifications called after a modifying method is
+                 called.
+      `signal` : For notifications called when a signal is emitted.
 
     
     Instance content
@@ -97,7 +68,7 @@ class NTInfo (dict):
 
       def notification_method(self, model, name, info)
 
-    NTInfo is a dictionary (with some particular behaviour added),
+    NTInfo is a dictionary (with some particular behaviour added)
     containing some information which is independent on the
     notification type, and some other information wich depends on the
     notification type.
@@ -109,24 +80,23 @@ class NTInfo (dict):
     For all notification types, NTInfo contains:
 
       model : the model containing the observable property triggering
-              the notification. model is also passed as first argument
-              of the notification method.
+              the notification. `model` is also passed as first
+              argument of the notification method.
 
-      name : the name of the observable property triggering the
-             notification. name is also passed as second argument of
-             the notification method.
+      prop_name : the name of the observable property triggering the
+                  notification. `name` is also passed as second
+                  argument of the notification method.
+      
+    Furthermore, any keyword argument not listed here is copied
+    without modification into `info`.
 
-      type : The value identifying the type of the notification
-             method. This is generally one value among NT_VALUE,
-             NT_BEFORE, NT_AFTER and NT_SIGNAL, but more generally it
-             can be also a bitwise combination of these values.
-  
     There are further information depending on the specific
     notification type:
 
-    For NT_VALUE
-    ------------
-
+    For Assign-type
+    ---------------
+      assign : flag set to `True`
+      
       old : the value that the observable property had before being
             changed.
 
@@ -134,8 +104,9 @@ class NTInfo (dict):
             changed to.
 
 
-    For NT_BEFORE
-    -------------
+    For Before method call type
+    ---------------------------
+      before : flag set to `True`
 
       instance : the object instance which the method that is being
                  called belongs to.
@@ -148,8 +119,9 @@ class NTInfo (dict):
               is being called.
 
 
-    For NT_AFTER
-    ------------
+    For After method call type
+    ---------------------------
+      after : flag set to `True`
 
       instance : the object instance which the method that has been 
                  called belongs to.
@@ -163,81 +135,194 @@ class NTInfo (dict):
       
       result : the value returned by the method which has been called. 
  
-    For NT_SIGNAL
-    -------------
-
+    For Signal-type
+    ---------------
+      signal : flag set to `True`
+    
       arg : the argument which was optionally specified when invoking
             emit() on the signal observable property.
   
-    Type queries
-    ============
+    Information access
+    ==================
+
+    The information carried by a NTInfo instance passed to a
+    notification method can be retrieved using the instance as a
+    dictionary, or accessing directly to the information as an
+    attribute of the instance. For example::
+       
+       # This is a multi-type notification
+       @Observer.observe("op1", assign=True, hello="Ciao")
+       @Observer.observe("op2", after=True, before=True)
+       def notify_me(self, model, name, info):
+           assert info["model"] == model # access as dict key
+           assert info.prop_name == name # access as attribute
+
+           if "assign" in info:
+              assert info.old == info["old"]
+              assert "hello" in info and "ciao" == info.hello
+              print "Assign from", info.old, "to", info.new
+           else:
+              assert "before" in info or "after" in info
+              assert "hello" not in info
+              print "Method name=", info.method_name
+              if "after" in info: print "Method returned", info.result              
+              pass
+              
+           return   
 
     As already told, the type carried by a NTInfo instance can be
-    accessed through attribute `type`, to be matched type constants
-    available in class `NTInfo`, possibly with bit masks.  However,
-    class `NTInfo` provides also predicates to query for type, like
-    methods `is_value`, `is_before`, etc.
+    accessed through boolean flags `assign`, `before`, `after` and
+    `signal`. Furthermore, any other information specified at
+    declaration time (keyword argument 'hello' in the previous
+    example) will be accessible in the corresponding notification
+    method.
 
        .. versionadded:: 1.99.1
 
     """
 
-    __metaclass__ = __NTinfo_mc__
-    
+    # At least one of the keys in this set is required when constructing
+    __ANY_REQUESTED = frozenset("assign before after signal".split())
+    __ALL_REQUESTED = frozenset("model prop_name".split())
+
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
-        # if not already set, sets the default type
-        if 'type' not in self: self['type'] = NTInfo.NT_VALUE
+        
+        # checks the content provided by the user
+        if not any((x in self and self[x] for x in NTInfo.__ANY_REQUESTED)):
+            raise KeyError("At least one flag among %s must be set" % \
+                               ",".join(NTInfo.__ANY_REQUESTED))
+        
+        # all requested are provided by the framework, not the user
+        assert all((x in self for x in NTInfo.__ALL_REQUESTED))
         return
 
     def __getattr__(self, name):
         try:
             return self[name]
-        except KeyError:
-            raise AttributeError
+        except KeyError: 
+            raise AttributeError("NTInfo object has no attribute '%s'.\n"
+                                 "Existing attributes are: %s" % (name, str(self)))
+        pass
 
-    def is_value(self): 
-        return self['type'] & NTInfo.NT_VALUE != 0
-
-    def is_before(self): 
-        return self['type'] & NTInfo.NT_BEFORE != 0
-
-    def is_after(self): 
-        return self['type'] & NTInfo.NT_AFTER != 0
-
-    def is_signal(self): 
-        return self['type'] & NTInfo.NT_SIGNAL != 0
-    
-    pass # end of class
-    
-
+    pass # end of class NTInfo
 # ----------------------------------------------------------------------
+    
+
+
+@decorators.good_decorator_accepting_args
+def observes(*args):
+    """
+    Decorate a method in an :class:`Observer` subclass as a notification.
+    Takes one to many property names as strings. If any of them changes
+    in a model we observe, the method is called. The name of the property 
+    will be passed to the method. 
+
+    The decorated method has to have one of these prototypes:
+
+      def value_notify(self, model, name, old, new)
+      def before_notify(self, model, name, instance, method_name, args, kwargs)
+      def after_notify(self, model, name, instance, method_name, res, args, kwargs)
+      def signal_notify(self, model, name, arg)
+
+       .. versionadded:: 1.99.0
+
+       .. deprecated:: 1.99.1
+          Use :meth:`Observer.observe` instead, which offers more features.
+    """
+
+    @decorators.good_decorator
+    def _decorator(_notified):
+        # marks the method with observed properties
+        _list = getattr(_notified, Observer._CUST_OBS_, list())        
+
+        # here the notificaion type is inferred out of the number of
+        # arguments of the notification method. This is not
+        # particularly robust.
+        margs, mvarargs, _, _ = inspect.getargspec(_notified)
+        mnumargs = len(margs)
+        if not mvarargs:
+            args_to_type = { 4 : 'signal',
+                             5 : 'assign',
+                             7 : 'before',
+                             8 : 'after', 
+                             }
+            try : 
+                type_kw = args_to_type[mnumargs]
+                # warning: flag _old_style_call is used this as
+                # deprecated call mechanism like in
+                # <property_<name>_...
+                _list += [(arg, dict({type_kw : True, 
+                                      'old_style_call' : True}))
+                          for arg in args]
+                setattr(_notified, Observer._CUST_OBS_, _list)
+
+            except KeyError:
+                log.logger.warn("Ignoring notification %s: wrong number of"
+                                " arguments (given %d, expected in (%s))", 
+                                _notified.__name__, mnumargs, 
+                                ",".join(map(str, args_to_type)))
+                pass
+        else:
+            log.logger.warn("Ignoring notification %s: variable arguments"
+                            " prevent type inference", _notified.__name__)
+            pass
+        return _notified
+
+    # checks arguments
+    if 0 == len(args): 
+        raise TypeError("decorator observe() takes one of more arguments (0 given)")
+    if any(type(arg) != str for arg in args):
+        raise TypeError("decorator observe() takes only strings as arguments")    
+
+    log.logger.warning("Decorator observer.observers is deprecated:"
+                       "use Observer.observe instead")
+    return _decorator
+# ----------------------------------------------------------------------
+
+
 class Observer (object):
     """
     .. note::
 
-       Most methods in this class are used internally by the framework.
-       Do not override them in subclasses.
+       Most methods in this class are used internally by the
+       framework.  Do not override them in subclasses.
     """
 
-    # these are internal
+    # this is internal
     _CUST_OBS_ = "__custom_observes__"
+    # ----------------------------------------------------------------------   
+
 
     @classmethod
     @decorators.good_decorator_accepting_args
-    def observes(cls, *args, **kwargs):
+    def observe(cls, *args, **kwargs):
         """
-        Decorate a method as a notification. Takes an arbitrary number
-        of property names as strings. If none are given, the name of
-        the method is used. If a given property changes in a model we
-        observe, the method is called.
+        If used as decorator, decorates a method as a notification
+        method. If called, declares dynamically a new notification
+        methods.
 
-        Keyword argument 'type' can be used to specify the type of the
-        notification. Values for type are type constants in class
-        `NTInfo`.  Values for `type` can be combined for declaring
-        notifications which can receive notification of several
-        types. If `type` is not specified, the default value is
-        `NTInfo.NT_VALUE`.
+        Used as decorator
+        =================
+        Takes one string (the property name), and at least one boolean
+        keyword argument identifying the types of the
+        notification. The keyword argument has to be set to True in
+        the set `{assign, before, after, signal}`.
+
+        If other keyword arguments are provided, they will be found in
+        the dictionary passed to the notification method.
+
+        The decorator can be used multiple times to define
+        notification methods which has to be called for multiple
+        observable properties.
+
+        Used dynamically
+        ================
+        To declare dynamically that a method is a notification method,
+        `Observer.observe` has to be called specifying the method as
+        first argument (not counting Observer `self`). The remaining
+        arguments are the property name and keyword arguments like
+        described in the use as decorator.
 
            .. versionadded:: 1.99.1
         """
@@ -245,21 +330,52 @@ class Observer (object):
         @decorators.good_decorator
         def _decorator(_notified):
             # marks the method with observed properties
-            _set = getattr(_notified, Observer._CUST_OBS_, set())
-            _set |=  set(names)
-            setattr(_notified, Observer._CUST_OBS_, _set)
-            return _notified        
+            _list = getattr(_notified, Observer._CUST_OBS_, list())
+            _list.append((name, kwargs))
+            setattr(_notified, Observer._CUST_OBS_, _list)
+            return _notified 
 
-        # this handle the case of empty args
-        if 1 == len(args) and type(args[0]) is types.FunctionType:
-            names = ()
-            return _decorator(args[0])
+        # handles arguments
+        if args and isinstance(args[0], cls):
+            # used as instance method, for declaring notifications
+            # dynamically
+            if len(args) != 3: 
+                raise TypeError("observe() takes exactly three arguments"
+                                " when called (%d given)" % len(args))
+            
+            self = args[0]
+            notified = args[1]
+            name = args[2]            
 
-        # this is the case with arguments
-        names = args
-        return _decorator
+            assert isinstance(self, Observer), "Method Observer.observe " \
+                "must be called with an Observer instance as first argument"
+            if not isinstance(notified, collections.Callable):
+                raise TypeError("Second argument of observe() must be a callable")
+            if type(name) != str: 
+                raise TypeError("Third argument of observe() must be a string")
+            
+            # fills the internal structures
+            if not self.__CUST_OBS_KWARGS.has_key(notified):
+                if not self.__CUST_OBS_MAP.has_key(name):
+                    self.__CUST_OBS_MAP[name] = set()
+                    pass
+                self.__CUST_OBS_MAP[name].add(notified)
+                self.__CUST_OBS_KWARGS[notified] = kwargs
+                pass            
+            
+            return None
+
+        # used statically as decorator
+        if len(args) != 1: 
+            raise TypeError("observe() takes exactly one argument when used"
+                            " as decorator (%d given)" % len(args))
+        name = args[0]
+        if type(name) != str: 
+            raise TypeError("First argument of observe() must be a string")
+        return _decorator            
     # ----------------------------------------------------------------------
-    
+
+
     def __init__(self, model=None, spurious=False):
         """
         *model* is passed to :meth:`observe_model` if given.
@@ -276,6 +392,15 @@ class Observer (object):
            necessary.
         """
 
+        # --------------------------------------------------------- #
+        # This turns the decorator 'observe' an instance method
+        def __observe(*args, **kwargs): self.__original_observe(self, *args, **kwargs)
+        __observe.__name__ = self.observe.__name__
+        __observe.__doc__ = self.observe.__doc__
+        self.__original_observe = self.observe
+        self.observe = __observe
+        # --------------------------------------------------------- #
+
         self.__accepts_spurious__ = spurious
 
         # NOTE: In rev. 202 these maps were unified into
@@ -290,62 +415,39 @@ class Observer (object):
         # Private maps: do not change/access them directly, use
         # methods to access them:
         self.__CUST_OBS_MAP = {} # prop name --> set of observing methods
-        self.__CUST_OBS_ARGS = {} # observing method --> flag 
+        self.__CUST_OBS_KWARGS = {} # observing method --> flag 
 
         processed_props = set() # tracks already processed properties
 
         # searches all custom observer methods
         for cls in inspect.getmro(type(self)):
-            # list of (method-name, method-object, list-of-properties-the-method-observes)
+            # list of (method-name, method-object, list of (prop-name, kwargs))
             meths = [ (name, meth, getattr(meth, Observer._CUST_OBS_))
                       for name, meth in cls.__dict__.iteritems()
-                      if inspect.isfunction(meth) and hasattr(meth, Observer._CUST_OBS_)]
+                      if (inspect.isfunction(meth) and 
+                          hasattr(meth, Observer._CUST_OBS_)) ]
 
             # props processed in this class. This is used to avoid
             # processing the same props in base classes.
             cls_processed_props = set() 
             
-            # TODO: fix this code to call add_observing_method
-
             # since this is traversed top-bottom in the mro, the
             # first found match is the one to care
-            for name, meth, pnames in meths:
-                if 0 == len(pnames):
-                    # no args were specified in the decorator. In this
-                    # case the method does not take the prop name among
-                    # its arguments, and the property name is taken
-                    # from the method name.
-                    if name not in processed_props:
-                        if not self.__CUST_OBS_MAP.has_key(name):
-                            self.__CUST_OBS_MAP[name] = set()
+            for name, meth, pnames_ka in meths:
+                for pname, ka in pnames_ka:
+                    if pname not in processed_props:
+                        if not self.__CUST_OBS_MAP.has_key(pname):
+                            self.__CUST_OBS_MAP[pname] = set()
                             pass
-                        _me = getattr(self, name)
-                        self.__CUST_OBS_MAP[name].add(_me)
-                        
-                        # first hit matters
-                        if not self.__CUST_OBS_ARGS.has_key(_me):
-                            self.__CUST_OBS_ARGS[_me] = False # no additional args
-                            pass
-                        cls_processed_props.add(name)
-                        pass
-                    pass
-                else: 
-                    takes_arg = 1 < len(pnames)
-                    for prop_name in pnames:
-                        if prop_name not in processed_props:
-                            if not self.__CUST_OBS_MAP.has_key(prop_name):
-                                self.__CUST_OBS_MAP[prop_name] = set()
-                                pass
-                            _me = getattr(self, name)
-                            self.__CUST_OBS_MAP[prop_name].add(_me)
+                        _me = getattr(self, name) # the most top avail method 
+                        self.__CUST_OBS_MAP[pname].add(_me)
 
-                            # first hit matters
-                            if not self.__CUST_OBS_ARGS.has_key(_me):
-                                self.__CUST_OBS_ARGS[_me] = takes_arg
-                                pass
-                            
-                            cls_processed_props.add(prop_name)
+                        # first hit matters
+                        if not self.__CUST_OBS_KWARGS.has_key(_me):
+                            self.__CUST_OBS_KWARGS[_me] = ka
                             pass
+                            
+                        cls_processed_props.add(pname)
                         pass
                     pass
                 pass 
@@ -355,74 +457,49 @@ class Observer (object):
             pass # end of loop over classes in the mro
 
         if model: self.observe_model(model)
-        return
+        return   
     
     def observe_model(self, model):
-        """
-        Call :meth:`~gtkmvc.model.Model.register_observer` on *model*.
-        """
+        """Starts observing the given model"""
         return model.register_observer(self)
 
     def relieve_model(self, model):
-        """
-        Call :meth:`~gtkmvc.model.Model.unregister_observer` on *model*.
-        """
+        """Stops observing the given model"""
         return model.unregister_observer(self)
     
     def accepts_spurious_change(self):
         """
-        Are we interested in spurious notifications?
-
-        :rtype: bool
-        """
+        Returns True if this observer is interested in receiving
+        spurious value changes. This is queried by the model when
+        notifying a value change."""
         return self.__accepts_spurious__
 
-    def add_observing_method(self, method, 
-                             prop_name_or_names):
+    def get_observing_methods(self, prop_name):
         """
-        Add notifications at runtime.
+        Return a possibly empty set of callables registered with
+        :meth:`observe` for *prop_name*.
         
-        *method* is a callable bound to `self`.
-        
-        *prop_name_or_names* can be a string or a sequence of strings.
-        In the latter case the name of the property that changed will be
-        passed to the method during notifications.
-        
-        Multiple calls may add different methods for the same names as well as
-        additional names for the same method. However, the signature of the
-        method is always determined by the last call. ::
-
-         def observes_one_property(self, model, old, new)
-
-         def observes_multiple(self, model, prop_name, old, new)
-
-        .. note::
-
-           Dynamic methods only work if you add/remove them before starting
-           to observe a model.
+        .. versionadded:: 1.99.1
+        Replaces :meth:`get_custom_observing_methods`.
         """
+        return self.__CUST_OBS_MAP.get(prop_name, set())
 
-        if isinstance(prop_name_or_names, types.StringType):
-            takes_name = False
-            prop_names = (prop_name_or_names,)
-        else:
-            try:
-                iter(prop_name_or_names)
-            except TypeError:
-                raise AssertionError("prop_name_or_names must be either a"
-                    " string or an iterable")
-            takes_name = True
-            prop_names = prop_name_or_names
-            pass
-                          
-        for prop_name in prop_names:
-            if not self.__CUST_OBS_MAP.has_key(prop_name):
-                self.__CUST_OBS_MAP[prop_name] = set()
-                pass
-            self.__CUST_OBS_MAP[prop_name].add(method)
-            pass
-        self.__CUST_OBS_ARGS[method] = takes_name
-        return
+    # this is done to keep backward compatibility
+    get_custom_observing_methods = get_observing_methods
+    
+    def get_observing_method_kwargs(self, method):
+        """
+        Returns the keyword arguments which were specified when
+        declaring a notification method, either statically of
+        synamically with :meth:`Observer.observe`.
+
+        *method* a callable that was registered with
+        :meth:`observes`.
+        
+        :rtype: dict
+        """
+        return self.__CUST_OBS_KWARGS[method]
+    
 
     def remove_observing_method(self, method, prop_names):
         """
@@ -443,7 +520,7 @@ class Observer (object):
             if method in _set: _set.remove(method)
             pass
         
-        if method in self.__CUST_OBS_ARGS: del self.__CUST_OBS_ARGS[method]
+        if method in self.__CUST_OBS_KWARGS: del self.__CUST_OBS_KWARGS[method]
         return
 
     def is_observing_method(self, method):
@@ -451,35 +528,7 @@ class Observer (object):
         Returns `True` if the given method was previously added as an
         observing method, either dynamically or via decorator.
         """
-        return self.__CUST_OBS_ARGS.has_key(method)
-    
-    def get_observing_methods(self, prop_name):
-        """
-        Return a possibly empty set of callables registered with
-        :meth:`add_observing_method` or :meth:`observes` for *prop_name*.
+        return method in self.__CUST_OBS_KWARGS
 
-        .. versionadded:: 1.99.1
-           Replaces :meth:`get_custom_observing_methods`.
-        """
-        return self.__CUST_OBS_MAP.get(prop_name, set())
-
-    # this is done to keep backward compatibility
-    get_custom_observing_methods = get_observing_methods
-
-    def does_observing_method_receive_prop_name(self, method):
-        """
-        Will the method be passed the name of the property that changed on
-        notification? This additional argument is meant for methods that are
-        registered for more than one property.
-        
-        *method* a callable that was registered with
-        :meth:`add_observing_method` or :meth:`observes`.
-        
-        :rtype: bool
-        """
-        return self.__CUST_OBS_ARGS[method]
-    
     pass # end of class
-
-    
-        
+# ----------------------------------------------------------------------

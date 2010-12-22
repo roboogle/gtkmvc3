@@ -27,7 +27,7 @@ import types
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
-from observer import Observer
+from observer import Observer, NTInfo
 from observable import Signal
 from support.log import logger
 from support import decorators
@@ -202,9 +202,15 @@ class Model (Observer):
         Observer.__init__(self)
         
         self.__observers = []
-        # keys are properties names, values are pairs (bool, methods)
-        # inside the observer. bool is True for custom observing
-        # methods, False otherwise
+
+        # keys are properties names, values are pairs (method,
+        # kwargs|None) inside the observer. kwargs is the keyword
+        # argument possibly specified when explicitly defining the
+        # notification method in observers, and it is used to build
+        # the NTInfo instance passed down when the notification method
+        # is invoked. If kwargs is None (special case), the
+        # notification method is "old style" (property_<name>_...) and
+        # won't be receiving the property name.
         self.__value_notifications = {}
         self.__instance_notif_before = {}
         self.__instance_notif_after = {}
@@ -324,6 +330,7 @@ class Model (Observer):
         """
         value = getattr(self, "_prop_%s" % prop_name, None)
 
+        # --- Some services ---
         def getmeth(format, numargs):
             name = format % prop_name
             meth = getattr(observer, name)
@@ -334,108 +341,88 @@ class Model (Observer):
                 raise AttributeError
             return meth
 
-        def add_value(notification):
-            if notification in self.__value_notifications[prop_name]:
-                return
+        def add_value(notification, kw=None):
+            pair = (notification, kw)
+            if pair in self.__value_notifications[prop_name]: return
             logger.debug("Will call '%s' after assignment to %s",
-                notification[1].__name__, prop_name)
-            self.__value_notifications[prop_name].append(notification)
+                notification.__name__, prop_name)
+            self.__value_notifications[prop_name].append(pair)
+            return
 
-        def add_before(notification):
-            if not isinstance(value, ObsWrapperBase) or \
-                isinstance(value, Signal):
+        def add_before(notification, kw=None):
+            if (not isinstance(value, ObsWrapperBase) or 
+                isinstance(value, Signal)): 
                 return
-            if notification in self.__instance_notif_before[prop_name]:
-                return
+
+            pair = (notification, kw)
+            if pair in self.__instance_notif_before[prop_name]: return
             logger.debug("Will call '%s' before mutation of %s",
-                notification[1].__name__, prop_name)
-            self.__instance_notif_before[prop_name].append(notification)
+                notification.__name__, prop_name)
+            self.__instance_notif_before[prop_name].append(pair)
+            return
 
-        def add_after(notification):
-            if not isinstance(value, ObsWrapperBase) or \
-                isinstance(value, Signal):
+        def add_after(notification, kw=None):
+            if (not isinstance(value, ObsWrapperBase) or 
+                isinstance(value, Signal)):
                 return
-            if notification in self.__instance_notif_after[prop_name]:
-                return
+            pair = (notification, kw)
+            if pair in self.__instance_notif_after[prop_name]: return
             logger.debug("Will call '%s' after mutation of %s",
-                notification[1].__name__, prop_name)
-            self.__instance_notif_after[prop_name].append(notification)
+                notification.__name__, prop_name)
+            self.__instance_notif_after[prop_name].append(pair)
+            return
 
-        def add_signal(notification):
-            if not isinstance(value, Signal):
-                return
-            if notification in self.__signal_notif[prop_name]:
-                return
+        def add_signal(notification, kw=None):
+            if not isinstance(value, Signal): return
+            pair = (notification, kw)
+            if pair in self.__signal_notif[prop_name]: return
             logger.debug("Will call '%s' after emit on %s",
-                notification[1].__name__, prop_name)
-            self.__signal_notif[prop_name].append(notification)
+                notification.__name__, prop_name)
+            self.__signal_notif[prop_name].append(pair)
+            return
+        # ---------------------
 
-        try:
-            notification = WITHOUT_NAME, getmeth("property_%s_signal_emit", 3)
-        except AttributeError:
-            pass
-        else:
-            add_signal(notification)
+        try: notification = getmeth("property_%s_signal_emit", 3)
+        except AttributeError: pass
+        else: add_signal(notification)
 
-        try:
-            notification = WITHOUT_NAME, getmeth("property_%s_value_change", 4)
-        except AttributeError:
-            pass
-        else:
-            add_value(notification)
+        try: notification = getmeth("property_%s_value_change", 4)
+        except AttributeError: pass
+        else: add_value(notification)
 
-        try:
-            notification = WITHOUT_NAME, getmeth("property_%s_before_change", 6)
-        except AttributeError:
-            pass
-        else:
-            add_before(notification)
+        try: notification = getmeth("property_%s_before_change", 6)
+        except AttributeError: pass
+        else: add_before(notification)
 
-        try:
-            notification = WITHOUT_NAME, getmeth("property_%s_after_change", 7)
-        except AttributeError:
-            pass
-        else:
-            add_after(notification)
-
+        try: notification = getmeth("property_%s_after_change", 7)
+        except AttributeError: pass
+        else: add_after(notification)
+        
+        # here explicit notification methods are handled (those which
+        # have been statically or dynamically registered)
+        type_to_adding_method = {
+            'assign' : add_value,
+            'before' : add_before, 
+            'after'  : add_after, 
+            'signal' : add_signal,
+            }
+        
         for meth in observer.get_observing_methods(prop_name):
-            args, varargs, _, _ = inspect.getargspec(meth)
-            numargs = len(args)
-            if varargs:
-                logger.warn("Ignoring notification %s: variable arguments"
-                    " prevent type inference", meth.__name__)
-                continue
-            if observer.does_observing_method_receive_prop_name(meth):
-                notification = WITH_NAME, meth
-                if numargs == 4:
-                    add_signal(notification)
-                elif numargs == 5:
-                    add_value(notification)
-                elif numargs == 7:
-                    add_before(notification)
-                elif numargs == 8:
-                    add_after(notification)
-                else:
-                    logger.warn("Ignoring notification %s: wrong number of"
-                        " arguments (one is prop_name)", meth.__name__)
+            added = False
+            kw = observer.get_observing_method_kwargs(meth)
+            for flag, adding_meth in type_to_adding_method.iteritems():
+                if flag in kw: 
+                    added = True
+                    adding_meth(meth, kw)
                     pass
                 pass
-            else:
-                notification = WITHOUT_NAME, meth
-                if numargs == 3:
-                    add_signal(notification)
-                elif numargs == 4:
-                    add_value(notification)
-                elif numargs == 6:
-                    add_before(notification)
-                elif numargs == 7:
-                    add_after(notification)
-                else:
-                    logger.warn("Ignoring notification %s: wrong number of"
-                        " arguments (prop_name not passed)", meth.__name__)
-                    pass
-                pass
+            if not added: raise ValueError("Notification method %s is marked "
+                                           "to be observing property '%s', "
+                                           "but no notification type "
+                                           "information were specified." %
+                                           (meth.__name__, prop_name))                                           
             pass
+        
         return
 
     def __remove_observer_notification(self, observer, prop_name):
@@ -448,9 +435,9 @@ class Model (Observer):
         """
 
         def side_effect(seq):
-            for flag, meth in reversed(seq):
+            for meth, kw in reversed(seq):
                 if meth.im_self is observer:
-                    seq.remove((flag, meth))
+                    seq.remove((meth, kw))
                     yield meth
 
         for meth in side_effect(self.__value_notifications.get(prop_name, ())):
@@ -485,16 +472,25 @@ class Model (Observer):
         *old* the value before the change occured.
         """
         assert(self.__value_notifications.has_key(prop_name))
-        for flag, method in self.__value_notifications[prop_name] :
+        for method, kw in self.__value_notifications[prop_name] :
             obs = method.im_self
             # notification occurs checking spuriousness of the observer
             if old != new or obs.accepts_spurious_change():
-                if flag == WITHOUT_NAME: 
+                if kw is None: # old style call without name
                     self.__notify_observer__(obs, method,
-                                             self, old, new) # notifies the change
-                else: # explicit (custom) notification
+                                             self, old, new)
+                elif 'old_style_call' in kw:  # old style call with name
                     self.__notify_observer__(obs, method,
-                                             self, prop_name, old, new) # notifies the change
+                                             self, prop_name, old, new)
+                else: 
+                    # New style explicit notification.
+                    # notice that named arguments overwrite any
+                    # existing key:val in kw, which is precisely what
+                    # it is expected to happen
+                    info = NTInfo(kw, model=self, prop_name=prop_name, 
+                                  old=old, new=new)
+                    self.__notify_observer__(obs, method, 
+                                             self, prop_name, info)
                     pass
                 pass
             pass
@@ -510,16 +506,29 @@ class Model (Observer):
         *meth_name* name of the method we are about to call on *instance*.
         """
         assert(self.__instance_notif_before.has_key(prop_name))
-        for flag, method in self.__instance_notif_before[prop_name]:
+        for method, kw in self.__instance_notif_before[prop_name]:
+            obs = method.im_self
             # notifies the change
-            if flag == WITHOUT_NAME: 
-                self.__notify_observer__(method.im_self, method,
+            if kw is None: # old style call without name
+                self.__notify_observer__(obs, method,
                                          self, instance,
                                          meth_name, args, kwargs)
-            else: # explicit (custom) notification
-                self.__notify_observer__(method.im_self, method,
+            elif 'old_style_call' in kw:  # old style call with name
+                self.__notify_observer__(obs, method,
                                          self, prop_name, instance,
-                                         meth_name, args, kwargs)
+                                         meth_name, args, kwargs)                
+            else: 
+                # New style explicit notification.
+                # notice that named arguments overwrite any
+                # existing key:val in kw, which is precisely what
+                # it is expected to happen
+                info = NTInfo(kw, 
+                              model=self, prop_name=prop_name, 
+                              instance=instance, method_name=meth_name, 
+                              args=args, kwargs=kwargs)
+                self.__notify_observer__(obs, method, 
+                                         self, prop_name, info)
+                pass
             pass
         return                
 
@@ -533,17 +542,29 @@ class Model (Observer):
         *res* the return value of the method call.
         """
         assert(self.__instance_notif_after.has_key(prop_name))
-        for flag, method in self.__instance_notif_after[prop_name]:
+        for method, kw in self.__instance_notif_after[prop_name]:
+            obs = method.im_self
             # notifies the change
-            if flag == WITHOUT_NAME: 
-                self.__notify_observer__(method.im_self, method,
+            if kw is None:  # old style call without name
+                self.__notify_observer__(obs, method,
                                          self, instance,
                                          meth_name, res, args, kwargs) 
-            else: # explicit (custom) notification
-                self.__notify_observer__(method.im_self, method,
+            elif 'old_style_call' in kw:  # old style call with name
+                self.__notify_observer__(obs, method,
                                          self, prop_name, instance,
-                                         meth_name, res, args, kwargs)
-            
+                                         meth_name, res, args, kwargs) 
+            else: 
+                # New style explicit notification.
+                # notice that named arguments overwrite any
+                # existing key:val in kw, which is precisely what
+                # it is expected to happen
+                info = NTInfo(kw, 
+                              model=self, prop_name=prop_name, 
+                              instance=instance, method_name=meth_name, 
+                              result=res, args=args, kwargs=kwargs)
+                self.__notify_observer__(obs, method, 
+                                         self, prop_name, info)
+                pass            
             pass
         return
 
@@ -558,14 +579,25 @@ class Model (Observer):
         """
         assert(self.__signal_notif.has_key(prop_name))
         
-        for flag, method in self.__signal_notif[prop_name]:
+        for method, kw in self.__signal_notif[prop_name]:
+            obs = method.im_self
             # notifies the signal emit
-            if flag == WITHOUT_NAME:
-                self.__notify_observer__(method.im_self, method,
+            if kw is None: # old style call, without name
+                self.__notify_observer__(obs, method,
                                          self, arg)
-            else: # explicit (custom) notification
-                self.__notify_observer__(method.im_self, method,
+            elif 'old_style_call' in kw:  # old style call with name
+                self.__notify_observer__(obs, method,
                                          self, prop_name, arg)
+            else:
+                # New style explicit notification.
+                # notice that named arguments overwrite any
+                # existing key:val in kw, which is precisely what
+                # it is expected to happen
+                info = NTInfo(kw, 
+                              model=self, prop_name=prop_name, arg=arg)
+                self.__notify_observer__(obs, method, 
+                                         self, prop_name, info)
+                pass
             pass
         return
         

@@ -27,9 +27,9 @@ presented. ::
     pass # end of class
  # ----------------------------
  class MyObserver (Observer):
-    @Observer.observes
-    def name(self, model, old, new):
-        print "'name' changed from", old, "to", new
+    @Observer.observe("name", assign=True)
+    def notification(self, model, name, info):
+        print "'name' changed from", info.old, "to", info.new
         return
     pass # end of class
  # ----------------------------
@@ -41,16 +41,18 @@ presented. ::
 In models, OPs are declared explicitly, and in observers we define
 methods which will be called when OPs are changed. In the example,
 when ``m.name`` is changed in the last line, method
-``MyObserver.name`` is called automatically to notify the observer.
+``MyObserver.notification`` is called automatically to notify the
+observer. All details about observers will be presented in section
+:ref:`Observers`, in particular about what `assign=True` means. 
 
 Controllers are also observers, so the OP pattern clicks well with
 the MVC pattern.
 
-If the example looks smooth and easy, the topic is much more
-complex. OPs can be *concrete* or *logical*, and can be values
-(like in the previous example), or complex objects like containers
-or user's classes. All these differences add complexity which will
-be described in details in the following sections.
+If the example looks smooth and relatively easy, the topic is much
+more complex. OPs can be *concrete* or *logical*, and can be values
+(like in the previous example), or complex objects like containers or
+user's classes. All these differences add complexity which will be
+described in details in the following sections.
 
 .. _OPconc:
 .. include:: op_concrete.rst
@@ -64,6 +66,6 @@ be described in details in the following sections.
 .. include:: op_special.rst
 
 
-:TODO: Add a section about semantical constratins when OP are
+:TODO: Add a section about semantical constraints when OP are
        involved. E.g. getter defined without a corrresponding
        logical prop, etc.

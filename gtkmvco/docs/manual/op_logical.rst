@@ -234,6 +234,3 @@ as: ::
 
 Of course, since in naming conventions names *matters*, some names
 in the example had to be adapted.
-
-
-

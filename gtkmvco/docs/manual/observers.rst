@@ -50,9 +50,9 @@ When an OP gets changed, notifications are sent by the framework to
 observer's methods. As we see in previous chapter, changes can happen
 at:
 
-Value
+Assignment
 	When the value of an OP is changed, meaning that the OP is
-	assigned with a different value.
+	assigned with a value.
 
 Instance 
 	 When an object instance is changed internally. For example an
@@ -62,87 +62,130 @@ Instance
 
 .. _Observer_vcn:
 
-Value Change Notifications
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Change Notification Methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Value notifications sent to methods whose propotype is: 
+Independently on the notification type, the prototype of notification
+methods in observers is always:
 
-.. method:: Observer.method_name(model, [pname,] old, new)
+.. method:: Observer.method_name(model, prop_name, info)
 
    :param model: is the observed Model instance containing the OP
+                 which got changed
+
+   :param prop_name: is the name of the OP which got changed.
+
+   :param info: a dictionary whose content depends on the notification
+                type (namely *assign*, *before* method call, *after* method
+                call and *signal*).
+
+How is an observer's method declared to be *notification* method for
+an OP? It is possible to declare notification methods *statically* or
+*dynamically*.
+
+1. **Statically** with decorator ``@Observer.observe``. For example::
+
+    from gtkmvc import Observer
+    class MyObserver (Observer):
+
+      @Observer.observe('prop1', assign=True)
+      @Observer.observe('prop2', assign=True, signal=True)
+      def notifications(self, model, prop_name, info):
+          # this is called when 'prop1' or 'prop2' are assigned
+          # and also when 'prop2.emit()' is called
+          return
+
+      @Observer.observe('prop1', assign=True)
+      def other_notification(self, model, prop_name, info):
+          # this is called when 'prop1' is assigned
+          return
+
+   Notice that an OP can be bound to multiple notifications, like
+   ``prop1`` in the example. Also notice that the type of the
+   notification (assign, signal, etc.) is declared by means of keyword
+   arguments flags. We are discussing types and keyword arguments
+   later in this section.
+
+2. **Dynamically** with method ``Observer.observe``. For example::
+
+    from gtkmvc import Observer
+    class MyObserver (Observer):
+
+      def __init__(self):
+         Observer.__init__(self)
+
+         self.observe(self.notification, "prop1", assign=True)
+         self.observe(self.notification, "prop2", assign=True, signal=True)
+         return
+
+      def notification(self, model, prop_name, info):
+          # ...
+          return
+
+   As you can see, `Observer.observe` can be used both as decorator
+   and instance method to declare notifications. When used dynamically
+   (as instance method), the only difference is that it takes as first
+   argument the method to declare as notification.
+
+
+The parameter `info:NTInfo`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We anticipated that parameter `info` of change notification is a
+dictionary whose content depends on the notification type. Actually
+:py:obj:`info` is an instance of class :py:class:`NTInfo` 
+(**N**\ otification **T**\ ype **Info**\ rmation).
+
+:py:class:`NTInfo` derives from :py:class:`dict` type, but offers the
+possibility to access to its values by accessing keys as attributes::
+
+    # ...
+    info['key'] = 20 # access with key
+    info.key += 1 # access with attribute
+    print info.key # 21
+
+When defining a notification method, e.g. statically with decorator::
+
+    @Observer.observe('prop2', assign=True, signal=True, foo="a-value-for-foo")
+    def notifications(self, model, prop_name, info):
+        # ...
+        return 
+
+Instance :py:obj:`info` in method notification will contain all
+keyword arguments and associated values which were specified at
+declaration time::
+
+    @Observer.observe('prop2', assign=True, signal=True, foo="a-value-for-foo")
+    def notifications(self, model, prop_name, info):
+        print info['assign'] # True
+        print info.signal    # True
+        print info.foo       # "a-value-for-foo"
+        return
+
+Notification types
+------------------
+
+The type of the notification method is decided at declaration time, by
+using specific flags as keyword arguments. Later in the notification
+method, parameter :py:obj:`info` will carry specific information which
+depend on the notification type. Here all the supported types are
+discussed in details.
+
+Assign Notifications
+^^^^^^^^^^^^^^^^^^^^
+
+Keyword flag: :py:obj:`assign` set to :py:const:`True`.
+
+:py:obj:`info` content:
+
+   :model: is the observed Model instance containing the OP
                  which got changed.
-   :param pname: is the name of the OP which got changed. It has to be
+   :prop_name: is the name of the OP which got changed. It has to be
    	  	         specified when the method receives notifications for
    	  	         multiple OPs.
-   :param old: is the old value the OP had before being changed.
-   :param new: is the current value the OP is assigned to.
+   :old: is the old value the OP had before being changed.
+   :new: is the current value the OP is assigned to.
    
-How are methods receiving value change notifications bound to OPs?
-
-1. **Statically** with decorator ``Observer.observes``::
-    
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-      @Observer.observes
-      def prop1(self, model, old, new):
-          # this is called when OP 'prop1' is changed
-          return
-
-      @Observer.observes('prop1', 'prop2')
-      def multiple_notifications(self, model, pname, old, new):
-          # this is called when 'prop1' or 'prop2' are changed
-          return
-
-   Notice in this case the difference between the two cases
-   (with/without arguments passed to the decorators). Also notice that
-   an OP can be bound to multiple notifications, like ``prop1`` in the
-   example.
-
-#. **Statically** with a naming convention, by naming the notification
-   method ``property_<pname>_value_change`` (*deprecated*)::
-
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-
-      def property_prop1_value_change(self, model, old, new):
-          # this is called when OP 'prop1' is changed
-          return
-
-      def property_prop2_value_change(self, model, old, new):
-          # this is called when OP 'prop2' is changed
-          return
-   		
-   In this case each notification method has to be bound to one
-   specific OP only.
-   
-#. **Dynamically** with method ``Observer.add_observing_method``.
-   This is useful when the definition of the observer class happens
-   dynamically (e.g. in generated *proxies*), or when the OPs to be
-   observed are not known at static time. ::
-
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-
-      def __init__(self, m):
-          Observer.__init__(self, m)
-          self.add_observing_method(self.prop1_change, "prop1")
-          self.add_observing_method(self.multiple_notifications, ("prop1", "prop2"))
-          return
-
-      def prop1_change(self, model, old, new):
-          # this is called when OP 'prop1' is changed
-          return
-
-      def multiple_notifications(self, model, pname, old, new):
-          # this is called when OPs 'prop1' or 'prop2' are changed
-          return
-   
-   Notice the difference between the two cases, with
-   ``prop1_change`` not receiving the OP name as it is a notification
-   method for a specific OP, while ``multiple_notifications``
-   receiving the OP name. The difference is imposed when calling
-   ``add_observing_method``.
-
 
 Instance Change Notifications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,78 +238,6 @@ following prototype in a class deriving from ``Observer``:
                 been called. 
    :param kwargs: Keywords arguments to the instance's method which has
                 been called. 
-
-Similarly to :ref:`_Observer_vcn`, there are different ways a method
-in ``Observer`` can be declared to be a instance change notification
-method:
-
-1. **Statically** with decorator ``Observer.observes``::
-
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-      @Observer.observes
-      def prop1_before(self, model, instance, mname, args, kwargs):
-          # this is called before OP 'prop1' is changed by calling a changing method 
-          return
-
-      @Observer.observes('prop1', 'prop2')
-      def multiple_notifications_before(self, model, pname, instance, mname, args, kwargs):
-          # this is called before 'prop1' or 'prop2' are changed by calling a changing method
-          return
-
-      @Observer.observes
-      def prop4_after(self, model, instance, mname, res, args, kwargs):
-          # this is called after OP 'prop4' is changed by calling a changing method 
-          return
-
-      @Observer.observes('prop2', 'prop4')
-      def multiple_notifications_after(self, model, pname, instance, mname, res, args, kwargs):
-          # this is called after 'prop2' or 'prop4' are changed by calling a changing method 
-          return
-
-   Again, notice that an OP's change can be notified to multiple
-   methods in the same observer.
-
-#. **Statically** with a naming convention, by naming the
-   notification methods ``property_<pname>_before_change`` and
-   ``property_<pname>_after_change`` (*deprecated*)::
-
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-
-      def property_prop1_before_change(self, model, instance, mname, args, kwargs):
-          # this is called immediatelly before 'prop1' is changed by a method call
-          return
-
-      def property_prop2_after_change(self, model, instance, mname, res, args, kwargs):
-          # this is called immediatelly after 'prop2' is changed by a method call
-          return
-   		
-   In this case each notification method has to be bound to one
-   specific OP only.
-
-#. **Dynamically** with method ``Observer.add_observing_method``.
-   Exactly like in the case of value change, but the notification
-   methods have different prototypes::
-
-    from gtkmvc import Observer    
-    class MyObserver (Observer):
-
-      def __init__(self, m):
-          Observer.__init__(self, m)
-          self.add_observing_method(self.before_prop1_gets_changed, "prop1")
-          self.add_observing_method(self.multiple_after_change, ("prop1", "prop2"))
-          return
-
-      def before_prop1_gets_changed(self, model, instance, mname, args, kwargs):
-          # this is called immediatelly before 'prop1' is changed by a method call
-          return
-
-      def multiple_after_change(self, model, pname, instance, mname, res, args, kwargs):
-          # this is called immediatelly after 'prop1' or 'prop2'
-          # are changed by a method call. pname carries the name of
-          # the property which has been changed.
-          return
 
 
 Of course, it is not needed to define both *before* and *after*

@@ -87,7 +87,7 @@ User classes
    be observed (i.e. observables will be notified before and/or after
    observed object *methods* are called.)
 
-Events
+Signals
    To notify the observers that some event is occurred.
 
 All needed details about observable property types are explained later

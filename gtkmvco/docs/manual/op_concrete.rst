@@ -92,7 +92,7 @@ Oriented rules:
 
 For example: ::
 
- from gtkmvc import Model, Observer
+ from gtkmvc import Model
 
  class Base (Model):
     prop1 = 1
@@ -105,9 +105,9 @@ For example: ::
         self.register_observer(self) 
         return
     
-    @Observer.observes("prop1")
-    def prop1_changed(self, model, old, new):
-        print model, "prop1 changed from '%s' to '%s'" % (old, new)
+    @Model.observe("prop1", assign=True)
+    def prop1_changed(self, model, name, info):
+        print model, "prop1 changed from '%s' to '%s'" % (info.old, info.new)
         return
     pass # end of class
  # --------------------------------------------------------
@@ -116,9 +116,9 @@ For example: ::
     prop2 = 2
     __observables__ = ("prop2",)
           
-    @Observer.observes("prop2")
-    def prop2_changed(self, model, old, new):
-        print self, "prop2 changed from '%s' to '%s'" % (old, new)
+    @Model.observe("prop2", assign=True)
+    def prop2_changed(self, model, name, info):
+        print self, "prop2 changed from '%s' to '%s'" % (info.old, info.new)
         return
     pass # end of class
  # --------------------------------------------------------
@@ -140,24 +140,17 @@ When executed, this script generates this output: ::
 Let's analyse the example. 
 
 First, in the ``Base.__init__`` constructor you can see that the
-instance registers itself as an observer... of itself! This is done
-only to write a compact example (it is not needed to define an
-external class for the observer). However, in complex designs it is
-quite common to see models observing them self, or sub-models
-contained inside them.
+instance registers itself as an observer... of itself! As we will see
+in section :ref:`Observers`, class `Model` derives from `Observer`, so
+all models are also observer. 
+
+In the example this is exploited only to write a compact example (it
+is not needed to define an additional class for the
+observer). However, in complex designs it is quite common to see
+models observing them self, or sub-models contained inside them.
 
 Second, method ``Base.prop1_changed`` is explicitly marked to
-observe property ``prop1``. An implicit declaration where the
-property name is taken from the method name is also possible, like
-in: ::
-
-    @Observer.observes
-    def prop1(self, model, old, new): ...
-
-However, method ``Base.prop1`` would clash with the property
-``Base.prop1 = 1`` and using explicit names when decorating the
-notification method is needed. More details about this issue will
-be presented in the section dedicated to observers.
+observe property ``prop1``. 
 
 Third, in class ``Der`` only the OP ``prop2`` is declared, as
 ``prop1`` is inherited from class ``Base``.
@@ -173,9 +166,9 @@ class, by re-declaring the OSs. For example: ::
     prop2 = 2
     __observables__ = ("prop?",)
 
-    @Observer.observes("prop2")
-    def prop2_changed(self, model, old, new):
-        print self, "prop2 changed from '%s' to '%s'" % (old, new)
+    @Observer.observe("prop2", assign=True)
+    def prop2_changed(self, model, name, info):
+        print self, "prop2 changed from '%s' to '%s'" % (info.old, info.new)
         return
     pass # end of class
  # --------------------------------------------------------

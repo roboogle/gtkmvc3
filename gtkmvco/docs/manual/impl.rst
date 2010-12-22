@@ -230,7 +230,7 @@ use it as follows: ::
  from gtkmvc import View
  
  class MyView (View):
-   builder = 'test.xml'
+   builder = 'test.glade'
    pass 
  
  m = MyModel()
@@ -256,7 +256,7 @@ the derived view constructor: ::
  
  class MyView (View):
    def __init__(self, ):
-     View.__init__(self, builder='test.xml')
+     View.__init__(self, builder='test.glade')
  
      self['vbox_widget'] = gtk.VBox()
      ...

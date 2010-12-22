@@ -4,8 +4,10 @@ Types of Observable Properties
 
 In section :ref:`KOBS` we anticipated that there exist several types
 of *OP*s. In the examples so far we have seen only *value* *OPs*,
-meaning that observers will be notified of any change of *value*
-assigned to the corresponding *OP*. What would happen if the value of
+meaning that observers will be notified of any change of *value*,
+i.e. when the OPs are assigned to different values [#f_spurious]_.
+
+What would happen if the value of
 the property would be a complex object like a list, or a user-defined
 class, and the object would change internally?
 
@@ -29,10 +31,10 @@ For example: ::
 
 Last two lines of the previous example actually change the *OP*
 internally, that is different from *assigning* a new value to the
-property like in ``m.prop1 = [5,4,3,2]`` that would trigger a value
-notifications like those seen in previous examples.  Similar problem
-is found when the property is assigned to a class instance, and then a
-method that change the instance is called.
+property like in ``m.prop1 = [5,4,3,2]`` that would trigger an
+*assign* notifications like those seen in previous examples. Similar
+problem is found when the property is assigned to a class instance,
+and then a method that change the instance is called.
 
 
 Supported objects
@@ -69,7 +71,8 @@ Class Instances
 
 What if the value is a user-defined class instance?  Suppose a class
 has a method changing the content instance. The idea is that observers
-are notified when the *method* is called.
+are notified when the *method* is called, with the possibility to
+choose if being notified *before* or *after* the call.
 
 However, how can the user declare that method ``M`` *does changes* the
 instance? Two mechanism are provided by the framework:
@@ -84,7 +87,7 @@ instance? Two mechanism are provided by the framework:
 
 Examples for new classes: ::
 
- from gtkmvc import Model, Observer, Observable
+ from gtkmvc import Model, Observable
 
  # ----------------------------------------------------------------------
  class AdHocClass (Observable):
@@ -114,9 +117,8 @@ those class methods that must be observed with the decorator
 ``gtkmvc.Observable.observed`` (decorators are supported by
 Python version 2.4 and later only). 
 
-
 However, sometimes we want to reuse existing classes and it is not
-possible to derive them from ``gtkmvc.Observable``.  In this case
+possible to derive them from ``gtkmvc.Observable``. In this case
 declaration of the methods to be observed can be done at time of
 declaration of the corresponding *OP*. In this case the *value* to be
 assigned to the *OP* must be a triple ``(class, instance,
@@ -158,18 +160,17 @@ Finally, *OP* can hold special values that are *signals* that can be
 used to notify observers that certain *events* occurred. 
 
 To declare an *OP* as a signal, the value of the *OP* must be an
-instance of class ``gtkmvc.observable.Signal``. To notify an event,
+instance of class ``gtkmvc.Signal``. To notify an event,
 the model can then invoke method ``emit`` of the *OP*. Emitting a
 signal can carry an optional argument.
 
 For example: ::
 
- from gtkmvc import Model
- from gtkmvc import observable
+ from gtkmvc import Model, Signal
  
  # ----------------------------------------------------------------------
  class MyModel (Model):
-     sgn = observable.Signal()
+     sgn = Signal()
      __observables__ = ("sgn",)
  
      pass
@@ -215,7 +216,7 @@ However, when dealing with attributes whose type is a class instances,
 like for example a list, you must keep in mind the attribute sharing. ::
 
  m1.prop2.append(1)
- print m2.prop2 # prints [1]
+ print m2.prop2 # prints [1] !
 
 If attribute sharing is not what you want, simply assign OPs in the
 model's constructor: ::
@@ -234,3 +235,8 @@ model's constructor: ::
 Now `m1.prop2` and `m2.prop2` are different objects, and sharing no
 longer occurs.
 
+.. rubric:: Section Notes
+.. [#f_spurious] Actually there exist *spurious* assign notifications,
+                 which are issued also when there is no change in the
+                 value of an OP, e.g. when an OP is assigned to
+                 itself.

@@ -44,14 +44,16 @@ Model
    through a set of Controllers*.
  
 View
-   shows parts of the Model state, and interactively
+   Shows parts of the Model state, and interactively
    exchanges information with the User, via input/output devices.
    A view can be dcomposed into sub-views to simplify the design and
    the reuse. 
-   A View collects a set of widget trees built from a
-   *Glade* file, and/or constructed by hand. Since a Widget contains a
-   *state*, this implementation differs from the standard *MVC* pattern,
-   where generally the View side is completely *stateless*.
+
+   A View collects a set of widget trees built from a *Glade* or
+   *gtk.Builder* file, and/or constructed by hand. Since a Widget
+   contains a *state*, this implementation differs from the standard
+   *MVC* pattern, where generally the View side is completely
+   *stateless*.
  
    The View also interacts with zero, one or more *Controllers*
    (see below), sending to it signals, and receiving information to

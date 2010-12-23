@@ -81,6 +81,12 @@ In the example, the View is implemented inside the class
      """The application view. Contains only the main window1 tree."""
      glade = os.path.join(GLADE_PATH, "example.glade")
      top = "window1"
+
+     def set_msg(self, msg):
+        self['label_text'].set_text(msg)
+        self['label_text_len'].set_text(str(len(msg)))
+        return
+
      pass # end of class
 
 
@@ -144,10 +150,12 @@ generates the needed code to handle the notification.  When the value
 of variable ``message_index`` changes, all registered
 observers will be notified.
 
-It is also possible to use the special class' variable
-``__properties__``, which is a map of (property, value)
-couples. This variable was used in older versions of *gtkmvc* and
-now should be avoided.
+.. Note:: 
+   It is also possible to use the special class' variable
+   ``__properties__``, which is a map of (property, value)
+   couples. This variable was used in older versions of *gtkmvc* and
+   should be avoided in new code.
+
 
 Controller
 ----------
@@ -183,25 +191,24 @@ pressed. ::
          self.model.set_next_message()
          return
  
-     # Observables notifications (value):
-     def property_message_index_value_change(self, model, old, new):
+     # Observables notifications
+     @Controller.observe("message_index", assign=True)
+     def value_change(self, model, name, info):
          """The model is changed and the view must be updated"""
-         msg = self.model.get_message(new)
+         msg = self.model.get_message(info.new)
          
-         self.view['label_text'].set_text(msg)
-         self.view['label_text_len'].set_text(str(len(msg)))
+         self.view.set_msg(msg)
          return    
  
      pass # end of class
 
 
-The ``destroy`` signal is connected when the View registers
-itself inside the controller, by using the method override of
-``register_view``.  Method ``on_button1_clicked``
-calls a method inside the model which changes a part of the state
-inside the model. Since that part of the state is an observable
-property, the associated observer (which is the controller itself) is
-notified of the modification, by calling method
-``property_message_index_value_change``. This method
+The ``destroy`` signal is connected when the View registers itself
+inside the controller, by using the method override of
+``register_view``.  Method ``on_button1_clicked`` calls a method
+inside the model which changes a part of the state inside the
+model. Since that part of the state is an observable property, the
+associated observer (which is the controller itself) is notified of
+the modification, by calling method ``value_change``. This method
 updates the view connected to the controller.
 

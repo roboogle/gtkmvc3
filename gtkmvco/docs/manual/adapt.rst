@@ -470,9 +470,8 @@ label and a ``SpinButton``.
 The view is simply: ::
 
  class MyView (View):
-     def __init__(self, ctrl):
-         View.__init__(self, ctrl, "adapters.glade", "window")
-         return
+     glade = "adapters.glade"
+     top = "window"
      pass # end of class
 
 The model contains a tuple of three integers that we want to connect

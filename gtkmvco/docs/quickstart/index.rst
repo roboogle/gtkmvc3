@@ -156,8 +156,8 @@ A view is a class that is intended to be a container for widgets. ::
  from gtkmvc import View
 
  class MyView (View):
-    builder = "gtk_builder_file.xml"
-
+    builder = "gtk_builder_file.glade"
+    
     def __init__(self):
         View.__init__(self)
         
@@ -180,14 +180,13 @@ A view is a class that is intended to be a container for widgets. ::
 Your view is derived from base class ``gtkmvc.View`` that offers
 several services:
 
-1. Attributes ``builder`` that is used to tell the view which
-   GtkBuilder file its widgets are taken from. as an alternative,
+1. Attribute ``builder`` that is used to tell the view which
+   GtkBuilder file its widgets are taken from. As an alternative,
    attribute ``glade`` can be used for deprecated glade files.
-2. The view instance can be used a container (a dictionary) of
+2. Attribute ``top`` which contains the name of the top-level widget.
+3. The view instance can be used a container (a dictionary) of
    widgets, both for accessing named widgets in GtkBuilder files,
    and for creating new widgets manually.
-
-:TODO: check top_level with GtkBuilder files
 
 Views can be decomposed into a hierarchy of views. For example::
 
@@ -195,7 +194,8 @@ Views can be decomposed into a hierarchy of views. For example::
  from gtkmvc import View
 
  class MySuperView (View):
-    builder = "view1.xml"
+    builder = "view1.glade" 
+    top = "top_widget_name"
 
     def __init__(self):
         View.__init__(self)
@@ -209,7 +209,7 @@ Views can be decomposed into a hierarchy of views. For example::
  
  class MySubView (View):
     def __init__(self):
-        View.__init__(self, glade="view2.glade", top="view2_top_widget")
+        View.__init__(self, builder="view2.glade", top="view2_top_widget")
         # setting of sub view...
         return
     pass # end of class
@@ -222,14 +222,14 @@ As you can see:
    containing view, like in the example.
 3. Class View provides the method ``get_top_widget`` that returns the
    View's top level widget.
-4. Both attributes ``glade`` and ``top`` can be overridden or
-   substituted by View's constructor equivalent parameters. 
+4. All attributes ``glade``, ``builder`` and ``top`` can be overridden
+   or substituted by View's constructor equivalent parameters.
 
 For simple cases (views offering no services, and only based on a
 glade file) it is not mandatory to derive our own class::
 
  from gtkmvc import View
- v = View(glade="myview.glade", top="mytop_widget)
+ v = View(builder="myview.glade", top="mytop_widget)
 
 ------
 Models
@@ -295,68 +295,75 @@ the details.
 Every time a value property gets reassigned, observers observing it
 will be notified.
 
-2. Custom Value Properties
-""""""""""""""""""""""""""
+2. Logical Properties
+"""""""""""""""""""""
+
 Sometimes it is needed to store values of properties *outside* the
 model, like in the File System, in a DB, or somewhere in the network
-via RPC. In this case it is possible to declare observable
-properties that do not correspond to any class attribute, but that
-correspond each to a pair of methods (getter/setter)::
+via RPC. In other cases values are not *stored*, but are *calculated*
+out of other properties.  In these cases it is possible to declare
+observable properties that do not correspond to any class attribute,
+but that correspond each to a pair of methods (getter/setter)::
 
  from gtkmvc import Model
  class MyModel (Model):
     data1 = 5
     __observables__ = ("data1", "data_external")
 
-    def get_data_external_value(self):
-    	value = # get the value somehow
-	return value
+    @Model.getter
+    def data_external(self):
+        value = # get the value somehow
+        return value
 
-    def set_data_external_value(self, value):
-    	# store the value somehow...
-	return
+    @Model.setter
+    def data_external(self, value):
+        # store the value somehow...
+    return
 
     pass # end of class
 
-A getter/setter pair has to follow a *naming convention*, and in the
-example is given for the **specific** property ``data_external``.
+The syntax for declaring getter/setter pair for a property is inpired
+to the syntax of python decorator :py:func:`property`.
 
-It is also possible to define **one generic** getter/setter pair that
-takes also the name of the custom property::
+It is also possible to define getters and/or setters that takes also
+the name of the property, making possible to define multi-properties
+getter/setter pairs::
 
  from gtkmvc import Model
  class MyModel (Model):
-    data1 = 5
+    data1 = 5 # this is a concrete property
     __observables__ = ("data1", "data2", "data3", "data4")
 
+ 
     # this handles data3 and data4
-    def get__value(self, prop_name):
-    	if prop_name == "data3": value = # get the value of data3 somehow
-	elif #... 
-	return value
+    @Model.getter("data3", "data4")
+    def d3_d4_get(self, prop_name):
+        if prop_name == "data3": value = ... # get the value of data3 somehow
+        elif prop_name == "data4": ... 
+        # ...
+        return value
 
-    # this handles data3 and data4
-    def set__value(self, prop_name, value):
-    	if prop_name == "data3": # store the value of data3 somehow
-	elif #... 
-	return   
-    
-    def get_data2_value(self):
-    	value = # get the value somehow
-	return value
+    # this handles data2, data3 and data4
+    @Model.setter("data[234]")
+    def d2_d3_d4_set(self, prop_name, value):
+        if prop_name == "data2": ... # store the value of data3 somehow
+        elif prop_name == 'data3': ... 
+        # ...
+        return   
 
-    def set_data2_value(self, value):
-    	# store the value somehow...
-	return
+    @Model.getter   
+    def data2(self):
+        value = ... # get the value somehow
+        return value
 
     pass # end of class
 
-.. note:: Specific getter/setter pair shadows the generic pair for the
- property they handle. In the example, ``get__value`` and
- `set__value`` will be never called for property ``data2``.
+.. note:: Notice the use of pattern matching when defining
+          getter/setter pairs, like for `d2_d3_d4_set`.
 
 .. note:: You can exploit custom properties values to perform some
- custom actions when a property is read or written.
+          custom actions when a property is read or written.
+
 
 3. Mutable containers
 """""""""""""""""""""
@@ -433,16 +440,16 @@ list naming the methods whose calls can be observed by observers.
 Sometimes the models want to communicate to observers that *events*
 occurred. For this ``Signal`` can be used as property value::
 
- from gtkmvc import Model, observable
+ from gtkmvc import Model, Signal
  class MyModel (Model):
-    sgn = observable.Signal()
+    sgn = Signal()
     __observables__ = ("sgn",)
     pass
 
  m = MyModel()
  m.sgn.emit()
  m.sgn.emit("A value can also be passed here")
-
+ m.sgn = Signal() # here the signal is reassigned
 
 ---------
 Observers
@@ -454,19 +461,18 @@ observable properties into one or models it observes gets changed.
 Methods in the observer that are intended to receive notifications can
 be defined through:
 
-1. An implicit *naming convention* for single properties.
-2. An explicit declaration that exploits decorators, for single and
-   multiple properties.
+1. Statically with a decorator
+2. Dynamically 
 
 Depending on the type of the observable property, you can see three
 different types of notifications:
 
-1. Value change notifications (for value assignments)
+1. Assign notifications (for value change in assignments)
 2. Method calls (for containers and class instances)
 3. Signal emitting (for signals)
 
-In the example you find value, before call, after call and signal
-notifications, presented in both flavours explicit and implicit::
+In the example you find assign, before call, after call and signal
+notifications, presented in the static flavours::
 
  from gtkmvc import Observer
 
@@ -475,56 +481,51 @@ notifications, presented in both flavours explicit and implicit::
     # ------------------------------------------------------
     #    Value change
     # ------------------------------------------------------   
-    @Observer.observes("data1", "data2")
-    def my_observing_value_method(self, model, prop_name, old, new):
-    	print "Explicit value observer:", prop_name, old, new
- 
-    def property_data1_value_change(self, model, old, new):
-        print "Implicit value observer for data1:", old, new
+
+    # common notification for multiple properties:
+    @Observer.observe("data1", assign=True)
+    @Observer.observe("data2", assign=True)
+    def assign_notification(self, model, prop_name, info):
+        print "assign_notification:", prop_name, info.old, info.new
+
+    # multiple notifications for the same properties are possible:
+    @Observer.observe("data1", assign=True)
+    def another_assign_notification(self, model, prop_name, info):
+        print "another_assign_notification:", prop_name, info.old, info.new
         return
    
     # ------------------------------------------------------
-    #    Before method call
+    #    Before and After method call
     # ------------------------------------------------------   
-    @Observer.observes("data3",)
-    def my_observing_before_call_method(self, model, prop_name, instance, name, args, kwargs):
-    	print "Explicit before call observer:", prop_name, instance, name
+    @Observer.observe("data3", before=True)
+    def before_call_notification(self, model, prop_name, info):    
+        print "before_call_notification:", prop_name, info.instance, info.method_name
         return
-	
-    def property_data3_before_change(self, model, instance, name, args, kwargs):
-        print "Implicit data3 before call observer", instance, name
-        return
-
-    # ------------------------------------------------------
-    #    After method call
-    # ------------------------------------------------------   
-    @Observer.observes("data3",)
-    def my_observing_after_call_method(self, model, prop_name, instance, name, res, args, kwargs):
-    	print "Explicit after call observer:", prop_name, instance, name, res
-        return
-		
-    def property_data3_after_change(self, model, instance, name, res, args, kwargs):
-        print "Implicit data3 after call observer", instance, name, res
+    
+    # multiple notification types are allowed:
+    @Observer.observe("data3", before=True, after=True)
+    def before_after_call_notification(self, model, prop_name, info):
+        if "before" in info:
+           print "before_after_call_notification: BEFORE:", prop_name, info.instance, info.method_name
+        else:
+           assert "after" in info
+           print "before_after_call_notification: AFTER:", prop_name, info.instance, info.method_name, info.result
+           pass
         return
 
     # ------------------------------------------------------
     #    Signal emitted 
     # ------------------------------------------------------   
-    @Observer.observes("sgn",)	
-    def property_sgn_signal_emit(self, model, signal_name, arg):
-    	print "Explicit signal observer", signal_name, arg
-	return
-
-    def property_sgn_signal_emit(self, model, arg):
-    	print "Implicit signal observer of sgn", arg
-	return
-	
+    @Observer.observe("sgn", signal=True, assign=True)  
+    def signal_notification(self, model, prop_name, info):
+        if "signal" in info:
+           print "signal_notification: SIGNAL:", prop_name, info.arg
+        else:
+           assert "assign" in info
+           print "signal_notification: ASSIGN:", prop_name, info.old, info.new
+           pass
+        return
     pass # end of class
-
-.. note:: You may use explicit observing methods for processing
-          multiple properties notifications at once, and implicit
-          observing methods for single properties. However, there is
-          no a strict rule for using either one or the other.
 
 Here is how the model and our observer can be connected/unconnected::
 
@@ -562,20 +563,23 @@ Now let's try to modify the assigned value to a property::
  m.data3.append("and fun")
  m.data3[0] = "music"
  
+ m.sgn.emit("Hello world!")
+ m.sgn = Signal() # sgn is reassigned
+
 The execution of this example produces the following output::
 
- Implicit value observer for data1: 10 11
- Explicit value observer: data1 10 11
+ assign_notification: data1 10 11
+ another_assign_notification: data1 10 11
  >>> Here m.data is 11
- Explicit value observer: data2 a string Another string
- Implicit data3 before call observer ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
- Explicit before call observer: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
- Implicit data3 after call observer ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] append None
- Explicit after call observer: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] append None
- Implicit data3 before call observer ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
- Explicit before call observer: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
- Implicit data3 after call observer ['music', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__ None
- Explicit after call observer: data3 ['music', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__ None
+ assign_notification: data2 a string Another string
+ before_call_notification: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
+ before_after_call_notification: BEFORE: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
+ before_after_call_notification: AFTER: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] append None
+ before_call_notification: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
+ before_after_call_notification: BEFORE: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
+ before_after_call_notification: AFTER: data3 ['music', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__ None
+signal_notification: SIGNAL: sgn Hello world!
+signal_notification: ASSIGN: sgn <gtkmvc.observable.Signal object at 0x7f88957f5fd0> <gtkmvc.observable.Signal object at 0x7f8895801ad0>
 
 Of course an observer is not limited to observe one model::
 
@@ -614,53 +618,54 @@ This is the typical structure of a controller::
  class MyController (Controller):
 
        def __init__(self, model, view):
-       	   Controller.__init__(self, model, view)
+           Controller.__init__(self, model, view)
 
-	   # From here on the connected model and view are accessible
-	   # through fields 'self.model' and 'self.view' respectively.
-	   
-	   # setup internal fields...
+       # From here on the connected model and view are accessible
+       # through fields 'self.model' and 'self.view' respectively.
+       
+       # setup internal fields...
 
-	   # setup sub-controllers...
-	   
-	   return
+       # setup sub-controllers...
+       
+       return
 
        def register_view(self, view):
-       	   # initializes the view if needed
+           # initializes the view if needed
        
            # setup widgets that need a model, like TreeView (see next section)...
            
-	   # setup widgets not specified in glade, like TreeViewColumn...
-	   
-       	   # connect additional signals (e.g. for manually constructed widgets...
-		    
-       	   return
+       # setup widgets not specified in glade, like TreeViewColumn...
+       
+           # connect additional signals (e.g. for manually constructed widgets...
+            
+           return
 
        def register_adapters(self):
-       	   # setup all adapters (see Adapters below)
-       	   return
+           # setup all adapters (see Adapters below)
+           return
 
        # ------------------------------------------------------------
        #      GTK Signal handlers
        # ------------------------------------------------------------
        def on_button_clicked(self, button):
-       	   # ...
-	   return
+           # ...
+       return
 
        # ...
 
        # ------------------------------------------------------------
        #      Notifications of observable properties
        # ------------------------------------------------------------
-       def property_prop_name_value_change(self, model, old, new):
-       	   #...
-	   return
-	   
+       @Controller.observe("prop_name", assign=True, ...)
+       def notification(self, model, prop_name, info):
+           #...
+       return
+       
        pass # end of class
 
 As you see, a controller does a lot of work, and tends to blow-up in
 size. For this reason it is important to split big controllers into
-sub-controllers. Ina typical configuration, the application model is
+sub-controllers. In a typical configuration, the application model is
 split into sub-modules, say *m1*, *m2* and *m3*.
 The application controller is split into several sub-controllers, and
 there are sub controllers *c1*, *c2* and *c3* respectively controlling
@@ -719,6 +724,14 @@ The controllers have a similar structure::
        return
    pass
 
+However, it is pretty common to have controllers split also to control
+different parts of a view. For example, the application (top) level
+controller made of three sub-controllers, respectively controlling the
+application main window, the toolbars, and the main component
+featuring in the main window. The key here is to split the complexity
+into pieces which can harmoniously live together.
+
+
 .. _gtk.TreeView:
 
 `TreeViews <http://www.pygtk.org/docs/pygtk/class-gtktreeview.html>`_ and relatives
@@ -755,12 +768,12 @@ This is the full code for this example::
     list_store = gtk.ListStore(int, str)
     # ...
     def __init__(self):
-    	Model.__init__(self)
+        Model.__init__(self)
         text = """gtkmvc is a thin framework for
  developing GUI applications with
  Python and the pygtk toolkit."""
         # fills in some data
-	self.text_buf.set_text(text)
+    self.text_buf.set_text(text)
         for n, word in enumerate(text.split()):
             self.list_store.append([n+1,word])
             pass
@@ -773,23 +786,23 @@ This is the full code for this example::
     # ...
 
     def register_view(self, view):
-    	text_view = view['textview']
-	# connects the buffer and the text view
-	text_view.set_buffer(self.model.text_buf)
+        text_view = view['textview']
+    # connects the buffer and the text view
+    text_view.set_buffer(self.model.text_buf)
 
-	# connects the treeview to the liststore
-	tv = view['treeview']
+    # connects the treeview to the liststore
+    tv = view['treeview']
         tv.set_model(self.model.list_store)        
 
-	# creates the columns of the treeview						   
+    # creates the columns of the treeview                          
         rend = gtk.CellRendererText()
         col = gtk.TreeViewColumn('Col1', rend, text=0)
         tv.append_column(col)
-	
+    
         rend = gtk.CellRendererText()
         col = gtk.TreeViewColumn('Col2', rend, text=1)
         tv.append_column(col)
-	return
+    return
     pass # end of class
 
  # running triplet
@@ -851,26 +864,26 @@ property ``data1``. ::
  class MyCtrl (Controller):
     def register_view(self, view):
         # we connect manually as the glade file does not contain this signal handler
-    	view['window1'].connect('destroy', gtk.mainquit)
-	return
+        view['window1'].connect('destroy', gtk.mainquit)
+    return
  
     def register_adapters(self):
-    	ad = Adapter(self.model, "data1")
+        ad = Adapter(self.model, "data1")
         ad.connect_widget(self.view["label_data1"],
-			  setter=lambda w,v: w.set_markup("<big><b>%s</b></big>" % v))
+              setter=lambda w,v: w.set_markup("<big><b>%s</b></big>" % v))
         self.adapt(ad)
-	return
-			 
+    return
+             
     pass # end of class
 
 Optional parameter ``setter`` is called when it is time to write the
 value into the given widget. Here it used to markup the text.
 
 .. note:: There are similar parameters for getting, setting and error
-   	  handling that can be called both when getting/setting the
-   	  value from/to the model and the widget. Adapters are complex
-   	  entities that can be further developed, see the User
-   	  Manual for a complete description.
+      handling that can be called both when getting/setting the
+      value from/to the model and the widget. Adapters are complex
+      entities that can be further developed, see the User
+      Manual for a complete description.
     
 Finally, we need only to create a **MVC** triplet and run ``gtk``::
 
@@ -896,13 +909,13 @@ In the example we connect all the widgets very easily::
  class MyCtrl (Controller):
     def register_view(self, view):
         # we connect manually as the glade file does not contain this signal handler
-    	view['window1'].connect('destroy', gtk.mainquit)
-	return
+        view['window1'].connect('destroy', gtk.mainquit)
+    return
  
     def register_adapters(self):
-    	for name in ("data1", "data2", "data3", "data4"): self.adapt(name)   
-	return
-			 
+        for name in ("data1", "data2", "data3", "data4"): self.adapt(name)   
+    return
+             
     pass # end of class
 
 Very compact isn't it? Here you see the result of this magic, where

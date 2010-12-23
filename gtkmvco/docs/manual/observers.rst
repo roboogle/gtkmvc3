@@ -8,6 +8,15 @@ If OPs live into ``Models``, ``Observers`` are the objects which are
 interested in being notified when an OP gets changed. An Observer
 observes one or more Models.
 
+.. Important::
+   Since version 1.99.1, observers were deeply revised. If you have
+   experience with older versions, you will find many changes. In
+   particular the usage of name-based notification methods like
+   :py:meth:`property_<name>_value_change` is discouraged, but still
+   supported for backward compatibility. At the end of this section
+   all discouraged/deprecated features about observers are listed.
+
+
 
 Observer registration
 ---------------------
@@ -151,16 +160,35 @@ When defining a notification method, e.g. statically with decorator::
         # ...
         return 
 
-Instance :py:obj:`info` in method notification will contain all
-keyword arguments and associated values which were specified at
+Instance :py:obj:`info` in method notification will contain some of
+the keyword arguments and associated values which were specified at
 declaration time::
 
     @Observer.observe('prop2', assign=True, signal=True, foo="a-value-for-foo")
     def notifications(self, model, prop_name, info):
-        print info['assign'] # True
-        print info.signal    # True
-        print info.foo       # "a-value-for-foo"
+        assert info['assign'] xor info.signal
+        assert "a-value-for-foo" == info.foo
         return
+
+In particular, in each notification call only *one* of the keyword
+arguments identifying the type of the notification is set. All the
+other keyword arguments are copied as they are.
+
+Apart from keyword parameters used when declaring the notification
+method, :py:obj:`info` contains also attributes:
+
+   * :py:attribute:`model`: the model containing the OP which was
+     changed. This is also passed to the notification method as first
+     argument.
+
+   * :py:attribute:`prop_name`: the name of the OP which was
+     changed. This is also passed to the notification method as second
+     argument.
+
+The standard remaining content of :py:obj:`info` depends on the
+notification type it is passed along to, and it is listed in detail
+now.
+
 
 Notification types
 ------------------
@@ -168,146 +196,213 @@ Notification types
 The type of the notification method is decided at declaration time, by
 using specific flags as keyword arguments. Later in the notification
 method, parameter :py:obj:`info` will carry specific information which
-depend on the notification type. Here all the supported types are
-discussed in details.
+depend on the notification type. In the following table details of all
+the supported types are presented.
 
-Assign Notifications
-^^^^^^^^^^^^^^^^^^^^
-
-Keyword flag: :py:obj:`assign` set to :py:const:`True`.
-
-:py:obj:`info` content:
-
-   :model: is the observed Model instance containing the OP
-                 which got changed.
-   :prop_name: is the name of the OP which got changed. It has to be
-   	  	         specified when the method receives notifications for
-   	  	         multiple OPs.
-   :old: is the old value the OP had before being changed.
-   :new: is the current value the OP is assigned to.
-   
-
-Instance Change Notifications
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In section :ref:`OPtypes` mutable instances were used as OP in
-models. When a mutable instance gets changed, notifications are made
-within observers, **before** and/or **after** the method changing the
-OP is called.
-
-A notification method which is called *before* a change has the following prototype in a
-class deriving from ``Observer``:
-
-.. method:: before_method_call(model, [pname,] instance, mname, args, kwargs)
- 
-   This it the notification called when a mutable instance is being
-   changed, right before the call execution.
-
-   :param model: is the ``Model`` instance containing the mutable
-                 instance OP.
-   :param pname: is the name of the OP which got changed. It has to be
-   	  	specified when the method receives notifications for
-   	  	multiple OPs.
-   :param instance: is the mutable instance which is being changed.
-   :param mname: is the name of the instance's method which is being
-                called to change the instance.
-   :param args: List of arguments to the instance's method which is 
-                being called. 
-   :param kwargs: Keywords arguments to the instance's method which is 
-                being called. 
-
-A notification method which is called *after* a change has the
-following prototype in a class deriving from ``Observer``:
-
-.. method:: after_method_call(model, [pname,] instance, mname, res, args, kwargs)
- 
-   This it the notification called when a mutable instance is being
-   changed, right before the call execution.
-
-   :param model: is the ``Model`` instance containing the mutable
-                 instance OP.
-   :param pname: is the name of the OP which got changed. It has to be
-   	  	specified when the method receives notifications for
-   	  	multiple OPs.
-   :param instance: is the mutable instance which has been changed.
-   :param mname: is the name of the instance's method which has been called
-                to change the instance.
-   :param res: value returned by the instance's method which has been called
-                to change the instance.
-   :param args: List of arguments to the instance's method which has 
-                been called. 
-   :param kwargs: Keywords arguments to the instance's method which has
-                been called. 
-
-
-Of course, it is not needed to define both *before* and *after*
-notification methods in the observer class, as only the actually
-defined/declared methods will be called.
++---------+------------------+------------------------------------------------------+
+|Type     |Keyword           | `info` attributes/keys                               |
++=========+==================+======================================================+
+|*All*    |                  | .. py:attribute:: model                              |
+|         |                  |                                                      |
+|         |                  |    The model instance containing the OP which is     |
+|         |                  |    being changed.                                    |
+|         |                  +------------------------------------------------------+
+|         |                  |.. py:attribute:: prop_name                           |
+|         |                  |                                                      |
+|         |                  |   The name of the OP which is being changed.         |
++---------+------------------+------------------------------------------------------+
+|Assign   |`assign = True`   | .. py:attribute:: old                                |
+|         |                  |                                                      |
+|         |                  |    Holds the value the property had before           |
+|         |                  |    being assigned to.                                |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: new                                |
+|         |                  |                                                      |
+|         |                  |    Holds the value which the property is assigned    |
+|         |                  |    to.                                               |
++---------+------------------+------------------------------------------------------+
+|Before   |`before = True`   | .. py:attribute:: instance                           |
+|         |                  |                                                      |
+|         |                  |    The mutable instance which is being changed.      |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: method_name                        |
+|         |                  |                                                      |
+|         |                  |    The name of the instance's method which is        |
+|         |                  |    being called to change the instance.              |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: args                               |
+|         |                  |                                                      |
+|         |                  |    List of actual arguments passed to the            |
+|         |                  |    instance's method which is being called.          |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: kwargs                             |
+|         |                  |                                                      |
+|         |                  |    Dictionary of the keyword arguments passed to     |
+|         |                  |    the instance's method which is being called.      |
++---------+------------------+------------------------------------------------------+
+|After    |`after = True`    | .. py:attribute:: instance                           |
+|         |                  |                                                      |
+|         |                  |    The mutable instance which has been changed.      |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: method_name                        |
+|         |                  |                                                      |
+|         |                  |    The name of the instance's method which has       |
+|         |                  |    been called to change the instance.               |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: result                             |
+|         |                  |                                                      |
+|         |                  |    The value returned by the instance's method.      |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: args                               |
+|         |                  |                                                      |
+|         |                  |    List of actual arguments passed to the            |
+|         |                  |    instance's method which has been called.          |
+|         |                  +------------------------------------------------------+
+|         |                  | .. py:attribute:: kwargs                             |
+|         |                  |                                                      |
+|         |                  |    Dictionary of the keyword arguments passed to     |
+|         |                  |    the instance's method which has been called.      |
++---------+------------------+------------------------------------------------------+
+|Signal   |`signal = True`   | .. py:attribute:: arg                                |
+|         |                  |                                                      |
+|         |                  |    The optional argument passed to signal's          |
+|         |                  |    `emit()` method. `arg` is `None` if               |
+|         |                  |    `emit` was called without argument.               |
++---------+------------------+------------------------------------------------------+
 
 
-Examples
---------
+Notification methods and Inheritance
+------------------------------------
 
-:TODO: This subsection has to be extended largely
+Notification methods behaves exactly like any normal method when
+classes are derived. When overriding notification methods in derived
+classes, it is not necessary to re-declare them as notification
+methods, as any information provided in base classes is retained
+untouched in derived classes.
 
-You may use the property in this way: ::
+For example::
+
+ from gtkmvc import Observer, Model, Signal
+
+ class MyModel (Model):
+     prop1 = Signal()
+     __observables__ = ("prop1",)
+     pass # end of class BaseObs
+
+ class BaseObs (Observer):
+     @Observer.observe("prop1", assign=True, user_data="my-data-in-BaseObs")
+     def notification(self, model, name, info):
+         print "BaseObs.notification:", model, name, info
+         return
+     pass # end of class BaseObs
+
+ class DerObs (BaseObs):
+     def notification(self, model, name, info):
+         print "DerObs.notification:", model, name, info
+         return
+     pass # end of class BaseObs
+
 
  m = MyModel()
- print m.name  # prints 'Rob'
- m.name = 'Roberto' # changes the property value
+ do = DerObs(m)
+ m.prop1 = Signal()
 
-What's missing is now an observer, to be notified when the property
-changes. To create an observer, derive your class from base class
-``gtkmvc.Observer``. ::
+The execution of this code will output::
 
- from gtkmvc import Observer
- 
- class AnObserver (Observer):
- 
-   def property_name_value_change(self, model, old, new):
-     print "Property name changed from '%s' to '%s"' % (old, new)
-     return
- 
-   pass # end of class
+ DerObs.notification: <__main__.MyModel object ..> prop1 
+ { 'model': <__main__.MyModel object ...>,
+   'prop_name': 'prop1', 
+   'assign': True, 
+   'old': <gtkmvc.observable.Signal object at 0x12a6110>, 
+   'new': <gtkmvc.observable.Signal object at 0x12a64d0>, 
+   'user_data': 'my-data-in-BaseObs' }
 
+As you see the actually called method is
+:py:meth:`DerObs.notification`, even if the method in
+:py:class:`DerObs` is not explicitly declared to be a notification
+method. Furthermore, the keyword arguments specified at declaration
+time in class :py:class:`BaseObs` are passed down to :py:obj:`info`
+untouched.
 
-The Observer constructor gets an instance of a Model, and registers the
-class instance itself to the given model, to become an observer of
-that model instance.
+Sometimes it is useful to re-define notification methods in derived
+class. In this case it is sufficient to use again static or dynamic
+declaration in derived class. It is important to notice here that when
+notifications in derived classes are redefined, notifications in base
+classes are hidden. For example::
 
-To receive notifications for the property ``name``, the
-observer must define a method called
-``property_name_value_change`` that when is automatically
-called will get the instance of the model containing the changed
-property, and the property's old and new values.
+ from gtkmvc import Observer, Model, Signal
 
-Instead of using an implicit naming convention for the notification
-methods, is also possible to declare that a method within the observer
-is interested in receiving notifications for a bunch of properties: ::
+ class MyModel (Model):
+     prop1 = Signal()
+     __observables__ = ("prop1",)
+     pass # end of class BaseObs
 
- from gtkmvc import Observer
- 
- class AnObserver (Observer):
- 
-   @Observer.observes('name', ...)
-   def an_observing_method(self, model, prop_name, old, new):
-     print "Property '%s' changed from '%s' to '%s"' % (prop_name, old, new)
-     return
- 
-   pass # end of class
+ class BaseObs (Observer):
+     @Observer.observe("prop1", assign=True, user_data="my-data-in-BaseObs")
+     def notification(self, model, name, info):
+         print "BaseObs.notification:", model, name, info
+         return
+     pass # end of class BaseObs
 
+ class DerObs (BaseObs):
+     @Observer.observe("prop1", signal=True,
+                       user_data="my-data-in-DerObs",
+                       other_data="other-data-in-DerObs")
+     def notification(self, model, name, info):
+         print "DerObs.notification:", model, name, info
+         return
+     pass # end of class BaseObs
 
-Of course the explicit observing method will receive the name of the
-property it is changed as now it can observe multiple properties. 
-
-As already mentioned, when used in combination with the *MVC* pattern,
-Controllers are also Observers of their models.
-
-Here follows an example of usage: ::
 
  m = MyModel()
- o = AnObserver(m)
- 
- print m.name  # prints 'Rob'
- m.name = 'Roberto' # changes the property value, o is notified
+ do = DerObs(m)
+ m.prop1 = Signal()
+ m.prop1.emit("wake up!")
+
+The execution of this code produces the output::
+
+ DerObs.notification: <__main__.MyModel object ...> prop1 
+ { 'model': <__main__.MyModel object ...>, 
+   'prop_name': 'prop1', 
+   'signal': True, 
+   'arg': 'wake up!', 
+   'user_data': 'my-data-in-DerObs', 
+   'other_data': 'other-data-in-DerObs' }
+
+Notice that even if :py:obj:`prop1` has been assigned, the *assign*
+notification has not been sent, as :py:meth:`DerObs.notification`
+intercepts only *signals* and :py:meth:`BaseObs.notification` is
+shadowed by it.
+
+However, if we declare :py:meth:`DerObs.notification` to receive both
+*assign* and *signal* notifications::
+
+ class DerObs (BaseObs):
+     @Observer.observe("prop1", signal=True, assign=True,
+                       user_data="my-data-in-DerObs",
+                       other_data="other-data-in-DerObs")
+     def notification(self, model, name, info):
+         print "DerObs.notification:", model, name, info
+         return
+     pass # end of class BaseObs
+
+The execution produces two notifications as expected::
+
+ DerObs.notification: <__main__.MyModel object ...> prop1 
+ { 'model': <__main__.MyModel object ...>, 
+   'prop_name': 'prop1', 
+   'assign': True, 
+   'old': <gtkmvc.observable.Signal object at 0x7fc5098ab110>, 
+   'new': <gtkmvc.observable.Signal object at 0x7fc5098ab4d0>, 
+   'user_data': 'my-data-in-DerObs',    
+   'other_data': 'other-data-in-DerObs' }
+
+ DerObs.notification: <__main__.MyModel object ...> prop1 
+ { 'model': <__main__.MyModel object ...>, 
+   'prop_name': 'prop1', 
+   'signal': True, 
+   'arg': 'wake up!', 
+   'user_data': 'my-data-in-DerObs', 
+   'other_data': 'other-data-in-DerObs' }
+
 

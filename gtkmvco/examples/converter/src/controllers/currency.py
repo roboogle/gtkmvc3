@@ -77,16 +77,17 @@ class CurrencyCtrl (Controller):
     # ----------------------------------------
     #          observable properties
     # ----------------------------------------
-    def property_name_value_change(self, m, old, new):
-        if old != new and not self.__changing: self.view.set_name(new)
-        return
-
-    def property_rate_value_change(self, m, old, new):
-        if old != new and not self.__changing: self.view.set_rate(new)
-        return
-
-    def property_notes_value_change(self, m, old, new):
-        if old != new and not self.__changing: self.view.set_notes(new)
+    @Controller.observe("name", assign=True)
+    @Controller.observe("rate", assign=True)
+    @Controller.observe("notes", assign=True)
+    def value_change(self, m, prop_name, info):
+        if info.old != info.new and not self.__changing:
+            meth = { "name" : self.view.set_name,
+                     "rate" : self.view.set_rate,
+                     "notes" : self.view.set_notes,
+                     }[prop_name]
+            meth(info.new)
+            pass
         return
     
     pass # end of class

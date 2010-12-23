@@ -53,7 +53,8 @@ class ConverterModel (Model):
     # ----------------------------------------
     #          observable properties
     # ----------------------------------------
-    def property_iter_value_change(self, model, old, new):
+    @Model.observe("iter", assign=True)
+    def iter_value_change(self, model, _, info):
         assert model in (self.source, self.target)
         self.can_convert = (self.source.iter is not None and
                             self.target.iter is not None)

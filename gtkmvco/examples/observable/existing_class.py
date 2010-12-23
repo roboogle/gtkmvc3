@@ -67,17 +67,18 @@ class MyObserver (Observer):
         return
 
     # notification
-    def property_obj_value_change(self, model, old, new):
-        print "obj changed!"
-        return
-
-    def property_obj_before_change(self, model, instance, name, args, kwargs):
-        print "obj before change!", instance, name, args, kwargs
-        return
-
-    def property_obj_after_change(self, model, instance, name, res,
-                                  args, kwargs):
-        print "obj after change!", instance, name, res, args, kwargs
+    @Observer.observe("obj", assign=True, before=True, after=True)
+    def obj_change(self, model, prop_name, info):
+        if "assign" in info:            
+            print prop_name, "changed!"
+        elif "before" in info:
+            print prop_name, "before change!", info.instance, \
+                  info.method_name, info.args, info.kwargs
+        else:
+            assert "after" in info
+            print prop_name, "before change!", info.instance, \
+                  info.method_name, info.result, info.args, info.kwargs
+            pass            
         return
 
     pass # end of class

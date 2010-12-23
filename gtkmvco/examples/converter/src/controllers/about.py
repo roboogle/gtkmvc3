@@ -75,8 +75,9 @@ class AboutCtrl (Controller):
     # ----------------------------------------
     #          observable properties
     # ----------------------------------------
-    def property_credits_value_change(self, model, old, new):
-        self.view.set_text(new)
+    @Controller.observe("credits", assign=True)
+    def credits_change(self, m, n, info):
+        self.view.set_text(info.new)
         return
 
     pass # end of class

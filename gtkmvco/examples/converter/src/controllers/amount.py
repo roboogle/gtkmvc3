@@ -70,9 +70,10 @@ class AmountCtrl (Controller):
     # ----------------------------------------
     #          observable properties
     # ----------------------------------------
-    def property_amount_value_change(self, m, old, new):
+    @Controller.observe("amount", assign=True)
+    def amount_change(self, m, n, info):
         if self.__changing_amount: return
-        self.view['sb_amount'].set_value(new)
+        self.view['sb_amount'].set_value(info.new)
         return
     pass # end of class
 

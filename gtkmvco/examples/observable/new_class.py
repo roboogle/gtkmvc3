@@ -72,16 +72,17 @@ class MyModel (Model):
 class MyObserver (Observer):
 
     # notification
-    def property_obj_value_change(self, model, old, new):
-        print "obj changed!"
-        return
-
     # we are interested in knowing the object changed only after it
-    # had changed, so property_obj_before_change is not defined, and
-    # will not be called.
-    def property_obj_after_change(self, model, instance, name, res,
-                                  args, kwargs):
-        print "obj after change!", instance, name, res, args, kwargs
+    # had changed, so 'before' is not set
+    @Observer.observe("obj", assign=True, after=True)
+    def property_obj_value_change(self, model, prop_name, info):
+        if "assign" in info:
+            print prop_name, "changed!"
+        else:
+            assert "after" in info
+            print prop_name, "after change!", info.instance, \
+                  info.method_name, info.res, info.args, info.kwargs
+            pass
         return
 
     pass

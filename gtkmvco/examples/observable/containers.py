@@ -37,8 +37,8 @@ from gtkmvc import Observer
 # ----------------------------------------------------------------------
 class MyModel (Model):
     """Since version 1.0.0, both maps and lists are allowed as
-    observable properties. When changed, observers' methods
-    property_<name>_{before,after}_change will be called if found."""
+    observable properties. When changed, observers' notification
+    methods will be called."""
 
     a_int = 0
     a_list = []
@@ -54,32 +54,20 @@ class MyObserver (Observer):
     create observers that are not necessarily derived from Controller"""
 
     # notifications
-    def property_a_int_value_change(self, model, old, new):
-        print "a_int changed!"
+    @Observer.observe("a_int", assign=True)
+    @Observer.observe("a_list", assign=True)
+    def value_change(self, model, prop_name, info):
+        print prop_name, "changed!"
         return
 
-    def property_a_list_value_change(self, model, old, new):
-        print "a_list changed!"
-        return
-
-    def property_a_list_before_change(self, model, instance, name,
-                                      args, kwargs):
-        print "a_list before change!", instance, name, args, kwargs
-        return
-
-    def property_a_list_after_change(self, model, instance, name, res,
-                                     args, kwargs):
-        print "a_list after change!", instance, name, res, args, kwargs
-        return
-
-    def property_a_map_before_change(self, model, instance, name,
-                                     args, kwargs):
-        print "a_map before change!", instance, name, args, kwargs
-        return
-
-    def property_a_map_after_change(self, model, instance, name, res,
-                                    args, kwargs):
-        print "a_map after change!", instance, name, res, args, kwargs
+    @Observer.observe("a_list", before=True, after=True)
+    @Observer.observe("a_map", before=True, after=True)
+    def method_call(self, model, prop_name, info):
+        if "before" in info: ntype="before"
+        else: ntype="after"
+        
+        print prop_name, ntype, "change!", info.instance, \
+              info.method_name, info.args, info.kwargs
         return
 
     pass

@@ -44,7 +44,6 @@ class MyModel (Model):
 
     sgn = observable.Signal()
     __observables__ = ("sgn",)
-
     pass
 
 
@@ -55,8 +54,9 @@ class MyObserver (Observer):
         return
 
     # notification
-    def property_sgn_signal_emit(self, model, arg):
-        print "Signal!", model, arg
+    @Observer.observe("sgn", signal=True)
+    def signal_emit(self, model, prop_name, info):
+        print "Signal!", model, info.arg
         return
 
     pass # end of class

@@ -54,9 +54,10 @@ class MyCtrl (Controller):
         self.model.reset_value = sb.get_value_as_int()
         return
     
-    # observable properties    
-    def property_counter_value_change(self, model, old, new):
-        self.view.set_counter_value(new)
+    # observable properties
+    @Controller.observe("counter", assign=True)
+    def counter_change(self, model, prop_name, info):
+        self.view.set_counter_value(info.new)
         return
     
     pass # end of class

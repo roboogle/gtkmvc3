@@ -70,16 +70,11 @@ class MyObserver (Observer):
     create observers that are not necessarily derived from Controller"""
 
     # notifications
-    def property_internal_value_change(self, model, old, new):
-        print "internal changed!"
-        return
-
-    def property_external_spec_value_change(self, model, old, new):
-        print "external spec changed!"
-        return
-
-    def property_external_gen_value_change(self, model, old, new):
-        print "external gen changed!"
+    @Observer.observe("internal", assign=True)
+    @Observer.observe("external_spec", assign=True)
+    @Observer.observe("external_gen", assign=True)
+    def value_change(self, model, prop_name, info):
+        print prop_name, "changed!"
         return
     
     pass

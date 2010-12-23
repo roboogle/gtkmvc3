@@ -40,14 +40,16 @@ class MyController (Controller):
         return True
     
     # observd properties
-    def property_counter_value_change(self, model, old, new):
-        self.view.set_label("%d" % new)
+    @Controller.observe("counter", assign=True)
+    def counter_change(self, model, prop_name, info):
+        self.view.set_label("%d" % info.new)
         return
 
-    def property_busy_value_change(self, model, old, new):
-        if new != old:
-            self.view['button'].set_sensitive(not new)
-            if not new: self.view['button'].grab_focus()
+    @Controller.observe("busy", assign=True)
+    def busy_change(self, model, prop_name, info):
+        if info.new != info.old:
+            self.view['button'].set_sensitive(not info.new)
+            if not info.new: self.view['button'].grab_focus()
         return
 
     pass # end of class

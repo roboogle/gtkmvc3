@@ -44,9 +44,10 @@ class MyController (Controller):
         return
 
     # observable properties:
-    def property_counter_value_change(self, model, old, new):
-        self.view['label'].set_text("%d" % new)
-        print "Property 'counter' changed value from %d to %d" % (old, new)
+    @Controller.observe("counter", assign=True)
+    def counter_value_change(self, model, prop_name, info):
+        self.view['label'].set_text("%d" % info.new)
+        print "Property 'counter' changed value from %d to %d" % (info.old, info.new)
         return
     
     

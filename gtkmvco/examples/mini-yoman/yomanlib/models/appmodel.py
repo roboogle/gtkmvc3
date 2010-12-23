@@ -33,87 +33,88 @@ import gobject
 import os
 
 def recursive_find(self, index, obj):
-	def do_recursive_find(self, index, obj, iter):
-		while iter:
-			# Match the current node
-			if self.get_value(iter, index) == obj:
-				return iter
-			# Try to match any children nodes
-			child_iter = self.iter_children(iter)
-			if child_iter is not None:
-				res = do_recursive_find(self, index, obj, child_iter)
-				if res is not None:
-					return res
-			# The current and its children are no match, continue
-			iter = self.iter_next(iter)
-		return None
-	iter = self.get_iter_first()
-	return do_recursive_find(self, index, obj, iter)
+    def do_recursive_find(self, index, obj, iter):
+        while iter:
+            # Match the current node
+            if self.get_value(iter, index) == obj:
+                return iter
+            # Try to match any children nodes
+            child_iter = self.iter_children(iter)
+            if child_iter is not None:
+                res = do_recursive_find(self, index, obj, child_iter)
+                if res is not None:
+                    return res
+            # The current and its children are no match, continue
+            iter = self.iter_next(iter)
+        return None
+    iter = self.get_iter_first()
+    return do_recursive_find(self, index, obj, iter)
 
 
 class AppModel(Model):
 
-	def __init__(self):
-		Model.__init__(self)
-		self.data = DataModel()
-		self.clear()
+    def __init__(self):
+        Model.__init__(self)
+        self.data = DataModel()
+        self.clear()
 
-	def clear(self):
-		self.data.clear()
+    def clear(self):
+        self.data.clear()
 
-	pass
+    pass
 
 
 class NoteModel(TextBufferModel):
-	enabled = True
-	title = ""
-	__observables__ = ("enabled", "title")
+    enabled = True
+    title = ""
+    __observables__ = ("enabled", "title")
 
-	def __init__(self, title="", text="", enabled=True):
-		TextBufferModel.__init__(self)
-		self.enabled = enabled
-		self.title = title
-		self.set_text(text)
-	
-	pass
+    def __init__(self, title="", text="", enabled=True):
+        TextBufferModel.__init__(self)
+        self.enabled = enabled
+        self.title = title
+        self.set_text(text)
+    
+    pass
 
 class DataModel(TreeStoreModel):
 
-	TITLE_INDEX = 0
-	OBJECT_INDEX = 1
+    TITLE_INDEX = 0
+    OBJECT_INDEX = 1
 
-	def __init__(self):
-		TreeStoreModel.__init__(self, gobject.TYPE_STRING,
-		                              gobject.TYPE_PYOBJECT)
+    def __init__(self):
+        TreeStoreModel.__init__(self, gobject.TYPE_STRING,
+                                      gobject.TYPE_PYOBJECT)
 
-		self.clear()
-		pass
+        self.clear()
+        pass
 
-	def new_note(self, parent=None):
-		note = NoteModel(title="New Note")
-		return self.add_note(note, parent)
+    def new_note(self, parent=None):
+        note = NoteModel(title="New Note")
+        return self.add_note(note, parent)
 
-	def add_note(self, note, parent=None):
-		note.register_observer(self)
-		iter = self.append(parent, (note.title, note))
-		return iter
+    def add_note(self, note, parent=None):
+        note.register_observer(self)
+        iter = self.append(parent, (note.title, note))
+        return iter
 
-	def del_note(self, note_iter):
-		if note_iter is None:
-			return
-		note = self.get_value(note_iter, self.OBJECT_INDEX)
-		note.unregister_observer(self)
-		self.remove(note_iter)
+    def del_note(self, note_iter):
+        if note_iter is None:
+            return
+        note = self.get_value(note_iter, self.OBJECT_INDEX)
+        note.unregister_observer(self)
+        self.remove(note_iter)
 
-	def clear(self):
-		self.empty_note = NoteModel(enabled=False)
-		TreeStoreModel.clear(self)
-		return
+    def clear(self):
+        self.empty_note = NoteModel(enabled=False)
+        TreeStoreModel.clear(self)
+        return
 
-	def property_title_value_change(self, model, old, new):
-		iter = recursive_find(self, self.OBJECT_INDEX, model)
-		assert(iter is not None)
-		self.set_value(iter, self.TITLE_INDEX, model.title)
-		return
-	
-	pass
+    @Model.observe("title", assign=True)
+    def title_value_change(self, model, _, info):
+        iter = recursive_find(self, self.OBJECT_INDEX, model)
+        assert(iter is not None)
+        self.set_value(iter, self.TITLE_INDEX, model.title)
+        return
+    
+    pass

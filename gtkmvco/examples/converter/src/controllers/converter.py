@@ -58,13 +58,15 @@ class ConverterCtrl (Controller):
     def on_button_convert_clicked(self, btn):
         self.model.convert()
         return
-
     
     # ----------------------------------------
     #          observable properties
     # ----------------------------------------
-    def property_can_convert_value_change(self, m, old, new):
-        if old != new: self.view['button_convert'].set_sensitive(new)
+    @Controller.observe("can_convert", assign=True)
+    def can_convert_change(self, m, pname, info):
+        if info.old != info.new:
+            self.view['button_convert'].set_sensitive(info.new)
+            pass
         return
     
     pass # end of class

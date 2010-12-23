@@ -53,8 +53,9 @@ class MyController(Controller):
         return False
     
     # observable properties notifications
-    def property_use_rb1_value_change(self, model, old, new):
-        self.view.enable_rb2(not new)
+    @Controller.observe("use_rb1", assign=True)
+    def use_rb1_change(self, model, prop_name, info):
+        self.view.enable_rb2(not info.new)
         return
 	  
     pass # end of class

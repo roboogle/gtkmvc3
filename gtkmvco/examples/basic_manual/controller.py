@@ -62,9 +62,9 @@ class MyCtrl (Controller):
 
     
     # observable properties
-    
-    def property_counter_value_change(self, model, old, new):
-        self.view.set_counter_value(new)
+    @Controller.observe("counter", assign=True)
+    def counter_change(self, model, prop_name, info):
+        self.view.set_counter_value(info.new)
         return
     
     pass # end of class

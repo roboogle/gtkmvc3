@@ -406,3 +406,46 @@ The execution produces two notifications as expected::
    'other_data': 'other-data-in-DerObs' }
 
 
+Old-style notifications
+-----------------------
+
+Naming conventions-based
+^^^^^^^^^^^^^^^^^^^^^^^^
+Old style notifications (version 1.99.0 and older) were implicitly
+declared by exploiting a *naming convention*. :py:class:`NTInfo` was
+not supported, and notification methods had different signatures
+depending on the notification type.
+
+For example, an *assign* type notification method for property `prop1`
+was defined as::
+
+ def property_prop1_value_change(self, model, old, new): 
+     # ...
+     return
+
+*after* type notifications were more complicated::
+
+ def property_prop1_after_change(self, model, instance, 
+                                 method_name, res, args, kwargs): 
+     # ...
+     return
+
+If this implicit mechanism is still supported for backward
+compatibility, is should be not used anymore in new code, use static
+or dynamic declaration mechanisms instead.
+
+
+Decorator-based
+^^^^^^^^^^^^^^^
+In release 1.99.0 featured an experimental decorator
+`@observer.observes` which could be used for multiple properties
+assign-type only notifications::
+
+  @observer.observes ("prop1", "prop2")
+  def notification(self, model, name, old, new):
+      # ...
+      return
+
+This decorator has been fully substituted by `Observer.observe` and
+should be not used anymore. However, it is still supported.
+

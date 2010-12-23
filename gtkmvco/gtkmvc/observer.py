@@ -182,19 +182,27 @@ class NTInfo (dict):
     """
 
     # At least one of the keys in this set is required when constructing
-    __ANY_REQUESTED = frozenset("assign before after signal".split())
+    __ONE_REQUESTED = frozenset("assign before after signal".split())
     __ALL_REQUESTED = frozenset("model prop_name".split())
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, _type, *args, **kwargs):
+        """_type is a sting in (assign before after signal) which
+        identifies the type."""
+        
         dict.__init__(self, *args, **kwargs)
         
-        # checks the content provided by the user
-        if not any((x in self and self[x] for x in NTInfo.__ANY_REQUESTED)):
-            raise KeyError("At least one flag among %s must be set" % \
-                               ",".join(NTInfo.__ANY_REQUESTED))
-        
+        # checks the content provided by the user        
+        if not (_type in self and self[_type]):
+            raise KeyError("flag '%s' must be set in given arguments" % _type)
+
         # all requested are provided by the framework, not the user
         assert all((x in self for x in NTInfo.__ALL_REQUESTED))
+
+        # now removes all type-flags not related to _type
+        for flag in NTInfo.__ONE_REQUESTED:
+            if flag != _type and flag in self: del self[flag]
+            pass
+        
         return
 
     def __getattr__(self, name):

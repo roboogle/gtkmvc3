@@ -487,7 +487,8 @@ class Model (Observer):
                     # notice that named arguments overwrite any
                     # existing key:val in kw, which is precisely what
                     # it is expected to happen
-                    info = NTInfo(kw, model=self, prop_name=prop_name, 
+                    info = NTInfo('assign',
+                                  kw, model=self, prop_name=prop_name, 
                                   old=old, new=new)
                     self.__notify_observer__(obs, method, 
                                              self, prop_name, info)
@@ -522,7 +523,8 @@ class Model (Observer):
                 # notice that named arguments overwrite any
                 # existing key:val in kw, which is precisely what
                 # it is expected to happen
-                info = NTInfo(kw, 
+                info = NTInfo('before',
+                              kw, 
                               model=self, prop_name=prop_name, 
                               instance=instance, method_name=meth_name, 
                               args=args, kwargs=kwargs)
@@ -558,7 +560,8 @@ class Model (Observer):
                 # notice that named arguments overwrite any
                 # existing key:val in kw, which is precisely what
                 # it is expected to happen
-                info = NTInfo(kw, 
+                info = NTInfo('after',
+                              kw, 
                               model=self, prop_name=prop_name, 
                               instance=instance, method_name=meth_name, 
                               result=res, args=args, kwargs=kwargs)
@@ -593,7 +596,8 @@ class Model (Observer):
                 # notice that named arguments overwrite any
                 # existing key:val in kw, which is precisely what
                 # it is expected to happen
-                info = NTInfo(kw, 
+                info = NTInfo('signal',
+                              kw, 
                               model=self, prop_name=prop_name, arg=arg)
                 self.__notify_observer__(obs, method, 
                                          self, prop_name, info)

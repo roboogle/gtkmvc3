@@ -88,28 +88,27 @@ class ${class_name} (${base_class_name}):
     # ---------------------------------------------------------------
     
     # For value-change notifications
-#     def property_<property_name_here>_value_change(self, model, old_value, new_value):
+#     @Controller.observe("<property_name_here>", assign=True)
+#     def value_change(self, model, prop_name, info):
+#         # info contains 'new' and 'old' values
 #         return
 
     # For value-change of containers like lists, maps, or method calls for observable class instances. 
-    # There exist 'before' and 'after' versions, you can use both or only one, depending on your need. 
-#     def property_<property_name_here>_before_change(self, model, instance, name, args, kwargs):
-#         # instance is the object that is being changed (the list for example)
-#         # name is the name of the method that is used to change it ('append' for example)
-#         # args is the list of arguments of the invoked method 'name'
-#         # kwargs is the keywords map of the invoked method 'name'
+    # There exist 'before' and 'after' versions, you can use both or only one, depending on your need.
+#     @Controller.observe("<property_name_here>", before=True, after=True)
+#     def method_call(self, model, prop_name, info):
+#         # Info contains:
+#         # 'instance' is the object that is being changed (the list for example)
+#         # 'method_name' is the name of the method that is used to change it ('append' for example)
+#         # 'args' is the list of arguments of the invoked method 'name'
+#         # 'kwargs' is the keywords map of the invoked method 'name'
+#         # 'result' (only for 'after' notifications) the value returned by the method after the call
 #         return
 #
-#     def property_<property_name_here>_after_change(self, model, instance, name, args, kwargs):
-#         # instance is the object that is being changed (the list for example)
-#         # name is the name of the method that is used to change it ('append' for example)
-#         # args is the list of arguments of the invoked method 'name'
-#         # kwargs is the keywords map of the invoked method 'name'
-#         return   
 
-    def property_somevalue_value_change(self, model, old_value, new_value):
+    @Controller.observe("somevalue", assign=True)
+    def somevalue_change(self, model, prop_name, info):
         return
-
    
     pass # end of class ${class_name}
 """
@@ -207,7 +206,7 @@ def main(*args, **kargs):
 
     m = ApplModel()
     v = ApplView()
-    c = ApplCtrl(m,v)
+    c = ApplCtrl(m, v)
 
     gtk.main()    
     return

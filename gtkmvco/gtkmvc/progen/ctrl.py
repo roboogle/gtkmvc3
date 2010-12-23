@@ -99,11 +99,9 @@ class ProgenCtrl (Controller):
         return
 
     # Properties
-    def property_name_value_change(self, m, old, new):
-        self.__enable_generate()
-        return
-
-    def property_author_value_change(self, m, old, new):
+    @Controller.observe("name", assign=True)
+    @Controller.observe("author", assign=True)
+    def name_change(self, m, pname, info):
         self.__enable_generate()
         return
 

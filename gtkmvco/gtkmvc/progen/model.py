@@ -250,22 +250,24 @@ class ProgenModel (Model):
         f.close()
         return True
         
-    # some code to generate a default string for copyright 
-    def property_author_value_change(self, model, old, new):
+    # some code to generate a default string for copyright
+    @Model.observe("author", assign=True)
+    def author_change(self, model, pname, info):
         if self.__own_copyright:
             self.__itsme = True
-            if new in ("",None): self.copyright = ""
+            if info.new in ("", None): self.copyright = ""
             else:
                 self.copyright = "Copyright (C) %d by %s" \
-                    % (datetime.datetime.today().year, new)
+                    % (datetime.datetime.today().year, info.new)
                 pass
             self.__itsme = False
             pass
         return
 
-    def property_copyright_value_change(self, model, old, new):
+    @Model.observe("copyright", assign=True)
+    def copyright_change(self, model, pname, info):
         if self.__itsme: return
-        self.__own_copyright = new in ("",None)
+        self.__own_copyright = info.new in ("",None)
         return
 
     

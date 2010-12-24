@@ -1,56 +1,57 @@
-"""
-Test shows an entry, label and button. The label should always be two times
-the entry. The button should increment the entry by 0.5. Typing a non-float
-should print an error and reset the entry.
-"""
-import _importer
-from gtkmvc import Model, Controller, View
+import unittest
+
+from _importer import refresh_gui
+
+import gtkmvc
 from gtkmvc.adapters.basic import Adapter
-from gtkmvc import observable
 
-import gtk
-
-
-
-class MyView (View):
-    glade = "adapters.glade"
-    top = "window1"
-
-
-class MyModel (Model):
+class Model(gtkmvc.Model):
     en1 = 10.0
-    __observables__ = ("en1",)
+    __observables__ = ["en1"]
 
-
-class MyCtrl (Controller):
-
+class Controller(gtkmvc.Controller):
     def on_button1_clicked(self, button):
         self.model.en1 += 1
-        return
-    
-    pass
 
-# ----------------------------------------------------------------------
+class TwoForOne(unittest.TestCase):
+    def setUp(self):
+        self.m = Model()
+        self.v = gtkmvc.View(glade="adapters.glade", top="window1")
+        self.c = Controller(self.m, self.v)
+        refresh_gui()
 
-def myerr(adapt, name, val):
-    print "Error from", adapt, ":", name, ",", val
-    adapt.update_widget()
-    
-m = MyModel()
-v = MyView()
-c = MyCtrl(m, v)
+    def testArguments(self):
+        errors = []
+        def handle(adapter, name, value):
+            errors.append((adapter, name, value))
+            adapter.update_widget()
 
-a1 = Adapter(m, "en1",
-    # gtkmvc recently changed prop_write to take the value directly from the
-    # widget instead of after an automatic cast.
-    prop_read=lambda v: v/2.0, prop_write=lambda v: float(v)*2,
-    value_error=myerr, prop_cast=False)
-a1.connect_widget(v["entry1"])
+        e = Adapter(self.m, "en1",
+            prop_read=lambda v: v/2.0,
+            prop_write=lambda v: float(v)*2,
+            value_error=handle,
+            prop_cast=False,
+            )
+        e.connect_widget(self.v["entry1"])
 
-a2 = Adapter(m, "en1")
-a2.connect_widget(v["label1"], setter=lambda w,v: w.set_markup("<big><b>%.2f</b></big>" % v))
+        l = Adapter(self.m, "en1")
+        l.connect_widget(self.v["label1"],
+            setter=lambda w, v: w.set_markup("<big><b>%.2f</b></big>" % v))
 
-gtk.main()
+        self.assertEqual("5.0", self.v["entry1"].get_text())
+        self.assertEqual("10.00", self.v["label1"].get_text())
 
+        self.v["entry1"].set_text("1")
+        self.assertEqual("2.00", self.v["label1"].get_text())
 
+        self.v["button1"].clicked()
+        self.assertEqual("1.5", self.v["entry1"].get_text())
+        self.assertEqual("3.00", self.v["label1"].get_text())
 
+        self.v["entry1"].set_text("?")
+        self.assertEqual((e, "en1", "?"), errors[-1])
+        self.assertEqual("1.5", self.v["entry1"].get_text())
+        self.assertEqual("3.00", self.v["label1"].get_text())
+
+if __name__ == "__main__":
+    unittest.main()

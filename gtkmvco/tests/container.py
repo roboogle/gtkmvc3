@@ -103,5 +103,6 @@ class TestSeq(unittest.TestCase):
         return
     
     
-unittest.main()
+if __name__ == "__main__":
+    unittest.main()
 

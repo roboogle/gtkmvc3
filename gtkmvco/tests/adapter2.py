@@ -1,15 +1,10 @@
-"""
-Test shows an entry and a button. Pressing the button should increment the
-entry by one. Changing the entry manually to a value > 10 will print a message,
-doing it by pressing the button will raise ValueError in the signal handler.
-"""
-import _importer
-from gtkmvc import Model, Controller, View
+import unittest
+
+from _importer import refresh_gui
+
+import gtkmvc
 from gtkmvc.adapters.basic import UserClassAdapter
 from gtkmvc import observable
-
-import gtk
-
 
 class UserClass (observable.Observable):
     def __init__(self, max_val):
@@ -28,41 +23,49 @@ class UserClass (observable.Observable):
     def get_x(self): return self.x
     pass
 
-
-class MyView (View):
-    glade = "adapters.glade"
-    top = "window2"
-
-
-class MyModel (Model):
+class Model(gtkmvc.Model):
     x = UserClass(10)
-    __observables__ = ("x",)
+    __observables__ = ["x"]
 
-
-class MyCtrl (Controller):
+class Controller(gtkmvc.Controller):
+    caught = False
 
     def on_button2_clicked(self, button):
-        self.model.x.set_x(self.model.x.get_x() + 1)
-        return
-    
-    pass
+        try:
+            self.model.x.set_x(self.model.x.get_x() + 1)
+        except ValueError:
+            self.caught = True
 
-# ----------------------------------------------------------------------
+class User(unittest.TestCase):
+    def setUp(self):
+        self.m = Model()
+        self.v = gtkmvc.View(glade="adapters.glade", top="window2")
+        self.c = Controller(self.m, self.v)
+        refresh_gui()
 
-def myerr(adapt, name, val):
-    print "Error from", adapt, ":", name, ",", val
-    adapt.update_widget()
-    
-m = MyModel()
-v = MyView()
-c = MyCtrl(m, v)
+    def testArguments(self):
+        errors = []
+        def handle(adapter, name, value):
+            errors.append((adapter, name, value))
+            adapter.update_widget()
 
-a1 = UserClassAdapter(m, "x", "get_x", "set_x", value_error=myerr)
-a1.connect_widget(v["en2"])
+        a = UserClassAdapter(self.m, "x", "get_x", "set_x", value_error=handle)
+        a.connect_widget(self.v["en2"])
 
-m.x.set_x(5)
+        self.assertEqual("0", self.v["en2"].get_text())
 
-gtk.main()
+        self.v["button2"].clicked()
+        self.assertEqual("1", self.v["en2"].get_text())
 
+        self.m.x.set_x(10)
+        self.assertEqual("10", self.v["en2"].get_text())
 
+        self.assertFalse(self.c.caught)
+        self.v["button2"].clicked()
+        self.assertTrue(self.c.caught)
 
+        self.v["en2"].set_text("11")
+        self.assertEqual((a, "x", "11"), errors[-1])
+
+if __name__ == "__main__":
+    unittest.main()

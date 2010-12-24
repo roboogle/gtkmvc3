@@ -63,9 +63,8 @@ described in details in the following sections.
 .. _OPtypes:
 .. include:: op_types.rst
 
+.. _OPconstr:
+.. include:: op_constr.rst
+
 .. include:: op_special.rst
 
-
-:TODO: Add a section about semantical constraints when OP are
-       involved. E.g. getter defined without a corrresponding
-       logical prop, etc.

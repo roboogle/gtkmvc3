@@ -291,10 +291,9 @@ class PropertyMeta (type):
                 # old style
                 _getter = type(cls).get_getter(cls, name)
                 if _getter is None:
-                    logger.warning("In class %s.%s logical observable '%s' "\
-                                       "has no getter method" % \
-                                       (cls.__module__, cls.__name__, name))
-                    pass
+                    raise RuntimeError("In class %s.%s logical observable '%s' "\
+                                           "has no getter method" % \
+                                           (cls.__module__, cls.__name__, name))
                 pass
             
             # finds the setter

@@ -102,6 +102,7 @@ class DynamicWithName(gtkmvc.Observer):
     def __init__(self, model):
         gtkmvc.Observer.__init__(self)
 
+        # TODO only first name each works!
         for name in ("signal", "iduna"): 
             self.observe(self.a, name, signal=True)
             pass
@@ -175,6 +176,10 @@ class DynamicTest(unittest.TestCase):
         self.m = Model()
         self.c = Dynamic()
         self.c.observe(self.c.a, "signal", signal=True)
+
+    def testArgs(self):
+        self.assertEqual(dict(signal=True),
+            self.c.get_observing_method_kwargs(self.c.a))
 
     def testGet(self):
         self.assertEqual(self.c.a,

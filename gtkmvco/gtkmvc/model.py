@@ -344,8 +344,9 @@ class Model (Observer):
         def add_value(notification, kw=None):
             pair = (notification, kw)
             if pair in self.__value_notifications[prop_name]: return
-            logger.debug("Will call '%s' after assignment to %s",
-                notification.__name__, prop_name)
+            logger.debug("Will call %s.%s after assignment to %s.%s",
+                observer.__class__.__name__, notification.__name__,
+                self.__class__.__name__, prop_name)
             self.__value_notifications[prop_name].append(pair)
             return
 
@@ -356,8 +357,9 @@ class Model (Observer):
 
             pair = (notification, kw)
             if pair in self.__instance_notif_before[prop_name]: return
-            logger.debug("Will call '%s' before mutation of %s",
-                notification.__name__, prop_name)
+            logger.debug("Will call %s.%s before mutation of %s.%s",
+                observer.__class__.__name__, notification.__name__,
+                self.__class__.__name__, prop_name)
             self.__instance_notif_before[prop_name].append(pair)
             return
 
@@ -367,8 +369,9 @@ class Model (Observer):
                 return
             pair = (notification, kw)
             if pair in self.__instance_notif_after[prop_name]: return
-            logger.debug("Will call '%s' after mutation of %s",
-                notification.__name__, prop_name)
+            logger.debug("Will call %s.%s after mutation of %s.%s",
+                observer.__class__.__name__, notification.__name__,
+                self.__class__.__name__, prop_name)
             self.__instance_notif_after[prop_name].append(pair)
             return
 
@@ -376,8 +379,9 @@ class Model (Observer):
             if not isinstance(value, Signal): return
             pair = (notification, kw)
             if pair in self.__signal_notif[prop_name]: return
-            logger.debug("Will call '%s' after emit on %s",
-                notification.__name__, prop_name)
+            logger.debug("Will call %s.%s after emit on %s.%s",
+                observer.__class__.__name__, notification.__name__,
+                self.__class__.__name__, prop_name)
             self.__signal_notif[prop_name].append(pair)
             return
         # ---------------------

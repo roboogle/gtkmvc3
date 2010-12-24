@@ -25,5 +25,9 @@ class MyView (View):
        will be incremented."""
     glade = "pygtkmvc-example.glade"
 
+    def set_text(self, text):
+        self['label'].set_text(text)
+        return
+
     pass # end of class
 # ----------------------------------------------------------------------

@@ -34,9 +34,8 @@ class MyController (Controller):
         self.view['main_window'].connect('destroy', gtk.main_quit)
         
         # initializes the text of label:
-        self.view['label'].set_text("%d" % self.model.counter)
+        self.view.set_text("%d" % self.model.counter)
         return
-    
     
     # signals:
     def on_button_clicked(self, button):
@@ -46,8 +45,9 @@ class MyController (Controller):
     # observable properties:
     @Controller.observe("counter", assign=True)
     def counter_value_change(self, model, prop_name, info):
-        self.view['label'].set_text("%d" % info.new)
-        print "Property 'counter' changed value from %d to %d" % (info.old, info.new)
+        self.view.set_text("%d" % info.new)
+        print "Property 'counter' changed value from %d to %d" \
+            % (info.old, info.new)
         return
     
     

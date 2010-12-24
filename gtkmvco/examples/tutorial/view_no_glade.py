@@ -48,5 +48,9 @@ class MyViewNoGlade (View):
         
         return
 
+    def set_text(self, text):
+        self['label'].set_text(text)
+        return
+
     pass # end of class
 # ----------------------------------------------------------------------

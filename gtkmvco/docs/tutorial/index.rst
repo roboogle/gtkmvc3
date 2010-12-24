@@ -104,7 +104,7 @@ are interested in monitoring and show any change of this counter, we
 declare it as an *observable property*. ::
 
 
- from gtkmvc.model import Model
+ from gtkmvc import Model
  
  class MyModel (Model):
      # observable properties:
@@ -129,6 +129,10 @@ The glade-based view
 button are significant, and signal clicked of the button has been
 associated with a function called ``on_button_clicked``.
 
+.. note:: 
+   Since version 1.99.1 `gtk.Builder` glade format is supported
+   by view along with old `glade` format.
+
 .. _glade-figure:
 
 .. figure:: images/glade.png
@@ -146,51 +150,48 @@ associate each widget with a string name. When a glade file is used to
 build the view, each widget will be associated automatically inside
 the view with the corresponding name occurring in the glade file.
 
-later, each ``View`` instance is connected to a
+Later, each ``View`` instance is connected to a
 corresponding ``Controller``, and when built from a glade file,
 methods inside the ``Controller`` will be scanned to try to
 connect automatically all signals declared in the glade file. ::
 
- from gtkmvc.model import Model
-   
- # This is file model.py
- from gtkmvc.view import View
- 
+ from gtkmvc import View
  class MyView (View):
- 
-     def __init__(self):
-         View.__init__(self, 'pygtkmvc-example.glade')
-         return
- 
-     # some special methods for setting this view...
- 
-     pass # end of class
+    def __init__(self):
+       View.__init__(self, builder="pygtkmvc-example.glade")
+       return
 
-Class ``MyView`` calls simply ``View``'s class
-constructor from within its constructor, by passing the glade file
-name. All the hard work is carried out by class ``View``.
+    def set_text(self, text):
+        self['label'].set_text(text)
+        return
+    pass # end of class
 
-Most of the time user's views are like class ``MyView``
-here: they derive from ``View`` and simply call View's
-constructor by passing glade filename and possibly name of top
-level widget. In this situation, it is possible to use a much
-compact declaration for views: ::
 
+Class ``MyView`` calls simply ``View``'s class constructor from within
+its constructor, by passing the glade file name, either with the
+keyword argument `builder` for |gtk.Builder| format, or keyword
+argument `glade` for the old |glade| format. All the hard work is
+carried out by class ``View``.
+
+Most of the time user's views are like class ``MyView`` here: they
+derive from ``View`` and simply call View's constructor by passing
+glade filename and possibly name of top-level widget. In this
+situation, it is possible to use a much compact declaration for views::
+
+ from gtkmvc import View
  class MyView2 (View):
-     glade = 'pygtkmvc-example.glade'
-     pass # end of class
+    builder = "pygtkmvc-example.glade"
 
-Another alternative is: ::
+    def set_text(self, text):
+        self['label'].set_text(text)
+        return
+    pass # end of class
 
- class MyView3 (View): pass
-
-later when instantiating the view: ::
+Attributes `builder`, `glade` and `top` can be overridden by using the
+corresponding keyword arguments when calling the constructor::
 
     ...
-    v = MyView3(glade='pygtkmvc-example.glade')
-
-Similarly, it is possible to to the same for top-level widget (or
-widgets) with member or parameter ``top``.
+    v = MyView2(builder='a-different-pygtkmvc-example.glade')
 
 
 The controller
@@ -218,11 +219,11 @@ view instances which it is linked to. These are accessible via members
          of the button with a controller's method. Signal 'destroy'
          for the main window is handled as well."""
  
-         # connects the signals:
+         # connects some signals manually:
          self.view['main_window'].connect('destroy', gtk.main_quit)
          
          # initializes the text of label:
-         self.view['label'].set_text("%d" % self.model.counter)
+         self.view.set_text("%d" % self.model.counter)
          return
         
      # signals:
@@ -231,9 +232,11 @@ view instances which it is linked to. These are accessible via members
          return
  
      # observable properties:
-     def property_counter_value_change(self, model, old, new):
-         self.view['label'].set_text("%d" % new)
-         print "Property 'counter' changed value from %d to %d" % (old, new)
+     @Controller.observe("counter", assign=True)
+     def counter_change(self, model, prop_name, info):
+         self.view.set_text("%d" % info.new)
+         print "Property '%s' changed value from %d to %d" \
+	   % (prop_name, info.old, info.new)  
          return
      
      pass # end of class
@@ -244,11 +247,13 @@ instance belongs to. From that moment on, class member self.model will
 be accessible. 
 
 ``Controller``'s base class ``Observer`` calls method
-``Model.register_observer`` in order to make the controller
-an observer for the observable property ``counter`` in the
-model. After this, every change applied to ``MyModel`` class'
-member ``counter`` will make method
-``property_counter_value_change`` of class ``MyController`` be called automatically.
+``Model.register_observer`` in order to make the controller an
+observer for the observable property ``counter`` in the model. After
+this, every change applied to ``MyModel`` class' member ``counter``
+will make method ``counter_change`` of class ``MyController`` be
+called automatically.  In fact, the method has been registered as a
+notification method for assignments with the decorator
+`@Controller.observe`.
 
 At construction time also the ``View`` instance is passed,
 to be registered to be the view of the controller.
@@ -271,13 +276,14 @@ time the user clicks the button. The corresponding signal is
 automatically connected to this method when class ``MyView``
 registers itself within the controller.
 
-Finally, method ``property_counter_value_change`` is
-called when the property counter in class ``MyModel``
-changes. The model containing the property, the old value and the
-new value are passed to this method. Notice that the model is passed
-since the controller might be an observer for more than one model,
-even different from the model it is directly connected to in the
-|mvc| chain.
+Finally, method ``counter_change`` is called when the property counter
+in class ``MyModel`` changes (gets assigned to a different value). The
+model containing the property, the name of the property, and a
+structure carrying other information (e.g. the old and new value) are
+passed to this method. Notice that the model is passed since the
+controller might be an observer for more than one model, even
+different from the model it is directly connected to in the |mvc|
+chain.
 
 
 The main code
@@ -339,10 +345,13 @@ is mainly designed to be used with glade files. ::
          # added like in a map:
          self['main_window'] = w
          self['label'] = l
-         self['button'] = b
-         
+         self['button'] = b         
          return
  
+     def set_text(self, text):
+         self['label'].set_text(text)
+         return
+
      pass # end of class
 
 The entire work is carried out by the View's constructor which can
@@ -459,7 +468,7 @@ unchanged. It is the Controller that can be simplified as follows: ::
 
 Controller method ``register_adapters`` is called by the
 framework when adapters can be instantiated. The controller is no
-longer interested in observing property ``Counter`` and to
+longer interested in observing property ``counter`` and to
 initialize the value shown in the label, as these activities are now
 transparently carried out by the adapter.
 
@@ -565,3 +574,6 @@ appreciated quality of the framework.
 
 For any further information, and a detailed list of supported
 features, please refer to the user manual. 
+
+For implementation details, see the API manual.
+

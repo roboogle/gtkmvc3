@@ -21,8 +21,9 @@ class Trigger(gtkmvc.Observer):
     def __init__(self, m):
         gtkmvc.Observer.__init__(self, m)
 
-        self.add_observing_method(self.property_value_change, 
-                                  m.get_properties())
+        for name in m.get_properties():
+            self.observe(self.property_value_change, name, assign=True,
+                old_style_call=True)
         return
 
     def property_value_change(self, model, prop_name, old, new):

@@ -1,9 +1,10 @@
 """
 Tests using more than one concurrent iter on a view.
 """
-import _importer
+import unittest
 
-import gtk
+from _importer import refresh_gui
+
 import gtkmvc
 
 class View(gtkmvc.View):
@@ -15,24 +16,25 @@ class Ctrl(gtkmvc.Controller):
     def register_view(self, view):
         iter1 = iter(view)
         iter2 = iter(view)
-        set1 = set()
-        set2 = set()
-        try:
-            for item1 in iter1:
-                item2 = iter2.next()
-                set1.add(item1)
-                set2.add(item2)
-            assert set1 == set2
-            print "OK"
-        except (StopIteration, AssertionError):
-            print "Failed"
-        gtk.main_quit()
+        self.set1 = set()
+        self.set2 = set()
+        for item1 in iter1:
+            item2 = iter2.next()
+            self.set1.add(item1)
+            self.set2.add(item2)
 
     def on_button7_clicked(self, button):
         pass
     
-m = gtkmvc.Model()
-v = View()
-c = Ctrl(m, v)
+class TwoForOne(unittest.TestCase):
+    def setUp(self):
+        self.m = gtkmvc.Model()
+        self.v = View()
+        self.c = Ctrl(self.m, self.v)
 
-gtk.main()
+    def testIter(self):
+        refresh_gui()
+        self.assertEqual(self.c.set1, self.c.set2)
+
+if __name__ == "__main__":
+    unittest.main()

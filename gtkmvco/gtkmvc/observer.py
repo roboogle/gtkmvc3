@@ -436,6 +436,9 @@ class Observer (object):
             for name, meth, pnames_ka in meths:
                 _method = getattr(self, name) # the most top avail method 
 
+                # WARNING! Here we store the top-level method in the
+                # mro, not the (unbound) method which has been
+                # declared by the user with the decorator.
                 for pname, ka in pnames_ka:
                     if pname not in processed_props:
                         self.__register_notification(pname, _method, ka)

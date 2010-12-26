@@ -179,15 +179,15 @@ class DynamicTest(unittest.TestCase):
 
     def testArgs(self):
         self.assertEqual(dict(signal=True),
-            self.c.get_observing_method_kwargs(self.c.a))
+            self.c.get_observing_method_kwargs("signal", self.c.a))
 
     def testGet(self):
         self.assertEqual(self.c.a,
             self.c.get_observing_methods("signal").pop())
 
     def testIs(self):
-        self.assertTrue(self.c.is_observing_method(self.c.a))
-        self.assertFalse(self.c.is_observing_method(self.c.observe_model))
+        self.assertTrue(self.c.is_observing_method("signal", self.c.a))
+        self.assertFalse(self.c.is_observing_method("signal", self.c.observe_model))
 
     def testAdd(self):
         self.c.observe_model(self.m)
@@ -195,7 +195,7 @@ class DynamicTest(unittest.TestCase):
         self.assertEqual(4, self.c.signal)
 
     def testRemove(self):
-        self.c.remove_observing_method(self.c.a, ["signal"])
+        self.c.remove_observing_method(["signal"], self.c.a, )
         self.c.observe_model(self.m)
         self.m.signal.emit(4)
         self.assertFalse(hasattr(self.c, "signal"))

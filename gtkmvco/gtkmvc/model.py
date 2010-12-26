@@ -413,18 +413,19 @@ class Model (Observer):
         
         for meth in observer.get_observing_methods(prop_name):
             added = False
-            kw = observer.get_observing_method_kwargs(meth)
+            kw = observer.get_observing_method_kwargs(prop_name, meth)
             for flag, adding_meth in type_to_adding_method.iteritems():
                 if flag in kw: 
                     added = True
                     adding_meth(meth, kw)
                     pass
                 pass
-            if not added: raise ValueError("Notification method %s is marked "
-                                           "to be observing property '%s', "
-                                           "but no notification type "
+            if not added: raise ValueError("In %s notification method %s is "
+                                           "marked to be observing property "
+                                           "'%s', but no notification type "
                                            "information were specified." %
-                                           (meth.__name__, prop_name))                                           
+                                           (observer.__class__, 
+                                            meth.__name__, prop_name))
             pass
         
         return

@@ -362,15 +362,7 @@ class Observer (object):
             if type(name) != str: 
                 raise TypeError("Third argument of observe() must be a string")
             
-            # fills the internal structures
-            if not self.__CUST_OBS_KWARGS.has_key(notified):
-                if not self.__CUST_OBS_MAP.has_key(name):
-                    self.__CUST_OBS_MAP[name] = set()
-                    pass
-                self.__CUST_OBS_MAP[name].add(notified)
-                self.__CUST_OBS_KWARGS[notified] = kwargs
-                pass            
-            
+            self.__register_notification(name, notified, kwargs)
             return None
 
         # used statically as decorator
@@ -442,19 +434,11 @@ class Observer (object):
             # since this is traversed top-bottom in the mro, the
             # first found match is the one to care
             for name, meth, pnames_ka in meths:
+                _method = getattr(self, name) # the most top avail method 
+
                 for pname, ka in pnames_ka:
                     if pname not in processed_props:
-                        if not self.__CUST_OBS_MAP.has_key(pname):
-                            self.__CUST_OBS_MAP[pname] = set()
-                            pass
-                        _me = getattr(self, name) # the most top avail method 
-                        self.__CUST_OBS_MAP[pname].add(_me)
-
-                        # first hit matters
-                        if not self.__CUST_OBS_KWARGS.has_key(_me):
-                            self.__CUST_OBS_KWARGS[_me] = ka
-                            pass
-                            
+                        self.__register_notification(pname, _method, ka)
                         cls_processed_props.add(pname)
                         pass
                     pass
@@ -495,7 +479,8 @@ class Observer (object):
     # this is done to keep backward compatibility
     get_custom_observing_methods = get_observing_methods
     
-    def get_observing_method_kwargs(self, method):
+
+    def get_observing_method_kwargs(self, prop_name, method):
         """
         Returns the keyword arguments which were specified when
         declaring a notification method, either statically of
@@ -506,15 +491,14 @@ class Observer (object):
         
         :rtype: dict
         """
-        return self.__CUST_OBS_KWARGS[method]
+        return self.__CUST_OBS_KWARGS[(prop_name, method)]
     
 
-    def remove_observing_method(self, method, prop_names):
+    def remove_observing_method(self, prop_names, method):
         """
         Remove dynamic notifications.
         
-        *method* a callable that was registered with 
-        :meth:`add_observing_method` or :meth:`observes`.
+        *method* a callable that was registered with :meth:`observe`.
         
         *prop_names* a sequence of strings. This need not correspond to any
         one `add` call.
@@ -526,17 +510,46 @@ class Observer (object):
         for prop_name in prop_names:
             _set = self.__CUST_OBS_MAP.get(prop_name, set())
             if method in _set: _set.remove(method)
+            key = (prop_name, method)
+            if key in self.__CUST_OBS_KWARGS: del self.__CUST_OBS_KWARGS[key]
             pass
         
-        if method in self.__CUST_OBS_KWARGS: del self.__CUST_OBS_KWARGS[method]
         return
 
-    def is_observing_method(self, method):
+    def is_observing_method(self, prop_name, method):
         """
         Returns `True` if the given method was previously added as an
         observing method, either dynamically or via decorator.
         """
-        return method in self.__CUST_OBS_KWARGS
+        return (prop_name, method) in self.__CUST_OBS_KWARGS
+
+
+    def __register_notification(self, prop_name, method, kwargs):
+        """Internal service which associates the given property name
+        to the method, and the (prop_name, method) with the given
+        kwargs dictionary. If needed merges the dictionary, if the
+        given (prop_name, method) pair was already registered (in this
+        case the last registration wins in case of overlapping.)
+
+        If given prop_name and method have been already registered, a
+        ValueError exception is raised."""
+
+        key = (prop_name, method)
+        if key in self.__CUST_OBS_KWARGS:
+            raise ValueError("In %s method '%s' has been declared "
+                             "to be a notification for property '%s' "
+                             "multiple times (only one is allowed)." % \
+                                 (self.__class__, 
+                                  method.__name__, prop_name))
+                
+        # fills the internal structures
+        if not self.__CUST_OBS_MAP.has_key(prop_name):
+            self.__CUST_OBS_MAP[prop_name] = set()
+            pass
+        self.__CUST_OBS_MAP[prop_name].add(method)
+
+        self.__CUST_OBS_KWARGS[key] = kwargs
+        return
 
     pass # end of class
 # ----------------------------------------------------------------------

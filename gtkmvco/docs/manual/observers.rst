@@ -164,10 +164,10 @@ Instance :py:obj:`info` in method notification will contain some of
 the keyword arguments and associated values which were specified at
 declaration time::
 
-    @Observer.observe('prop2', assign=True, signal=True, foo="a-value-for-foo")
+    @Observer.observe('prop2', assign=True, signal=True, foo='a-value-for-foo')
     def notifications(self, model, prop_name, info):
-        assert info['assign'] xor info.signal
-        assert "a-value-for-foo" == info.foo
+        assert info['assign'] ^ info.signal
+        assert 'a-value-for-foo' == info.foo
         return
 
 In particular, in each notification call only *one* of the keyword
@@ -189,6 +189,32 @@ The standard remaining content of :py:obj:`info` depends on the
 notification type it is passed along to, and it is listed in detail
 now.
 
+It is possible to have one method be declared as a notification for
+several properties. E.g.::
+
+    @Observer.observe('prop1', assign=True, signal=True, foo1='value1')
+    @Observer.observe('prop2', after=True, foo2='value2')
+    @Observer.observe('prop3', assign=True, before=True, foo3='value3')
+    def notify(self, model, prop_name, info):
+        # ...
+        return
+
+When invoked, the notification's info parameter will be filled with
+data according to each declaration. In the example, only the assign
+notification regarding `prop2` will carry key `foo2` in the `info`
+parameter.
+
+However, when declaring a method as a notification for a property,
+that property cannot be occur in other declarations regarding the same
+method::
+
+    @Observer.observe('prop1', assign=True, signal=True, foo1='value1')
+    @Observer.observe('prop2', after=True, foo2='value2')
+    @Observer.observe('prop2', assign=True, before=True, foo3='value3') #ERROR!
+    def notify(self, model, prop_name, info):
+        # ...
+        return
+
 
 Notification types
 ------------------
@@ -202,68 +228,68 @@ the supported types are presented.
 +---------+------------------+------------------------------------------------------+
 |Type     |Keyword           | `info` attributes/keys                               |
 +=========+==================+======================================================+
-|*All*    |                  | .. py:attribute:: model                              |
+|*All*    |                  | .. attribute:: model                                 |
 |         |                  |                                                      |
 |         |                  |    The model instance containing the OP which is     |
 |         |                  |    being changed.                                    |
 |         |                  +------------------------------------------------------+
-|         |                  |.. py:attribute:: prop_name                           |
+|         |                  |.. attribute:: prop_name                              |
 |         |                  |                                                      |
 |         |                  |   The name of the OP which is being changed.         |
 +---------+------------------+------------------------------------------------------+
-|Assign   |`assign = True`   | .. py:attribute:: old                                |
+|Assign   |`assign = True`   | .. attribute:: old                                   |
 |         |                  |                                                      |
 |         |                  |    Holds the value the property had before           |
 |         |                  |    being assigned to.                                |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: new                                |
+|         |                  | .. attribute:: new                                   |
 |         |                  |                                                      |
 |         |                  |    Holds the value which the property is assigned    |
 |         |                  |    to.                                               |
 +---------+------------------+------------------------------------------------------+
-|Before   |`before = True`   | .. py:attribute:: instance                           |
+|Before   |`before = True`   | .. attribute:: instance                              |
 |         |                  |                                                      |
 |         |                  |    The mutable instance which is being changed.      |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: method_name                        |
+|         |                  | .. attribute:: method_name                           |
 |         |                  |                                                      |
 |         |                  |    The name of the instance's method which is        |
 |         |                  |    being called to change the instance.              |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: args                               |
+|         |                  | .. attribute:: args                                  |
 |         |                  |                                                      |
 |         |                  |    List of actual arguments passed to the            |
 |         |                  |    instance's method which is being called.          |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: kwargs                             |
+|         |                  | .. attribute:: kwargs                                |
 |         |                  |                                                      |
 |         |                  |    Dictionary of the keyword arguments passed to     |
 |         |                  |    the instance's method which is being called.      |
 +---------+------------------+------------------------------------------------------+
-|After    |`after = True`    | .. py:attribute:: instance                           |
+|After    |`after = True`    | .. attribute:: instance                              |
 |         |                  |                                                      |
 |         |                  |    The mutable instance which has been changed.      |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: method_name                        |
+|         |                  | .. attribute:: method_name                           |
 |         |                  |                                                      |
 |         |                  |    The name of the instance's method which has       |
 |         |                  |    been called to change the instance.               |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: result                             |
+|         |                  | .. attribute:: result                                |
 |         |                  |                                                      |
 |         |                  |    The value returned by the instance's method.      |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: args                               |
+|         |                  | .. attribute:: args                                  |
 |         |                  |                                                      |
 |         |                  |    List of actual arguments passed to the            |
 |         |                  |    instance's method which has been called.          |
 |         |                  +------------------------------------------------------+
-|         |                  | .. py:attribute:: kwargs                             |
+|         |                  | .. attribute:: kwargs                                |
 |         |                  |                                                      |
 |         |                  |    Dictionary of the keyword arguments passed to     |
 |         |                  |    the instance's method which has been called.      |
 +---------+------------------+------------------------------------------------------+
-|Signal   |`signal = True`   | .. py:attribute:: arg                                |
+|Signal   |`signal = True`   | .. attribute:: arg                                   |
 |         |                  |                                                      |
 |         |                  |    The optional argument passed to signal's          |
 |         |                  |    `emit()` method. `arg` is `None` if               |

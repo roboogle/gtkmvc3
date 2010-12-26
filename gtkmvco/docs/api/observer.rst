@@ -1,5 +1,5 @@
-Custom Observers
-================
+Observers
+=========
 
 .. module:: gtkmvc.observer
 

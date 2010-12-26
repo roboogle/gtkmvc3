@@ -165,7 +165,7 @@ class NTInfo (dict):
               assert "before" in info or "after" in info
               assert "hello" not in info
               print "Method name=", info.method_name
-              if "after" in info: print "Method returned", info.result              
+              if "after" in info: print "Method returned", info.result    
               pass
               
            return   
@@ -307,30 +307,43 @@ class Observer (object):
     def observe(cls, *args, **kwargs):
         """
         If used as decorator, decorates a method as a notification
-        method. If called, declares dynamically a new notification
-        methods.
+        method. Used in a normal method call, declares dynamically a
+        new notification methods. 
 
-        Used as decorator
-        =================
-        Takes one string (the property name), and at least one boolean
-        keyword argument identifying the types of the
-        notification. The keyword argument has to be set to True in
-        the set `{assign, before, after, signal}`.
+        .. warning::
+      
+           Due to limitation in the dynamic registration (in version
+           1.99.1), declarations of dynamic notifications must accur
+           before registering self as an observer of the models whose
+           properties the notifications are supposed to be
+           observing. A hack for this limitation, is to first relieve
+           any interesting model before dynamically register the
+           notifications, and then re-observe those models.
 
-        If other keyword arguments are provided, they will be found in
-        the dictionary passed to the notification method.
 
-        The decorator can be used multiple times to define
-        notification methods which has to be called for multiple
-        observable properties.
+        * Used as decorator
 
-        Used dynamically
-        ================
-        To declare dynamically that a method is a notification method,
-        `Observer.observe` has to be called specifying the method as
-        first argument (not counting Observer `self`). The remaining
-        arguments are the property name and keyword arguments like
-        described in the use as decorator.
+          Takes one string (the property name), and at least one
+          boolean keyword argument identifying the types of the
+          notification. The keyword argument has to be set to True in
+          the set `{assign, before, after, signal}`.
+
+          If other keyword arguments are provided, they will be found
+          in the dictionary passed to the notification method.
+
+          The decorator can be used multiple times to define
+          notification methods which has to be called for multiple
+          observable properties.
+
+
+        * Used dynamically
+
+          To declare dynamically that a method is a notification
+          method, bound instance method `Observer.observe` has to be
+          called specifying the method as first argument (not counting
+          Observer `self`). The remaining arguments are the property
+          name and keyword arguments like described in the use as
+          decorator.
 
            .. versionadded:: 1.99.1
         """

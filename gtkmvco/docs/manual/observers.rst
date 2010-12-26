@@ -136,6 +136,45 @@ an OP? It is possible to declare notification methods *statically* or
    (as instance method), the only difference is that it takes as first
    argument the method to declare as notification.
 
+   Class `Observer` provides some other methods wich are useful when
+   dealing with dynamic definition of notifications. In particular:
+
+   .. method:: def get_observing_methods(self, prop_name)
+
+      Returns a set of methods which have been registered as
+      notifications for a property.
+
+      :param prop_name: the name of the property.
+      :returns: a set of methods.
+
+
+   .. method:: def remove_observing_method(self, prop_names, method)
+
+      Removes a previously defined notification method for a property
+      set.
+
+      :param prop_names: sequence of names of properties.
+      :param method: The method previously defined as a notification. 
+
+   .. method:: def is_observing_method(self, prop_names, method)
+
+      Returns True if given method is a notification for given
+      property name.
+
+      :param prop_name: name of the property.
+      :param method: The method whose nature is queried. 
+      :returns: a boolean value.
+
+
+   .. Warning::
+
+      Version 1.99.1 does not provide a full support for definition of
+      dynamic behaviours yet. In particular it is necessary at the
+      moment to declare dynamic notifications *before* registering the
+      models the notifications are interested in. Next version will
+      provide a better support.
+   
+     
 
 The parameter `info:NTInfo`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,9 +1,31 @@
 **********************************************************************
-* Since the 1.99.0 release *
+* Dec xx 2010                                                        *
 **********************************************************************
+
+Released version 1.99.1
+
+This is a minor release that keeps compatibility with previous version
+1.99.0. However, some features provided in 1.99.0 are deprecated in
+1.99.1.
+
+This version goes in the direction of stabilizing the API and making
+the code more robust. Many bugs were fixed, and a new, clean API is
+now provided for defining notification methods in observers, and
+logical observable properties in models.
+
+The documentation has been updated and extended to reflect all
+changes, and a complete Library Reference is now
+available. Furthermore, the documentation now uses Sphinx instead of
+Latex to generate both pdf and html documentation formats.
 
 * New
 
+  - Models now feature Logical Observable Properties, along already
+    supported Concrete Observable Properties.
+  - In Observers notification methods have all the same prototype,
+    which make much cleaner the application code.
+  - New mechanism to declare both dynamically and statically
+    notification methods in Observers.
   - adapt FileChooserButton
   - adapt ComboBox
   - adapt Adjustment
@@ -26,6 +48,16 @@
   - Methods to declare methods as observing properties at runtime.
 
 * Changed
+
+  - Name-based notification methods like
+    `property_<name>_value_change` are still supported, but their
+    usage is now discouraged. A new mechanism for declaring
+    notifications is now available, and you should consider porting
+    applications accordingly.
+
+  - Decorator Observer.observes is now deprecated. A new mechanism for
+    declaring notifications is now available, and you should consider
+    porting applications accordingly.
 
   - support GtkBuilder in addition to libglade, which is no longer
     required.
@@ -70,9 +102,23 @@
 
   - no more errors from static container adapters you didn't create.
 
-  - multiple concurrent iterators on views no longer steal each other widgets.
+  - multiple concurrent iterators on views no longer steal each other
+    widgets.
 
-  - the decorator for observing methods only worked with multiple arguments.
+  - the decorator for observing methods only worked with multiple
+    arguments.
+
+
+Many thanks to Tobias Weber <towb AT celvina DOT de> for joining the
+team, and actively providing a great boost and improvement to the
+framework by:
+ * Contributing to the Roadmap
+ * Designing of new features
+ * Bug fixing
+ * Testing 
+ * Documentation (Library Reference)
+
+
 
 **********************************************************************
 *  Apr 1 2009                                                        * 

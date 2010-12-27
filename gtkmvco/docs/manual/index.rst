@@ -1,5 +1,5 @@
-Welcome to GTKMVC documentation
-===============================
+GTKMVC - The User Manual
+========================
 
 Contents:
 

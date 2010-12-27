@@ -3,8 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GTK MVC |version| documentation
-===============================
+GTK MVC |version| Library Reference
+===================================
+
+.. sectionauthor:: Tobias Weber <towb@celvina.de>
+
+.. topic:: Authors
+
+   Tobias Weber <towb AT celvina.de> 
 
 .. toctree::
    :maxdepth: 2

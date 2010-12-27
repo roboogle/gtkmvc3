@@ -174,7 +174,7 @@ htmlhelp_basename = 'GTKMVCdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'gtkmvc-reference.tex', u'GTK MVC Documentation',
+  ('index', 'gtkmvc-reference.tex', u'GTK MVC Library Reference',
    u'Roberto Cavada', 'manual'),
 ]
 

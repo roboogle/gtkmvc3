@@ -216,11 +216,11 @@ other keyword arguments are copied as they are.
 Apart from keyword parameters used when declaring the notification
 method, :py:obj:`info` contains also attributes:
 
-   * :py:attribute:`model`: the model containing the OP which was
+   * :py:attr:`model`: the model containing the OP which was
      changed. This is also passed to the notification method as first
      argument.
 
-   * :py:attribute:`prop_name`: the name of the OP which was
+   * :py:attr:`prop_name`: the name of the OP which was
      changed. This is also passed to the notification method as second
      argument.
 
@@ -264,76 +264,138 @@ method, parameter :py:obj:`info` will carry specific information which
 depend on the notification type. In the following table details of all
 the supported types are presented.
 
-+---------+------------------+------------------------------------------------------+
-|Type     |Keyword           | `info` attributes/keys                               |
-+=========+==================+======================================================+
-|*All*    |                  | .. attribute:: model                                 |
-|         |                  |                                                      |
-|         |                  |    The model instance containing the OP which is     |
-|         |                  |    being changed.                                    |
-|         |                  +------------------------------------------------------+
-|         |                  |.. attribute:: prop_name                              |
-|         |                  |                                                      |
-|         |                  |   The name of the OP which is being changed.         |
-+---------+------------------+------------------------------------------------------+
-|Assign   |`assign = True`   | .. attribute:: old                                   |
-|         |                  |                                                      |
-|         |                  |    Holds the value the property had before           |
-|         |                  |    being assigned to.                                |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: new                                   |
-|         |                  |                                                      |
-|         |                  |    Holds the value which the property is assigned    |
-|         |                  |    to.                                               |
-+---------+------------------+------------------------------------------------------+
-|Before   |`before = True`   | .. attribute:: instance                              |
-|         |                  |                                                      |
-|         |                  |    The mutable instance which is being changed.      |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: method_name                           |
-|         |                  |                                                      |
-|         |                  |    The name of the instance's method which is        |
-|         |                  |    being called to change the instance.              |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: args                                  |
-|         |                  |                                                      |
-|         |                  |    List of actual arguments passed to the            |
-|         |                  |    instance's method which is being called.          |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: kwargs                                |
-|         |                  |                                                      |
-|         |                  |    Dictionary of the keyword arguments passed to     |
-|         |                  |    the instance's method which is being called.      |
-+---------+------------------+------------------------------------------------------+
-|After    |`after = True`    | .. attribute:: instance                              |
-|         |                  |                                                      |
-|         |                  |    The mutable instance which has been changed.      |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: method_name                           |
-|         |                  |                                                      |
-|         |                  |    The name of the instance's method which has       |
-|         |                  |    been called to change the instance.               |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: result                                |
-|         |                  |                                                      |
-|         |                  |    The value returned by the instance's method.      |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: args                                  |
-|         |                  |                                                      |
-|         |                  |    List of actual arguments passed to the            |
-|         |                  |    instance's method which has been called.          |
-|         |                  +------------------------------------------------------+
-|         |                  | .. attribute:: kwargs                                |
-|         |                  |                                                      |
-|         |                  |    Dictionary of the keyword arguments passed to     |
-|         |                  |    the instance's method which has been called.      |
-+---------+------------------+------------------------------------------------------+
-|Signal   |`signal = True`   | .. attribute:: arg                                   |
-|         |                  |                                                      |
-|         |                  |    The optional argument passed to signal's          |
-|         |                  |    `emit()` method. `arg` is `None` if               |
-|         |                  |    `emit` was called without argument.               |
-+---------+------------------+------------------------------------------------------+
+Common to all types
+^^^^^^^^^^^^^^^^^^^
+
+.. class:: NTInfo
+
+    .. attribute:: model                              
+                                                      
+       The model instance containing the OP which     
+       has been changed.                                   
+                                                      
+       :type: `gtkmvc.Model`                          
+                                                      
+    .. attribute:: prop_name                          
+                                                      
+       The name of the OP which has beeen changed.    
+                                                      
+       :type: `string`                                
+
+
+Assign Type
+^^^^^^^^^^^
+
+Keyword argument to be used on `Observer.observe`: `assign=True`
+
+.. class:: NTInfo
+                                                     
+    .. attribute:: old                               
+                                                     
+       Holds the value which the property had before 
+       being assigned to (i.e. the previous value)   
+                                                     
+       :type: <any>                                  
+                                                     
+    .. attribute:: new                               
+                                                     
+       Holds the value which the property has been   
+       assigned to (i.e. the current value)          
+                                                     
+       :type: <any>                                  
+
+
+Before method call type
+^^^^^^^^^^^^^^^^^^^^^^^
+Keyword argument to be used on `Observer.observe`: `before = True`
+
+
+.. class:: NTInfo 
+                                                     
+    .. attribute:: instance                          
+                                                     
+       The mutable instance which is being changed.  
+                                                     
+       :type: <any mutable>                          
+                                                     
+    .. attribute:: method_name                       
+                                                     
+       The name of the instance's method which is    
+       being called to change the instance.          
+                                                     
+       :type: `string`                               
+                                                     
+    .. attribute:: args                              
+                                                     
+       List of actual arguments passed to the        
+       instance's method which is being called.      
+                                                     
+       :type: `list`                                 
+                                                     
+    .. attribute:: kwargs                            
+                                                     
+       Dictionary of the keyword arguments passed to 
+       the instance's method which is being called.  
+                                                     
+       :type: `dict`                                 
+
+
+After method call type
+^^^^^^^^^^^^^^^^^^^^^^
+Keyword argument to be used on `Observer.observe`: `after = True` 
+
+This is similar to `before` but features an attribute to carry the
+return value of the method.
+
+.. class:: NTInfo 
+                                                     
+    .. attribute:: instance                          
+                                                     
+       The mutable instance which has been changed.  
+                                                     
+       :type: `instance`                             
+                                                     
+    .. attribute:: method_name                       
+                                                     
+       The name of the instance's method which has   
+       been called to change the instance.           
+                                                     
+       :type: `string`                               
+                                                     
+    .. attribute:: args                              
+                                                     
+       List of actual arguments passed to the        
+       instance's method which has been called.      
+                                                     
+       :type: `list`                                 
+                                                     
+    .. attribute:: kwargs                            
+                                                     
+       Dictionary of the keyword arguments passed to 
+       the instance's method which has been called.  
+                                                     
+       :type: `dict`                                 
+                                                     
+    .. attribute:: result                            
+                                                     
+       The value returned by the instance's method.  
+                                                     
+       :type: <any>                                  
+
+
+Signal emit type
+^^^^^^^^^^^^^^^^
+Keyword argument to be used on `Observer.observe`: `signal = True` 
+
+.. class:: NTInfo
+                                                     
+    .. attribute:: arg                               
+                                                     
+       The optional argument passed to signal's      
+       `emit()` method. `arg` is `None` if           
+       `emit` was called without argument.           
+                                                     
+       :type: <any>                                  
 
 
 Notification methods and Inheritance
@@ -383,7 +445,7 @@ The execution of this code will output::
    'user_data': 'my-data-in-BaseObs' }
 
 As you see the actually called method is
-:py:meth:`DerObs.notification`, even if the method in
+meth:`DerObs.notification`, even if the method in
 :py:class:`DerObs` is not explicitly declared to be a notification
 method. Furthermore, the keyword arguments specified at declaration
 time in class :py:class:`BaseObs` are passed down to :py:obj:`info`

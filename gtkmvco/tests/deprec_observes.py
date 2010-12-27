@@ -79,7 +79,7 @@ class DeprecatedObservesTest (unittest.TestCase):
                         }
         for p in 'p1 p2 p3 p4'.split():
             for m in self.o.get_observing_methods(p):
-                kw = self.o.get_observing_method_kwargs(m)
+                kw = self.o.get_observing_method_kwargs(p, m)
                 self.assertTrue(right_types[m] in kw)
                 self.assertTrue(kw[right_types[m]] is True)
                 pass

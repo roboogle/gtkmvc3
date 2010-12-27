@@ -44,8 +44,22 @@ implementation which depends on the application semantics.
    * Easy access to the associated Model and View for any derived
      class.
    * Construction of columns and renderers of
-     ``gtk.TreeView`` widgets.
+     :class:`gtk.TreeView` widgets.
    * Instantiation of *adapters*.
+
+
+The :ref:`fig:ClassDiagram` gives an overview about a few of the main
+classes which are discussed in this section, and shows relationships
+among them. All details can be found in the API Library Reference, and
+of course in the source code.
+
+.. _fig:ClassDiagram:
+
+.. figure:: images/main_classes.png
+   :width: 22 cm
+   :align: center
+
+   Diagram of some of the main classes
 
 
 .. _MODELS:
@@ -108,6 +122,7 @@ gtkmvc.TextBufferModelMT
    derives both from ``ModelMT`` and ``gtk.TextBuffer``.
 
 
+.. _CONTROLLERS:
 
 Controllers
 -----------
@@ -130,13 +145,14 @@ will update the view.
 Model registration
 ^^^^^^^^^^^^^^^^^^
 
-By default, a controller is also an Observer (see below) of the
-corresponding Model, even when there is nothing to observe, or when
-the controller is interested in observing nothing within the model.
+A controller by default observes the model it is connected
+to. However, as :class:`Controller` derives from :class:`Observer`, a
+controller can observe multiple models. See :ref:`Observers` for
+further information about observers.
 
 Registration occurs automatically. If the observation is not wanted,
-the derived controller can call method ``unregister_model``
-from the instance constructor, to unregister itself.
+the derived controller can call method ``relieve_model`` from the
+instance constructor, to unregister itself.
 
 
 .. _VR:D:

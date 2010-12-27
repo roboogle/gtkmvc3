@@ -8,6 +8,12 @@ If OPs live into ``Models``, ``Observers`` are the objects which are
 interested in being notified when an OP gets changed. An Observer
 observes one or more Models.
 
+A typical observer is an instance of class :ref:`gtkmvc.Controller<CONTROLLERS>` which
+derive from :class:`gtkmvc.Observer`.
+
+Also :ref:`gtkmvc.Model<MODELS>` derives from :class:`gtkmvc.Observer`, as
+in hierarchies of models parents sometimes observe children.
+
 .. Important::
    Since version 1.99.1, observers were deeply revised. If you have
    experience with older versions, you will find many changes. In

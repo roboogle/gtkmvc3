@@ -132,7 +132,7 @@ specified with wildcards. For example this is perfectly legal: ::
     @Model.setter("*") # matches "energy", "entropy", "enology"
     def happiness(self, name, value): 
         print "setter for", name, value
-        # ...
+        ...
         return
 
 
@@ -149,10 +149,10 @@ However, this example is not legal: ::
     __observables__ = ("energy", "entropy", "enology")
 
     @Model.getter("en*") # matches energy, entropy, and enology
-    def getter1(self, name): #...
+    def getter1(self, name): ...
 
     @Model.getter("*") # matches energy, entropy, and enology
-    def getter2(self, name): #...
+    def getter2(self, name): ...
 
     pass # end of class
  # ----------------------------
@@ -198,10 +198,10 @@ specific getter/setter defined. For example: ::
     def get_energy_value(self): return 0.1  # constantly need holidays!
 
     # getter for entropy and enology only, as energy has a specific getter
-    def get__value(self, name): # ...
+    def get__value(self, name): ...
 
     # setter for all properties
-    def set_value(self, name, value): # ...
+    def set_value(self, name, value): ...
 
     pass # end of class
  # ----------------------------
@@ -226,7 +226,7 @@ as: ::
     
     def set__value(self, name, value): 
         print "setter for", name, value
-        # ...
+        ...
         return
 
     pass # end of class

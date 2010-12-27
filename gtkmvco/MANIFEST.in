@@ -11,17 +11,17 @@ include examples/adapters
 
 recursive-include docs Makefile
 
-# docs
-recursive-include docs/user-man/figs/png *.png
-recursive-include docs/user-man  *.tex *.tex.in *.cfg
-
-# tutorial
-recursive-include docs/tutorial/tex *.tex *.png *.tex.in *.cfg
-recursive-include docs/tutorial/src *.py *.glade
-#recursive-include README *.py *.glade
+# user manual
+recursive-include docs/manual *.rst *.py *.png *.dia
 
 # quickstart
-recursive-include docs/quickstart/source *.rst *.py *.png dummy
+recursive-include docs/quickstart *.rst *.py *.png *.dia
+
+# api
+recursive-include docs/api *.rst *.py *.png *.dia
+
+# tutorial
+recursive-include docs/tutorial *.rst *.py *.png *.dia
 
 # glade
 include gtkmvc/progen/progen.glade
@@ -29,5 +29,7 @@ include gtkmvc/progen/progen.glade
 prune dist
 prune docs/tutorial/tex/html
 prune docs/user-man/html
-prune docs/quickstart/build
+prune docs/manual/_build
+prune docs/quickstart/_build
+prune docs/api/_build
 

@@ -2,16 +2,7 @@ import unittest
 
 import gtk
 
-import time
-import gtk
-
-# http://unpythonic.blogspot.com/2007/03/unit-testing-pygtk.html
-def refresh_gui(delay=0):
-    while gtk.events_pending():
-        gtk.main_iteration_do(block=False)
-    time.sleep(delay)
-
-import _importer
+from _importer import refresh_gui
 
 import gtkmvc
 
@@ -56,6 +47,7 @@ class T(unittest.TestCase):
         self.assertFalse("prop" in self.v)
 
     def testOverride(self):
+        # Expect warning "No widget candidates match property 'prop'".
         self.c.adapt()
         self.assertTrue(self.c.called)
 

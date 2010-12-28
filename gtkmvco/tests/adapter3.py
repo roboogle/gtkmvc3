@@ -28,10 +28,16 @@ class ConnectTest(unittest.TestCase):
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
+    def testController(self):
+        self.c.adapt("box", "hbox1")
+        self.assertStatic()
+
     def testStatic(self):
         a = StaticContainerAdapter(self.m, "box")
         a.connect_widget(self.v["hbox1"])
+        self.assertStatic()
 
+    def assertStatic(self):
         self.assertEqual("0", self.v["entry2"].get_text())
         self.assertEqual("1", self.v["label3"].get_text())
         self.assertEqual("2", self.v["spinbutton1"].get_text())

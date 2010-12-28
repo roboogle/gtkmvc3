@@ -8,9 +8,10 @@ import unittest
 modules = []
 for name in glob.glob("*.py"):
     if name != __file__:
-        with open(name, "rU") as f:
-            if "unittest" in f.read():
-                modules.append(os.path.splitext(name)[0])
+        f = open(name, "rU")
+        if "unittest" in f.read():
+            modules.append(os.path.splitext(name)[0])
+        f.close()
 
 suite = unittest.defaultTestLoader.loadTestsFromNames(modules)
 runner = unittest.TextTestRunner()

@@ -196,7 +196,7 @@ class NTInfo (dict):
             raise KeyError("flag '%s' must be set in given arguments" % _type)
 
         # all requested are provided by the framework, not the user
-        assert all((x in self for x in NTInfo.__ALL_REQUESTED))
+        assert NTInfo.__ALL_REQUESTED <= set(self)
 
         # now removes all type-flags not related to _type
         for flag in NTInfo.__ONE_REQUESTED:
@@ -280,7 +280,7 @@ def observes(*args):
     # checks arguments
     if 0 == len(args): 
         raise TypeError("decorator observe() takes one of more arguments (0 given)")
-    if any(type(arg) != str for arg in args):
+    if [a for a in args if type(a) != str]:
         raise TypeError("decorator observe() takes only strings as arguments")    
 
     log.logger.warning("Decorator observer.observers is deprecated:"
@@ -370,7 +370,7 @@ class Observer (object):
 
             assert isinstance(self, Observer), "Method Observer.observe " \
                 "must be called with an Observer instance as first argument"
-            if not isinstance(notified, collections.Callable):
+            if not callable(notified):
                 raise TypeError("Second argument of observe() must be a callable")
             if type(name) != str: 
                 raise TypeError("Third argument of observe() must be a string")

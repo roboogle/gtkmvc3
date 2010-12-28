@@ -40,6 +40,8 @@ class MyCtrl (Controller):
                             w.set_markup("<big><b>%i</b></big>" % v))
         self.adapt(ad)
         self.adapt("toggle", "label_t2")
+        # Before PyGTK 2.14 this will display the object ID instead of
+        # something useful.
         self.adapt("color", "label_t3")
         self.adapt("url", "label_t4")
         self.adapt("spin", "label_t5")

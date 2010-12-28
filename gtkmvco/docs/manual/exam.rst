@@ -66,35 +66,6 @@ language is required in order to understand the code details.
 More description section is :doc:`impl`.
 
 
-View
-----
-
-In the example, the View is implemented inside the class
-``ExampleView`` shown below. ::
-
- from gtkmvc import View
- import os.path
- 
- GLADE_PATH = "./glade" 
- 
- class ExampleView (View):
-     """The application view. Contains only the main window1 tree."""
-     glade = os.path.join(GLADE_PATH, "example.glade")
-     top = "window1"
-
-     def set_msg(self, msg):
-        self['label_text'].set_text(msg)
-        self['label_text_len'].set_text(str(len(msg)))
-        return
-
-     pass # end of class
-
-
-Class ``ExampleView`` extends the generic ``View``
-class, which performs most of the job, as described above.
-Class memebers ``glade`` and ``top`` are used instead of
-calling ``View`` constructor directly.
-
 Model
 -----
 
@@ -106,36 +77,38 @@ current message index. The current message index is also an
 observable property. A couple of methods are supplied in order to
 access the state. ::
 
+ # file model.py
  from gtkmvc import Model
 
  class ExampleModel (Model):
-     """The model contains a set of messages
-     and an observable property that represent the current message
-     index"""
- 
-     # Observable property: code for that is automatically generated
-     # by metaclass constructor. The controller will be the observer
-     # for this property
-     message_index = -1   # -1 is the initial value
-     __observables__ = ("message_index",)
- 
-     def __init__(self):
-         Model.__init__(self)
- 
-         self.messages= ('Initial message',
-                         'Another message', 
-                         'Another message again',
-                         'Model changed again!')
-         return
- 
-     def get_message(self, index): return self.messages[index]
- 
-     def set_next_message(self):
-         # this changes the observable property:
-         self.message_index = (self.message_index + 1) % len(self.messages)
-         return
- 
-     pass # end of class
+    """The model contains a set of messages
+    and an observable property that represent the current message
+    index"""
+
+    # Observable property: code for that is automatically generated
+    # by metaclass constructor. The controller will be the observer
+    # for this property
+    message_index = -1   # -1 is the initial value
+    __observables__ = ("message_index",)
+
+    def __init__(self):
+        Model.__init__(self)
+
+        self.messages= ("I am patient with stupidity",
+                        "but not with those",
+                        "who are proud of it.",
+                        "(Edith Sitwell)",
+                        )
+        return
+
+    def get_message(self, index): return self.messages[index]
+
+    def set_next_message(self):
+        # this changes the observable property:
+        self.message_index = (self.message_index + 1) % len(self.messages)
+        return
+
+    pass # end of class
 
 
 
@@ -150,57 +123,78 @@ generates the needed code to handle the notification.  When the value
 of variable ``message_index`` changes, all registered
 observers will be notified.
 
-.. Note:: 
-   It is also possible to use the special class' variable
-   ``__properties__``, which is a map of (property, value)
-   couples. This variable was used in older versions of *gtkmvc* and
-   should be avoided in new code.
+
+
+View
+----
+
+In the example, the View is implemented inside the class
+``ExampleView`` shown below. ::
+
+ # file view.py
+ import os.path
+ from gtkmvc import View
+
+ GLADE_PATH = "./"
+
+ class ExampleView (View):
+    """The application view. Contains only the main window1 tree."""
+    builder = os.path.join(GLADE_PATH, "example.glade")
+    top = "window1"
+
+    def set_msg(self, msg):
+       self['label_text'].set_text(msg)
+       self['label_text_len'].set_text(str(len(msg)))
+       return
+
+    pass # end of class
+
+
+Class ``ExampleView`` extends the generic ``View``
+class, which performs most of the job, as described above.
+Class members ``builder`` and ``top`` are used instead of
+calling ``View`` constructor directly.
 
 
 Controller
 ----------
 
-Class ``ExampleController`` contains the *logic* of the
+Class ``ExampleController`` contains the *GUI logic* of the
 application. The controller handles two signals and the observable
 property notification. Signals are the ``destroy`` event,
 invoked when the application quits, and the
 ``on_button1_clicked``, fired when ``button1`` is
 pressed. ::
 
+ # file ctrl.py
+ from gtk import main_quit
  from gtkmvc import Controller
- from gtk import mainquit
 
  class ExampleController(Controller):
-     """The only one controller. Handles the button clicked signal, and
-     notifications about one observable property."""
- 
-     def __init__(self, model, view):
-         """Contructor. model will be accessible via the member 'self.model'.
-         View registration is also performed."""
-         Controller.__init__(self, model, view)
-         return
- 
-     def register_view(self, view):
-         # Connects the exiting signal:
-         view.get_top_widget().connect("destroy", mainquit)
-         return
- 
-     # Signal
-     def on_button1_clicked(self, button):
-         """Handles the signal clicked for button1. Changes the model."""
-         self.model.set_next_message()
-         return
- 
-     # Observables notifications
-     @Controller.observe("message_index", assign=True)
-     def value_change(self, model, name, info):
-         """The model is changed and the view must be updated"""
-         msg = self.model.get_message(info.new)
-         
-         self.view.set_msg(msg)
-         return    
- 
-     pass # end of class
+    """The only one controller. Handles the button clicked signal, and
+    notifications about one observable property."""
+
+    def register_view(self, view):
+        # Connects the exiting signal:
+        view.get_top_widget().connect("destroy", main_quit)
+        return
+
+    # Signal
+    def on_button1_clicked(self, button):
+        """Handles the signal clicked for button1. Changes the model."""
+        self.model.set_next_message()
+        return
+
+    # Observables notifications
+    @Controller.observe("message_index", assign=True)
+    def value_change(self, model, name, info):
+        """The model is changed and the view must be updated"""
+        msg = self.model.get_message(info.new)
+
+        self.view.set_msg(msg)
+        return
+
+    pass # end of class
 
 
 The ``destroy`` signal is connected when the View registers itself
@@ -211,4 +205,45 @@ model. Since that part of the state is an observable property, the
 associated observer (which is the controller itself) is notified of
 the modification, by calling method ``value_change``. This method
 updates the view connected to the controller.
+
+
+The Launcher (main)
+-------------------
+
+The :func:`main` code creates a `(m,v,c)` triple and launches
+:func:`gtk.main()`. All the rest is cosmetics. ::
+
+ import gtk
+
+ from model import ExampleModel
+ from ctrl import ExampleController
+ from view import ExampleView
+ import gtkmvc
+
+ def check_requirements():
+    gtkmvc.require("1.99.1")
+    return
+
+ def setup_env(development_state=False):
+    # This is how developers should set gtkmvc logging level (by
+    # default debugging info is not shown):
+    if development_state:
+        import logging
+        gtkmvc.support.log.logger.setLevel(logging.DEBUG)
+        pass
+    return
+
+ def main():
+    m = ExampleModel()
+    v = ExampleView()
+    c = ExampleController(m, v)
+
+    gtk.main()
+    return
+
+ if __name__ == "__main__":
+    check_requirements()
+    setup_env(development_state=True)
+    main()
+    pass
 

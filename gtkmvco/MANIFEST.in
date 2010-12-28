@@ -27,9 +27,9 @@ recursive-include docs/tutorial *.rst *.py *.png *.dia
 include gtkmvc/progen/progen.glade
 
 prune dist
-prune docs/tutorial/tex/html
-prune docs/user-man/html
 prune docs/manual/_build
 prune docs/quickstart/_build
+prune docs/tutorial/_build
 prune docs/api/_build
+
 

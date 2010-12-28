@@ -37,10 +37,13 @@ class MyOb (Observer):
         self.notifications.insert(0, (model, name, old, new))
         return
 
-    # no matching
+    # Assert warning "Ignoring notification no_matching: wrong number of
+    # arguments"
     @observes("p1")
     def no_matching(self, model, name): return
 
+    # Assert warning "Ignoring notification varargs: variable arguments
+    # prevent type inference"
     @observes("p1")
     def varargs(self, model, *args): return
     pass # end of class

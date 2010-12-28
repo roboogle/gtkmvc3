@@ -14,7 +14,8 @@ class Model(gtkmvc.Model):
         self.register_observer(self)
         return
 
-    def property_mutable_before_change(self, *args):
+    def property_mutable_before_change(self, model, instance, name, args,
+        kwargs):
         self.called = True
         return
 

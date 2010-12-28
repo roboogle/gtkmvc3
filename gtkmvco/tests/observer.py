@@ -102,7 +102,6 @@ class DynamicWithName(gtkmvc.Observer):
     def __init__(self, model):
         gtkmvc.Observer.__init__(self)
 
-        # TODO only first name each works!
         for name in ("signal", "iduna"): 
             self.observe(self.a, name, signal=True)
             pass
@@ -187,7 +186,8 @@ class DynamicTest(unittest.TestCase):
 
     def testIs(self):
         self.assertTrue(self.c.is_observing_method("signal", self.c.a))
-        self.assertFalse(self.c.is_observing_method("signal", self.c.observe_model))
+        self.assertFalse(self.c.is_observing_method("signal",
+            self.c.observe_model))
 
     def testAdd(self):
         self.c.observe_model(self.m)
@@ -199,6 +199,60 @@ class DynamicTest(unittest.TestCase):
         self.c.observe_model(self.m)
         self.m.signal.emit(4)
         self.assertFalse(hasattr(self.c, "signal"))
+
+class DynamicMultiple(gtkmvc.Observer):
+    def __init__(self, model):
+        gtkmvc.Observer.__init__(self)
+        self.changes = []
+        for name in model.get_properties():
+            self.observe(self.change, name,
+                signal=True, assign=True, before=True, after=True)
+        self.observe_model(model)
+
+    def change(self, *args):
+        self.changes.append(args)
+
+class MultipleTest(unittest.TestCase):
+    def setUp(self):
+        self.m = Model()
+        self.c = DynamicMultiple(self.m)
+
+    def testConstraint(self):
+        # TODO also the decorator.
+        self.assertRaises(ValueError,
+            lambda: self.c.observe(self.c.change, "signal", signal=True))
+
+    def testDictionary(self):
+        # TODO not just for signals.
+        self.m.signal.emit(4)
+
+        model, name, info = self.c.changes.pop()
+
+        self.assertEqual(self.m, model)
+        self.assertEqual(self.m, info["model"])
+        self.assertEqual("signal", name)
+        self.assertEqual("signal", info["prop_name"])
+        self.assertEqual(True, info["signal"])
+        self.assertEqual(4, info["arg"])
+
+        for k in info:
+            self.assertEqual(info[k], getattr(info, k))
+
+        self.assertRaises(KeyError, lambda: info["llanfairpwllgwyngyll"])
+        self.assertRaises(AttributeError, lambda: info.llanfairpwllgwyngyll)
+
+    def testNotifications(self):
+        """
+        Avoid regression to before r245.
+        """
+        self.m.signal.emit(4)
+        self.assertEqual(4, self.c.changes[-1][2]["arg"])
+
+        self.m.iduna.emit(5)
+        self.assertEqual(5, self.c.changes[-1][2]["arg"])
+
+        self.m.value = 2
+        self.assertEqual(True, self.c.changes[-1][2]["assign"])
 
 if __name__ == "__main__":
     unittest.main()

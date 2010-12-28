@@ -45,3 +45,6 @@ logger = logging.getLogger("gtkmvc")
 logger.addHandler(stderr)
 
 logger.setLevel(logging.ERROR)
+
+# 1.99.0 compatibility.
+ch = stderr

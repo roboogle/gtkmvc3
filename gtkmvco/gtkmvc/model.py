@@ -335,7 +335,7 @@ class Model (Observer):
             name = format % prop_name
             meth = getattr(observer, name)
             args, varargs, _, _ = inspect.getargspec(meth)
-            if varargs or len(args) != numargs:
+            if not varargs and len(args) != numargs:
                 logger.warn("Ignoring notification %s: exactly %d arguments"
                     " are expected", name, numargs)
                 raise AttributeError

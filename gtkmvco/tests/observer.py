@@ -31,6 +31,19 @@ class Implicit(gtkmvc.Observer):
         args, kwargs):
         self.after = name, args
 
+class ImplicitVar(gtkmvc.Observer):
+    def property_signal_signal_emit(self, *args):
+        self.signal = args[1]
+
+    def property_value_value_change(self, *args):
+        self.value = args[1:3]
+
+    def property_before_before_change(self, *args):
+        self.before = args[2:4]
+
+    def property_after_after_change(self, *args):
+        self.after = args[2], args[4]
+
 class Explicit(gtkmvc.Observer):
     @gtkmvc.Observer.observe("signal", signal=True)
     def notify_signal(self, model, name, info):
@@ -153,6 +166,9 @@ class SingleTest(unittest.TestCase):
 
     def testImplicit(self):
         self.notifications(Implicit(self.m))
+
+    def testImplicitVar(self):
+        self.notifications(ImplicitVar(self.m))
 
     def testExplicit(self):
         self.notifications(Explicit(self.m))

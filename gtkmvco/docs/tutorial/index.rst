@@ -42,7 +42,7 @@ showing the value of a numeric counter. The window contains also a
 button, which increments the counter by one every time it is pressed.
 
 .. figure:: images/appl.png
-   :width: 3cm
+   :width: 4cm
    
    How the mini-application looks like
 
@@ -136,7 +136,7 @@ associated with a function called ``on_button_clicked``.
 .. _glade-figure:
 
 .. figure:: images/glade.png
-   :width: 10cm
+   :width: 18cm
    
    Glade at work
 
@@ -490,7 +490,7 @@ label shows the property's value. Method
         return
 
 .. figure:: images/adap.png
-   :width: 4cm
+   :width: 6cm
    
    Adapter at work
 
@@ -514,7 +514,7 @@ on |pygtkmvc|. *gtkmvc-progen* is available both as a command-line
 program and as a GUI application. 
 
 .. figure:: images/progen.png
-   :width: 8cm
+   :width: 12cm
    
    *gtkmvc-progen* GUI at work
 
@@ -551,7 +551,7 @@ Let us run now the resulting application skeleton. ::
 
 
 .. figure:: images/hello.png
-   :width: 6cm
+   :width: 8cm
    
    The skeletal hello application
 

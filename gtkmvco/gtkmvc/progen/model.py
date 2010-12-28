@@ -134,7 +134,7 @@ class ProgenModel (Model):
         # glade file
         if self.glade: res = self.__generate_glade(resources) or res
 
-        if self.dist_gtkmvc: res = self.__copy_framework(src) or res
+        if self.dist_gtkmvc: res = self.__copy_framework(os.path.join(resources, "external")) or res
 
         if not res: _log("No actions were taken")
         else: _log("Done")
@@ -148,6 +148,7 @@ class ProgenModel (Model):
         res = self.__mkdir(resources) or res
         res = self.__mkdir(os.path.join(resources, "glade")) or res
         res = self.__mkdir(os.path.join(resources, "styles")) or res
+        res = self.__mkdir(os.path.join(resources, "external")) or res
         return res
 
     def __generate_classes(self, models, ctrls, views):
@@ -189,29 +190,49 @@ class ProgenModel (Model):
                                                    'class_name' : name,                                                   
                                                    })
 
-    def __copy_framework(self, src):
-        # copies gtkmvc packages
-        destdir = os.path.join(src, "gtkmvc")
-        if os.path.isdir(destdir): return False
+    def __copy_framework(self, destdir):
+        # copies gtkmvc packages, creating a zip package
+        if not os.path.isdir(destdir): return False
 
+        destzip = os.path.join(destdir, "gtkmvc.zip")
         from gtkmvc.progen.globals import GTKMVC_DIR
         if GTKMVC_DIR is None:
             _log("Warning: the gtkmvc framework was not found")
             return False
 
         _log("The gtkmvc framework was found in '%s'" % GTKMVC_DIR)
-        import glob, shutil
-        self.__mkdir(destdir)
-        all = glob.glob(os.path.join(GTKMVC_DIR, "*"))
-        for a in all:
-            base = os.path.basename(a)
-            if os.path.isdir(a) and base != "CVS" and base != "progen":
-                dest = os.path.join(destdir, base)
-                if not os.path.isdir(dest): shutil.copytree(a, dest)
-                pass
-            elif os.path.isfile(a) and os.path.splitext(a)[1].lower() == ".py": shutil.copy(a, destdir)
+        import zipfile
+
+        zipper = zipfile.PyZipFile(destzip, "w")        
+        zipper.writepy(GTKMVC_DIR) # for the python files
+
+        # adds any additional non-python file:
+        for fname in ("progen/progen.glade", ):
+            zipper.write(os.path.join(GTKMVC_DIR, fname), "gtkmvc/progen/progen.glade")
             pass
+
+        # ----------------------------------------------------------------------
+        # WARNING!! You are not allowed to change the below text
+        # (comment, copyright and license information)
+        comment = """This is a Python package archive of library
+GTKMVC, a thin framework for writing GUI applications with Python and
+PyGTK (http://sourceforge.net/apps/trac/pygtkmvc/wiki)."""
+        copyright = "Copyright (C) 2010 by Roberto Cavada <roboogle@gmail.com>"
+
+        license_short = """GTKMVC is Free Software, covered by the LGPL License version 2 or any
+later version at your choice. You should have received a copy of the
+LGPL license along with the software. If not, please contact the
+provider of the software, and ask for it.
+"""
+        # ----------------------------------------------------------------------
         
+        # adds copyright and license notice
+        zipper.writestr("README.txt",
+                        "\n\n".join((comment, copyright, license_short)))
+
+        zipper.close()
+
+        _log("Copied the gtkmvc framework into %s" % destzip)
         return True
     
         

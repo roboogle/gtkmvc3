@@ -190,13 +190,14 @@ def setup_path():
     """Sets up the python include paths to include needed directories"""
     import os.path; import sys
     from ${src_name}.utils.globals import TOPDIR 
-    sys.path = [os.path.join(TOPDIR, "${src_name}")] + sys.path
+    sys.path.insert(0, reduce(os.path.join, (TOPDIR, "${res_name}", "external", "gtkmvc.zip")))
+    sys.path.insert(0, os.path.join(TOPDIR, "${src_name}"))
     return
 
 
 def check_requirements():
     """Checks versions and other requirements"""
-    import gtkmvc; gtkmvc.require("1.99.0")
+    import gtkmvc; gtkmvc.require("1.99.1")
     return
 
 def main(*args, **kargs):
@@ -257,7 +258,7 @@ This is a demo from gtkmvc Project Generator</property>
 Hope you will enjoy designing and developing with gtkmvc!
 
 For further information take a tour at 
-&lt;u&gt;http://pygtkmvc.sourceforge.net&lt;/u&gt;</property>
+&lt;u&gt;http://sourceforge.net/apps/trac/pygtkmvc/wiki&lt;/u&gt;</property>
             <property name="use_markup">True</property>
           </widget>
           <packing>

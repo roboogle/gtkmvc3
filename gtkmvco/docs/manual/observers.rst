@@ -18,7 +18,7 @@ in hierarchies of models parents sometimes observe children.
    Since version 1.99.1, observers were deeply revised. If you have
    experience with older versions, you will find many changes. In
    particular the usage of name-based notification methods like
-   :py:meth:`property_<name>_value_change` is discouraged, but still
+   ``property_<name>_value_change`` is discouraged, but still
    supported for backward compatibility. At the end of this section
    all discouraged/deprecated features about observers are listed.
 
@@ -187,10 +187,10 @@ The parameter `info:NTInfo`
 
 We anticipated that parameter `info` of change notification is a
 dictionary whose content depends on the notification type. Actually
-:py:obj:`info` is an instance of class :py:class:`NTInfo` 
+:obj:`info` is an instance of class :class:`NTInfo` 
 (**N**\ otification **T**\ ype **Info**\ rmation).
 
-:py:class:`NTInfo` derives from :py:class:`dict` type, but offers the
+:class:`NTInfo` derives from :class:`dict` type, but offers the
 possibility to access to its values by accessing keys as attributes::
 
     # ...
@@ -205,7 +205,7 @@ When defining a notification method, e.g. statically with decorator::
         # ...
         return 
 
-Instance :py:obj:`info` in method notification will contain some of
+Instance :obj:`info` in method notification will contain some of
 the keyword arguments and associated values which were specified at
 declaration time::
 
@@ -220,17 +220,17 @@ arguments identifying the type of the notification is set. All the
 other keyword arguments are copied as they are.
 
 Apart from keyword parameters used when declaring the notification
-method, :py:obj:`info` contains also attributes:
+method, :obj:`info` contains also attributes:
 
-   * :py:attr:`model`: the model containing the OP which was
+   * :attr:`model`: the model containing the OP which was
      changed. This is also passed to the notification method as first
      argument.
 
-   * :py:attr:`prop_name`: the name of the OP which was
+   * :attr:`prop_name`: the name of the OP which was
      changed. This is also passed to the notification method as second
      argument.
 
-The standard remaining content of :py:obj:`info` depends on the
+The standard remaining content of :obj:`info` depends on the
 notification type it is passed along to, and it is listed in detail
 now.
 
@@ -266,7 +266,7 @@ Notification types
 
 The type of the notification method is decided at declaration time, by
 using specific flags as keyword arguments. Later in the notification
-method, parameter :py:obj:`info` will carry specific information which
+method, parameter :obj:`info` will carry specific information which
 depend on the notification type. In the following table details of all
 the supported types are presented.
 
@@ -452,9 +452,9 @@ The execution of this code will output::
 
 As you see the actually called method is
 meth:`DerObs.notification`, even if the method in
-:py:class:`DerObs` is not explicitly declared to be a notification
+:class:`DerObs` is not explicitly declared to be a notification
 method. Furthermore, the keyword arguments specified at declaration
-time in class :py:class:`BaseObs` are passed down to :py:obj:`info`
+time in class :class:`BaseObs` are passed down to :obj:`info`
 untouched.
 
 Sometimes it is useful to re-define notification methods in derived
@@ -502,12 +502,12 @@ The execution of this code produces the output::
    'user_data': 'my-data-in-DerObs', 
    'other_data': 'other-data-in-DerObs' }
 
-Notice that even if :py:obj:`prop1` has been assigned, the *assign*
-notification has not been sent, as :py:meth:`DerObs.notification`
-intercepts only *signals* and :py:meth:`BaseObs.notification` is
+Notice that even if :obj:`prop1` has been assigned, the *assign*
+notification has not been sent, as :meth:`DerObs.notification`
+intercepts only *signals* and :meth:`BaseObs.notification` is
 shadowed by it.
 
-However, if we declare :py:meth:`DerObs.notification` to receive both
+However, if we declare :meth:`DerObs.notification` to receive both
 *assign* and *signal* notifications::
 
  class DerObs (BaseObs):
@@ -545,7 +545,7 @@ Old-style notifications
 Naming conventions-based
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Old style notifications (version 1.99.0 and older) were implicitly
-declared by exploiting a *naming convention*. :py:class:`NTInfo` was
+declared by exploiting a *naming convention*. :class:`NTInfo` was
 not supported, and notification methods had different signatures
 depending on the notification type.
 

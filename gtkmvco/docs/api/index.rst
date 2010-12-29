@@ -6,11 +6,7 @@
 GTK MVC |version| Library Reference
 ===================================
 
-.. sectionauthor:: Tobias Weber <towb@celvina.de>
-
-.. topic:: Authors
-
-   Tobias Weber <towb AT celvina.de> 
+.. sectionauthor:: Tobias Weber
 
 .. toctree::
    :maxdepth: 2

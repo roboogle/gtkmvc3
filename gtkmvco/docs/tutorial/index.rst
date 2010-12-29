@@ -169,7 +169,7 @@ connect automatically all signals declared in the glade file. ::
 
 Class ``MyView`` calls simply ``View``'s class constructor from within
 its constructor, by passing the glade file name, either with the
-keyword argument `builder` for |gtk.Builder| format, or keyword
+keyword argument `builder` for :class:`gtk.Builder` format, or keyword
 argument `glade` for the old |glade| format. All the hard work is
 carried out by class ``View``.
 

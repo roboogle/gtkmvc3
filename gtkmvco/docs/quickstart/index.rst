@@ -323,7 +323,7 @@ but that correspond each to a pair of methods (getter/setter)::
     pass # end of class
 
 The syntax for declaring getter/setter pair for a property is inpired
-to the syntax of python decorator :py:func:`property`.
+to the syntax of python decorator :func:`property`.
 
 It is also possible to define getters and/or setters that takes also
 the name of the property, making possible to define multi-properties
@@ -578,8 +578,8 @@ The execution of this example produces the following output::
  before_call_notification: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
  before_after_call_notification: BEFORE: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
  before_after_call_notification: AFTER: data3 ['music', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__ None
-signal_notification: SIGNAL: sgn Hello world!
-signal_notification: ASSIGN: sgn <gtkmvc.observable.Signal object at 0x7f88957f5fd0> <gtkmvc.observable.Signal object at 0x7f8895801ad0>
+ signal_notification: SIGNAL: sgn Hello world!
+ signal_notification: ASSIGN: sgn <gtkmvc.observable.Signal object at 0x7f88957f5fd0> <gtkmvc.observable.Signal object at 0x7f8895801ad0>
 
 Of course an observer is not limited to observe one model::
 

@@ -488,7 +488,7 @@ class Observer (object):
         :meth:`observe` for *prop_name*.
         
         .. versionadded:: 1.99.1
-        Replaces :meth:`get_custom_observing_methods`.
+           Replaces :meth:`get_custom_observing_methods`.
         """
         return self.__CUST_OBS_MAP.get(prop_name, set())
 

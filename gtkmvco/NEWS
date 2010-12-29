@@ -13,10 +13,10 @@ the code more robust. Many bugs were fixed, and a new, clean API is
 now provided for defining notification methods in observers, and
 logical observable properties in models.
 
-The documentation has been updated and extended to reflect all
-changes, and a complete Library Reference is now
-available. Furthermore, the documentation now uses Sphinx instead of
-Latex to generate both pdf and html documentation formats.
+The documentation has been updated and extended to reflect all changes, and a
+complete Library Reference is now available. Furthermore, the documentation
+now uses Sphinx instead of Latex to generate both pdf and html documentation
+formats.
 
 * New
 
@@ -44,8 +44,6 @@ Latex to generate both pdf and html documentation formats.
     behaviour all along. Default is still to call it after the cast.
   - Decorators for property setters/getters in models. The methods can now have
     arbitrary names and you are no longer limited to one property per method.
-  - A third manual, this one ordered by method. Use it for quick reference.
-  - Methods to declare methods as observing properties at runtime.
 
 * Changed
 
@@ -109,14 +107,8 @@ Latex to generate both pdf and html documentation formats.
     arguments.
 
 
-Many thanks to Tobias Weber <towb AT celvina DOT de> for joining the
-team, and actively providing a great boost and improvement to the
-framework by:
- * Contributing to the Roadmap
- * Designing of new features
- * Bug fixing
- * Testing 
- * Documentation (Library Reference)
+Many thanks to Christian Spoer for narrowing down a bug and to Tobias Weber
+for joining the team.
 
 
 

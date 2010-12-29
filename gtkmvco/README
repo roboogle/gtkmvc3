@@ -1,9 +1,8 @@
-MVC with Observer pattern for pygtk2
-=====
-Author: Roberto Cavada <cavada AT fbk.eu>
+===========================================================================
+||            MVC with Observer pattern for pygtk2                       ||
+===========================================================================
 
-In 2010 Tobias Weber <towb AT celvina.de> has joined the development
-"team".
+Copyright (C) 2010 by Roberto Cavada <roboogle AT gmail.com>
 
 
 New Versions
@@ -12,19 +11,19 @@ New versions of this package can be found at:
  <http://pygtkmvc.sourceforge.net>
 
 
-Copyright Information
-=====================
+License
+=======
 This software is covered by the GNU Library General Public License
-(version 2, or if you choose, a later version). 
+(version 2, or if you choose, any later version). 
 
 
 How to use it
 =============
-See the provided examples, read the documentation and tutorial
+See the provided examples, read the documentation and tutorial.
 
 
-Contacting the Author
-=====================
+Contacting the Authors
+======================
 If you have any enhancements implemented or still in mind, or bug
 reports, please see contact information at the URL: 
 http://sourceforge.net/apps/trac/pygtkmvc

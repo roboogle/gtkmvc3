@@ -190,7 +190,7 @@ def setup_path():
     """Sets up the python include paths to include needed directories"""
     import os.path; import sys
     from ${src_name}.utils.globals import TOPDIR 
-    sys.path.insert(0, reduce(os.path.join, (TOPDIR, "${res_name}", "external", "gtkmvc.zip")))
+    sys.path.insert(0, reduce(os.path.join, (TOPDIR, "${res_name}", "external")))
     sys.path.insert(0, os.path.join(TOPDIR, "${src_name}"))
     return
 

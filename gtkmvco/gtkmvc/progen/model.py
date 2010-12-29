@@ -23,12 +23,15 @@
 
 
 import os
+import glob
 import datetime
+import shutil
 from string import Template
 
 from gtkmvc import Model
 from gtkmvc.progen import templates
-
+# relpath is taken from utils here for portability
+from gtkmvc.support.utils import relpath
 
 # ----------------------------------------------------------------------
 # Logging stuff
@@ -187,52 +190,69 @@ class ProgenModel (Model):
 
     def __generate_class_template(self, base, name, template):
         return Template(template).safe_substitute({'base_class_name' : base,
-                                                   'class_name' : name,                                                   
+                                                   'class_name' : name,
                                                    })
 
     def __copy_framework(self, destdir):
         # copies gtkmvc packages, creating a zip package
         if not os.path.isdir(destdir): return False
 
-        destzip = os.path.join(destdir, "gtkmvc.zip")
         from gtkmvc.progen.globals import GTKMVC_DIR
         if GTKMVC_DIR is None:
             _log("Warning: the gtkmvc framework was not found")
             return False
 
         _log("The gtkmvc framework was found in '%s'" % GTKMVC_DIR)
-        import zipfile
 
-        zipper = zipfile.PyZipFile(destzip, "w")        
-        zipper.writepy(GTKMVC_DIR) # for the python files
-
-        # adds any additional non-python file:
-        for fname in ("progen/progen.glade", ):
-            zipper.write(os.path.join(GTKMVC_DIR, fname), "gtkmvc/progen/progen.glade")
+        # creates destdir
+        if not os.path.isdir(destdir):
+            _log("Creating directory '%s'" % destdir)
+            os.makedirs(destdir)
             pass
-
-        # ----------------------------------------------------------------------
-        # WARNING!! You are not allowed to change the below text
-        # (comment, copyright and license information)
-        comment = """This is a Python package archive of library
-GTKMVC, a thin framework for writing GUI applications with Python and
-PyGTK (http://sourceforge.net/apps/trac/pygtkmvc/wiki)."""
-        copyright = "Copyright (C) 2010 by Roberto Cavada <roboogle@gmail.com>"
-
-        license_short = """GTKMVC is Free Software, covered by the LGPL License version 2 or any
-later version at your choice. You should have received a copy of the
-LGPL license along with the software. If not, please contact the
-provider of the software, and ask for it.
-"""
-        # ----------------------------------------------------------------------
         
-        # adds copyright and license notice
-        zipper.writestr("README.txt",
-                        "\n\n".join((comment, copyright, license_short)))
+        # copies the source files
+        gtkmvc_parent = os.path.dirname(GTKMVC_DIR)
+        for root, dirs, files in os.walk(GTKMVC_DIR):
+            if ".svn" in dirs: dirs.remove(".svn")
+            if "progen" in dirs: dirs.remove("progen")
 
-        zipper.close()
+            relroot = relpath(root, gtkmvc_parent)
+            pyfiles = glob.glob(os.path.join(root, "*.py"))
+            if pyfiles:
+                _dest = os.path.join(destdir, relroot)
+                if not os.path.isdir(_dest):
+                    _log("Creating directory '%s'" % _dest)
+                    os.mkdir(_dest)
+                    pass
 
-        _log("Copied the gtkmvc framework into %s" % destzip)
+                for py in pyfiles:
+                    pydest = os.path.join(_dest, relpath(py, root))
+                    if not os.path.isfile(pydest):
+                        _log("Copying file '%s' into '%s'" % (py, pydest))
+                        shutil.copy(py, pydest)
+                        pass
+                    pass
+                pass
+            pass
+        
+        # copies non-source files
+        for relsrc, reldest in (("gtkmvc/progen/README.txt", "gtkmvc/README.txt"),):
+            _dest = os.path.join(destdir, reldest)
+            _dest_dir = os.path.dirname(_dest)
+
+            if not os.path.isdir(_dest_dir):
+                _log("Creating directory '%s'" % _dest_dir)
+                os.makedirs(_dest_dir)
+                pass
+            
+            if not os.path.isfile(_dest):
+                _src = os.path.join(gtkmvc_parent, relsrc)
+                _log("Copying file '%s' into '%s'" % (_src, _dest))
+                shutil.copy(_src, _dest)
+                pass
+            pass
+        
+        _log("Copied the gtkmvc framework into %s" % destdir)
         return True
     
         

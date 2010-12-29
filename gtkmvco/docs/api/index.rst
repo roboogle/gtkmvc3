@@ -23,15 +23,8 @@ GTK MVC |version| Library Reference
 Installation
 ============
 
-The required dependencies are:
+Please refer to the User Manual for any detail.
 
- * Python 2.4.3
- * GTK+ 2.10.4
- * PyGTK 2.10.1
-
-or newer. ::
-
- setup.py install
 
 The :mod:`gtkmvc` Module
 ========================

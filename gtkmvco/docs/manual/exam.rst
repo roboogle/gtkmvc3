@@ -229,7 +229,7 @@ The :func:`main` code creates a `(m,v,c)` triple and launches
     # default debugging info is not shown):
     if development_state:
         import logging
-        gtkmvc.support.log.logger.setLevel(logging.DEBUG)
+        logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
         pass
     return
 

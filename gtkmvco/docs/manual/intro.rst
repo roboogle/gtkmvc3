@@ -9,6 +9,9 @@ use, modify and extend the infrastructure, for easily creating
 new applications based on it.
 
 
+Section :doc:`install` gives information about the required
+dependencies, the installation, the distribution and the license of
+*gtkmvc*.
 
 Section :doc:`motiv` tries to motivate the usage of *gtkmvc*, by
 discussing the context which the framework is thought to operate, and

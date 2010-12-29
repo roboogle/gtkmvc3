@@ -17,7 +17,7 @@ def setup_env(development_state=False):
     # default debugging info is not shown):
     if development_state:
         import logging
-        gtkmvc.support.log.logger.setLevel(logging.DEBUG)
+        logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
         pass
     return
 

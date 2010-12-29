@@ -34,6 +34,12 @@ The tutorial is thought to be minimal, meaning that many of provided
 features are not mentioned. For any further information the user
 should refer to the manual pages.
 
+How do I install it?
+====================
+
+Please refer to the User Manual for all details about the
+installation.
+
 
 The example in few words
 ========================

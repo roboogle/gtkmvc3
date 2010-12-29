@@ -4,9 +4,13 @@ Adapters
 .. module:: gtkmvc.adapters
 
 .. class:: Adapter
+   :noindex:
 .. class:: UserClassAdapter
+   :noindex:
 .. class:: RoUserClassAdapter
+   :noindex:
 .. class:: StaticContainerAdapter
+   :noindex:
 
    These are shortcuts to classes from modules in this package.
 
@@ -46,8 +50,6 @@ Single Adapter, multiple widgets
 
 Connecting automatically
 ------------------------
-
-The :mod:`default` Module
 
 .. automodule:: gtkmvc.adapters.default
     :members:

@@ -49,8 +49,8 @@ class Model (Observer):
        *Value properties* have to exist as an attribute with an
        initial value, which may be ``None``.
 
-       *Logical properties* require a getter and may have
-        a setter method in the class.
+       *Logical properties* require a getter and may have a setter method in
+       the class.
     """
 
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 

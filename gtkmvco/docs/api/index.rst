@@ -36,35 +36,8 @@ or newer. ::
 The :mod:`gtkmvc` Module
 ========================
 
-.. module:: gtkmvc
+.. automodule:: gtkmvc
 
-.. note::
-   Nothing in this module is exported by default, you have to prefix identifiers
-   with the module name.
-
-.. class:: Model
-   :noindex:
-.. class:: ModelMT
-   :noindex:
-.. class:: TextBufferModel
-   :noindex:
-.. class:: ListStoreModel
-   :noindex:
-.. class:: TreeStoreModel
-   :noindex:
-.. class:: View
-   :noindex:
-.. class:: Controller
-   :noindex:
-.. class:: Observer
-   :noindex:
-
-   These are shortcuts to classes from other modules. They are documented there.
-
-.. function:: get_version()
-
-   Get the version of the library as imported.
-
-   :rtype: tuple of integers
+.. autofunction:: get_version()
 
 .. autofunction:: require(version)

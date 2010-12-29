@@ -15,3 +15,8 @@ Observers
        An alias for :meth:`get_observing_methods`.
 
        .. deprecated:: 1.99.1
+
+.. autoclass:: NTInfo
+    :show-inheritance:
+
+    .. automethod:: __getattr__

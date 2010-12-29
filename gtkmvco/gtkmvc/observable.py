@@ -32,11 +32,10 @@ class Observable (ObsWrapperBase):
     @classmethod
     @decorators.good_classmethod_decorator
     def observed(cls, _func):
-        """Use this decorator to make your class methods observable.
-        
-        Your observer will receive at most two notifications:
-        - property_<name>_before_change
-        - property_<name>_after_change        
+        """
+        Decorate methods to be observable. If they are called on an instance
+        stored in a property, the model will emit before and after
+        notifications.
         """
 
         def wrapper(*args, **kwargs):
@@ -59,12 +58,10 @@ class Observable (ObsWrapperBase):
 
 @decorators.good_decorator
 def observed(func):
-    """Use this decorator to make your class methods observable.
-    
-    Your observer will receive at most two notifications:
-    - property_<name>_before_change
-    - property_<name>_after_change
+    """
+    Just like :meth:`Observable.observed`.
 
+    .. deprecated:: 1.99.1
     """
 
     def wrapper(*args, **kwargs):

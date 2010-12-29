@@ -26,7 +26,8 @@ Signals
 Wrapping values
 ---------------
 
-Properties whose value doesn't change.
+Properties whose value doesn't change
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. module:: gtkmvc.support.wrappers
 
@@ -39,7 +40,8 @@ Properties whose value doesn't change.
 .. autoclass:: ObsUserClassWrapper
     :show-inheritance:
 
-Mutable properties.
+Mutable properties
+^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: ObsSeqWrapper
 

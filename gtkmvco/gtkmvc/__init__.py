@@ -21,6 +21,31 @@
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
+"""
+Shortcuts are provided to the following classes defined in submodules:
+
+.. class:: Model
+   :noindex:
+.. class:: TreeStoreModel
+   :noindex:
+.. class:: ListStoreModel
+   :noindex:
+.. class:: TextBufferModel
+   :noindex:
+.. class:: ModelMT
+   :noindex:
+.. class:: Controller
+   :noindex:
+.. class:: View
+   :noindex:
+.. class:: Observer
+   :noindex:
+.. class:: Observable
+   :noindex:
+
+The following two functions are not exported by default, you have to prefix
+identifiers with the module name:
+"""
 
 __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel", 
            "ModelMT",
@@ -42,7 +67,11 @@ from observable import Observable, Signal
 # visible modules
 import observable, observer, adapters
 
-def get_version(): return __version
+def get_version():
+    """
+    Return the imported version of this framework as a tuple of integers.
+    """
+    return __version
 
 def require(request):
     """
@@ -57,8 +86,8 @@ def require(request):
 
     .. note::
 
-       For historical reasons this does not take API changes into account.
-       Those are caught by the argument checks in View and Controller
+       For historical reasons this does not take all API changes into account.
+       Some are caught by the argument checks in View and Controller
        constructors.
     """
     try:

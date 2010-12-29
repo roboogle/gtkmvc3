@@ -31,8 +31,8 @@ import collections
 
 
 class NTInfo (dict):
-    """Notification Type of observers' notification methods.
-
+    """
+    A container for information attached to a notification.
     This class is a dictionary-like object used:
 
     1. As class when defining notification methods in observers, as it
@@ -42,26 +42,25 @@ class NTInfo (dict):
        called in observers.
 
 
-    Notification Type Flags
-    =======================
+    **Notification Type Flags**
     
-    Notification methods are declared either statically with decorator
-    `@Observer.observe` or dynamically calling the (same) method
-    `Observer.observe(...)`. In both cases the type of the
+    Notification methods are declared either statically or dynamically 
+    through :meth:`Observer.observe`. In both cases the type of the
     notification is defined by setting to `True` some flags. Flags can
     be set in any combination for multi-type notification
     methods. Flags are:
 
-      `assign` : For notifications issued when OPs are assigned.
-      `before` : For notifications called before a modifying method is
-                 called.
-      `after`  : For notifications called after a modifying method is
-                 called.
-      `signal` : For notifications called when a signal is emitted.
+    assign
+       For notifications issued when OPs are assigned.
+    before
+       For notifications called before a modifying method is called.
+    after
+       For notifications called after a modifying method is called.
+    signal
+       For notifications called when a signal is emitted.
 
     
-    Instance content
-    ================
+    **Instance content**
 
     Instances of class `NTInfo` will be received as the last argument
     (`info`) of any notification method::
@@ -74,18 +73,18 @@ class NTInfo (dict):
     notification type.
 
 
-    Common to all types
-    -------------------
+    **Common to all types**
 
     For all notification types, NTInfo contains:
 
-      model : the model containing the observable property triggering
-              the notification. `model` is also passed as first
-              argument of the notification method.
+    model
+       the model containing the observable property triggering the
+       notification. `model` is also passed as first argument of the
+       notification method.
 
-      prop_name : the name of the observable property triggering the
-                  notification. `name` is also passed as second
-                  argument of the notification method.
+    prop_name
+       the name of the observable property triggering the notification. `name`
+       is also passed as second argument of the notification method.
       
     Furthermore, any keyword argument not listed here is copied
     without modification into `info`.
@@ -93,57 +92,71 @@ class NTInfo (dict):
     There are further information depending on the specific
     notification type:
 
-    For Assign-type
-    ---------------
-      assign : flag set to `True`
-      
-      old : the value that the observable property had before being
-            changed.
+    **For Assign-type**
 
-      new : the new value that the observable property has been
-            changed to.
+    assign
+       flag set to `True`
 
+    old
+       the value that the observable property had before being
+       changed.
 
-    For Before method call type
-    ---------------------------
-      before : flag set to `True`
-
-      instance : the object instance which the method that is being
-                 called belongs to.
-
-      method_name : the name of the method that is being called. 
-
-      args : tuple of the arguments of the method that is being called. 
-
-      kwargs: dictionary of the keyword arguments of the method that
-              is being called.
+    new
+       the new value that the observable property has been
+       changed to.
 
 
-    For After method call type
-    ---------------------------
-      after : flag set to `True`
+    **For Before method call type**
 
-      instance : the object instance which the method that has been 
-                 called belongs to.
+    before
+       flag set to `True`
 
-      method_name : the name of the method that has been called. 
+    instance
+       the object instance which the method that is being called belongs to.
 
-      args : tuple of the arguments of the method that has been called. 
+    method_name
+       the name of the method that is being called. 
 
-      kwargs: dictionary of the keyword arguments of the method that
-              has been called.
-      
-      result : the value returned by the method which has been called. 
- 
-    For Signal-type
-    ---------------
-      signal : flag set to `True`
-    
-      arg : the argument which was optionally specified when invoking
-            emit() on the signal observable property.
-  
-    Information access
-    ==================
+    args
+       tuple of the arguments of the method that is being called. 
+
+    kwargs
+       dictionary of the keyword arguments of the method that
+       is being called.
+
+
+    **For After method call type**
+
+    after
+       flag set to `True`
+
+    instance
+       the object instance which the method that has been 
+       called belongs to.
+
+    method_name
+       the name of the method that has been called. 
+
+    args
+       tuple of the arguments of the method that has been called. 
+
+    kwargs
+       dictionary of the keyword arguments of the method that
+       has been called.
+
+    result
+       the value returned by the method which has been called. 
+
+    **For Signal-type**
+
+    signal
+       flag set to `True`
+
+    arg
+       the argument which was optionally specified when invoking
+       emit() on the signal observable property.
+
+    **Information access**
 
     The information carried by a NTInfo instance passed to a
     notification method can be retrieved using the instance as a
@@ -177,7 +190,7 @@ class NTInfo (dict):
     example) will be accessible in the corresponding notification
     method.
 
-       .. versionadded:: 1.99.1
+    .. versionadded:: 1.99.1
 
     """
 
@@ -186,9 +199,6 @@ class NTInfo (dict):
     __ALL_REQUESTED = frozenset("model prop_name".split())
 
     def __init__(self, _type, *args, **kwargs):
-        """_type is a sting in (assign before after signal) which
-        identifies the type."""
-        
         dict.__init__(self, *args, **kwargs)
         
         # checks the content provided by the user        
@@ -206,6 +216,9 @@ class NTInfo (dict):
         return
 
     def __getattr__(self, name):
+        """
+        All dictionary keys are also available as attributes.
+        """
         try:
             return self[name]
         except KeyError: 
@@ -226,17 +239,18 @@ def observes(*args):
     in a model we observe, the method is called. The name of the property 
     will be passed to the method. 
 
-    The decorated method has to have one of these prototypes:
+    The type of notification is inferred from the number of arguments. Valid
+    signature are::
 
       def value_notify(self, model, name, old, new)
       def before_notify(self, model, name, instance, method_name, args, kwargs)
       def after_notify(self, model, name, instance, method_name, res, args, kwargs)
       def signal_notify(self, model, name, arg)
 
-       .. versionadded:: 1.99.0
+    .. versionadded:: 1.99.0
 
-       .. deprecated:: 1.99.1
-          Use :meth:`Observer.observe` instead, which offers more features.
+    .. deprecated:: 1.99.1
+       Use :meth:`Observer.observe` instead, which offers more features.
     """
 
     @decorators.good_decorator
@@ -306,46 +320,47 @@ class Observer (object):
     @decorators.good_decorator_accepting_args
     def observe(cls, *args, **kwargs):
         """
-        If used as decorator, decorates a method as a notification
-        method. Used in a normal method call, declares dynamically a
-        new notification methods. 
+        Mark a method as recieving notifications. Comes in two flavours:
+
+        .. method:: observe(name, **types)
+           :noindex:
+
+           A decorator living in the class. Can be applied more than once to
+           the same method, provided the names differ.
+           
+           *name* is the property we want to be notified about as a string.
+           
+           *types* are boolean values denoting the types of
+           notifications desired. At least one of the following has to be
+           passed as True: assign, before, after, signal.
+
+           Excess keyword arguments are passed to the method as part of the
+           info dictionary.
+
+        .. method:: observe(callable, name, **types)
+           :noindex:
+
+           An instance method to define notifications at runtime. Works as
+           above.
+           
+           *callable* is the method to send notifications to. The effect will
+           be as if this had been decorated.
+
+        In all cases the notification method must take exactly three
+        arguments: the model object, the name of the property that changed,
+        and an :class:`NTInfo` object describing the change.
 
         .. warning::
       
            Due to limitation in the dynamic registration (in version
-           1.99.1), declarations of dynamic notifications must accur
+           1.99.1), declarations of dynamic notifications must occur
            before registering self as an observer of the models whose
            properties the notifications are supposed to be
            observing. A hack for this limitation, is to first relieve
            any interesting model before dynamically register the
            notifications, and then re-observe those models.
 
-
-        * Used as decorator
-
-          Takes one string (the property name), and at least one
-          boolean keyword argument identifying the types of the
-          notification. The keyword argument has to be set to True in
-          the set `{assign, before, after, signal}`.
-
-          If other keyword arguments are provided, they will be found
-          in the dictionary passed to the notification method.
-
-          The decorator can be used multiple times to define
-          notification methods which has to be called for multiple
-          observable properties.
-
-
-        * Used dynamically
-
-          To declare dynamically that a method is a notification
-          method, bound instance method `Observer.observe` has to be
-          called specifying the method as first argument (not counting
-          Observer `self`). The remaining arguments are the property
-          name and keyword arguments like described in the use as
-          decorator.
-
-           .. versionadded:: 1.99.1
+        .. versionadded:: 1.99.1
         """
         
         @decorators.good_decorator

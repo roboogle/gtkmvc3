@@ -41,8 +41,13 @@ def getmembers(_object, _predicate):
     return observers
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # This is taken from python 2.6 (os.path.relpath is supported in 2.6)
+#
+# Copyright (c) 2001 Python Software Foundation; All Rights Reserved
+# This code about relpath is covered by the Python Software Foundation
+# (PSF) Agreement. See http://docs.python.org/license.html for details.
+# ======================================================================
 def __posix_relpath(path, start=os.curdir):
     """Return a relative version of a path"""
 
@@ -85,7 +90,6 @@ def __nt_relpath(path, start=os.curdir):
     rel_list = [os.pardir] * (len(start_list)-i) + path_list[i:]
     if not rel_list: return os.curdir
     return os.path.join(*rel_list)
-
 try: 
     import os.path.relpath
     relpath = os.path.relpath
@@ -96,4 +100,6 @@ except ImportError:
         relpath = __posix_relpath
         pass
     pass
-# ----------------------------------------------------------------------
+# ======================================================================
+# End of code covered by PSF License Agreement
+# ======================================================================

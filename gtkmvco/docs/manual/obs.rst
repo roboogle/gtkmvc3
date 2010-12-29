@@ -91,4 +91,4 @@ Signals
    To notify the observers that some event is occurred.
 
 All needed details about observable property types are explained later
-in this document (see section :ref:`OP_types`).
+in this document (see section :ref:`OPtypes`).

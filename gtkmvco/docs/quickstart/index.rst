@@ -312,13 +312,13 @@ but that correspond each to a pair of methods (getter/setter)::
 
     @Model.getter
     def data_external(self):
-        value = # get the value somehow
+        value = get_the_value_somehow()
         return value
 
     @Model.setter
     def data_external(self, value):
         # store the value somehow...
-    return
+        return
 
     pass # end of class
 
@@ -614,54 +614,54 @@ Controllers are the most complex structures that are intended to:
 This is the typical structure of a controller::
 
  from gtkmvc import Controller
-
+ 
  class MyController (Controller):
-
-       def __init__(self, model, view):
-           Controller.__init__(self, model, view)
-
-       # From here on the connected model and view are accessible
-       # through fields 'self.model' and 'self.view' respectively.
-       
-       # setup internal fields...
-
-       # setup sub-controllers...
-       
-       return
-
-       def register_view(self, view):
-           # initializes the view if needed
-       
-           # setup widgets that need a model, like TreeView (see next section)...
-           
-       # setup widgets not specified in glade, like TreeViewColumn...
-       
-           # connect additional signals (e.g. for manually constructed widgets...
-            
-           return
-
-       def register_adapters(self):
-           # setup all adapters (see Adapters below)
-           return
-
-       # ------------------------------------------------------------
-       #      GTK Signal handlers
-       # ------------------------------------------------------------
-       def on_button_clicked(self, button):
-           # ...
-       return
-
-       # ...
-
-       # ------------------------------------------------------------
-       #      Notifications of observable properties
-       # ------------------------------------------------------------
-       @Controller.observe("prop_name", assign=True, ...)
-       def notification(self, model, prop_name, info):
-           #...
-       return
-       
-       pass # end of class
+ 
+     def __init__(self, model, view):
+         Controller.__init__(self, model, view)
+ 
+         # From here on the connected model and view are accessible
+         # through fields 'self.model' and 'self.view' respectively.
+ 
+         # setup internal fields...
+ 
+         # setup sub-controllers...
+ 
+         return
+ 
+     def register_view(self, view):
+         # initializes the view if needed
+ 
+         # setup widgets that need a model, like TreeView (see next section)...
+ 
+         # setup widgets not specified in glade, like TreeViewColumn...
+ 
+         # connect additional signals (e.g. for manually constructed widgets...
+ 
+         return
+ 
+     def register_adapters(self):
+         # setup all adapters (see Adapters below)
+         return
+ 
+     # ------------------------------------------------------------
+     #      GTK Signal handlers
+     # ------------------------------------------------------------
+     def on_button_clicked(self, button):
+         # ...
+         return
+ 
+     # ...
+ 
+     # ------------------------------------------------------------
+     #      Notifications of observable properties
+     # ------------------------------------------------------------
+     @Controller.observe("prop_name", assign=True)
+     def notification(self, model, prop_name, info):
+         #...
+         return
+ 
+     pass # end of class
 
 As you see, a controller does a lot of work, and tends to blow-up in
 size. For this reason it is important to split big controllers into

@@ -114,4 +114,4 @@ exploited by controllers to connect signals and handle the creation of
 particular widgets like for example TreeViews, TreeColumns,
 CellRenderers, etc.
 
-.. [#theory] For example, see http://www.object-arts.com/EducationCentre/Overviews/MVC.htm
+.. [#theory] For example, see http://www.mimuw.edu.pl/~sl/teaching/00_01/Delfin_EC/Overviews/MVC.htm

@@ -410,7 +410,7 @@ class PropertyMeta (type):
 
         if isinstance(val, tuple):
             # this might be a class instance to be wrapped
-            # (thanks to Tobias Weber <towb ta celvina tod de> for
+            # (thanks to Tobias Weber for
             # providing a bug fix to avoid TypeError (in 1.99.1)
             if len(val) == 3:
                 try: 

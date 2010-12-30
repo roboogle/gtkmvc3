@@ -49,9 +49,9 @@ application based on *gtkmvc* may be::
      |             |------ glade
      |             |------ images
      |             |------ ...
-     |             +------ external
+     |             +------ external         <---- sys.path contains this
      |                        |--- ...
-     |                        +--- gtkmvc     <---- PUT IT HERE!
+     |                        +--- gtkmvc   <---- PUT IT HERE!
      |-------- src
      |          |------ models
      |          |------ views
@@ -59,6 +59,9 @@ application based on *gtkmvc* may be::
      |          +------ ...
      |
      +-------- ...
+
+By prepending `external` to :mod:`sys.path`, *gtkmvc* will be found as
+if it was installed regularly.
 
 Section :doc:`progen` presents a little utility to build a project
 based on *gtkmvc* from scratch. `progen` generates a structure similar

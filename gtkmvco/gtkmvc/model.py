@@ -24,6 +24,9 @@
 import gtk
 import inspect
 import types 
+import collections
+import string
+import itertools
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
@@ -31,8 +34,6 @@ from observer import Observer, NTInfo
 from observable import Signal
 from support.log import logger
 from support import decorators
-
-import itertools
 
 # Pass prop_name to this method?
 WITH_NAME = True
@@ -202,7 +203,7 @@ class Model (Observer):
         Observer.__init__(self)
         
         self.__observers = []
-
+        
         # keys are properties names, values are pairs (method,
         # kwargs|None) inside the observer. kwargs is the keyword
         # argument possibly specified when explicitly defining the
@@ -215,20 +216,25 @@ class Model (Observer):
         self.__instance_notif_before = {}
         self.__instance_notif_after = {}
         self.__signal_notif = {}
+
+        self.__dynamic_props = set()
         
         for key in self.get_properties(): self.register_property(key)
         return
 
+
     def register_property(self, name):
-        """Registers an existing property to be monitored, and sets
-        up notifiers for notifications"""
+        """Registers an existing property to be monitored, and sets up
+        notifiers for notifications. The name can be also an list/map
+        access, like in abc[1][key][3] (new in 1.99.2)"""
+        
         if not self.__value_notifications.has_key(name): 
             self.__value_notifications[name] = []
             pass
         
         # registers observable wrappers
-        prop = getattr(self, "_prop_%s" % name, None)
-            
+        prop = self.__get_prop_value(name)
+        
         if isinstance(prop, ObsWrapperBase):
             prop.__add_model__(self, name)
 
@@ -245,8 +251,14 @@ class Model (Observer):
                     self.__instance_notif_after[name] = []
                     pass
                 pass
+
+            # adds the property to the dynamic set if not found in
+            # static properties (new in 1.99.2)
+            if name not in self.get_properties():
+                self.__dynamic_props.add(name)
+                pass
             pass
-                
+
         return
 
 
@@ -313,7 +325,9 @@ class Model (Observer):
 
         :rtype: frozenset of strings
         """
-        return getattr(self, support.metaclasses.ALL_OBS_SET, frozenset())
+        return frozenset(getattr(self, support.metaclasses.ALL_OBS_SET,
+                                 frozenset()) |
+                         self.__dynamic_props)
 
     
     def __add_observer_notification(self, observer, prop_name):
@@ -328,7 +342,7 @@ class Model (Observer):
         decorators or at runtime. In the latter case the type of the notification
         is inferred from the number of arguments it takes.
         """
-        value = getattr(self, "_prop_%s" % prop_name, None)
+        value = self.__get_prop_value(prop_name)
 
         # --- Some services ---
         def getmeth(format, numargs):
@@ -610,6 +624,26 @@ class Model (Observer):
             pass
         return
         
+    def __get_prop_value(self, name):
+        """Returns the property value, given its name. The name can be
+        also a sequence/dict access, like in abc[1]['key'][3] (new in
+        1.99.2)"""
+        prop = getattr(self, "_prop_%s" % name, None)
+        if prop is None:
+            prop = getattr(self, name, None)
+            if prop is None:
+                name_keys = itertools.imap(string.strip, name.split("["))
+                _name = name_keys.next()
+                prop = getattr(self, _name)
+                if prop is not None:                    
+                    for key in (x.replace("]","") for x in name_keys):
+                        if isinstance(prop, collections.Sequence): key = int(key)
+                        prop = prop.__getitem__(key)
+                        pass
+                    pass
+                pass             
+            pass
+        return prop
 
     pass # end of class Model
 # ----------------------------------------------------------------------

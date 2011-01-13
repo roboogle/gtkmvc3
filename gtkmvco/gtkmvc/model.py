@@ -634,7 +634,7 @@ class Model (Observer):
             if prop is None:
                 name_keys = itertools.imap(string.strip, name.split("["))
                 _name = name_keys.next()
-                prop = getattr(self, _name)
+                prop = getattr(self, _name, None)
                 if prop is not None:                    
                     for key in (x.replace("]","") for x in name_keys):
                         if isinstance(prop, collections.Sequence): key = int(key)

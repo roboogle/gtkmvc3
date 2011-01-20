@@ -219,7 +219,13 @@ class Model (Observer):
 
         self.__dynamic_props = set()
         
-        for key in self.get_properties(): self.register_property(key)
+        # RC: This is a temporary fix for bug in r283, and failed
+        # tentative in r285
+        #for key in self.get_properties(): self.register_property(key)
+        for key in getattr(self, support.metaclasses.ALL_OBS_SET, frozenset()):
+            self.register_property(key)
+            pass
+
         return
 
 

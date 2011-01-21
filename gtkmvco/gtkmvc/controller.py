@@ -31,9 +31,12 @@ import gobject
 import sys
 
 class Controller (Observer):
-    def __init__(self, model, view, spurious=False, auto_adapt=False):
+    handlers = "glade"
+
+    def __init__(self, model, view, spurious=False, auto_adapt=False,
+        handlers=""):
         """
-        Two positional and two optional keyword arguments.
+        Two positional and three optional keyword arguments.
         
         *model* will have the new instance registered as an observer.
         It is made available as an attribute.
@@ -46,6 +49,12 @@ class Controller (Observer):
         
         *auto_adapt* denotes whether to call :meth:`adapt` with no arguments
         as part of the view registration process.
+
+        *handlers* denotes where signal connections are made. Possible values
+        are "glade" (the default) and "class". In the latter case all
+        controller methods with a name like `on_<widget>__<signal>` (e.g.
+        :meth:`on_my_window__delete_event`, note the two underscores) are
+        connected automatically.
 
         View registration consists of connecting signal handlers,
         :meth:`register_view` and :meth:`register_adapters`, and is scheduled
@@ -61,6 +70,7 @@ class Controller (Observer):
 
         Observer.__init__(self, model, spurious)
 
+        self.handlers = handlers or self.handlers
         self.model = model
         self.view = None
         self.__adapters = []
@@ -76,7 +86,23 @@ class Controller (Observer):
         assert(self.view is None)
         self.view = view
 
-        self.__autoconnect_signals()
+        if self.handlers == "class":
+            for name in dir(self):
+                when, _, what = name.partition('_')
+                widget, _, signal = what.partition('__')
+                if when == "on":
+                    try:
+                        view[widget].connect(signal, getattr(self, name))
+                    except IndexError:
+                        # Not a handler
+                        pass
+                    except KeyError:
+                        logger.warn("Widget not found for handler: %s", name)
+        elif self.handlers == "glade":
+            self.__autoconnect_signals()
+        else:
+            raise NotImplementedError("%s is not a valid source of signal "
+                "connections" % self.handlers)
 
         self.register_view(view)
         self.register_adapters()

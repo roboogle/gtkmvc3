@@ -34,10 +34,13 @@ from observer import Observer, NTInfo
 from observable import Signal
 from support.log import logger
 from support import decorators
+from support.utils import getmembers
 
 # Pass prop_name to this method?
 WITH_NAME = True
 WITHOUT_NAME = False
+
+KWARG_NAME_DEPS = "deps"
 
 class Model (Observer):
     """
@@ -57,25 +60,35 @@ class Model (Observer):
     __metaclass__  = support.metaclasses.ObservablePropertyMeta 
     __properties__ = {} # override this
 
-    # this class is used internally and by metaclass only
-    class __accinfo: 
+    # these classes are used internally and by metaclass only
+    class __setinfo: 
         def __init__(self, func, has_args): 
-            self.func = func; self.has_args = has_args
+            self.func = func
+            self.has_args = has_args
+            return
         pass
+    class __getinfo:
+        def __init__(self, func, has_args, deps=()): 
+            self.func = func
+            self.has_args = has_args
+            self.deps = deps
+            return
+        pass
+
 
     @classmethod
     @decorators.good_decorator_accepting_args
-    def getter(cls, *args):
+    def getter(cls, *args, **kwargs):
         """
         Decorate a method as a logical property getter. Comes in two flavours:
 
-        .. method:: getter()
+        .. method:: getter([deps=(name,...)])
            :noindex:
            
            Uses the name of the method as the property name.
            The method must not require arguments.
 
-        .. method:: getter(one, two, ...)
+        .. method:: getter(one, two, ..., [deps=(name,...)])
            :noindex:
            
            Takes a variable number of strings as the property
@@ -92,30 +105,31 @@ class Model (Observer):
                 setattr(cls, support.metaclasses.LOGICAL_GETTERS_MAP_NAME, _dict)
                 pass
 
-            # names is an array which is set in the outer frame. 
+            # names is an array which is set in the outer frame.
+            # deps is a tuple/list which set int the outer frame
             if 0 == len(names): 
                 if _dict.has_key(_func.__name__):
                     # error: the name is used multiple times
                     raise ValueError("The same pattern is used multiple times")
-                _dict[_func.__name__] = cls.__accinfo(_func, False)
+                _dict[_func.__name__] = cls.__getinfo(_func, False, deps)
             else: 
                 # annotates getters for all names
                 for name in names: 
                     if _dict.has_key(name):
                         # error: the name is used multiple times
                         raise ValueError("The same pattern is used multiple times")
-                    _dict[name] = cls.__accinfo(_func, True)
+                    _dict[name] = cls.__getinfo(_func, True, deps)
                 pass
             # here we can return whatever, it will in anycase
             # substituted by the metaclass constructor, to be a
             # property
             return _func
 
-        assert 0 < len(args)
         if 1 == len(args) and isinstance(args[0], types.FunctionType):
             # decorator is used without arguments (args[0] contains
             # the decorated function)
             names = [] # names is used in __decorator
+            deps = () # deps is used in __decorator
             return __decorator(args[0])
     
         # Here decorator is used with arguments
@@ -124,7 +138,22 @@ class Model (Observer):
             if not isinstance(arg, types.StringType): 
                 raise TypeError("Arguments of decorator must be strings")
             pass
+
+        # here deps are checked
+        _deps = kwargs.get(KWARG_NAME_DEPS, ())
+        for dep in _deps:
+            if not isinstance(dep, types.StringType): 
+                raise TypeError("Elements of keyword argument "
+                                "'%s' must be strings" % KWARG_NAME_DEPS)
+            pass
+        # deps is the only supported keyword argument
+        unsupported = set(kwargs) - set((KWARG_NAME_DEPS,))
+        if unsupported:
+            logger.warn("%s are unrecognized keyword arguments" % str(unsupported))
+            pass
+
         names = args # names is used in __decorator
+        deps = _deps # deps is used in __decorator
 
         return __decorator
     # ----------------------------------------------------------------------
@@ -165,14 +194,14 @@ class Model (Observer):
                 if _dict.has_key(_func.__name__):
                     # error: the name is used multiple times
                     raise ValueError("The same pattern is used multiple times")
-                _dict[_func.__name__] = cls.__accinfo(_func, False)
+                _dict[_func.__name__] = cls.__setinfo(_func, False)
             else: 
                 # annotates getters for all names
                 for name in names: 
                     if _dict.has_key(name):
                         # error: the name is used multiple times
                         raise ValueError("The same pattern is used multiple times")
-                    _dict[name] = cls.__accinfo(_func, True)
+                    _dict[name] = cls.__setinfo(_func, True)
                     pass
                 pass
 
@@ -181,7 +210,6 @@ class Model (Observer):
             # property
             return _func
 
-        assert 0 < len(args)
         if 1 == len(args) and isinstance(args[0], types.FunctionType):
             # decorator is used without arguments (args[0] contains
             # the decorated function)
@@ -218,6 +246,9 @@ class Model (Observer):
         self.__signal_notif = {}
 
         self.__dynamic_props = set()
+
+        # Here dependencies are reversed and pre-calculated
+        self._calculate_logical_deps()
         
         # RC: This is a temporary fix for bug in r283, and failed
         # tentative in r285
@@ -226,6 +257,61 @@ class Model (Observer):
             self.register_property(key)
             pass
 
+        return
+
+    def _calculate_logical_deps(self):
+        """Internal service which calculates dependencies information
+        based on those given with getters.
+        
+        The graph has to be reversed, as the getter tells that a
+        property depends on a set of others, but the model needs to
+        know how has to be notified (i.e. needs to know which OP is
+        affected by an OP).  Only proximity of edges is considered,
+        the rest is demanded at runtime)
+
+        Result is stored inside internal map __log_prop_deps.
+        """        
+        self.__log_prop_deps = {} 
+        logic_ops = ((name, op.deps)
+                     for name, op in getmembers(type(self),\
+  lambda x: isinstance(x, support.metaclasses.ObservablePropertyMeta.LogicalOP)
+                                                )
+                     )
+        
+        for name, deps in logic_ops:
+            for dep in deps:
+                rdeps = self.__log_prop_deps.get(dep, [])
+                # name must appear only once in DAG
+                assert name not in rdeps 
+                rdeps.append(name)
+                self.__log_prop_deps[dep] = rdeps
+                pass
+            pass
+        # emits debugging info about dependencies
+        _mod_cls = "%s.%s" % (self.__class__.__module__, self.__class__.__name__)
+        for name, rdeps in self.__log_prop_deps.iteritems():
+            logger.debug("In class %s changes to OP %s affects logical OPs: %s",
+                         _mod_cls, name, ", ".join(rdeps))
+            pass
+
+        return # TO BE IMPLEMENTED
+        # The graph has to be checked to be a DAG:
+        count = { }
+        for node in self.__log_prop_deps: count[node] = 0
+        for node in self.__log_prop_deps:
+            for succ in self.__log_prop_deps[node]:
+                count[succ] += 1
+                if count[succ] > 1:
+                    raise ValueError("In class %s Logical OP '%s' is in loop"\
+                                     % (_mod_cls, node))
+                pass
+            pass
+        # there must be at least one node without incoming edges
+        if count and all(count.itervalues()):
+            raise ValueError("In class %s there is a loop among "
+                             "Logical OPs dependencies" % _mod_cls)
+
+        # here the graph is a DAG
         return
 
 
@@ -485,7 +571,56 @@ class Model (Observer):
         multithreading, or a rpc, etc.)  This implementation simply
         calls the given method with the given arguments"""
         return method(*args, **kwargs)
-    
+
+    def __before_property_value_change__(self, prop_name):
+        """This is called right before the value of a property gets
+        changed, and before a property change notification is
+        sent. This is called before calling
+        notify_property_value_change in order to first collect all the
+        old values of the properties whose value is declared to be
+        dependend on this property. returns a tuple containing the old
+        values (the values before the assignments to prop_name), among
+        with other information. The returned tuple has to be passed to
+        __after_property_value_change__. All this procedure is done by
+        the setter's code which is generated by the metaclass."""
+        
+        return tuple((self, name, getattr(self, name))
+                     for name in self._get_logical_deps(prop_name))
+
+    def _get_logical_deps(self, prop_name):
+        """Returns an iterator over a sequence of property names,
+        which has to e notified upon any value modification of
+        prop_name. used internally by __before_property_value_change__"""
+
+        if prop_name not in self.__log_prop_deps: return # stop iteration
+
+        alread_visited = set()
+        to_be_visited = self.__log_prop_deps[prop_name][:] # copy
+        while to_be_visited:
+            x = to_be_visited.pop(0)
+            if x not in alread_visited:
+                yield x
+                alread_visited.add(x)
+                children = self.__log_prop_deps.get(x, [])
+                to_be_visited += children
+                pass
+            pass
+        return            
+
+    def __after_property_value_change__(self, prop_name, old_vals):
+        """This is called after the value of a property is
+        changed. This is called while calling
+        notify_property_value_change in order to notify all the
+        observers which are interested in observing properties whose
+        value is declared to be dependend on this property. The
+        old_vals tuple is the value returned by the previous call to
+        __before_property_value_change__. All this procedure is done
+        by the setter's code which is generated by the metaclass."""
+        for model, name, val in old_vals:
+            model.notify_property_value_change(name, val, getattr(model, name))
+            pass
+        return
+
     # -------------------------------------------------------------
     #            Notifiers:
     # -------------------------------------------------------------

@@ -100,6 +100,19 @@ class PropertyMeta (type):
     implementation (this can be probably made better).
     An example is provided in meta-class PropertyMetaVerbose below.
     """
+
+    class ConcreteOP (property):
+        """This is used to create concrete properties"""
+        pass
+
+    class LogicalOP (property):
+        """This is used to create logical properties"""
+        def __init__(self, fget, fset=None, deps=frozenset()):
+            property.__init__(self, fget, fset)
+            self.deps = deps
+            pass
+        pass # end of class
+
     
     def __init__(cls, name, bases, _dict):
         """class constructor"""
@@ -287,6 +300,7 @@ class PropertyMeta (type):
                 # decorator-based
                 _getter = type(cls).get_getter(cls, name, ai_get.func, 
                                                ai_get.has_args)
+                _deps = ai_get.deps
             else: 
                 # old style
                 _getter = type(cls).get_getter(cls, name)
@@ -294,7 +308,9 @@ class PropertyMeta (type):
                     raise RuntimeError("In class %s.%s logical observable '%s' "\
                                            "has no getter method" % \
                                            (cls.__module__, cls.__name__, name))
+                _deps = ()
                 pass
+            
             
             # finds the setter
             ai_set = resolved_setdict.get(name, None)
@@ -322,8 +338,8 @@ class PropertyMeta (type):
                 else: _setter =  type(cls).get_setter(cls, name)
                 pass
             
-            # here _setter can be None            
-            prop = property(_getter, _setter)
+            # creates the logical property, here _setter can be None            
+            prop = PropertyMeta.LogicalOP(_getter, _setter, frozenset(_deps))
             setattr(cls, name, prop)
             real_log_props.add(name)                
             pass
@@ -338,7 +354,6 @@ class PropertyMeta (type):
             pass
 
         return frozenset(real_log_props)
-
 
 
     def __create_conc_prop_accessors__(cls, prop_name, default_val):
@@ -367,8 +382,9 @@ class PropertyMeta (type):
                                % (setter_name, prop_name))
             pass
 
-        # creates the property
-        prop = property(getattr(cls, getter_name), getattr(cls, setter_name))
+        # creates the concrete property
+        prop = PropertyMeta.ConcreteOP(getattr(cls, getter_name),
+                                       getattr(cls, setter_name))
         setattr(cls, prop_name, prop)
 
         # creates the underlaying variable if needed
@@ -634,11 +650,20 @@ class ObservablePropertyMeta (PropertyMeta):
       def _setter(self, val):
           old = _inner_getter(self)
           new = type(self).create_value(prop_name, val, self)
+
+          # to track dependencies
+          olds = self.__before_property_value_change__(prop_name)
+
+          # this is the unique place where the value is set:
           _inner_setter(self, new)
+          
           if type(self).check_value_change(old, new): 
               self._reset_property_notification(prop_name, old)
               pass
           self.notify_property_value_change(prop_name, old, val)
+
+          # to notify dependencies
+          self.__after_property_value_change__(prop_name, olds)
           return
       return _setter
 
@@ -709,7 +734,13 @@ try:
         if k in conc_pnames:
           _old = getattr(instance, k)
           _new = kwargs[k]
+
+          # to track dependencies
+          olds = instance.__before_property_value_change__(k)
+          # to notify the property observer
           instance.notify_property_value_change(k, _old, _new)
+          # to notify dependencies
+          instance.__after_property_value_change__(k, olds)          
           pass
         pass
       return

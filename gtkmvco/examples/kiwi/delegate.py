@@ -54,16 +54,16 @@ class MyModel (Model):
     temperature = 0.0
     __observables__ = ("temperature", "celsius", "farenheit")
 
-    @Model.getter(dep="temperature")
+    @Model.getter(deps=["temperature"])
     def celsius(self): return (self.temperature - 32) * 5/9.0
 
-    @Model.getter(dep="temperature")
+    @Model.getter(deps=["temperature"])
     def farenheit(self): return (self.temperature * 9/5.0) + 32
     pass # end of class
 
 m = MyModel()
 v = View(builder="delegate.glade")
-c = Controller(m, v, auto_adapt=True, auto_quit=True)
+c = Controller(m, v, auto_adapt=True) #, auto_quit=True)
 gtk.main()
 
     

@@ -309,9 +309,8 @@ class Model (Observer):
         # makes the graph total
         graph.update( (prop, frozenset())
                       for prop in reduce(set.union, 
-                                         map(set, graph.values())) - \
-                          set(graph.keys()) )
-
+                                         map(set, graph.values()),
+                                         set()) - set(graph.keys()) )
         # DFS searching for leaves
         while True:
             leaves = frozenset(prop for prop, deps in graph.iteritems() 
@@ -322,11 +321,12 @@ class Model (Observer):
                           for prop, deps in graph.iteritems()
                           if prop not in leaves )
             pass
+
         # here remaining vertex are in a loop (over-approximated)
         if graph: 
             raise ValueError("In class %s found a loop among logical OPs: %s"\
                                  % (_mod_cls, ", ".join(graph.keys())))
-        
+
         # here the graph is a DAG
         return
 

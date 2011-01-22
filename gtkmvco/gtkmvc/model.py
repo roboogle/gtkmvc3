@@ -246,9 +246,6 @@ class Model (Observer):
         self.__signal_notif = {}
 
         self.__dynamic_props = set()
-
-        # Here dependencies are reversed and pre-calculated
-        self._calculate_logical_deps()
         
         # RC: This is a temporary fix for bug in r283, and failed
         # tentative in r285
@@ -257,6 +254,8 @@ class Model (Observer):
             self.register_property(key)
             pass
 
+        # here OPs dependencies are reversed and pre-calculated
+        self._calculate_logical_deps()
         return
 
     def _calculate_logical_deps(self):
@@ -269,17 +268,25 @@ class Model (Observer):
         affected by an OP).  Only proximity of edges is considered,
         the rest is demanded at runtime)
 
-        Result is stored inside internal map __log_prop_deps.
+        Result is stored inside internal dict __log_prop_deps which
+        represents the dependencies graph.
         """        
-        self.__log_prop_deps = {} 
-        logic_ops = ((name, op.deps)
-                     for name, op in getmembers(type(self),\
+        self.__log_prop_deps = {} # the result goes here
+
+        # this is used in messages
+        _mod_cls = "%s.%s" % (self.__class__.__module__, self.__class__.__name__)
+
+        logic_ops = ((name, opr.deps)
+                     for name, opr in getmembers(type(self),\
   lambda x: isinstance(x, support.metaclasses.ObservablePropertyMeta.LogicalOP)
-                                                )
-                     )
-        
+                                                ))
+        # reverses the graph
         for name, deps in logic_ops:
             for dep in deps:
+                if not self.has_property(dep):
+                    raise ValueError("In class %s dependencies of logical "
+                                     "property '%s' refer non-existant "
+                                     "OP '%s'" % (_mod_cls, name, dep))
                 rdeps = self.__log_prop_deps.get(dep, [])
                 # name must appear only once in DAG
                 assert name not in rdeps 
@@ -288,29 +295,38 @@ class Model (Observer):
                 pass
             pass
         # emits debugging info about dependencies
-        _mod_cls = "%s.%s" % (self.__class__.__module__, self.__class__.__name__)
         for name, rdeps in self.__log_prop_deps.iteritems():
             logger.debug("In class %s changes to OP %s affects logical OPs: %s",
                          _mod_cls, name, ", ".join(rdeps))
             pass
 
-        return # TO BE IMPLEMENTED
-        # The graph has to be checked to be a DAG:
-        count = { }
-        for node in self.__log_prop_deps: count[node] = 0
-        for node in self.__log_prop_deps:
-            for succ in self.__log_prop_deps[node]:
-                count[succ] += 1
-                if count[succ] > 1:
-                    raise ValueError("In class %s Logical OP '%s' is in loop"\
-                                     % (_mod_cls, node))
-                pass
-            pass
-        # there must be at least one node without incoming edges
-        if count and all(count.itervalues()):
-            raise ValueError("In class %s there is a loop among "
-                             "Logical OPs dependencies" % _mod_cls)
+        # --------------------------------------------------
+        # Here the graph is checked to be a DAG
+        # --------------------------------------------------
+        graph = dict((prop, frozenset(deps))
+                     for prop, deps in self.__log_prop_deps.iteritems())
 
+        # makes the graph total
+        graph.update( (prop, frozenset())
+                      for prop in reduce(set.union, 
+                                         map(set, graph.values())) - \
+                          set(graph.keys()) )
+
+        # DFS searching for leaves
+        while True:
+            leaves = frozenset(prop for prop, deps in graph.iteritems() 
+                               if not deps)
+            if not leaves: break
+            # remove leaves from graph
+            graph = dict( (prop, (deps - leaves))
+                          for prop, deps in graph.iteritems()
+                          if prop not in leaves )
+            pass
+        # here remaining vertex are in a loop (over-approximated)
+        if graph: 
+            raise ValueError("In class %s found a loop among logical OPs: %s"\
+                                 % (_mod_cls, ", ".join(graph.keys())))
+        
         # here the graph is a DAG
         return
 

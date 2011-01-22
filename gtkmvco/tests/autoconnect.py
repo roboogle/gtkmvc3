@@ -4,7 +4,7 @@ the program.
 
 This tests recognizing handlers by name instead of defining them in Glade.
 
-TODO unittest, class attribute
+TODO automate, class attribute
 """
 
 import gtk

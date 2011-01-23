@@ -24,9 +24,6 @@
 import gtk
 import inspect
 import types 
-import collections
-import string
-import itertools
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
@@ -245,14 +242,7 @@ class Model (Observer):
         self.__instance_notif_after = {}
         self.__signal_notif = {}
 
-        self.__dynamic_props = set()
-        
-        # RC: This is a temporary fix for bug in r283, and failed
-        # tentative in r285
-        #for key in self.get_properties(): self.register_property(key)
-        for key in getattr(self, support.metaclasses.ALL_OBS_SET, frozenset()):
-            self.register_property(key)
-            pass
+        for key in self.get_properties(): self.register_property(key)
 
         # here OPs dependencies are reversed and pre-calculated
         self._calculate_logical_deps()
@@ -359,12 +349,6 @@ class Model (Observer):
                     self.__instance_notif_after[name] = []
                     pass
                 pass
-
-            # adds the property to the dynamic set if not found in
-            # static properties (new in 1.99.2)
-            if name not in self.get_properties():
-                self.__dynamic_props.add(name)
-                pass
             pass
 
         return
@@ -433,9 +417,7 @@ class Model (Observer):
 
         :rtype: frozenset of strings
         """
-        return frozenset(getattr(self, support.metaclasses.ALL_OBS_SET,
-                                 frozenset()) |
-                         self.__dynamic_props)
+        return getattr(self, support.metaclasses.ALL_OBS_SET, frozenset())
 
     
     def __add_observer_notification(self, observer, prop_name):
@@ -783,25 +765,8 @@ class Model (Observer):
         return
         
     def __get_prop_value(self, name):
-        """Returns the property value, given its name. The name can be
-        also a sequence/dict access, like in abc[1]['key'][3] (new in
-        1.99.2)"""
-        prop = getattr(self, "_prop_%s" % name, None)
-        if prop is None:
-            prop = getattr(self, name, None)
-            if prop is None:
-                name_keys = itertools.imap(string.strip, name.split("["))
-                _name = name_keys.next()
-                prop = getattr(self, _name, None)
-                if prop is not None:                    
-                    for key in (x.replace("]","") for x in name_keys):
-                        if isinstance(prop, collections.Sequence): key = int(key)
-                        prop = prop.__getitem__(key)
-                        pass
-                    pass
-                pass             
-            pass
-        return prop
+        """Returns the property value, given its name."""
+        return getattr(self, "_prop_%s" % name, None)
 
     pass # end of class Model
 # ----------------------------------------------------------------------

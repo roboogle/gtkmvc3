@@ -153,6 +153,22 @@ class BranchMultiLevel (Model):
     def log3(self): return self.log2    
     pass
 
+
+class LinearSingleLevelOldStyle (Model):
+    # basic, single level linear dependency
+    conc = 0
+    __observables__ = "conc log1 log2".split()
+
+    # specific
+    def get_log1_value(self, deps=["conc"]): return self.conc+1
+
+    # general
+    def get__value(self, name, deps=["log1"]):
+        assert "log2" == name
+        return self.log1+1
+    pass
+
+
 # must raise ValueError
 class InvalidLoop (Model):
     conc = 0
@@ -169,7 +185,7 @@ class InvalidLoop (Model):
     pass
 
 class NonExisting (Model):
-    # shuld raise ValueError, as deps refers to non-existant property
+    # should raise ValueError, as deps refers to non-existant property
     __observables__ = ("log1",)
     
     @Model.getter(deps=["non-existing"])
@@ -180,7 +196,20 @@ def make_ErroneousType():
     # factory for ErroneousType. Factory is needed here as this is
     # checked at compile time otherwise
     class ErroneousType (Model):
-        # shuld raise TypeError, as using wrong type for name of
+        # should raise TypeError, as using wrong type for name of
+        # property in deps.
+        __observables__ = ("log1",)
+        erroneous_type_value = 1
+        @Model.getter(deps=erroneous_type_value)
+        def log1(self): return 0
+        pass
+    return ErroneousType
+
+def make_ErroneousTypeElement():
+    # factory for ErroneousType. Factory is needed here as this is
+    # checked at compile time otherwise
+    class ErroneousTypeElement (Model):
+        # should raise TypeError, as using wrong type for name of
         # property in deps.
         __observables__ = ("log1",)
         erroneous_type_value = 1
@@ -188,6 +217,33 @@ def make_ErroneousType():
         def log1(self): return 0
         pass
     return ErroneousType
+
+def make_ErroneousTypeOldStyle():
+    # factory for ErroneousTypeOldStyle. Factory is needed here as this is
+    # checked at compile time otherwise
+    class ErroneousTypeOldStyle (Model):
+        # should raise TypeError, as using wrong type for name of
+        # property in deps.
+        __observables__ = ("log1",)
+        erroneous_type_value = 1
+
+        def get_log1_value(self, deps=erroneous_type_value): return 0
+        pass
+    return ErroneousType
+
+def make_ErroneousTypeElementOldStyle():
+    # factory for ErroneousTypeElementOldStyle. Factory is needed here
+    # as this is checked at compile time otherwise
+    class ErroneousTypeElementOldStyle (Model):
+        # should raise TypeError, as using wrong type for name of
+        # property in deps.
+        __observables__ = ("log1",)
+        erroneous_type_value = 1
+
+        def get__value(self, name, deps=(erroneous_type_value,)): return 0
+        pass
+    return ErroneousType
+
 # ----------------------------------------------------------------------
 
 class MyObserver (Observer):
@@ -327,8 +383,12 @@ class LogicalPropsDeps (unittest.TestCase):
         self.assertRaises(ValueError, NonExisting)
         return
 
-    def test_erroneous_type(self):
+    def test_erroneous_type1(self):
         self.assertRaises(TypeError, make_ErroneousType)
+        return
+
+    def test_erroneous_type2(self):
+        self.assertRaises(TypeError, make_ErroneousTypeElement)
         return
 
     def test_derivation1(self):
@@ -383,6 +443,25 @@ class LogicalPropsDeps (unittest.TestCase):
                 self.assertEqual(o.rec.count(p), 1)
                 pass
             pass     
+        return
+
+    def test_single_linear_old_style(self):
+        m = self.__model_factory(LinearSingleLevelOldStyle)
+        m.conc += 1
+
+        for o in (self.o1, self.o2):
+            for p in m.get_properties():                
+                self.assertEqual(o.rec.count(p), 1)
+                pass
+            pass
+        return
+
+    def test_erroneous_old_style_type1(self):
+        self.assertRaises(TypeError, make_ErroneousTypeOldStyle)
+        return
+
+    def test_erroneous_old_style_type2(self):
+        self.assertRaises(TypeError, make_ErroneousTypeElementOldStyle)
         return
         
     

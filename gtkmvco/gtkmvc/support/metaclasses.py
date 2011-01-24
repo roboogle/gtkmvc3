@@ -28,6 +28,7 @@ import inspect
 import sys
 import fnmatch
 import itertools
+import operator
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import getmembers
@@ -648,11 +649,19 @@ class ObservablePropertyMeta (PropertyMeta):
       _inner_getter = type(cls).get_getter(cls, prop_name, user_getter, getter_takes_name) 
 
       def _setter(self, val):
+
+          curr_frame = len(self._notify_stack)
+          if prop_name not in self._notify_stack:
+              self._notify_stack.append(prop_name)
+              pass
+          
           old = _inner_getter(self)
           new = type(self).create_value(prop_name, val, self)
 
           # to track dependencies
           olds = self.__before_property_value_change__(prop_name)
+          self._notify_stack.extend(
+              itertools.imap(operator.itemgetter(1), olds))                                    
 
           # this is the unique place where the value is set:
           _inner_setter(self, new)
@@ -664,6 +673,8 @@ class ObservablePropertyMeta (PropertyMeta):
 
           # to notify dependencies
           self.__after_property_value_change__(prop_name, olds)
+
+          del self._notify_stack[curr_frame:]
           return
       return _setter
 

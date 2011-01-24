@@ -61,9 +61,14 @@ class MyModel (Model):
     def fahrenheit(self): return (self.temperature * 9/5.0) + 32
     pass # end of class
 
+class MyController (Controller):
+    def on_window1__delete_event(self, w, e): gtk.main_quit()
+    def on_button_quit__clicked(self, b): gtk.main_quit()
+    pass
+
 m = MyModel()
 v = View(builder="delegate.glade")
-c = Controller(m, v, auto_adapt=True) #, auto_quit=True)
+c = MyController(m, v, auto_adapt=True, handlers="class")
 gtk.main()
 
     

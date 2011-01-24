@@ -52,13 +52,13 @@ gtk.main()
 # This is the same example written with gtkmvc (requires 1.99.2)
 class MyModel (Model):
     temperature = 0.0
-    __observables__ = ("temperature", "celsius", "farenheit")
+    __observables__ = ("temperature", "celsius", "fahrenheit")
 
     @Model.getter(deps=["temperature"])
     def celsius(self): return (self.temperature - 32) * 5/9.0
 
     @Model.getter(deps=["temperature"])
-    def farenheit(self): return (self.temperature * 9/5.0) + 32
+    def fahrenheit(self): return (self.temperature * 9/5.0) + 32
     pass # end of class
 
 m = MyModel()

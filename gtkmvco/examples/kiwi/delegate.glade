@@ -104,7 +104,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label_farenheit">
+                  <object class="GtkLabel" id="label_fahrenheit">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">0.0</property>
                   </object>
@@ -121,7 +121,7 @@
                   <object class="GtkLabel" id="label5">
                     <property name="visible">True</property>
                     <property name="xalign">1</property>
-                    <property name="label" translatable="yes">Farenheit:</property>
+                    <property name="label" translatable="yes">Fahrenheit:</property>
                   </object>
                   <packing>
                     <property name="top_attach">2</property>

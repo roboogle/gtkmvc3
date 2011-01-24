@@ -364,6 +364,23 @@ getter/setter pairs::
 .. note:: You can exploit custom properties values to perform some
           custom actions when a property is read or written.
 
+It is possible to define **dependencies** among logical and concrete
+properties. For example::
+
+ from gtkmvc import Model
+ class MyModel (Model):
+    celsius = 0
+    __observables__ = ("celsius", "fahrenheit")
+
+    @Model.getter(deps=["celsius"])
+    def fahrenheit(self): return self.celsius * 9/5.0 + 32
+    pass
+
+When dependencies are explicitly declared, the framework takes them
+into account automatically when sending notifications. In the
+examples, any observer of `fahrenheit` would be notified even when
+`celsius` gets changed, as `fahrenheit` depends on it.
+
 
 3. Mutable containers
 """""""""""""""""""""

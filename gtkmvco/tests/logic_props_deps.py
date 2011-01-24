@@ -43,6 +43,15 @@ class DerivedModelWithOverriding (LinearSingleLevel):
     def log3(self): return self.log2+1
     pass
 
+class LinearSingleLevelPattern (Model):
+    # basic, single level linear dependency, use of patterns in
+    # decorators
+    conc = 0
+
+    __observables__ = "conc log1 log2".split()
+
+    @Model.getter("log?", deps=["conc"])
+    def log12_get(self, name): return self.conc+1
 
 class LinearMultiLevel (Model):
     # more complex linear dependency    
@@ -364,6 +373,18 @@ class LogicalPropsDeps (unittest.TestCase):
                 pass
             pass        
         return
+
+    def test_pattern(self):
+        m = self.__model_factory(LinearSingleLevelPattern)
+        m.conc += 1
+
+        for o in (self.o1, self.o2):
+            for p in "conc log1 log2".split():
+                self.assertEqual(o.rec.count(p), 1)
+                pass
+            pass     
+        return
+        
     
     pass # end of class
 

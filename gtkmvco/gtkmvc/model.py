@@ -24,6 +24,7 @@
 import gtk
 import inspect
 import types 
+import collections
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
@@ -37,7 +38,7 @@ from support.utils import getmembers
 WITH_NAME = True
 WITHOUT_NAME = False
 
-KWARG_NAME_DEPS = "deps"
+
 
 class Model (Observer):
     """
@@ -137,14 +138,18 @@ class Model (Observer):
             pass
 
         # here deps are checked
-        _deps = kwargs.get(KWARG_NAME_DEPS, ())
+        _deps = kwargs.get(support.metaclasses.KWARG_NAME_DEPS, ())
+        if not isinstance(_deps, collections.Iterable):
+                raise TypeError("Keyword argument '%s' must be an iterable" % 
+                                support.metaclasses.KWARG_NAME_DEPS)
         for dep in _deps:
             if not isinstance(dep, types.StringType): 
                 raise TypeError("Elements of keyword argument "
-                                "'%s' must be strings" % KWARG_NAME_DEPS)
+                                "'%s' must be strings" % \
+                                support.metaclasses.KWARG_NAME_DEPS)
             pass
         # deps is the only supported keyword argument
-        unsupported = set(kwargs) - set((KWARG_NAME_DEPS,))
+        unsupported = set(kwargs) - set((support.metaclasses.KWARG_NAME_DEPS,))
         if unsupported:
             logger.warn("%s are unrecognized keyword arguments" % str(unsupported))
             pass

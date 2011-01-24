@@ -29,6 +29,7 @@ import sys
 import fnmatch
 import itertools
 import operator
+import collections
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import getmembers
@@ -66,6 +67,9 @@ SET_GENERIC_NAME = "set__value"
 
 # this used for pattern matching
 WILDCARDS = frozenset("[]!*?")
+
+# name of the keyword argument for logical getters
+KWARG_NAME_DEPS = "deps"
 
 
 class PropertyMeta (type):
@@ -309,9 +313,8 @@ class PropertyMeta (type):
                     raise RuntimeError("In class %s.%s logical observable '%s' "\
                                            "has no getter method" % \
                                            (cls.__module__, cls.__name__, name))
-                _deps = ()
+                _deps = type(cls)._get_old_style_getter_deps(cls, name, _getter)
                 pass
-            
             
             # finds the setter
             ai_set = resolved_setdict.get(name, None)
@@ -355,6 +358,49 @@ class PropertyMeta (type):
             pass
 
         return frozenset(real_log_props)
+
+
+    def _get_old_style_getter_deps(cls, prop_name, _getter):
+        """Checks if deps were given with argument 'deps' (only for
+         old-style getters (not based on decorator).
+         Checks types, and returns the value (iterable of strings)
+         given with the argument 'deps'"""
+        args, _, _, defaults = inspect.getargspec(_getter)
+
+        try:
+            idx = args.index(KWARG_NAME_DEPS) - (len(args)-len(defaults))
+            # finds the corresponding value
+            if idx < 0:
+                raise ValueError("In class %s.%s logical OP getter '%s'"
+                                 "must have a default value set for "
+                                 "argument '%s'" % \
+                                 (cls.__module__, cls.__name__,
+                                  _getter.__name__, KWARG_NAME_DEPS))
+            _deps = defaults[idx]
+            # checks types
+            if not isinstance(_deps, collections.Iterable):
+                raise TypeError("In logical OP getter %s.%s.%s "
+                                "default value of argument '%s' "
+                                "must be an iterable" % \
+                                (cls.__module__, cls.__name__,
+                                 _getter.__name__, KWARG_NAME_DEPS))
+            
+            for dep in _deps:
+                if not isinstance(dep, types.StringType): 
+                    raise TypeError("In logical OP getter %s.%s.%s "
+                                    "values of argument '%s' "
+                                    "must be strings" % \
+                                    (cls.__module__, cls.__name__,
+                                     _getter.__name__,
+                                     KWARG_NAME_DEPS))
+                pass
+            pass
+        
+        except ValueError:
+            _deps = ()
+            pass
+
+        return _deps
 
 
     def __create_conc_prop_accessors__(cls, prop_name, default_val):
@@ -482,7 +528,10 @@ class PropertyMeta (type):
         """
         if user_getter: 
             if getter_takes_name: # wraps the property name
-                def _getter(self): return user_getter(self, prop_name)
+                _deps = type(cls)._get_old_style_getter_deps(cls, prop_name,
+                                                             user_getter)
+                def _getter(self, deps=_deps):
+                    return user_getter(self, prop_name)                
             else: _getter = user_getter
             return _getter
 
@@ -561,23 +610,27 @@ class ObservablePropertyMeta (PropertyMeta):
           # properties)
           if user_getter: pass
           else:
-              if has_specific_getter: 
+              if has_specific_getter:
+                  _getter = getattr(cls, GET_PROP_NAME % {'prop_name' : prop_name})
+                  _deps = type(cls)._get_old_style_getter_deps(cls, prop_name,
+                                                               _getter)
+                  
                   # this is done to delay getter call, to have
                   # bound methods to allow overloading of getter in
                   # derived classes
-                  def __getter(self):
+                  def __getter(self, deps=_deps):
                       _getter = getattr(self, GET_PROP_NAME % {'prop_name' : prop_name})
                       return _getter()
-                  #previously it was simply:
-                  #user_getter = getattr(cls, GET_PROP_NAME % {'prop_name' : prop_name})
                   user_getter = __getter
                   getter_takes_name = False
               else:
                   assert has_general_getter
-                  def __getter(self, name):
+                  _getter = getattr(cls, GET_GENERIC_NAME)
+                  _deps = type(cls)._get_old_style_getter_deps(cls, prop_name,
+                                                               _getter)
+                  def __getter(self, name, deps=_deps):
                       _getter = getattr(self, GET_GENERIC_NAME)
                       return _getter(name)
-                  #user_getter = getattr(cls, GET_GENERIC_NAME)
                   user_getter = __getter
                   getter_takes_name = True
                   pass

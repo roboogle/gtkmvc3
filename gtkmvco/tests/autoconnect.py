@@ -1,36 +1,56 @@
-"""
-Test shows a button. Clicking it should print. Closing the window should quit
-the program.
-
-This tests recognizing handlers by name instead of defining them in Glade.
-
-TODO automate, class attribute
-"""
+import unittest
 
 import gtk
 
-import _importer
+from _importer import refresh_gui
 import gtkmvc
 
-class View(gtkmvc.View):
-    def __init__(self):
-        gtkmvc.View.__init__(self)
-
-        w = self['window'] = gtk.Window()
-        b = self['button_doit'] = gtk.Button("OK")
-        w.add(b)
-        w.show_all()
-
 class Super(gtkmvc.Controller):
-    def on_window__delete_event(self, window, event):
-        gtk.main_quit()
+    def __init__(self, **kwargs):
+        self.calls = []
+
+        v = gtkmvc.View()
+        v['main_window'] = w = gtk.Window()
+        v['button'] = b = gtk.Button()
+        w.add(b)
+
+        gtkmvc.Controller.__init__(self, gtkmvc.Model(), v, **kwargs)
+        refresh_gui()
+
+    def on_button__clicked(self, widget):
+        self.calls.append(widget)
 
 class Controller(Super):
-    def on_button_doit__clicked(self, button):
-        print "Ouch!"
+    handlers = "class"
 
-m = gtkmvc.Model()
-v = View()
-c = Controller(m, v, handlers="class")
+    def on_main_window__delete_event(self, widget, event):
+        self.calls.append(widget)
 
-gtk.main()
+class AutoConnect(unittest.TestCase):
+    def testDefault(self):
+        c = Super()
+        w = c.view['button']
+        w.clicked()
+        self.assertEqual([], c.calls)
+
+    def testArgument(self):
+        c = Super(handlers="class")
+        w = c.view['button']
+        w.clicked()
+        self.assertEqual([w], c.calls)
+
+    def testAttribute(self):
+        c = Controller()
+        w = c.view['button']
+        w.clicked()
+        self.assertEqual([w], c.calls)
+
+    def testUnderscores(self):
+        c = Controller()
+        w = c.view['main_window']
+        # Didn't find a better way.
+        w.emit('delete-event', None)
+        self.assertEqual([w], c.calls)
+
+if __name__ == "__main__":
+    unittest.main()

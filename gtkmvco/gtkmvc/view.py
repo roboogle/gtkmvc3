@@ -158,11 +158,10 @@ class View (object):
        
     def __getitem__(self, key):
         """
-        Return the widget named *key*, or ``None``.
+        Return the widget named *key* or raise KeyError.
         
-        .. note::
-        
-           In future versions this will likely change to raise ``KeyError``.
+        .. versionchanged:: 1.99.2
+           Used to return None when the widget wasn't found.
         """
         wid = None
 
@@ -193,6 +192,8 @@ class View (object):
                 pass
             pass
         
+        if not wid:
+            raise KeyError(key)
         return wid
     
     def __setitem__(self, key, wid):

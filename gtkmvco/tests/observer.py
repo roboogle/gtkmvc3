@@ -61,6 +61,15 @@ class Explicit(gtkmvc.Observer):
     def notify_after(self, model, name, info):
         self.after = info.method_name, info.args
 
+class ImplicitExplicit(gtkmvc.Observer):
+    def __init__(self, *arg, **kwargs):
+        self.calls = []
+        gtkmvc.Observer.__init__(self, *arg, **kwargs)
+
+    @gtkmvc.Observer.observe("signal", signal=True)
+    def property_signal_signal_emit(self, *args):
+        self.calls.append(args)
+
 class WithNameModule(gtkmvc.Observer):
     @gtkmvc.Observer.observe("signal", signal=True, old_style_call=True)
     @gtkmvc.Observer.observe("iduna", signal=True, old_style_call=True)
@@ -181,6 +190,15 @@ class SingleTest(unittest.TestCase):
 
     def testWithNameModule(self):
         self.notifications(WithNameModule(self.m))
+
+class DoubleTest(unittest.TestCase):
+    def testImplicitExplicit(self):
+        m = Model()
+        c = ImplicitExplicit(m)
+        self.assertEqual(0, len(c.calls))
+        m.signal.emit("Hello")
+        # Should this be 1?
+        self.assertEqual(2, len(c.calls))
 
 class Dynamic(gtkmvc.Observer):
     def a(self, model, prop_name, info):

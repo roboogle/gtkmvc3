@@ -28,7 +28,7 @@ from support import decorators, utils, log
 import inspect
 import types
 import collections
-
+import fnmatch
 
 class NTInfo (dict):
     """
@@ -303,6 +303,10 @@ def observes(*args):
 # ----------------------------------------------------------------------
 
 
+# this used for pattern matching
+WILDCARDS = frozenset("[]!*?")
+
+
 class Observer (object):
     """
     .. note::
@@ -373,7 +377,7 @@ class Observer (object):
 
         # handles arguments
         if args and isinstance(args[0], cls):
-            # used as instance method, for declaring notifications
+            # Used as instance method, for declaring notifications
             # dynamically
             if len(args) != 3: 
                 raise TypeError("observe() takes exactly three arguments"
@@ -432,7 +436,7 @@ class Observer (object):
         self.__accepts_spurious__ = spurious
 
         # NOTE: In rev. 202 these maps were unified into
-        #   __CUST_OBS_MAP only (the map contained pairs (method,
+        #   __PROP_TO_METHS only (the map contained pairs (method,
         #   args). However, this broke backward compatibility of code
         #   accessing the map through
         #   get_observing_methods. Now the informatio is split
@@ -442,9 +446,13 @@ class Observer (object):
 
         # Private maps: do not change/access them directly, use
         # methods to access them:
-        self.__CUST_OBS_MAP = {} # prop name --> set of observing methods
-        self.__CUST_OBS_KWARGS = {} # observing method --> flag 
-
+        self.__PROP_TO_METHS = {} # prop name --> set of observing methods
+        self.__METH_TO_PROPS = {} # method --> set of observed properties
+        self.__PAT_TO_METHS = {} # like __PROP_TO_METHS but only for
+                                 # pattern names (to optimize search)
+        self.__METH_TO_PAT = {} # method --> pattern
+        self.__PAT_METH_TO_KWARGS = {} # (pattern, method) --> info
+                                    
         processed_props = set() # tracks already processed properties
 
         # searches all custom observer methods
@@ -500,12 +508,20 @@ class Observer (object):
     def get_observing_methods(self, prop_name):
         """
         Return a possibly empty set of callables registered with
-        :meth:`observe` for *prop_name*.
+        :meth:`observe` for *prop_name*. The returned set includes
+        those notifications which have been registered by means of
+        patterns matching prop_name.
         
         .. versionadded:: 1.99.1
            Replaces :meth:`get_custom_observing_methods`.
         """
-        return self.__CUST_OBS_MAP.get(prop_name, set())
+        # searches in pattern and in map
+        return reduce(set.union,
+                      (meths
+                       for pat, meths in self.__PAT_TO_METHS.iteritems()
+                       if fnmatch.fnmatch(prop_name, pat)),
+                      set()) | \
+                      self.__PROP_TO_METHS.get(prop_name, set())
 
     # this is done to keep backward compatibility
     get_custom_observing_methods = get_observing_methods
@@ -514,15 +530,27 @@ class Observer (object):
     def get_observing_method_kwargs(self, prop_name, method):
         """
         Returns the keyword arguments which were specified when
-        declaring a notification method, either statically of
-        synamically with :meth:`Observer.observe`.
+        declaring a notification method, either statically or
+        dynamically with :meth:`Observer.observe`.
+
+        Since patterns may be involved when declaring the
+        notifications, first exact match is checked, and then the
+        single-allowed pattern is checked, if there is any.
 
         *method* a callable that was registered with
-        :meth:`observes`.
+        :meth:`observe`.
         
         :rtype: dict
         """
-        return self.__CUST_OBS_KWARGS[(prop_name, method)]
+        # exact match have precedence
+        if (prop_name, method) in self.__PAT_METH_TO_KWARGS:
+            return self.__PAT_METH_TO_KWARGS[(prop_name, method)]
+
+        # checks pattern
+        if method in self.__METH_TO_PAT:
+            prop_name = self.__METH_TO_PAT[method]
+            pass
+        return self.__PAT_METH_TO_KWARGS[(prop_name, method)]
     
 
     def remove_observing_method(self, prop_names, method):
@@ -532,19 +560,28 @@ class Observer (object):
         *method* a callable that was registered with :meth:`observe`.
         
         *prop_names* a sequence of strings. This need not correspond to any
-        one `add` call.
+        one `observe` call.
 
         .. note::
 
-           This can revert the effects of a decorator at runtime. Don't.
+           This can revert even the effects of decorator `observe` at
+           runtime. Don't.
         """
         for prop_name in prop_names:
-            _set = self.__CUST_OBS_MAP.get(prop_name, set())
-            if method in _set: _set.remove(method)
-            key = (prop_name, method)
-            if key in self.__CUST_OBS_KWARGS: del self.__CUST_OBS_KWARGS[key]
+            if prop_name in self.__PROP_TO_METHS:
+                # exact match
+                self.__PROP_TO_METHS[prop_name].remove(method)
+                del self.__PAT_METH_TO_KWARGS[(prop_name, method)]
+            elif method in self.__METH_TO_PAT:
+                # found a pattern matching
+                pat = self.__METH_TO_PAT[method]
+                if fnmatch.fnmatch(prop_name, pat):
+                    del self.__METH_TO_PAT[method]
+                    self.__PAT_TO_METHS[pat].remove(method)
+                    pass
+                del self.__PAT_METH_TO_KWARGS[(pat, method)]
+                pass
             pass
-        
         return
 
     def is_observing_method(self, prop_name, method):
@@ -552,8 +589,12 @@ class Observer (object):
         Returns `True` if the given method was previously added as an
         observing method, either dynamically or via decorator.
         """
-        return (prop_name, method) in self.__CUST_OBS_KWARGS
-
+        if (prop_name, method) in self.__PAT_METH_TO_KWARGS: return True       
+        if method in self.__METH_TO_PAT:
+            pat = self.__METH_TO_PAT[method]
+            if fnmatch.fnmatch(prop_name, pat): return True
+            pass
+        return False
 
     def __register_notification(self, prop_name, method, kwargs):
         """Internal service which associates the given property name
@@ -566,20 +607,51 @@ class Observer (object):
         ValueError exception is raised."""
 
         key = (prop_name, method)
-        if key in self.__CUST_OBS_KWARGS:
-            raise ValueError("In %s method '%s' has been declared "
-                             "to be a notification for property '%s' "
+        if key in self.__PAT_METH_TO_KWARGS:
+            raise ValueError("In class %s method '%s' has been declared "
+                             "to be a notification for pattern '%s' "
                              "multiple times (only one is allowed)." % \
                                  (self.__class__, 
                                   method.__name__, prop_name))
-                
-        # fills the internal structures
-        if not self.__CUST_OBS_MAP.has_key(prop_name):
-            self.__CUST_OBS_MAP[prop_name] = set()
-            pass
-        self.__CUST_OBS_MAP[prop_name].add(method)
+        if frozenset(prop_name) & WILDCARDS:
+            # checks that at most one pattern is specified per-method:
+            # (see ticket:31#comment:7 and following)
+            if (method in self.__METH_TO_PAT or 
+                (method in self.__METH_TO_PROPS and
+                 self.__METH_TO_PROPS[method])):
+                raise ValueError("In class %s multiple patterns have been "
+                                 "used to declare method '%s' to be a "
+                                 "notification (only one is allowed.)" % \
+                                 (self.__class__, method.__name__))
+            
+            # for the sake of efficiency, method to patterns map is kept
+            self.__METH_TO_PAT[method] = prop_name
 
-        self.__CUST_OBS_KWARGS[key] = kwargs
+            # the name contains wildcards
+            _dict = self.__PAT_TO_METHS
+            
+        else:
+            # check that it was not used for patterns
+            if method in self.__METH_TO_PAT:
+                raise ValueError("In class %s multiple patterns have been "
+                                 "used to declare method '%s' to be a "
+                                 "notification (only one is allowed.)" % \
+                                 (self.__class__, method.__name__))            
+                
+            _dict = self.__PROP_TO_METHS
+            if not self.__METH_TO_PROPS.has_key(method):
+                self.__METH_TO_PROPS[method] = set()
+                pass
+            self.__METH_TO_PROPS[method].add(prop_name)
+            pass
+        
+        # fills the internal structures
+        if not _dict.has_key(prop_name):
+            _dict[prop_name] = set()
+            pass
+        _dict[prop_name].add(method)
+
+        self.__PAT_METH_TO_KWARGS[key] = kwargs
         return
 
     pass # end of class

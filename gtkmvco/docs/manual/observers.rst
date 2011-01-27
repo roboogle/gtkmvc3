@@ -15,9 +15,11 @@ Also :ref:`gtkmvc.Model<MODELS>` derives from :class:`gtkmvc.Observer`, as
 in hierarchies of models parents sometimes observe children.
 
 .. Important::
+
    Since version 1.99.1, observers were deeply revised. If you have
-   experience with older versions, you will find many changes. In
-   particular the usage of name-based notification methods like
+   experience with older versions, you will find many changes,
+   although all changes are backward compatible. In particular the
+   usage of name-based notification methods like
    ``property_<name>_value_change`` is discouraged, but still
    supported for backward compatibility. At the end of this section
    all discouraged/deprecated features about observers are listed.

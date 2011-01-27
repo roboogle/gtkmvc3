@@ -2,6 +2,8 @@
 Logical Observable Properties
 =============================
 
+.. versionadded:: 1.99.1
+
 *Logical* OPs are properties whose values are not necessarily
 stored in the model, but which are read and written by a pair of
 getter/setter methods.
@@ -238,6 +240,8 @@ in the example had to be adapted.
 
 Dependencies among OPs
 ----------------------
+
+.. versionadded:: 1.99.2
 
 If the value of a logical OP `p` is calculated out of other OPs, `p`
 *depends* on the other OPs. In the general case, logical OPs depend on

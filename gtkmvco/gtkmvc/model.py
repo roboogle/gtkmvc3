@@ -651,8 +651,12 @@ class Model (Observer):
         assert(self.__value_notifications.has_key(prop_name))
         for method, kw in self.__value_notifications[prop_name] :
             obs = method.im_self
+            # spuriousness (ticket:38) is checked here
+            if kw and "spurious" in kw: spurious = kw['spurious']
+            else: spurious = obs.accepts_spurious_change()
+            
             # notification occurs checking spuriousness of the observer
-            if old != new or obs.accepts_spurious_change():
+            if old != new or spurious:
                 if kw is None: # old style call without name
                     self.__notify_observer__(obs, method,
                                              self, old, new)

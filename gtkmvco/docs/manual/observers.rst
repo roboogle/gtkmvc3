@@ -386,6 +386,21 @@ Keyword argument to be used on `Observer.observe`: `assign=True`
                                                      
        :type: <any>                                  
 
+    .. attribute:: spurious
+                                                     
+       Holds the value of the flag which can be used to change the
+       spuriousness of the specific notification method, overriding
+       the global spuriousness of the :class:`Observer`. If `True`,
+       the notification method will be called when the observable
+       property is assigned, also when its value does not change. If
+       `False`, spurious notifications will be not sent independently
+       on the `spurious` parameter passed to
+       :meth:`Observer.__init__`.
+                                              
+       :type: bool
+
+       .. versionadded:: 1.99.2
+
 
 Before method call type
 ^^^^^^^^^^^^^^^^^^^^^^^

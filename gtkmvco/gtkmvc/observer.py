@@ -105,6 +105,16 @@ class NTInfo (dict):
        the new value that the observable property has been
        changed to.
 
+    spurious
+       the flag which can be used to change the spuriousness of the
+       specific notification method, overriding the global
+       spuriousness of the :class:`Observer`. If `True`, the
+       notification method will be called when the observable property
+       is assigned, also when its value does not change. If `False`, spurious
+       notifications will be not sent independently on the `spurious`
+       parameter passed to :meth:`Observer.__init__`.
+
+       .. versionadded:: 1.99.2
 
     **For Before method call type**
 

@@ -499,7 +499,10 @@ notifications, presented in the static flavours::
     #    Value change
     # ------------------------------------------------------   
 
-    # common notification for multiple properties:
+    # Common notification for multiple properties.
+    # Notice that this could also be written as     
+    #  @Observer.observe("data[12]", assign=True)
+    # as patterns (like fnmatch) are supported by Observer.observe
     @Observer.observe("data1", assign=True)
     @Observer.observe("data2", assign=True)
     def assign_notification(self, model, prop_name, info):

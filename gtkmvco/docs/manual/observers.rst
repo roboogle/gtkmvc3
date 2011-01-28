@@ -182,6 +182,80 @@ an OP? It is possible to declare notification methods *statically* or
       models the notifications are interested in. Next version will
       provide a better support.
    
+
+Use of patterns with `Observer.observe`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Since version 1.99.2 it is possible to use patterns instead of the
+property name, like in :ref:`Concrete OP<OP_Concrete>` which
+can be specified using :ref:`patterns<OP_concrete_patterns>`. 
+
+The property name can contain wildcards like ``*`` to match any
+sequence of characters, ``?`` to match one single character, etc. See
+module `fnmatch <http://docs.python.org/library/fnmatch.html>`_ in
+*Python* library for other information about possible use of wildcards
+in names.
+
+With patterns it is possible to declare notification methods which are
+called for properties whose names match a syntactical rule. For
+example::
+
+   from gtkmvc import Observer
+   class MyObserver (Observer):
+
+      @Observer.observe('prop[1234]', assign=True, signal=True)
+      def notifications(self, model, prop_name, info):
+          # this is called when 'prop1', 'prop2', 'prop3' and 'prop4'
+          # are assigned and also when 'prop[1234].emit()' is called
+          return
+
+      @Observer.observe('a*', assign=True)
+      def other_notification(self, model, prop_name, info):
+          # this is called when any observed property whose name
+          # begins with 'a' is assigned
+          return
+
+      @Observer.observe('*', after=True)
+      def all_notification(self, model, prop_name, info):
+          # this is called after any observed property is changed by a method
+          return
+
+      # this is used to add a notification at runtime
+      def a_method(self, model, prop_name, info):
+          return
+
+Patterns can be used also when `Observer.observe` is called to add
+notifications at runtime::
+
+  o = MyObserver()
+  o.observe(o.a_method, "prop?", assign=True)
+
+.. Important::
+
+   When patterns are used with `Observer.observe`, each notification
+   method can have only **one** `Observer.observe` call or decorator,
+   or exception `ValueError` is raised when the class is instantiated
+   (for decorators), or when `Observer.observe` is called (for dynamic
+   declarations). For example this is **not** allowed::
+
+    from gtkmvc import Observer
+    class MyObserver (Observer):
+
+      # ERROR
+      @Observer.observe('a*', assign=True)
+      @Observer.observe('prop[1234]', signal=True)
+      def notifications(self, model, prop_name, info):
+          #...
+          return
+
+      # ERROR
+      @Observer.observe('prop1', assign=True)
+      @Observer.observe('prop[1234]', signal=True)
+      def notifications(self, model, prop_name, info):
+          #...
+          return
+
+.. versionadded:: 1.99.2
      
 
 The parameter `info:NTInfo`

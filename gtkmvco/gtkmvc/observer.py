@@ -324,15 +324,29 @@ class Observer (object):
     @decorators.good_decorator_accepting_args
     def observe(cls, *args, **kwargs):
         """
-        Mark a method as recieving notifications. Comes in two flavours:
+        Mark a method as receiving notifications. Comes in two flavours:
 
         .. method:: observe(name, **types)
            :noindex:
 
            A decorator living in the class. Can be applied more than once to
            the same method, provided the names differ.
-           
-           *name* is the property we want to be notified about as a string.
+
+           *name* is the property we want to be notified about as a
+           string.
+
+           .. Note::
+
+              Alternatively, *name* can be a pattern for matching
+              property names, meaning it can contain wildcards
+              character like in module `fnmatch
+              <http://docs.python.org/library/fnmatch.html>`_ in
+              Python library. However, if wildcards are used in name,
+              only *one* `observe` can be used for a given
+              notification method, or else `ValueError` exception is
+              raised when the Observer class is instantiated.
+
+              .. versionadded:: 1.99.2
            
            *types* are boolean values denoting the types of
            notifications desired. At least one of the following has to be

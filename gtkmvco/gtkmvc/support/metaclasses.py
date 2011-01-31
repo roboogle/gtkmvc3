@@ -496,7 +496,12 @@ class PropertyMeta (type):
             if model: res.__add_model__(model, prop_name)
             return res
 
-        elif isinstance(val, dict):            
+        elif isinstance(val, set):
+            res = wrappers.ObsSetWrapper(val)
+            if model: res.__add_model__(model, prop_name)
+            return res
+
+        elif isinstance(val, dict):
             res = wrappers.ObsMapWrapper(val)
             if model: res.__add_model__(model, prop_name)
             return res

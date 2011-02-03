@@ -155,6 +155,42 @@ class DynamicWithName(gtkmvc.Observer):
         if prop_name == "after":
             self.after = info.method_name, info.args
 
+class Trigger(gtkmvc.Observer):
+    def __init__(self, model):
+        self.changes = {}
+        gtkmvc.Observer.__init__(self)
+
+        for name in ("signal", "iduna"):
+            self.observe(self.a, name, signal=True)
+        for name in ("value"):
+            self.observe(self.a, name, assign=True)
+        for name in ("before", "after"):
+            self.observe(self.a, name, before=True, after=True)
+
+        self.observe_model(model)
+
+    def a(self, model, prop_name, info):
+        try:
+            self.changes[id(info)] += 1
+        except KeyError:
+            self.changes[id(info)] = 1
+
+    def unique(self):
+        for key in self.changes:
+            if self.changes[key] > 1:
+                return False
+        return True
+
+class DictionaryTest(unittest.TestCase):
+    def testSafety(self):
+        m = Model()
+        c = Trigger(m)
+        m.signal.emit(4)
+        m.value = 2
+        m.before.append(5)
+        m.after.append(5)
+        self.assertTrue(c.unique)
+
 class SingleTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()

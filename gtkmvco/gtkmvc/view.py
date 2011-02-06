@@ -69,7 +69,11 @@ class View (object):
            .. deprecated:: 1.99.1
 
         *builder* is a path to an XML file defining widgets in GtkBuilder
-        format.
+        format. It can also be a :class:`gtk.Builder` instance which already
+        contains widgets. This is useful for internationalisation or if you
+        want to break one XML file up into multiple views. Do not use that
+        variant with class attributes, or all instances of this view will share
+        one set of widgets.
 
            .. versionadded:: 1.99.1
 
@@ -82,8 +86,8 @@ class View (object):
         intend to create widgets later from code.
 
         .. deprecated:: 1.99.1
-           In future versions the functionality will be split into the new class
-           :class:`ManualView` and its child :class:`BuilderView`.
+           In future versions the functionality will be split into the new
+           class :class:`ManualView` and its child :class:`BuilderView`.
         """
         if isinstance(glade, Controller):
             raise NotImplementedError("This version of GTKMVC does not"
@@ -326,7 +330,8 @@ class View (object):
                 except TypeError: continue
                 
                 if name in self.autoWidgets and self.autoWidgets[name] != wid:
-                    raise ViewError("Widget '%s' in builder also found in glade specification" % name)
+                    raise ViewError("Widget '%s' in builder also found in "
+                        "glade specification" % name)
 
                 self.autoWidgets[name] = wid
                 pass

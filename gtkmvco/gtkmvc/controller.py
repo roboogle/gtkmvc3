@@ -278,7 +278,8 @@ class Controller (Observer):
 
         # autoconnects builder if available
         if self.view._builder is not None:
-            self.view._builder.connect_signals(dic)
+            #It was: #self.view._builder.connect_signals(dic)
+            self.view._builder_connect_signals(dic)
             pass
         
         return

@@ -27,7 +27,7 @@ from gtkmvc.controller import Controller
 from gtkmvc.support.log import logger
 from gtkmvc.support.exceptions import ViewError
 
-import gtk
+import gtk, gobject
 import sys
 
 try:
@@ -143,9 +143,9 @@ class View (object):
                 self._builder = gtk.Builder()
                 self._builder.add_from_file(_builder)
                 pass
-            pass
+            pass        
         else: self._builder = None # no gtk builder
-            
+
         # top widget list or singleton:
         if _top is not None:
             if len(wids) > 1:
@@ -158,6 +158,8 @@ class View (object):
        
         if parent is not None: self.set_parent_view(parent)
 
+        self.builder_pending_callbacks = {}
+        self.builder_connected = False
         return
        
     def __getitem__(self, key):
@@ -210,6 +212,7 @@ class View (object):
         self.manualWidgets[key] = wid
         if (self.m_topWidget is None): self.m_topWidget = wid
         return
+
 
     def show(self):
         """
@@ -289,6 +292,60 @@ class View (object):
             if handler is not None: return handler(str1, str2, int1, int2)
             pass        
         return None
+
+
+    def __builder_connect_pending_signals(self):
+        """Called internally to actually make the internal gtk.Builder
+        instance connect all signals found in controllers controlling
+        self."""
+        class _MultiHandlersProxy (object):
+            def __init__(self, funcs): self.funcs = funcs
+            def __call__(self, *args, **kwargs):
+                # according to gtk documentation, the return value of
+                # a signal is the return value of the last exectuted
+                # handler.
+                for func in self.funcs: res = func(*args, **kwargs)
+                return res
+            pass # eoc
+        
+        final_dict = {}
+        for n,v in self.builder_pending_callbacks.iteritems():
+            if len(v) == 1: final_dict[n] = v.pop()
+            else: final_dict[n] = _MultiHandlersProxy(v)
+            pass
+
+        self._builder.connect_signals(final_dict)
+
+        self.builder_connected = True
+        self.builder_pending_callbacks = {}
+        return
+
+    def _builder_connect_signals(self, _dict):
+        """Called by controllers which want to autoconnect their
+        handlers with signals declared in internal gtk.Builder.
+
+        This method accumulates handlers, and books signal
+        autoconnection later on the idle of the next occurring gtk
+        loop. After the autoconnection is done, this method cannot be
+        called anymore."""
+        
+        assert not self.builder_connected, "gtk.Builder not already connected"
+
+        if _dict and not self.builder_pending_callbacks:
+            # this is the first call, book the builder connection for
+            # later gtk loop
+            gobject.idle_add(self.__builder_connect_pending_signals)
+
+        for n,v in _dict.iteritems():
+            if n not in self.builder_pending_callbacks:
+                _set = set()
+                self.builder_pending_callbacks[n] = _set
+                pass
+            else: _set = self.builder_pending_callbacks[n]
+            _set.add(v)
+            pass
+
+        return
 
     def __iter__(self):
         """

@@ -17,6 +17,8 @@ __def_adapter = [ # class, default signal, getter, setter, value type
     (gtk.Arrow, None, lambda a: a.get_property("arrow-type"),
      lambda a,v: a.set(v,a.get_property("shadow-type")), gtk.ArrowType),
     (gtk.ToggleButton, "toggled", gtk.ToggleButton.get_active, gtk.ToggleButton.set_active, types.BooleanType),
+    (gtk.ToggleAction, "toggled", gtk.ToggleAction.get_active, gtk.ToggleAction.set_active, types.BooleanType),
+    (gtk.ToggleToolButton, "toggled", gtk.ToggleToolButton.get_active, gtk.ToggleToolButton.set_active, types.BooleanType),
     (gtk.CheckMenuItem, "toggled", gtk.CheckMenuItem.get_active, gtk.CheckMenuItem.set_active, types.BooleanType),
     (gtk.Expander, "activate", lambda w: not w.get_expanded(), gtk.Expander.set_expanded, types.BooleanType),
     (gtk.ColorButton, "color-set", gtk.ColorButton.get_color, gtk.ColorButton.set_color, gtk.gdk.Color),

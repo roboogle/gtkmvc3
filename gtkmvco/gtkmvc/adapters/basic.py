@@ -159,7 +159,9 @@ class Adapter (Observer):
         """Forces the property to be updated from the value hold by
         the widget. This method should be called directly by the
         user in very unusual conditions."""
-        self._write_property(self._read_widget())
+        try: val = self._read_widget()
+        except ValueError: pass
+        else: self._write_property(val)
         return
     
     def update_widget(self):
@@ -251,7 +253,7 @@ class Adapter (Observer):
         try: 
             totype = type(self._get_property(*args))
 
-            if self._prop_cast or not self._prop_write:
+            if totype is not types.NoneType and (self._prop_cast or not self._prop_write):
                 val = self._cast_value(val, totype)
             if self._prop_write: val = self._prop_write(val)
 
@@ -271,7 +273,12 @@ class Adapter (Observer):
 
     def _read_widget(self):
         """Returns the value currently stored into the widget, after
-        transforming it accordingly to possibly specified function."""
+        transforming it accordingly to possibly specified function.
+
+        This is implemented by calling the getter provided by the
+        user. This method can raise InvalidValue (raised by the
+        getter) when the value in the widget must not be considered as
+        valid."""
         getter = self._wid_info[self._wid][0]
         return getter(self._wid)
         
@@ -282,8 +289,10 @@ class Adapter (Observer):
         try:
             setter = self._wid_info[self._wid][1]
             wtype = self._wid_info[self._wid][2]
-            if wtype is not None: setter(self._wid, self._cast_value(val, wtype))
-            else: setter(self._wid, val)            
+            if setter:
+                if wtype is not None: setter(self._wid, self._cast_value(val, wtype))
+                else: setter(self._wid, val)
+                pass
         finally:
             self._itsme = False
             pass

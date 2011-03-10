@@ -156,10 +156,15 @@ class StaticContainerAdapter (UserClassAdapter):
         if idx is None:
             for w in self._widgets:
                 idx = self._get_idx_from_widget(w)
-                self._write_property(self._read_widget(idx), idx)
+                try: val = self._read_widget(idx)
+                except ValueError: pass
+                else: self._write_property(val, idx)
                 pass
             pass
-        else: self._write_property(self._read_widget(idx), idx)
+        else:
+            try: val = self._read_widget(idx)
+            except ValueError: pass
+            else: self._write_property(val, idx)
         return
     
     def update_widget(self, idx=None):

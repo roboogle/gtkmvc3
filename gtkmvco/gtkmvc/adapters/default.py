@@ -4,6 +4,17 @@ __all__ = ("add_adapter", "remove_adapter", "search_adapter_info",
 import types
 import gtk
 
+
+def __radio_setter(radio, value):
+    # this is used to control RadioButton and RadioAction
+    if radio.get_label() == value: radio.set_active(True)
+    return
+
+def __radio_getter(radio):
+    # this is used to control RadioButton and RadioAction
+    if radio.get_active(): return radio.get_label()
+    raise ValueError("Radio not active")
+
 # ----------------------------------------------------------------------
 # This list defines a default behavior for widgets.
 # If no particular behaviour has been specified, adapters will
@@ -16,6 +27,8 @@ __def_adapter = [ # class, default signal, getter, setter, value type
     (gtk.Label, None, gtk.Label.get_text, gtk.Label.set_text, types.StringType),
     (gtk.Arrow, None, lambda a: a.get_property("arrow-type"),
      lambda a,v: a.set(v,a.get_property("shadow-type")), gtk.ArrowType),
+    (gtk.RadioAction, "toggled", __radio_getter, __radio_setter, types.StringType),
+    (gtk.RadioButton, "toggled", __radio_getter, __radio_setter, types.StringType),
     (gtk.ToggleButton, "toggled", gtk.ToggleButton.get_active, gtk.ToggleButton.set_active, types.BooleanType),
     (gtk.ToggleAction, "toggled", gtk.ToggleAction.get_active, gtk.ToggleAction.set_active, types.BooleanType),
     (gtk.ToggleToolButton, "toggled", gtk.ToggleToolButton.get_active, gtk.ToggleToolButton.set_active, types.BooleanType),

@@ -17,7 +17,7 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
-top_dir = os.path.dirname(os.path.abspath(".."))
+top_dir = os.path.dirname(os.path.abspath("."))
 if os.path.exists(os.path.join(top_dir, "gtkmvc")):
     sys.path.insert(0, top_dir)
     pass

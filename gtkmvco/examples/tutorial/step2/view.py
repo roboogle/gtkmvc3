@@ -4,7 +4,7 @@ import gtk
 
 
 class MyView (View):
-    builder = "glade/tutorial_enhanced.glade"
+    builder = "glade/tut_step2.glade"
     top = "window_top"
 
     def __init__(self):

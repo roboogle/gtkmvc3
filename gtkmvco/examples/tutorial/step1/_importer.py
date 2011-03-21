@@ -27,7 +27,7 @@
 
 if __name__ != "__main__":
     import os.path; import sys
-    top_dir = os.path.dirname(os.path.abspath(".."))
+    top_dir = os.path.dirname(os.path.abspath("../.."))
     if os.path.exists(os.path.join(top_dir, "gtkmvc")):
         sys.path = [top_dir] + sys.path
     import gtkmvc

@@ -118,7 +118,7 @@ loop::
         gtk.main()
 
 That's it. You can find the full source code of this micro example
-under trunk/trac/htdocs/dload/example.tar.gz
+under in the `example` folder of the source code.
 
 
 Why this example is interesting

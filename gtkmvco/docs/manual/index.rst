@@ -19,7 +19,7 @@ Contents:
    progen
   
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

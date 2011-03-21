@@ -1,4 +1,4 @@
-GTKMVC - The User Manual
+The User Manual
 ========================
 
 Contents:

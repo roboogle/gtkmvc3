@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GTKMVC |version| Library Reference
+Library Reference - API
 ===================================
 
 .. sectionauthor:: Tobias Weber

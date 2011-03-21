@@ -1,9 +1,15 @@
 Getting Started
 ===============
 
-You can download gtkmvc from the SourceForge Project page.
+On Ubuntu/Debian you can install gtkmvc with::
 
-Download the source code with examples and documentation::
+  sudo aptitude install python-gtkmvc python-gtkmvc-doc
+
+
+You can download more recent versions of gtkmvc from the `SourceForge Project page <http://sourceforge.net/projects/pygtkmvc/>`_.
+
+
+Or download the source code with examples and documentation with::
 
   svn checkout https://pygtkmvc.svn.sourceforge.net/svnroot/pygtkmvc
 

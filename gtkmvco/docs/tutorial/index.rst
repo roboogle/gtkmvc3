@@ -18,7 +18,7 @@
 .. |vc| replace:: *V&C*
 
 #################################################
-A short tutorial for |pygtkmvc| Version |version|
+A short tutorial for |pygtkmvc| 
 #################################################
 
 .. toctree::
@@ -37,7 +37,7 @@ should refer to the manual pages.
 How do I install it?
 ====================
 
-Please refer to the User Manual for all details about the
+Please refer to the :doc:`../manual/install` for all details about the
 installation.
 
 

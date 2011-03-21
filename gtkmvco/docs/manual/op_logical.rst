@@ -1,3 +1,5 @@
+.. _OP_log:
+
 =============================
 Logical Observable Properties
 =============================
@@ -237,6 +239,8 @@ as: ::
 Of course, since in naming conventions names *matters*, some names
 in the example had to be adapted.
 
+
+.. _OP_log_deps:
 
 Dependencies among OPs
 ----------------------

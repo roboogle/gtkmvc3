@@ -8,7 +8,7 @@ Download the source code with examples and documentation::
   svn checkout https://pygtkmvc.svn.sourceforge.net/svnroot/pygtkmvc
 
 
-For a quick example, see gtkmvc in 5 minutes.
+For a quick example, see :doc:`five_min/index`.
 
 
 Contacts

@@ -1,10 +1,12 @@
 ## Copyright (C) 2009 Roberto Cavada
 
-import gtk
+import _importer
+
 from gtkmvc import Model
 from gtkmvc import View
 from gtkmvc import Controller
 
+import gtk
 
 class MyView (View):
     glade = "example.glade"

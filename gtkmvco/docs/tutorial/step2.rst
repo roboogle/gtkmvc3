@@ -310,16 +310,16 @@ controllers can be reduced by using adapters, which make code smaller
 and allow you to focus on the big picture and forget about the
 details.
 
-For example, the user can select a different counter either by
-selecting a radio button, or typing the counter name in the
-`gtk.Entry`. This is a detail you don't really mind if you use
-adapters, the only important result is that a member of your model
-class will be changed accordingly. 
+For example, the user can select a different counter by selecting a
+radio button, or typing the counter name in the `gtk.Entry`. This is a
+detail you don't really mind if you use adapters, the only important
+result is that a member of your model class will be changed
+accordingly.
 
 After the user selected a new counter, you don't have to worry about
-showing the counter value explicitly, either in the label or in the
-progress bar. Since those widgets are adapted to the counter value,
-the value is shown correctly whatever is the reason why it got
+showing the counter value explicitly, in the label, in the progress
+bar, or in the image. Since those widgets are adapted to the counter
+value, the value is shown correctly whatever is the reason why it got
 changed. In fact the value could change because it was reset, or
 incremented, or because the user selected a different counter. In the
 controller there is no code handling these different cases, which are

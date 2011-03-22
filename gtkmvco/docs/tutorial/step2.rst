@@ -289,7 +289,8 @@ of the code is quite low.
 |    :align: center                      |    :align: center                      |
 |    :figwidth: 10cm                     |    :figwidth: 10 cm                    |
 |                                        |                                        |
-|    Right after starting                |    `First` counter after increment     |
+|    Right after starting                |    `First` counter after a few         |  
+|                                        |    increments.                         |
 +----------------------------------------+----------------------------------------+
 | .. figure:: images/step2_run3.png      | .. figure:: images/step2_run4.png      |
 |    :width: 8 cm                        |    :width: 8 cm                        |
@@ -304,11 +305,17 @@ of the code is quite low.
 What have we learnt?
 ====================
 
-I hope that this example clearly shows that complex interactions can
-be reduced largely by exploiting observable properties. Complexity in
-controllers can be reduced by using adapters, which make code smaller
-and allow you to focus on the big picture and forget about the
-details.
+First of all we have seen the advantages and strength of logical
+observable properties.
+
+Second, the advantages of having separated entities to represent the
+logic, the aspect and the controller of an application.
+
+Third, I hope that this example clearly shows that complex
+interactions can be reduced largely by exploiting observable
+properties. Complexity in controllers can be reduced by using
+adapters, which make code smaller and allow you to focus on the big
+picture and forget about the details.
 
 For example, the user can select a different counter by selecting a
 radio button, or typing the counter name in the `gtk.Entry`. This is a

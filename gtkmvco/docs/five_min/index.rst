@@ -128,7 +128,7 @@ MVC Triplet
 Now it is needed to instantiate the MVC triplet and run the gtk main
 loop::
 
-    if __name__ = "__main__":
+    if "__main__" == __name__:
         m = MyModel() 
         v = MyView()  
         c = MyController(m, v)

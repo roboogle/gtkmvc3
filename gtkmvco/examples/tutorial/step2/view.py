@@ -1,7 +1,18 @@
+# Author: Roberto Cavada, Copyright 2011
+#
+# This is free software; you can redistribute it and/or 
+# modify it under the terms of the GNU Lesser General Public 
+# License as published by the Free Software Foundation; either 
+# version 2 of the License, or (at your option) any later version.
+#
+# These examples are distributed in the hope that they will be useful, 
+# but WITHOUT ANY WARRANTY; without even the implied warranty of 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+# Lesser General Public License for more details.
+
 import _importer
 from gtkmvc import View
 import gtk
-
 
 class MyView (View):
     builder = "glade/tut_step2.glade"
@@ -16,6 +27,7 @@ class MyView (View):
 
         self.show_green()        
         return
+
 
     def setup_content(self, names, max_value):
         """Creates the radio buttons for counter selection, and sets
@@ -45,9 +57,11 @@ class MyView (View):
         self['adjustment_counter'].set_upper(max_value)
         return
 
+
     # these set the image
     def show_red(self): self['image'].set_from_pixbuf(self.red_pb)
     def show_yellow(self): self['image'].set_from_pixbuf(self.yellow_pb)
     def show_green(self): self['image'].set_from_pixbuf(self.green_pb)        
 
-    pass
+    pass # end of class
+# ----------------------------------------------------------------------

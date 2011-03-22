@@ -108,7 +108,7 @@
                       <object class="GtkLabel" id="label_select">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Selected counter</property>
+                        <property name="label" translatable="yes">Counter name</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -119,7 +119,7 @@
                       <object class="GtkLabel" id="label_counter">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">label</property>
+                        <property name="label" translatable="yes">Counter value</property>
                       </object>
                       <packing>
                         <property name="position">1</property>

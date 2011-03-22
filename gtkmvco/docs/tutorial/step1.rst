@@ -7,6 +7,9 @@ A short tutorial: Step 1
 
 .. include:: common.rst 
 
+.. Important::
+
+   All the code presented here can be found in the distributed examples. 
 
 The example in few words
 ========================

@@ -17,7 +17,7 @@ class Model(gtkmvc.Model):
 
     def __init__(self):
         gtkmvc.Model.__init__(self)
-        self.next = time.clock()
+        self.next = time.time()
 
 class View(gtkmvc.View):
     def __init__(self):
@@ -51,7 +51,7 @@ class Controller(gtkmvc.Controller):
 
     def on_button_clicked(self, button):
         if button is self.view["2"]:
-            self.model.next.next.next = time.clock()
+            self.model.next.next.next = time.time()
         elif button is self.view["1"]:
             m = Model()
             self.model.next.next = m

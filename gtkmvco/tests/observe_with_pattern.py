@@ -6,7 +6,6 @@ Test for Observer.observe() with patterns in property name
 import _importer
 from gtkmvc import Model, Observer
 
-import functools
 import operator
 import unittest
 
@@ -25,7 +24,6 @@ class MyModel (Model):
 class MyObserverAbstract (Observer):
     @classmethod
     def _tracked(cls, meth):
-        @functools.wraps(meth)
         def _notify(self, model, name, info):
             self.notif.append(info)
             meth(self, model, name, info)

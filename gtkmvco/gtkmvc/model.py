@@ -24,7 +24,6 @@
 import gtk
 import inspect
 import types 
-import collections
 
 import support.metaclasses
 from support.wrappers import ObsWrapperBase
@@ -147,7 +146,7 @@ class Model (Observer):
 
         # here deps are checked
         _deps = kwargs.get(support.metaclasses.KWARG_NAME_DEPS, ())
-        if not isinstance(_deps, collections.Iterable):
+        if not hasattr(_deps, '__iter__'):
                 raise TypeError("Keyword argument '%s' must be an iterable" % 
                                 support.metaclasses.KWARG_NAME_DEPS)
         for dep in _deps:

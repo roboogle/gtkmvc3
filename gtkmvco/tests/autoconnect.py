@@ -49,7 +49,7 @@ class AutoConnect(unittest.TestCase):
         c = Controller()
         w = c.view['main_window']
         # Didn't find a better way.
-        w.emit('delete-event', None)
+        w.emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
         self.assertEqual([w], c.calls)
 
 if __name__ == "__main__":

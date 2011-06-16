@@ -30,6 +30,15 @@ import types
 import gobject
 import sys
 
+def partition(string, sep):
+    """
+    New in Python 2.5 as str.partition(sep)
+    """
+    p = string.split(sep, 1)
+    if len(p) == 2:
+        return p[0], sep, p[1]
+    return string, '', ''
+
 class Controller (Observer):
     handlers = "glade"
 
@@ -88,8 +97,8 @@ class Controller (Observer):
 
         if self.handlers == "class":
             for name in dir(self):
-                when, _, what = name.partition('_')
-                widget, _, signal = what.partition('__')
+                when, _, what = partition(name, '_')
+                widget, _, signal = partition(what, '__')
                 if when == "on":
                     try:
                         view[widget].connect(signal, getattr(self, name))

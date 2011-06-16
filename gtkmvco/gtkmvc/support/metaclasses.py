@@ -29,7 +29,6 @@ import sys
 import fnmatch
 import itertools
 import operator
-import collections
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.utils import getmembers
@@ -378,7 +377,7 @@ class PropertyMeta (type):
                                   _getter.__name__, KWARG_NAME_DEPS))
             _deps = defaults[idx]
             # checks types
-            if not isinstance(_deps, collections.Iterable):
+            if not hasattr(_deps, '__iter__'):
                 raise TypeError("In logical OP getter %s.%s.%s "
                                 "default value of argument '%s' "
                                 "must be an iterable" % \

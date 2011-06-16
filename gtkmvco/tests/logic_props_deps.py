@@ -312,7 +312,7 @@ class LogicalPropsDeps (unittest.TestCase):
                                  {'conc' : 0,
                                   'log1' : 0,
                                   'log2' : 1,
-                                  'log3' : 1 if o.accepts_spurious_change() else 0,
+                                  'log3' : int(o.accepts_spurious_change()),
                                   }[p])
                 pass
             pass
@@ -427,8 +427,8 @@ class LogicalPropsDeps (unittest.TestCase):
                 self.assertEqual(o.rec.count(p),
                                  {'conc' : 0,
                                   'log1' : 1,
-                                  'log2' : 1 if o.accepts_spurious_change() else 0,
-                                  'log3' : 1 if o.accepts_spurious_change() else 0,
+                                  'log2' : int(o.accepts_spurious_change()),
+                                  'log3' : int(o.accepts_spurious_change()),
                                   }[p])
                 pass
             pass        

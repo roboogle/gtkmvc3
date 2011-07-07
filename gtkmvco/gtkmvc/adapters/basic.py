@@ -27,6 +27,7 @@ import gtk
 import time
 import new
 
+from gtkmvc.support.utils import cast_value
 from gtkmvc.adapters.default import * 
 from gtkmvc.observer import Observer
 from gtkmvc import Model
@@ -324,19 +325,7 @@ class Adapter (Observer):
         return
          
     def _cast_value(self, val, totype):
-        """Casts given val to given totype. Raises TypeError if not able to cast."""
-        t = type(val)
-        if issubclass(t, totype): return val
-        if issubclass(totype, types.StringType): return str(val)
-        if issubclass(totype, types.UnicodeType): return unicode(val)
-
-        if (issubclass(totype, (types.IntType, types.FloatType)) and 
-            issubclass(t, (types.StringType, types.UnicodeType, 
-                           types.IntType, types.FloatType))):
-                if val: return totype(float(val))
-                else: return totype(0)
-        
-        raise TypeError("Not able to cast " + str(t) + " to " + str(totype))
+        return cast_value(val, totype)
 
 
     # ----------------------------------------------------------------------

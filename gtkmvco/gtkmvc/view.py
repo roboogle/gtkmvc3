@@ -349,12 +349,12 @@ class View (object):
 
     def __iter__(self):
         """
-        Return an iterator over widgets added with :meth:`__setitem__` and
+        Yield names of widgets added with :meth:`__setitem__` and
         those loaded from XML.
-        
+
         .. note::
-           In case of name conflicts this yields widgets that are not 
-           accessible via :meth:`__getitem__`.
+           In case of name conflicts the result contains duplicates, but only
+           the manually added widget is accessible via :meth:`__getitem__`.
         """
         # precalculates if needed
         self.__extract_autoWidgets()

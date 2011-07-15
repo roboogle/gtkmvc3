@@ -24,10 +24,12 @@
 
 from gtkmvc.observer import Observer
 from gtkmvc.support.log import logger
+from gtkmvc.support.utils import cast_value
 from gtkmvc.support.exceptions import TooManyCandidatesError
 
 import types
 import gobject
+import gtk
 import sys
 
 def partition(string, sep):
@@ -38,6 +40,58 @@ def partition(string, sep):
     if len(p) == 2:
         return p[0], sep, p[1]
     return string, '', ''
+
+def setup_column(widget, column=0, attribute=None, renderer=None,
+    property=None, from_python=None, to_python=None, model=None):
+    if not attribute:
+        attribute = widget.get_name()
+    if not renderer:
+        renderer = widget.get_cell_renderers()[0]
+    if not property:
+        for cls, name in [
+            (gtk.CellRendererText, 'text'),
+            (gtk.CellRendererProgress, 'value'),
+            (gtk.CellRendererToggle, 'active'),
+            ]:
+            if isinstance(renderer, cls):
+                property = name
+                break
+    if not from_python:
+        from_python = {
+            'text': unicode,
+            'value': int,
+            'active': bool,
+            }.get(property)
+    data_func = lambda widget, renderer, model, iter: renderer.set_property(
+            property,
+            from_python(
+                getattr(
+                    model.get_value(iter, column),
+                    attribute
+                    )
+                )
+            )
+    widget.set_cell_data_func(renderer, data_func)
+    if not model:
+        return
+    def callback(renderer, path, new=None):
+        try:
+            # Function works with bot Text and Toggle.
+            new = not renderer.get_active()
+        except AttributeError:
+            pass
+        o = model.get_value(model.get_iter(path), column)
+        if to_python:
+            new = to_python(new)
+        else:
+            old = getattr(o, attribute)
+            if old is not None:
+                new = cast_value(new, type(old))
+        setattr(o, attribute, new)
+    if isinstance(renderer, gtk.CellRendererText):
+        return renderer.connect('edited', callback)
+    elif isinstance(renderer, gtk.CellRendererToggle):
+        return renderer.connect('toggled', callback)
 
 class Controller (Observer):
     handlers = "glade"
@@ -138,6 +192,89 @@ class Controller (Observer):
         assert(self.model is not None)
         assert(self.view is not None)
         return
+
+    def setup_columns(self):
+        """
+        Search the view for :class:`TreeView` instances and call
+        :meth:`setup_column` on all their columns.
+
+        .. note::
+           This is a convenience function. It is never called by the framework.
+           You are free to repurpose it in subclasses.
+
+        For editing to work, the widget must already be connected to a model.
+        If you don't use :class:`ListStoreModel` this can be done in Glade,
+        however a `bug <https://bugzilla.gnome.org/show_bug.cgi?id=597095>`_
+        makes versions prior to 3.7.0 (released March 10th, 2010) remove
+        Python columns on save. If you want to correct the XML manually, it
+        should look like this::
+
+         <object class="GtkListStore" id="liststore1">
+           <columns>
+             <column type="PyObject"/>
+           </columns>
+         </object>
+        """
+        for name in self.view:
+            w = self.view[name]
+            if isinstance(w, gtk.TreeView):
+                m = w.get_model()
+                for c in w.get_columns():
+                    self.setup_column(c, model=m)
+
+    def setup_column(self, widget, column=0, attribute=None, renderer=None,
+        property=None, from_python=None, to_python=None, model=None):
+        # Maybe this is too overloaded.
+        """
+        Set up a :class:`TreeView` to display attributes of Python objects
+        stored in its :class:`TreeModel`.
+
+        This assumes that :class:`TreeViewColumn` instances have already
+        been added and :class:`CellRenderer` instances packed into them.
+        Both can be done in Glade.
+
+        *model* is the instance displayed by the widget. You only need to pass
+        this if you set *renderer* to be editable.
+        If you use sorting or filtering this may not be the actual data store,
+        but all tree paths and column indexes are relative to this.
+        Defaults to our model.
+
+        *widget* is a column, or a string naming one in our view.
+
+        *column* is an integer addressing the column in *model* that holds your
+        objects.
+
+        *attribute* is a string naming an object attribute to display. Defaults
+        to the name of *widget*.
+
+        *renderer* defaults to the first one found in *widget*.
+
+        *property* is a string naming the property of *renderer* to set. If not
+        given this is guessed based on the type of *renderer*.
+
+        *from_python* is a callable. It gets passed a value from the object and
+        must return it in a format suitable for *renderer*. If not given this
+        is guessed based on *property*.
+
+        *to_python* is a callable. It gets passed a value from *renderer* and
+        must return it in a format suitable for the attribute. If not given a
+        cast to the type of the previous attribute value is attempted.
+
+        If you need more flexibility, like setting multiple properties, setting
+        your own cell data function will override the internal one.
+
+        Returns an integer you can use to disconnect the internal editing
+        callback from *renderer*, or None.
+
+        .. versionadded:: 1.99.2
+        """
+        if isinstance(widget, types.StringType):
+            widget = self.view[widget]
+        if not model and isinstance(self.model, gtk.TreeModel):
+            model = self.model
+        return setup_column(widget, column=column, attribute=attribute,
+            renderer=renderer, property=property, from_python=from_python,
+            to_python=to_python, model=model)
 
     def adapt(self, *args):
         """

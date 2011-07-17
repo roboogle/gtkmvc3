@@ -23,6 +23,7 @@
 
 
 import types
+import weakref
 import gtk
 
 from gtkmvc.adapters.basic import UserClassAdapter, Adapter
@@ -251,3 +252,39 @@ class StaticContainerAdapter (UserClassAdapter):
         return    
 
     pass # end of class StaticContainerAdapter
+
+class watch_items_in_tree(Observer):
+    def __init__(self, tree, column=0):
+        """
+        Observe models stored in a list for assignment to their observable
+        properties, and notify the container that the row has changed.
+
+        *tree* is a :class:`gtk.TreeModel` instance.
+
+        *column* is an integer adressing the column of *tree* that contains
+        :class:`gtkmvc.Model` instances.
+        """
+        Observer.__init__(self)
+        self.column = column
+        self.rows = weakref.WeakKeyDictionary()
+        tree.foreach(self.on_changed)
+        tree.connect('row-changed', self.on_changed)
+
+    def on_changed(self, tree, path, iter):
+        item = tree.get_value(iter, 0)
+        if item:
+            self.rows[item] = gtk.TreeRowReference(tree, path)
+            item.register_observer(self)
+        return False
+
+    @Observer.observe('*', assign=True)
+    def on_assign(self, item, prop_name, info):
+        row = self.rows[item]
+        if row.valid():
+            path = row.get_path()
+            tree = row.get_model()
+            iter = tree.get_iter(path)
+            tree.row_changed(path, iter)
+        else:
+            item.unregister_observer(self)
+            del self.rows[item]

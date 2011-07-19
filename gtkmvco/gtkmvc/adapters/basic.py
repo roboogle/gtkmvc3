@@ -341,7 +341,7 @@ class Adapter (Observer):
     def _on_prop_changed(self):
         """Called by the observation code, when the value in the
         observed property is changed"""
-        if not self._itsme: self.update_widget()
+        if self._wid and not self._itsme: self.update_widget()
         return
 
     pass # end of class Adapter

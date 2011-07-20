@@ -566,16 +566,24 @@ class Model (Observer):
                     yield meth
 
         for meth in side_effect(self.__value_notifications.get(prop_name, ())):
-            logger.debug("Stop calling '%s' after assignment", meth.__name__)
+            logger.debug("Stop calling %s.%s after assignment to %s.%s",
+                observer.__class__.__name__, meth.__name__,
+                self.__class__.__name__, prop_name)
 
         for meth in side_effect(self.__signal_notif.get(prop_name, ())):
-            logger.debug("Stop calling '%s' after emit", meth.__name__)
+            logger.debug("Stop calling %s.%s after emit on %s.%s",
+                observer.__class__.__name__, meth.__name__,
+                self.__class__.__name__, prop_name)
 
         for meth in side_effect(self.__instance_notif_before.get(prop_name, ())):
-            logger.debug("Stop calling '%s' before mutation", meth.__name__)
+            logger.debug("Stop calling %s.%s before mutation of %s.%s",
+                observer.__class__.__name__, meth.__name__,
+                self.__class__.__name__, prop_name)
 
         for meth in side_effect(self.__instance_notif_after.get(prop_name, ())):
-            logger.debug("Stop calling '%s' after mutation", meth.__name__)
+            logger.debug("Stop calling %s.%s after mutation of %s.%s",
+                observer.__class__.__name__, meth.__name__,
+                self.__class__.__name__, prop_name)
 
         return
 

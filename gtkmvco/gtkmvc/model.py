@@ -85,20 +85,23 @@ class Model (Observer):
            Uses the name of the method as the property name.
            The method must not require arguments.
 
-           `deps` is an iterable of property names, identifying which
-           are the properties (both logical and concrete) which the
-           logical property depends on (new in version 1.99.2).
-           
         .. method:: getter(one, two, ..., [deps=(name,...)])
            :noindex:
            
            Takes a variable number of strings as the property
-           name(s). The name of the method does not matter.
+           name(s). These may contain wildcards as expanded by :mod:`fnmatch`.
+           The name of the method does not matter.
            The method must take a property name as its sole argument.
 
-           `deps` is an iterable of property names, identifying which
-           are the properties (both logical and concrete) which the
-           logical property depends on (new in version 1.99.2).
+        For both, `deps` is an iterable of property names, identifying which
+        are the properties (both logical and concrete) which the
+        logical property depends on.
+
+        .. versionadded:: 1.99.1
+           Introduced the decorator.
+
+        .. versionchanged:: 1.99.2
+           Added optional *deps* parameter.
         """
 
         @decorators.good_decorator

@@ -1,6 +1,8 @@
+import _importer
+
 import unittest
 
-from undo_manager import UndoManager
+from undo_manager import UndoModel as UndoManager
 
 class InitialTest(unittest.TestCase):
     def setUp(self):

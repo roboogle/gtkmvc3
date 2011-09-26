@@ -1,5 +1,7 @@
 from functools import partial as UndoOperation
 
+import gtkmvc
+
 class UndoGroup(list):
     name = ""
 
@@ -7,17 +9,41 @@ class UndoGroup(list):
         for operation in reversed(self):
             operation()
 
-class UndoManager(object):
+class UndoModel(gtkmvc.Model):
     """
     An action by the user may result in multiple operations.
+
+    All observable properties are read-only for you!
     """
+    undoable = None
+    redoable = None
+    undo_label = None
+    redo_label = None
+    __observables__ = ["??do*"]
 
     def __init__(self):
+        gtkmvc.Model.__init__(self)
+
         self._undo = []
         self._redo = []
         self._open = []
         self._redoing = False
         self._undoing = False
+
+        self.notify()
+
+    def notify(self):
+        self.undoable = self.can_undo()
+        self.redoable = self.can_redo()
+        self.undo_label = ("Undo %s" % self.undo_action_name()).rstrip()
+        self.redo_label = ("Redo %s" % self.redo_action_name()).rstrip()
+
+    @gtkmvc.Observer.observe('*', assign=True)
+    def on_assign(self, item, prop_name, info):
+        self.begin_grouping()
+        self.register(setattr, item, prop_name, info.old)
+        self.set_action_name("%s change" % prop_name)
+        self.end_grouping()
 
     def begin_grouping(self):
         """
@@ -50,6 +76,7 @@ class UndoManager(object):
             self._redo.append(close)
         else:
             self._undo.append(close)
+        self.notify()
 
     def grouping_level(self):
         """
@@ -80,7 +107,6 @@ class UndoManager(object):
             return
         group = self._redo.pop()
 
-        stack = self._open
         self._redoing = True
 
         self.begin_grouping()
@@ -89,7 +115,8 @@ class UndoManager(object):
         self.end_grouping()
 
         self._redoing = False
-        self._open = stack
+
+        self.notify()
 
     def redo_action_name(self):
         """
@@ -107,6 +134,7 @@ class UndoManager(object):
         self._open[-1].append(UndoOperation(func, *args, **kwargs))
         if not (self._undoing or self._redoing):
             self._redo = []
+        self.notify()
 
     def set_action_name(self, name):
         """
@@ -114,6 +142,7 @@ class UndoManager(object):
         """
         if self._open and name is not None:
             self._open[-1].name = name
+            self.notify()
 
     def undo(self):
         """
@@ -125,6 +154,7 @@ class UndoManager(object):
         if self._open:
             raise IndexError
         self.undo_nested_group()
+        self.notify()
 
     def undo_action_name(self):
         """
@@ -150,7 +180,6 @@ class UndoManager(object):
         else:
             return
 
-        stack = self._open
         self._undoing = True
 
         self.begin_grouping()
@@ -159,4 +188,5 @@ class UndoManager(object):
         self.end_grouping()
 
         self._undoing = False
-        self._open = stack
+
+        self.notify()

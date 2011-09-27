@@ -26,6 +26,8 @@ from gtkmvc.observer import Observer
 from gtkmvc.support.log import logger
 from gtkmvc.support.utils import cast_value
 from gtkmvc.support.exceptions import TooManyCandidatesError
+from gtkmvc.adapters.basic import Adapter, RoUserClassAdapter
+from gtkmvc.adapters.containers import StaticContainerAdapter
 
 import types
 import gobject
@@ -278,7 +280,7 @@ class Controller (Observer):
 
     def adapt(self, *args):
         """
-        There are four ways to call this:
+        There are five ways to call this:
 
         .. method:: adapt()
            :noindex:
@@ -315,11 +317,20 @@ class Controller (Observer):
            Like ``adapt(prop_name)`` but without widget name matching.
            
            *wid_name* has to exist in the view.
+
+        .. method:: adapt(prop_name, wid_name, gprop_name)
+           :noindex:
+
+           Like ``adapt(prop_name, wid_name)`` but without using default
+           adapters. This is useful to adapt secondary properties like
+           button sensitivity.
+
+           *gprop_name* is a string naming a property of the widget. No cast
+           is attempted, so *prop_name* must match its type exactly.
         """
         
         # checks arguments
         n = len(args)
-        if n not in range(3): raise TypeError("adapt() takes 0, 1 or 2 arguments (%d given)" % n)
 
         if n==0:
             adapters = []
@@ -345,8 +356,6 @@ class Controller (Observer):
                 pass
             
         elif n == 1: #one argument
-            from gtkmvc.adapters.basic import Adapter
-            
             if isinstance(args[0], Adapter): adapters = (args[0],)
 
             elif isinstance(args[0], types.StringType):
@@ -356,7 +365,7 @@ class Controller (Observer):
                 pass
             else: raise TypeError("Argument of adapt() must be either an Adapter or a string")
 
-        else: # two arguments
+        elif n == 2: # two arguments
             if not (isinstance(args[0], types.StringType) and
                     isinstance(args[1], types.StringType)):
                 raise TypeError("Arguments of adapt() must be two strings")
@@ -365,6 +374,24 @@ class Controller (Observer):
             prop_name, wid_name = args
             adapters = self.__create_adapters__(prop_name, wid_name)
             pass
+
+        elif n == 3:
+            for arg in args:
+                if not isinstance(arg, str):
+                    raise TypeError("names must be strings")
+
+            prop_name, wid_name, gprop_name = args
+            ad = Adapter(self.model, prop_name)
+            ad.connect_widget(self.view[wid_name],
+                getter=lambda w: w.get_property(gprop_name),
+                setter=lambda w, v: w.set_property(gprop_name, v),
+                signal='notify::%s' % gprop_name)
+            adapters = [ad]
+            pass
+
+        else:
+            raise TypeError(
+                "adapt() takes at most three arguments (%i given)" % n)
 
         for ad in adapters:
             self.__adapters.append(ad)
@@ -437,10 +464,6 @@ class Controller (Observer):
         and possibly creates one or more (best) fitting adapters
         that are returned as a list.
         """
-        from gtkmvc.adapters.basic import Adapter, RoUserClassAdapter
-        from gtkmvc.adapters.containers import StaticContainerAdapter
-        import gtk
-
         res = []
 
         wid = self.view[wid_name]

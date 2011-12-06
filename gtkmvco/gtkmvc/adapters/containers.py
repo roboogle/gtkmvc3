@@ -109,7 +109,8 @@ class StaticContainerAdapter (UserClassAdapter):
 
 
     def connect_widget(self, wid, getters=None, setters=None,
-                       signals=None, arg=None):
+                       signals=None, arg=None,
+                       flavours=None):
         """
         Called when the widget is instantiated, and the adapter is
         ready to connect the widgets inside it (if a container) or
@@ -137,11 +138,12 @@ class StaticContainerAdapter (UserClassAdapter):
         getters = self.__handle_par("getters", getters)
         setters = self.__handle_par("setters", setters)
         signals = self.__handle_par("signals", signals)
-        
-        for wi,ge,se,si in zip(self._widgets, getters, setters, signals):
+        flavours = self.__handle_par("flavours", flavours)
+
+        for wi,ge,se,si,fl in zip(self._widgets, getters, setters, signals, flavours):
             if type(ge) == types.MethodType: ge = ge.im_func
             if type(se) == types.MethodType: se = se.im_func
-            UserClassAdapter.connect_widget(self, wi, ge, se, si, arg, False)
+            UserClassAdapter.connect_widget(self, wi, ge, se, si, arg, False, fl)
             pass
 
         self.update_widget()

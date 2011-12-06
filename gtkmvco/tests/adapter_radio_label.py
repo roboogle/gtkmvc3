@@ -9,8 +9,8 @@ import gtk
 
 class MyModel (Model):
 
-    value = "Value2"
-    __observables__ = ("value",)
+    val = "Value2"
+    __observables__ = ("val",)
     pass
 
 class MyViewButtons (View):
@@ -36,18 +36,21 @@ class MyCtrl (Controller):
     def register_view(self, view):
         view['window1'].connect("delete-event", lambda x,e: gtk.main_quit())
         return
-    
-    def register_adapters(self):
-        self.adapt("value", "rb1")
-        self.adapt("value", "rb2")
-        self.adapt("value", "rb3")
-        self.adapt("value", "rb4")
 
-        # this is used to show the current value
-        self.adapt("value", "entry_value")
+    def register_adapters(self):
+        for i in range(1, 5): self.adapt("val", "rb%d" % i)
+
+        # this is used to show the current val
+        self.adapt("val", "entry_value")
         return
 
-    pass
+    @Controller.observe("val", assign=True)
+    def val_notify(self, model, name, info):
+        print "Notify change", name, model, model.val, type(model.val)
+        return
+
+    pass # end of class
+
 
 m = MyModel()
 

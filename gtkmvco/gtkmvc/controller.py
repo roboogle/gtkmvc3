@@ -278,7 +278,7 @@ class Controller (Observer):
             renderer=renderer, property=property, from_python=from_python,
             to_python=to_python, model=model)
 
-    def adapt(self, *args):
+    def adapt(self, *args, **kwargs):
         """
         There are five ways to call this:
 
@@ -288,7 +288,7 @@ class Controller (Observer):
            Take properties from the model for which ``adapt`` has not yet been
            called, match them to the view by name, and create adapters fitting
            for the respective widget type.
-           
+
            That information comes from :mod:`gtkmvc.adapters.default`.
            See :meth:`_find_widget_match` for name patterns.
 
@@ -298,10 +298,10 @@ class Controller (Observer):
 
         .. method:: adapt(ad)
            :noindex:
-        
+
            Keep track of manually created adapters for future ``adapt()``
            calls.
-        
+
            *ad* is an adapter instance already connected to a widget.
 
         .. method:: adapt(prop_name)
@@ -315,7 +315,7 @@ class Controller (Observer):
            :noindex:
 
            Like ``adapt(prop_name)`` but without widget name matching.
-           
+
            *wid_name* has to exist in the view.
 
         .. method:: adapt(prop_name, wid_name, gprop_name)
@@ -325,12 +325,19 @@ class Controller (Observer):
            adapters. This is useful to adapt secondary properties like
            button sensitivity.
 
-           *gprop_name* is a string naming a property of the widget. No cast
+           *prop_name* is a string naming a property of the widget. No cast
            is attempted, so *prop_name* must match its type exactly.
+
+        In all cases, optional keyword argument ``flavour=value``
+        can be used to specify a particular flavour from those
+        available in :mod:`gtkmvc.adapters.default` adapters.
+
         """
-        
+
         # checks arguments
         n = len(args)
+
+        flavour = kwargs.get("flavour", None)
 
         if n==0:
             adapters = []
@@ -351,17 +358,17 @@ class Controller (Observer):
                 else:
                     logger.debug("Auto-adapting property %s and widget %s" % \
                                      (prop_name, wid_name))
-                    adapters += self.__create_adapters__(prop_name, wid_name)                
+                    adapters += self.__create_adapters__(prop_name, wid_name, flavour)
                     pass
                 pass
-            
+
         elif n == 1: #one argument
             if isinstance(args[0], Adapter): adapters = (args[0],)
 
             elif isinstance(args[0], types.StringType):
                 prop_name = args[0]
                 wid_name = self._find_widget_match(prop_name)
-                adapters = self.__create_adapters__(prop_name, wid_name)
+                adapters = self.__create_adapters__(prop_name, wid_name, flavour)
                 pass
             else: raise TypeError("Argument of adapt() must be either an Adapter or a string")
 
@@ -372,7 +379,7 @@ class Controller (Observer):
 
             # retrieves both property and widget, and creates an adapter
             prop_name, wid_name = args
-            adapters = self.__create_adapters__(prop_name, wid_name)
+            adapters = self.__create_adapters__(prop_name, wid_name, flavour)
             pass
 
         elif n == 3:
@@ -383,9 +390,10 @@ class Controller (Observer):
             prop_name, wid_name, gprop_name = args
             ad = Adapter(self.model, prop_name)
             ad.connect_widget(self.view[wid_name],
-                getter=lambda w: w.get_property(gprop_name),
-                setter=lambda w, v: w.set_property(gprop_name, v),
-                signal='notify::%s' % gprop_name)
+                              getter=lambda w: w.get_property(gprop_name),
+                              setter=lambda w, v: w.set_property(gprop_name, v),
+                              signal='notify::%s' % gprop_name,
+                              flavour=flavour)
             adapters = [ad]
             pass
 
@@ -458,11 +466,14 @@ class Controller (Observer):
         return
 
     
-    def __create_adapters__(self, prop_name, wid_name):
+    def __create_adapters__(self, prop_name, wid_name, flavour=None):
         """
         Private service that looks at property and widgets types,
         and possibly creates one or more (best) fitting adapters
         that are returned as a list.
+
+        ``flavour`` is optionally used when a particular flavour
+        must be used when seraching in default adapters.
         """
         res = []
 
@@ -478,16 +489,16 @@ class Controller (Observer):
                                     spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[0],
                               lambda c,y: c.select_month(c.get_date()[1], y),
-                              "day-selected")
+                              "day-selected", flavour=flavour)
             res.append(ad) # year
-            
+
             ad = RoUserClassAdapter(self.model, prop_name,
                                     lambda d: d.month,
                                     lambda d,m: d.replace(month=m),
                                     spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[1]+1,
                               lambda c,m: c.select_month(m-1, c.get_date()[0]),
-                              "day-selected")
+                              "day-selected", flavour=flavour)
             res.append(ad) # month
 
             ad = RoUserClassAdapter(self.model, prop_name,
@@ -496,26 +507,25 @@ class Controller (Observer):
                                     spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, lambda c: c.get_date()[2],
                               lambda c,d: c.select_day(d),
-                              "day-selected")
+                              "day-selected", flavour=flavour)
             res.append(ad) # day
             return res
 
-            
         try: # tries with StaticContainerAdapter
             ad = StaticContainerAdapter(self.model, prop_name,
                                         spurious=self.accepts_spurious_change())
-            ad.connect_widget(wid)
+            ad.connect_widget(wid, flavours=flavour)
             res.append(ad)
-            
-        except TypeError:
+
+        except TypeError, e:
             # falls back to a simple adapter
             ad = Adapter(self.model, prop_name,
                          spurious=self.accepts_spurious_change())
-            ad.connect_widget(wid)
+            ad.connect_widget(wid, flavour=flavour)
             res.append(ad)
             pass
 
         return res
 
-                            
+
     pass # end of class Controller

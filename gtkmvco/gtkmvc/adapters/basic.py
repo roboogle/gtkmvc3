@@ -109,7 +109,8 @@ class Adapter (Observer):
     
     def connect_widget(self, wid,
                        getter=None, setter=None, 
-                       signal=None, arg=None, update=True):
+                       signal=None, arg=None, update=True,
+                       flavour=None):
 
         """
         Finish set-up by connecting the widget. The model was already
@@ -137,6 +138,12 @@ class Adapter (Observer):
         *update* denotes whether to update the widget from the model
         immediately. Otherwise the widget stays unchanged until the first
         notification.
+
+        *flavour* can be used to select special behaviours about
+         the adaptation when twice or more possibilities are
+         possibly handled for the same widget type. See
+         adapters.default for further information.
+
         """
 
         if self._wid_info.has_key(wid):
@@ -145,7 +152,7 @@ class Adapter (Observer):
         wid_type = None
 
         if None in (getter, setter, signal):
-            w = search_adapter_info(wid)
+            w = search_adapter_info(wid, flavour)
             if getter is None: getter = w[GETTER]
             if setter is None:
                 setter = w[SETTER]

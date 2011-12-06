@@ -325,7 +325,7 @@ class Controller (Observer):
            adapters. This is useful to adapt secondary properties like
            button sensitivity.
 
-           *prop_name* is a string naming a property of the widget. No cast
+           *gprop_name* is a string naming a property of the widget. No cast
            is attempted, so *prop_name* must match its type exactly.
 
         In all cases, optional keyword argument ``flavour=value``

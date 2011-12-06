@@ -16,12 +16,10 @@ def __radio_getter_label(radio):
     raise ValueError("Radio not active")
 
 def __radio_action_setter_value(ra, value):
-    # this is used to control RadioButton and RadioAction
     if value == ra.get_property("value"): ra.set_active(True)
     return
 
 def __radio_action_getter_value(ra):
-    # this is used to control RadioButton and RadioAction
     if ra.get_active(): return ra.get_current_value()
     raise ValueError("RadioAction not active")
 

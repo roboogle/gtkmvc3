@@ -32,21 +32,37 @@ def __radio_action_getter_value(ra):
 # will be matched by the search function. 
 # ----------------------------------------------------------------------
 __def_adapter = [ # class, default signal, getter, setter, value type, flavour
+
     (gtk.Entry, "changed", gtk.Entry.get_text, gtk.Entry.set_text, types.StringType, None),
+
     (gtk.Label, None, gtk.Label.get_text, gtk.Label.set_text, types.StringType, None),
+
     (gtk.Arrow, None, lambda a: a.get_property("arrow-type"),
      lambda a,v: a.set(v,a.get_property("shadow-type")), gtk.ArrowType, None),
+
     (gtk.RadioAction, "toggled", __radio_action_getter_value, __radio_action_setter_value, types.IntType, "value"),
+    (gtk.RadioAction, "toggled", gtk.RadioAction.get_active, gtk.RadioAction.set_active, types.BooleanType, "active"),
     (gtk.RadioAction, "toggled", __radio_getter_label, __radio_setter_label, types.StringType, None),
+
+    (gtk.RadioButton, "toggled", gtk.RadioButton.get_active, gtk.RadioButton.set_active, types.BooleanType, "active"),
     (gtk.RadioButton, "toggled", __radio_getter_label, __radio_setter_label, types.StringType, None),
+
+    (gtk.RadioToolButton, "toggled", gtk.RadioToolButton.get_active, gtk.RadioToolButton.set_active, types.BooleanType, "active"),
+
     (gtk.ToggleButton, "toggled", gtk.ToggleButton.get_active, gtk.ToggleButton.set_active, types.BooleanType, None),
     (gtk.ToggleAction, "toggled", gtk.ToggleAction.get_active, gtk.ToggleAction.set_active, types.BooleanType, None),
     (gtk.ToggleToolButton, "toggled", gtk.ToggleToolButton.get_active, gtk.ToggleToolButton.set_active, types.BooleanType, None),
+
     (gtk.CheckMenuItem, "toggled", gtk.CheckMenuItem.get_active, gtk.CheckMenuItem.set_active, types.BooleanType, None),
+
     (gtk.Expander, "activate", lambda w: not w.get_expanded(), gtk.Expander.set_expanded, types.BooleanType, None),
+
     (gtk.ColorButton, "color-set", gtk.ColorButton.get_color, gtk.ColorButton.set_color, gtk.gdk.Color, None),
+
     (gtk.ColorSelection, "color-changed", gtk.ColorSelection.get_current_color, gtk.ColorSelection.set_current_color, gtk.gdk.Color, None),
+
     (gtk.ComboBox, "changed", gtk.ComboBox.get_active, gtk.ComboBox.set_active, types.IntType, None),
+
     (gtk.Adjustment, "value-changed", gtk.Adjustment.get_value, gtk.Adjustment.set_value, types.FloatType, None),
     ]
 

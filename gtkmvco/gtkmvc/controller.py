@@ -47,6 +47,8 @@ def setup_column(widget, column=0, attribute=None, renderer=None,
     property=None, from_python=None, to_python=None, model=None):
     if not attribute:
         attribute = widget.get_name()
+        if attribute is None:
+            raise TypeError("Column not named")
     if not renderer:
         renderer = widget.get_cell_renderers()[0]
     if not property:

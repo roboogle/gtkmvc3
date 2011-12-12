@@ -79,6 +79,8 @@ class View (object):
 
         *top* is a string or a list of strings containing the names of our top
         level widgets. When using libglade only their children are loaded.
+        This does NOT work with *builder*, each instance will create every
+        window in the file.
 
         *parent* is used to call :meth:`set_parent_view`.
 

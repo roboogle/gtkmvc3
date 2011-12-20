@@ -514,6 +514,8 @@ class Controller (Observer):
             return res
 
         try: # tries with StaticContainerAdapter
+            if "." in prop_name:
+                raise TypeError
             ad = StaticContainerAdapter(self.model, prop_name,
                                         spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, flavours=flavour)

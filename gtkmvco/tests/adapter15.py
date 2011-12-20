@@ -9,8 +9,6 @@ import gtk
 import _importer
 import gtkmvc
 
-import dotted
-
 class Model(gtkmvc.Model):
     next = None
     __observables__ = ("next",)
@@ -44,7 +42,7 @@ class Controller(gtkmvc.Controller):
             view[i].connect('clicked', self.on_button_clicked)
 
     def register_adapters(self):
-        self.adapt(dotted.adapt(self.model, "next.next.next", self.view, "time"))
+        self.adapt("next.next.next", "time")
     
     def on_window_delete_event(self, window, event):
         gtk.main_quit()

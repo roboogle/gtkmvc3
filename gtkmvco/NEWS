@@ -33,6 +33,9 @@
 
   - View['non-existing name'] now raises KeyError instead of returning None.
 
+  - Adapting a property string with dots now notifies about changes along
+    the path.
+
 * Fixed
 
   - No longer raises when you modify a property while setting up an adapter.

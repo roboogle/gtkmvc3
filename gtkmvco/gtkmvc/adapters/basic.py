@@ -32,6 +32,55 @@ from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc import Model
 
+class Intermediate(Observer):
+    def __init__(self, model, path, adapter):
+        """
+        *model* is an instance.
+
+        *path* is a list of strings, with the first naming a property of
+        *model*. Its value must have a property named like the second string,
+        and so on.
+
+        *adapter* is an instance. Its widget will be updated every time a
+        property in *path* changes. Currently this only covers assignment.
+        """
+        self.model = model
+        self.prop_name = path[0]
+        self.path = path[1:]
+        self.adapter = adapter
+        self.next = None
+
+        Observer.__init__(self)
+        self.observe(self.update_widget, self.prop_name, assign=True)
+        self.observe_model(model)
+
+        self.create_next()
+
+    def create_next(self):
+        if self.path:
+            self.next = Intermediate(
+                getattr(self.model, self.prop_name), self.path, self.adapter)
+
+    def delete_next(self):
+        if self.next:
+            self.next.delete()
+            self.next = None
+
+    def delete(self):
+        self.relieve_model(self.model)
+        self.delete_next()
+
+    def update_widget(self, model, prop_name, info):
+        self.delete_next()
+        self.create_next()
+        model = info.new
+        for prop_name in self.path:
+            model = getattr(model, prop_name)
+        # Break encapsulation to change the model of our adapter.
+        self.adapter.relieve_model(model)
+        self.adapter._model = model
+        self.adapter.observe_model(model)
+        self.adapter.update_widget()
 
 # ----------------------------------------------------------------------
 class Adapter (Observer):
@@ -47,8 +96,8 @@ class Adapter (Observer):
         
         *prop_name* is a string. It may contain dots and will be resolved
         using Python attribute access on *model*. All objects traversed must
-        be :class:`Model` instances, but future changes to intermediates will
-        be ignored. The last part of the string names a property. Examples::
+        be :class:`Model` instances.
+        The last part of the string names a property. Examples::
 
          >>> "age"
          observe("age")
@@ -57,6 +106,9 @@ class Adapter (Observer):
          >>> "child.age"
          observe("age")
          observe_model(model.child)
+
+        .. versionchanged:: 1.99.2
+          Changes to intermediate models used to be ignored.
 
         *spurious* see superclass.
 
@@ -212,6 +264,7 @@ class Adapter (Observer):
         if len(parts) > 1:
             # identifies the model
             models = parts[:-1]
+            Intermediate(model, models, self)
             for name in models:
                 model = getattr(model, name)
                 if not isinstance(model, Model):

@@ -93,6 +93,7 @@ class StaticContainerAdapter (UserClassAdapter):
         if not (hasattr(prop, "__getitem__") and
                 hasattr(prop, "__setitem__")):
             # before giving up, unregisters itself as an observer
+            # TODO also tear down Intermediate instances
             self.relieve_model(model)
             raise TypeError("Property " + self._prop_name +
                             " is not a valid container")

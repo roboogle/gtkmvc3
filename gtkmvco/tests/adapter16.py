@@ -14,8 +14,6 @@ import gtk
 import _importer
 import gtkmvc
 
-import dotted
-
 class Selection(gtkmvc.adapters.basic.Adapter):
     def __init__(self, model, prop_name, empty):
         if not getattr(model, prop_name):
@@ -95,7 +93,7 @@ class Controller(gtkmvc.Controller):
         a.connect_widget(self.view["tree"])
         self.adapt(a)
 
-        self.adapt(dotted.adapt(self.model, "selected.name", self.view))
+        self.adapt("selected.name", "name")
 
         self.setup_columns()
 

@@ -1,4 +1,6 @@
-import _importer
+import unittest
+
+from _importer import refresh_gui
 from gtkmvc import Model, View, Controller
 import gtk
 
@@ -13,7 +15,7 @@ import gtk
 
 class MyModel (Model):
 
-    rb1_active = False
+    rb1_active = True
     rb2_active = False
     rb3_active = False
     rb4_active = False
@@ -21,11 +23,10 @@ class MyModel (Model):
     pass
 
 class MyViewActions (View):
-    builder = "adapter_radio_buttons.glade"
     top = "window1"
 
-    def __init__(self):
-        View.__init__(self)
+    def __init__(self, builder=None):
+        View.__init__(self, builder=builder)
 
         # sets the rb active state
         self["rb1"].set_active(True)
@@ -46,18 +47,46 @@ class MyCtrl (Controller):
 
     @Controller.observe("rb?_active", assign=True)
     def val_notify(self, model, name, info):
+        setattr(self, name, info.new)
         print "Notify change", name, model, info.old, info.new
         print
         return
 
     pass # end of class
 
+class Actions(unittest.TestCase):
+    def setUp(self):
+        self.v = v = MyViewActions(builder="adapter_radio_actions.glade")
+        self.c = MyCtrl(MyModel(), v)
+        refresh_gui()
 
-m = MyModel()
+    def testToggle(self):
+        self.v['rb_proxy2'].clicked()
+        refresh_gui()
+        self.assertFalse(self.c.rb1_active)
+        self.assertTrue(self.c.rb2_active)
 
-# enable these to use radio actions:
-v2 = MyViewActions()
-c2 = MyCtrl(m, v2)
+        self.v['rb_proxy4'].clicked()
+        refresh_gui()
+        self.assertFalse(self.c.rb2_active)
+        self.assertTrue(self.c.rb4_active)
 
-gtk.main()
+class Buttons(unittest.TestCase):
+    def setUp(self):
+        self.v = v = MyViewActions(builder="adapter_radio_buttons.glade")
+        self.c = MyCtrl(MyModel(), v)
+        refresh_gui()
 
+    def testToggle(self):
+        self.v['rb2'].clicked()
+        refresh_gui()
+        self.assertFalse(self.c.rb1_active)
+        self.assertTrue(self.c.rb2_active)
+
+        self.v['rb4'].clicked()
+        refresh_gui()
+        self.assertFalse(self.c.rb2_active)
+        self.assertTrue(self.c.rb4_active)
+
+if __name__ == "__main__":
+    unittest.main()

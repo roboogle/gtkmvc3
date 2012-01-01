@@ -2,8 +2,10 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkWindow" id="window1">
-    <property name="visible">True</property>
+  <object class="GtkWindow" id="window">
+    <property name="window_position">center</property>
+    <property name="default_width">440</property>
+    <property name="default_height">250</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolledwindow1">
         <property name="visible">True</property>
@@ -14,7 +16,8 @@
           <object class="GtkTreeView" id="treeview">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="model">treemodelfilter</property>
+            <property name="headers_visible">False</property>
+            <property name="search_column">0</property>
             <child>
               <object class="GtkTreeViewColumn" id="name">
                 <property name="title">column</property>
@@ -27,13 +30,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="liststore1">
-    <columns>
-      <column type="PyObject"/>
-    </columns>
-  </object>
-  <object class="GtkTreeModelFilter" id="treemodelfilter">
-    <property name="child_model">liststore1</property>
   </object>
 </interface>

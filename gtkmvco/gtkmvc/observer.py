@@ -23,12 +23,11 @@
 #  Please report bugs to <roboogle@gmail.com>.
 #  -------------------------------------------------------------------------
 
-from support import decorators, utils, log
-
 import inspect
-import types
-import collections
 import fnmatch
+
+from support import decorators, log
+
 
 class NTInfo (dict):
     # At least one of the keys in this set is required when constructing
@@ -60,13 +59,13 @@ class NTInfo (dict):
             return self[name]
         except KeyError: 
             raise AttributeError("NTInfo object has no attribute '%s'.\n"
-                                 "Existing attributes are: %s" % (name, str(self)))
+                                 "Existing attributes are: %s" % \
+                                 (name, str(self)))
         pass
 
-    pass # end of class NTInfo
+    pass  # end of class NTInfo
 # ----------------------------------------------------------------------
     
-
 
 @decorators.good_decorator_accepting_args
 def observes(*args):
@@ -80,8 +79,10 @@ def observes(*args):
     signature are::
 
       def value_notify(self, model, name, old, new)
-      def before_notify(self, model, name, instance, method_name, args, kwargs)
-      def after_notify(self, model, name, instance, method_name, res, args, kwargs)
+      def before_notify(self, model, name, instance, method_name, args, 
+                        kwargs)
+      def after_notify(self, model, name, instance, method_name, res, args, 
+                       kwargs)
       def signal_notify(self, model, name, arg)
 
     .. versionadded:: 1.99.0
@@ -101,11 +102,11 @@ def observes(*args):
         margs, mvarargs, _, _ = inspect.getargspec(_notified)
         mnumargs = len(margs)
         if not mvarargs:
-            args_to_type = { 4 : 'signal',
-                             5 : 'assign',
-                             7 : 'before',
-                             8 : 'after', 
-                             }
+            args_to_type = {4: 'signal',
+                            5: 'assign',
+                            7: 'before',
+                            8: 'after', 
+                            }
             try : 
                 type_kw = args_to_type[mnumargs]
                 # warning: flag _old_style_call is used this as
@@ -130,7 +131,8 @@ def observes(*args):
 
     # checks arguments
     if 0 == len(args): 
-        raise TypeError("decorator observe() takes one of more arguments (0 given)")
+        raise TypeError("decorator observe() takes one of more "
+                        "arguments (0 given)")
     if [a for a in args if type(a) != str]:
         raise TypeError("decorator observe() takes only strings as arguments")    
 
@@ -155,7 +157,6 @@ class Observer (object):
     # this is internal
     _CUST_OBS_ = "__custom_observes__"
     # ----------------------------------------------------------------------   
-
 
     @classmethod
     @decorators.good_decorator_accepting_args
@@ -241,7 +242,8 @@ class Observer (object):
             assert isinstance(self, Observer), "Method Observer.observe " \
                 "must be called with an Observer instance as first argument"
             if not callable(notified):
-                raise TypeError("Second argument of observe() must be a callable")
+                raise TypeError("Second argument of observe() "
+                                "must be a callable")
             if type(name) != str: 
                 raise TypeError("Third argument of observe() must be a string")
             
@@ -257,7 +259,6 @@ class Observer (object):
             raise TypeError("First argument of observe() must be a string")
         return _decorator            
     # ----------------------------------------------------------------------
-
 
     def __init__(self, model=None, spurious=False):
         """
@@ -277,7 +278,9 @@ class Observer (object):
 
         # --------------------------------------------------------- #
         # This turns the decorator 'observe' an instance method
-        def __observe(*args, **kwargs): self.__original_observe(self, *args, **kwargs)
+        def __observe(*args, **kwargs): 
+            self.__original_observe(self, *args, **kwargs)
+            return
         __observe.__name__ = self.observe.__name__
         __observe.__doc__ = self.observe.__doc__
         self.__original_observe = self.observe
@@ -297,22 +300,24 @@ class Observer (object):
 
         # Private maps: do not change/access them directly, use
         # methods to access them:
-        self.__PROP_TO_METHS = {} # prop name --> set of observing methods
-        self.__METH_TO_PROPS = {} # method --> set of observed properties
-        self.__PAT_TO_METHS = {} # like __PROP_TO_METHS but only for
-                                 # pattern names (to optimize search)
-        self.__METH_TO_PAT = {} # method --> pattern
-        self.__PAT_METH_TO_KWARGS = {} # (pattern, method) --> info
+        self.__PROP_TO_METHS = {}  # prop name --> set of observing methods
+        self.__METH_TO_PROPS = {}  # method --> set of observed properties
+        
+        # like __PROP_TO_METHS but only for pattern names (to optimize search)
+        self.__PAT_TO_METHS = {}  
+        
+        self.__METH_TO_PAT = {}  # method --> pattern
+        self.__PAT_METH_TO_KWARGS = {}  # (pattern, method) --> info
                                     
-        processed_props = set() # tracks already processed properties
+        processed_props = set()  # tracks already processed properties
 
         # searches all custom observer methods
         for cls in inspect.getmro(type(self)):
             # list of (method-name, method-object, list of (prop-name, kwargs))
-            meths = [ (name, meth, getattr(meth, Observer._CUST_OBS_))
-                      for name, meth in cls.__dict__.iteritems()
-                      if (inspect.isfunction(meth) and 
-                          hasattr(meth, Observer._CUST_OBS_)) ]
+            meths = [(name, meth, getattr(meth, Observer._CUST_OBS_))
+                     for name, meth in cls.__dict__.iteritems()
+                     if (inspect.isfunction(meth) and 
+                         hasattr(meth, Observer._CUST_OBS_))]
 
             # props processed in this class. This is used to avoid
             # processing the same props in base classes.
@@ -321,7 +326,7 @@ class Observer (object):
             # since this is traversed top-bottom in the mro, the
             # first found match is the one to care
             for name, meth, pnames_ka in meths:
-                _method = getattr(self, name) # the most top avail method 
+                _method = getattr(self, name)  # the most top avail method 
 
                 # WARNING! Here we store the top-level method in the
                 # mro, not the (unbound) method which has been
@@ -336,7 +341,7 @@ class Observer (object):
             
             # accumulates props processed in this class
             processed_props |= cls_processed_props
-            pass # end of loop over classes in the mro
+            pass  # end of loop over classes in the mro
 
         if model: self.observe_model(model)
         return   
@@ -377,7 +382,6 @@ class Observer (object):
     # this is done to keep backward compatibility
     get_custom_observing_methods = get_observing_methods
     
-
     def get_observing_method_kwargs(self, prop_name, method):
         """
         Returns the keyword arguments which were specified when
@@ -403,7 +407,6 @@ class Observer (object):
             pass
         return self.__PAT_METH_TO_KWARGS[(prop_name, method)]
     
-
     def remove_observing_method(self, prop_names, method):
         """
         Remove dynamic notifications.
@@ -490,14 +493,14 @@ class Observer (object):
                                  (self.__class__, method.__name__))            
                 
             _dict = self.__PROP_TO_METHS
-            if not self.__METH_TO_PROPS.has_key(method):
+            if method not in self.__METH_TO_PROPS:
                 self.__METH_TO_PROPS[method] = set()
                 pass
             self.__METH_TO_PROPS[method].add(prop_name)
             pass
         
         # fills the internal structures
-        if not _dict.has_key(prop_name):
+        if prop_name not in _dict:
             _dict[prop_name] = set()
             pass
         _dict[prop_name].add(method)
@@ -505,5 +508,5 @@ class Observer (object):
         self.__PAT_METH_TO_KWARGS[key] = kwargs
         return
 
-    pass # end of class
+    pass  # end of class
 # ----------------------------------------------------------------------

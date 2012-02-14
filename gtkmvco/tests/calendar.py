@@ -45,6 +45,25 @@ class Date(unittest.TestCase):
     def adapt(self):
         self.c.adapt('date', 'calendar')
 
+class DateLessCode(Date):
+    def adapt(self):
+        """
+        Controller handles Calendar specially and creates three
+        RoUserClassAdapter instances. This is only necessary for datetime
+        instances, as regular Adapter doesn't give the getter access to the
+        old model value to copy the time. Still, datetime may occur in the
+        wild, adapted to a Calendar and two or three SpinButton.
+        """
+        a = gtkmvc.adapters.Adapter(self.m, 'date')
+        def setter(c, d):
+            # TODO test if this flickers, maybe add "if new != old"
+            c.select_month(d.month - 1, d.year)
+            c.select_day(d.day)
+        a.connect_widget(
+            self.v['calendar'], getter=lambda w: datetime.date(*w.get_date()),
+            setter=setter, signal='day-selected')
+        self.c.adapt(a)
+
 class Time(Date):
     def adapt(self):
         self.c.adapt('time', 'calendar')        

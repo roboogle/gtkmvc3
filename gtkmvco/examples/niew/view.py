@@ -5,7 +5,11 @@ class _Abstract(object):
         self.builder = gtk.Builder()
         if "domain" in kwargs:
             self.builder.set_translation_domain(kwargs["domain"])
+        self.items = {}
         if isinstance(arg, gtk.Widget):
+            if len(args) == 1:
+                self.items[args[0]] = arg
+                args = ()
             if args or kwargs:
                 raise ValueError
             self.toplevel = arg
@@ -15,7 +19,6 @@ class _Abstract(object):
         self.manager = gtk.UIManager()
         if isinstance(self.toplevel, gtk.Window):
             self.toplevel.add_accel_group(self.manager.get_accel_group())
-        self.items = {}
         # Make Adjustment accessible
         for name in args:
             # Allow for ActionGroup detection
@@ -65,8 +68,8 @@ class Widget(_Abstract):
         """
         When creating widgets in code, pass a :class:`gtk.Widget` instance as
         the single argument, e.g. a Box. If you need it to be accessible to
-        Controller (for adaption or connection) you have to pass it again to
-        :meth:`__setitem__`.
+        Controller (for adaption or connection) you may pass a name as the
+        second argument.
 
         To use GtkBuilder you pass the path to the XML file and between one
         and many names of widgets you'd like to load, e.g. "box1",

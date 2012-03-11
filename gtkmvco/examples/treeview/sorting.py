@@ -42,7 +42,7 @@ def get_sort_function(order):
     stable = tuple((d['key'], -1 if d['reverse'] else 1) for d in order)
     def sort_function(a, b):
         for name, direction in stable:
-            v = cmp(getattr(a, name), getattr(b, name))
+            v = cmp(getattr(a, name) if a else a, getattr(b, name) if b else b)
             if v != 0:
                 return v * direction
         return 0

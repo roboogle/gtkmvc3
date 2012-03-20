@@ -2,6 +2,57 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkActionGroup" id="actiongroup1">
+    <child>
+      <object class="GtkAction" id="file_menu">
+        <property name="label" translatable="yes">_File</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="note_menu">
+        <property name="label" translatable="yes">_Note</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="help_menu">
+        <property name="label" translatable="yes">_Help</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="quit">
+        <property name="label" translatable="yes">_Quit</property>
+        <property name="stock_id">gtk-quit</property>
+        <signal name="activate" handler="on_quit_activate" swapped="no"/>
+      </object>
+      <accelerator key="q" modifiers="GDK_CONTROL_MASK"/>
+    </child>
+    <child>
+      <object class="GtkAction" id="add_note">
+        <property name="label" translatable="yes">Add Note</property>
+        <signal name="activate" handler="on_add_note_activate" swapped="no"/>
+      </object>
+      <accelerator key="a" modifiers="GDK_CONTROL_MASK"/>
+    </child>
+    <child>
+      <object class="GtkAction" id="add_child">
+        <property name="label" translatable="yes">Add Child</property>
+        <signal name="activate" handler="on_add_child_activate" swapped="no"/>
+      </object>
+      <accelerator key="a" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+    </child>
+    <child>
+      <object class="GtkAction" id="delete_note">
+        <property name="label" translatable="yes">Delete</property>
+        <signal name="activate" handler="on_delete_note_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="about">
+        <property name="label" translatable="yes">_About</property>
+        <signal name="activate" handler="on_about_activate" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="window_main">
     <property name="width_request">600</property>
     <property name="height_request">500</property>
@@ -11,92 +62,6 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <child>
-          <object class="GtkMenuBar" id="menubar1">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkMenuItem" id="menuitem4">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_File</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menuitem4_menu">
-                    <child>
-                      <object class="GtkImageMenuItem" id="quit">
-                        <property name="label">gtk-quit</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_quit_activate"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="note">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Note</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="note_menu">
-                    <child>
-                      <object class="GtkMenuItem" id="add_note">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Add Note</property>
-                        <property name="use_underline">True</property>
-                        <accelerator key="a" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-                        <signal name="activate" handler="on_add_note_activate"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="add_child">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Add Child</property>
-                        <property name="use_underline">True</property>
-                        <accelerator key="a" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
-                        <signal name="activate" handler="on_add_child_activate"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="delete_note">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Delete</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_delete_note_activate"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menuitem7">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Help</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="menuitem7_menu">
-                    <child>
-                      <object class="GtkMenuItem" id="about">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">_About</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_about_activate"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkHPaned" id="hpaned1">
             <property name="visible">True</property>

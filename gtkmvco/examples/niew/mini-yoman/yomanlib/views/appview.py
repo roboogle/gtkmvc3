@@ -36,13 +36,16 @@ GLADE_FILE = 'glade/yoman.glade'
 class AppView(Window):
 
 	def __init__(self):
-		Window.__init__(self, GLADE_FILE, 'window_main')
+		Window.__init__(self, GLADE_FILE, 'window_main', "actiongroup1")
 
 		self.main = MainView()
 		self.note = NoteView()
 
 		self.main.reparent(self, 'scrolledwindow_main')
 		self.note.reparent(self, 'scrolledwindow_note')
+		self.add_ui_from_file('glade/menu.xml')
+		self["vbox1"].pack_start(self["/menubar"], expand=False)
+		self["vbox1"].reorder_child(self["/menubar"], 0)
 		return
         
 

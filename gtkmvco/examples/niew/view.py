@@ -7,9 +7,8 @@ class _Abstract(object):
             self.builder.set_translation_domain(kwargs["domain"])
         self.items = {}
         if isinstance(arg, gtk.Widget):
-            if len(args) == 1:
-                self.items[args[0]] = arg
-                args = ()
+            self.items[args[0]] = arg
+            args = ()
             if args or kwargs:
                 raise ValueError
             self.toplevel = arg
@@ -43,7 +42,8 @@ class _Abstract(object):
         return self.items[name]
 
     def __setitem__(self, name, widget):
-        if isinstance(widget, gtk.ActionGroup):
+        if (isinstance(widget, gtk.ActionGroup) and
+            widget not in self.manager.get_action_groups()):
             self.manager.insert_action_group(widget)
         self.items[name] = widget
 
@@ -66,10 +66,8 @@ class _Abstract(object):
 class Widget(_Abstract):
     def __init__(self, arg, *args, **kwargs):
         """
-        When creating widgets in code, pass a :class:`gtk.Widget` instance as
-        the single argument, e.g. a Box. If you need it to be accessible to
-        Controller (for adaption or connection) you may pass a name as the
-        second argument.
+        When creating widgets in code, pass two arguments: a
+        :class:`gtk.Widget` instance and a string naming it.
 
         To use GtkBuilder you pass the path to the XML file and between one
         and many names of widgets you'd like to load, e.g. "box1",

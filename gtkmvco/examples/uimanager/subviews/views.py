@@ -74,9 +74,12 @@ class BarsView (View):
             self.ui.insert_action_group(view[agrp])
             pass
 
-        # connects all accelerators declared in glade
+        # Connects all accelerators declared in glade.  This is
+        # needed as action created in glade are connected to the
+        # top-level window acceleration group, and that window is
+        # not used here. Only the application Windows is used, and
+        # in fact the agrp_appl is not needed to be connected here.
         for view, agrp in [(self, "agrp_bars"),
-                           (appl_view, "agrp_appl"),
                            (appl_view.part1, "agrp_part1"),
                            (appl_view.part2, "agrp_part2"),
                            (appl_view.part3, "agrp_part3"),]:

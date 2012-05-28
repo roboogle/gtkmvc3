@@ -36,11 +36,11 @@ class SpinToolItem (gtk.ToolItem):
     __gtype_name__ = "SpinToolItem"
 
     __gsignals__ = {
-        'changed': (gobject.SIGNAL_RUN_FIRST, 
+        'changed': (gobject.SIGNAL_RUN_FIRST,
                     gobject.TYPE_NONE, #return value
                     ()), # arguments
-    }    
-    
+    }
+
     def __init__(self, label=None, adj=None):
         gtk.ToolItem.__init__(self)
 
@@ -57,7 +57,7 @@ class SpinToolItem (gtk.ToolItem):
         self.add(hbox)
         self.set_is_important(True)
 
-        self.sb.connect("changed", self._on_sb_changed)
+        self.sb.connect("change-value", self._on_sb_changed)
         return
 
     def _on_sb_changed(self, sb):

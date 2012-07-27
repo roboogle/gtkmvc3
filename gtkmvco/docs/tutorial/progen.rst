@@ -1,3 +1,5 @@
+.. include:: common.rst 
+
 Generating a standard project from scratch
 ==========================================
 

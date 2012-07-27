@@ -114,11 +114,11 @@ The glade file
 
 .. _fig_step2_hierarchy:
 
- .. figure:: images/step2_hierarchy.png
-    :height: 14cm
-    :align: right
+.. figure:: images/step2_hierarchy.png
+   :height: 14cm
+   :align: right
 
-    The widgets and objects in |glade| 
+   The widgets and objects in |glade|
 
 In picture :ref:`fig_step2_window` you can see how the main top level
 window looks like in |glade|. Here the format chosen is `gtk.Builder`
@@ -130,7 +130,7 @@ selecting the current counter.
 
 Here requisite 1 specifies that the number of counters is *variable*,
 meaning that it cannot be determined statically. For this reason the
-view will be filled with the required `gtk.RadioButton`s when the view
+view will be filled with the required radio buttons when the view
 will be instantiated and connected to the model which contains the
 actual counters.
 

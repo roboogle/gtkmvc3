@@ -11,7 +11,7 @@ Contents:
    motiv
    arch
    mvco   
-   mvc_impl
+   impl
    op
    observers
    exam

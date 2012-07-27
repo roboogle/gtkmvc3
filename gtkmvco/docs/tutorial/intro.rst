@@ -1,3 +1,5 @@
+.. include:: common.rst 
+
 What is this?
 =============
 |pygtkmvc| is a practical implementation of |mvc| and |obs|. The goal of

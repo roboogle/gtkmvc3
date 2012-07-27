@@ -631,7 +631,7 @@ Controllers are the most complex structures that are intended to:
 6. Setting up widgets that depend on the model. For example setting up
    of ``gtk.TreeView`` whose ``gtk.TreeModel`` lives within the model
    (see :ref:`gtk.TreeView`)
-7. Setting up :ref:`adapters`
+7. Setting up adapters.
 
 This is the typical structure of a controller::
 
@@ -847,8 +847,6 @@ When executed, this is what pops up:
 
 .. image:: images/mvc.png
 
-
-.. _adapters:
 
 --------
 Adapters

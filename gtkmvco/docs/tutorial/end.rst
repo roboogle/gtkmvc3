@@ -1,3 +1,5 @@
+.. include:: common.rst 
+
 Conclusions
 ===========
 The author does hope that this tutorial will be useful to help those

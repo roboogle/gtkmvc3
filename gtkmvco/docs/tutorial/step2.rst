@@ -280,25 +280,23 @@ The main code is trivial as usual:
    :lines: 13-
 
 And here you can see the result in all its beauty. The user
-interaction is particularly reach and robust, although the complexity
+interaction is particularly rich and robust, although the complexity
 of the code is quite low. 
 
 +----------------------------------------+----------------------------------------+
-| .. figure:: images/step2_run1.png      | .. figure:: images/step2_run2.png      |
+| .. image:: images/step2_run1.png       | .. image:: images/step2_run2.png       |
 |    :width: 8 cm                        |    :width: 8 cm                        |
 |    :align: center                      |    :align: center                      |
-|    :figwidth: 10cm                     |    :figwidth: 10 cm                    |
 |                                        |                                        |
-|    Right after starting                |    `First` counter after a few         |  
-|                                        |    increments.                         |
+| Right after starting                   | `First` counter after a few            |  
+|                                        | increments.                            |
 +----------------------------------------+----------------------------------------+
-| .. figure:: images/step2_run3.png      | .. figure:: images/step2_run4.png      |
+| .. image:: images/step2_run3.png       | .. image:: images/step2_run4.png       |
 |    :width: 8 cm                        |    :width: 8 cm                        |
 |    :align: center                      |    :align: center                      |
-|    :figwidth: 10 cm                    |    :figwidth: 10 cm                    |
 |                                        |                                        |
-|    No available values for counter     |    After selecting a different         |
-|    `First`                             |    counter                             |
+| No available values for counter        | After selecting a different            |
+| `First`                                | counter                                |
 +----------------------------------------+----------------------------------------+
 
 

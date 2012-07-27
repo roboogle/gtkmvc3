@@ -192,7 +192,13 @@ htmlhelp_basename = 'pygtkmvcdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('bla', 'pygtkmvc.tex', u'pygtkmvc Documentation',
+  ('quickstart/index', 'gtkmvc-quickstart.tex', u'gtkmvc: A Quickstart Guide',
+   u'Roberto Cavada', 'manual'),
+  ('tutorial/index', 'gtkmvc-tutorial.tex', u'Tutorial Documentation',
+   u'Roberto Cavada', 'manual'),
+  ('manual/index', 'gtkmvc-userman.tex', u'Model-View-Controller and Observer patterns for PyGTK Documentation',
+   u'Roberto Cavada', 'manual'),
+  ('api/index', 'gtkmvc-reference.tex', u'GTK MVC Library Reference',
    u'Roberto Cavada', 'manual'),
 ]
 

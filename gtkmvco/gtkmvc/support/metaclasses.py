@@ -727,7 +727,8 @@ class ObservablePropertyMeta (PropertyMeta):
             new = type(self).create_value(prop_name, val, self)
 
             # to track dependencies
-            olds = self.__before_property_value_change__(prop_name)
+            olds = self.__before_property_value_change__(prop_name) if \
+                self._has_observer() else ()
             self._notify_stack.extend(
                             itertools.imap(operator.itemgetter(1), olds))                                    
 

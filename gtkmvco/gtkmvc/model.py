@@ -37,6 +37,15 @@ from support.utils import getmembers
 WITH_NAME = True
 WITHOUT_NAME = False
 
+def count_leaves(x):
+    """
+    Return the number of non-sequence items in a given recursive sequence.
+    """
+    if hasattr(x, 'keys'):
+        x = x.values()
+    if hasattr(x, '__getitem__'):
+        return sum(map(count_leaves, x))
+    return 1
 
 class Model (Observer):
     """
@@ -271,6 +280,11 @@ class Model (Observer):
         # involved.
         self._notify_stack = [] 
         return
+
+    def _has_observer(self):
+        return bool(count_leaves((self.__value_notifications,
+            self.__instance_notif_before, self.__instance_notif_after,
+            self.__signal_notif)))
 
     def _calculate_logical_deps(self):
         """Internal service which calculates dependencies information

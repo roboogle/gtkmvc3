@@ -19,6 +19,8 @@
   - Optionally connect cell renderers set up in Glade to models stored in a
     TreeView.
 
+  - Adapt to arbitraty GObject properties.
+
 * Changed
 
   - Radio buttons or actions are adapted to string properties.

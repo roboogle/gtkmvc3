@@ -330,10 +330,11 @@ class Controller (Observer):
            *gprop_name* is a string naming a property of the widget. No cast
            is attempted, so *prop_name* must match its type exactly.
 
+           .. versionadded:: 1.99.2
+
         In all cases, optional keyword argument ``flavour=value``
         can be used to specify a particular flavour from those
         available in :mod:`gtkmvc.adapters.default` adapters.
-
         """
 
         # checks arguments

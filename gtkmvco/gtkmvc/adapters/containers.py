@@ -274,7 +274,7 @@ class watch_items_in_tree(Observer):
         tree.connect('row-changed', self.on_changed)
 
     def on_changed(self, tree, path, iter):
-        item = tree.get_value(iter, 0)
+        item = tree.get_value(iter, self.column)
         if item:
             self.rows[item] = gtk.TreeRowReference(tree, path)
             item.register_observer(self)

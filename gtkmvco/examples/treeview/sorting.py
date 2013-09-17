@@ -66,6 +66,43 @@ def get_sort_function(order):
         return 0
     return sort_function
 
+def _clicked(widget, column, attribute, model):
+    if not model:
+        model = widget.get_tree_view().get_model()
+    for other in widget.get_tree_view().get_columns():
+        if other is not widget:             # prevent flicker
+            other.set_sort_indicator(False)
+    if widget.get_sort_indicator():
+        if widget.get_sort_order() == gtk.SORT_ASCENDING:
+            widget.set_sort_order(gtk.SORT_DESCENDING)
+        else:
+            widget.set_sort_order(gtk.SORT_ASCENDING)
+    else:
+        widget.set_sort_order(gtk.SORT_ASCENDING)
+        widget.set_sort_indicator(True)
+    reverse = bool(widget.get_sort_order() == gtk.SORT_DESCENDING)
+    order = [dict(key=attribute, reverse=reverse)]
+    set_sort_function(model, get_sort_function(order), column)
+
+def setup_sort_column(widget, column=0, attribute=None, model=None):
+    """
+    *model* is the :class:`TreeModelSort` to act on. Defaults to what is
+    displayed. Pass this if you sort before filtering.
+
+    *widget* is a clickable :class:`TreeViewColumn`.
+
+    *column* is an integer addressing the column in *model* that holds your
+    objects.
+
+    *attribute* is a string naming an object attribute to display. Defaults
+    to the name of *widget*.
+    """
+    if not attribute:
+        attribute = widget.get_name()
+        if attribute is None:
+            raise TypeError("Column not named")
+    widget.connect('clicked', _clicked, column, attribute, model)
+
 class SortingView(gtk.TreeView):
     def __init__(self):
         gtk.TreeView.__init__(self)

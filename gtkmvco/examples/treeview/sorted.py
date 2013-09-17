@@ -60,8 +60,22 @@ class Controller(gtkmvc.Controller):
     def on_window__delete_event(self, widget, event):
         gtk.main_quit()
 
+class Simple(Controller):
+    def register_adapters(self):
+        self.setup_columns()
+
+        for c in self.view['treeview'].get_columns():
+            c.set_clickable(True)
+            setup_sort_column(c)
+        for n in ('label1', 'frame', 'button'):
+            self.view[n].set_visible(False)
+
 m = gtkmvc.Model()
 v = gtkmvc.View(builder='sorted.ui')
 c = Controller(m, v, handlers='class')
+
+m = gtkmvc.Model()
+v = gtkmvc.View(builder='sorted.ui')
+c = Simple(m, v, handlers='class')
 
 gtk.main()

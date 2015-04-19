@@ -23,10 +23,10 @@
 #  -------------------------------------------------------------------------
 
 
-from support import decorators, log
-from support.wrappers import ObsWrapperBase
+from gtkmvc.support import decorators, log
+from gtkmvc.support.wrappers import ObsWrapperBase
 
-# ----------------------------------------------------------------------
+
 class Observable (ObsWrapperBase):
 
     @classmethod
@@ -41,19 +41,19 @@ class Observable (ObsWrapperBase):
         def wrapper(*args, **kwargs):
             self = args[0]
             assert(isinstance(self, Observable))
-            
+
             self._notify_method_before(self, _func.__name__, args, kwargs)
             res = _func(*args, **kwargs)
             self._notify_method_after(self, _func.__name__, res, args, kwargs)
-            return res    
+            return res
 
         return wrapper
-    
+
 
     def __init__(self):
         ObsWrapperBase.__init__(self)
-        return
-    pass # end of class
+
+# ----------------------------------------------------------------------
 
 
 @decorators.good_decorator
@@ -71,7 +71,7 @@ def observed(func):
         self._notify_method_before(self, func.__name__, args, kwargs)
         res = func(*args, **kwargs)
         self._notify_method_after(self, func.__name__, res, args, kwargs)
-        return res    
+        return res
 
     log.logger.warning("Decorator observable.observed is deprecated:"
                        "use Observable.observed instead")
@@ -83,13 +83,8 @@ class Signal (Observable):
     """Base class for signals properties"""
     def __init__(self):
         Observable.__init__(self)
-        return
 
     def emit(self, arg=None):
         """Emits the signal, passing the optional argument"""
         for model,name in self.__get_models__():
             model.notify_signal_emit(name, arg)
-            pass
-        return
-    pass # end of class
-

@@ -57,7 +57,7 @@ __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
 __version = (1,99,2)
 
 # visible classes
-#from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
+from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
 #from gtkmvc.model_mt import ModelMT
 #from gtkmvc.controller import Controller
 from gtkmvc.view import View

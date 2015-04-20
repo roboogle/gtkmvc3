@@ -38,26 +38,20 @@ class MyCtrl (Controller):
 
     # gtk signals
     def on_window_delete_event(self, window, event):
-        import gtk
-        gtk.main_quit()
+        from gi.repository import Gtk
+        Gtk.main_quit()
         return True
 
     def on_button_inc_clicked(self, button):
         self.model.counter += 1
-        return
 
     def on_button_reset_clicked(self, button):
         self.model.reset()
-        return
 
     def on_sb_reset_value_changed(self, sb):
         self.model.reset_value = sb.get_value_as_int()
-        return
-    
+
     # observable properties
     @Controller.observe("counter", assign=True)
     def counter_change(self, model, prop_name, info):
         self.view.set_counter_value(info.new)
-        return
-    
-    pass # end of class

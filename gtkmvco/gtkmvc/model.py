@@ -28,7 +28,7 @@ import functools
 from gi.repository import Gtk
 
 from gtkmvc.support import metaclasses
-from gtkmvc.support.porting import with_metaclass
+from gtkmvc.support.porting import with_metaclass, add_metaclass
 from gtkmvc.support.wrappers import ObsWrapperBase
 from gtkmvc.observer import Observer, NTInfo
 from gtkmvc.observable import Signal
@@ -53,7 +53,7 @@ def count_leaves(x):
     return 1
 
 
-@with_metaclass(metaclasses.ObservablePropertyMeta)
+@add_metaclass(metaclasses.ObservablePropertyMeta)
 class Model (Observer):
     """
     .. attribute:: __observables__
@@ -779,8 +779,9 @@ class Model (Observer):
 
 
 # ----------------------------------------------------------------------
-@with_metaclass(metaclasses.ObservablePropertyGObjectMeta)
-class TreeStoreModel (Model, Gtk.TreeStore):
+class TreeStoreModel (
+        with_metaclass(metaclasses.ObservablePropertyGObjectMeta,
+                       Model, Gtk.TreeStore)):
     """Use this class as base class for your model derived by
     Gtk.TreeStore"""
 
@@ -790,8 +791,9 @@ class TreeStoreModel (Model, Gtk.TreeStore):
 
 
 # ----------------------------------------------------------------------
-@with_metaclass(metaclasses.ObservablePropertyGObjectMeta)
-class ListStoreModel (Model, Gtk.ListStore):
+class ListStoreModel (
+        with_metaclass(metaclasses.ObservablePropertyGObjectMeta,
+                       Model, Gtk.ListStore)):
     """Use this class as base class for your model derived by
     Gtk.ListStore"""
 
@@ -801,8 +803,9 @@ class ListStoreModel (Model, Gtk.ListStore):
 
 
 # ----------------------------------------------------------------------
-@with_metaclass(metaclasses.ObservablePropertyGObjectMeta)
-class TextBufferModel (Model, Gtk.TextBuffer):
+class TextBufferModel (
+        with_metaclass(metaclasses.ObservablePropertyGObjectMeta,
+                       Model, Gtk.TextBuffer)):
     """Use this class as base class for your model derived by
     Gtk.TextBuffer"""
 

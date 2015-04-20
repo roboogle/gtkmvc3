@@ -7,20 +7,23 @@ from gi.repository import Gtk, Gdk
 
 def __radio_setter_label(radio, value):
     # this is used to control RadioButton and RadioAction
-    if radio.get_label() == value: radio.set_active(True)
-    return
+    if radio.get_label() == value:
+        radio.set_active(True)
 
 def __radio_getter_label(radio):
     # this is used to control RadioButton and RadioAction
-    if radio.get_active(): return radio.get_label()
+    if radio.get_active():
+        return radio.get_label()
     raise ValueError("Radio not active")
 
 def __radio_action_setter_value(ra, value):
-    if value == ra.get_property("value"): ra.set_active(True)
+    if value == ra.get_property("value"):
+        ra.set_active(True)
     return
 
 def __radio_action_getter_value(ra):
-    if ra.get_active(): return ra.get_current_value()
+    if ra.get_active():
+        return ra.get_current_value()
     raise ValueError("RadioAction not active")
 
 
@@ -92,11 +95,9 @@ def add_adapter(widget_class, signal_name, getter, setter, value_type,
             # found an insertion point, iteration is over after inserting
             __def_adapter.insert(it, new_tu)
             return
-        pass
 
     # simply append it
     __def_adapter.append(new_tu)
-    return
 
 
 def remove_adapter(widget_class, flavour=None):
@@ -118,7 +119,7 @@ def remove_adapter(widget_class, flavour=None):
         if (widget_class == tu[WIDGET] and flavour == tu[FLAVOUR]):
             del __def_adapter[it]
             return True
-        pass
+
     return False # no adapter was found
 
 
@@ -131,12 +132,12 @@ def search_adapter_info(wid, flavour=None):
     particular tuple.
     """
     t = (type(wid), flavour)
-    if __memoize__.has_key(t): return __memoize__[t]
+    if __memoize__.has_key(t):
+        return __memoize__[t]
 
     for w in __def_adapter:
         if (isinstance(wid, w[WIDGET]) and flavour == w[FLAVOUR]):
             __memoize__[t] = w
             return w
-        pass
 
     raise TypeError("Adapter type " + str(t) + " not found among supported adapters")

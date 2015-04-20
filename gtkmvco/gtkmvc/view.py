@@ -72,6 +72,12 @@ class View (object):
         wids = ((_top,) if _top is None or isinstance(_top, str)
                 else _top)  # Already a list or tuple
 
+        # check if old 'glade' is still used
+        if hasattr(self, "glade"):
+            raise ViewError("View '%s' uses no longer "
+                            "supported glade specification" % self.__class__)
+
+
         # retrieves objects from builder if available
         _builder = builder if builder else self.builder
         if _builder is not None:

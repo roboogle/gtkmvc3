@@ -22,6 +22,12 @@
 #  Please report bugs to <roboogle@gmail.com>.
 
 
+import types
+import gobject
+import gtk
+import sys
+
+
 from gtkmvc.observer import Observer
 from gtkmvc.support.log import logger
 from gtkmvc.support.utils import cast_value
@@ -29,10 +35,6 @@ from gtkmvc.support.exceptions import TooManyCandidatesError
 from gtkmvc.adapters.basic import Adapter, RoUserClassAdapter
 from gtkmvc.adapters.containers import StaticContainerAdapter
 
-import types
-import gobject
-import gtk
-import sys
 
 def partition(string, sep):
     """
@@ -104,16 +106,16 @@ class Controller (Observer):
         handlers=""):
         """
         Two positional and three optional keyword arguments.
-        
+
         *model* will have the new instance registered as an observer.
         It is made available as an attribute.
-        
+
         *view* may contain signal connections loaded from XML. The handler
         methods have to exist in this class.
-        
+
         *spurious* denotes whether notifications in this class will be called
         if a property of *model* is set to the same value it already has.
-        
+
         *auto_adapt* denotes whether to call :meth:`adapt` with no arguments
         as part of the view registration process.
 
@@ -144,9 +146,8 @@ class Controller (Observer):
         # set of properties explicitly adapted by the user:
         self.__user_props = set()
         self.__auto_adapt = auto_adapt
-        
+
         gobject.idle_add(self._idle_register_view, view, priority=gobject.PRIORITY_HIGH)
-        return
 
     def _idle_register_view(self, view):
         """Internal method that calls register_view"""
@@ -181,12 +182,11 @@ class Controller (Observer):
         This does nothing. Subclasses can override it to connect signals
         manually or modify widgets loaded from XML, like adding columns to a
         TreeView. No super call necessary.
-        
+
         *view* is a shortcut for ``self.view``.
         """
         assert(self.model is not None)
         assert(self.view is not None)
-        return
 
     def register_adapters(self):
         """
@@ -195,7 +195,6 @@ class Controller (Observer):
         """
         assert(self.model is not None)
         assert(self.view is not None)
-        return
 
     def setup_columns(self):
         """
@@ -351,7 +350,7 @@ class Controller (Observer):
                 except TooManyCandidatesError, e:
                     # multiple candidates, gives up
                     raise e
-                except ValueError, e: 
+                except ValueError, e:
                     # no widgets found for given property, continue after emitting a warning
                     if e.args:
                         logger.warn(e[0])
@@ -362,8 +361,6 @@ class Controller (Observer):
                     logger.debug("Auto-adapting property %s and widget %s" % \
                                      (prop_name, wid_name))
                     adapters += self.__create_adapters__(prop_name, wid_name, flavour)
-                    pass
-                pass
 
         elif n == 1: #one argument
             if isinstance(args[0], Adapter): adapters = (args[0],)
@@ -372,8 +369,10 @@ class Controller (Observer):
                 prop_name = args[0]
                 wid_name = self._find_widget_match(prop_name)
                 adapters = self.__create_adapters__(prop_name, wid_name, flavour)
-                pass
-            else: raise TypeError("Argument of adapt() must be either an Adapter or a string")
+
+            else:
+                raise TypeError("Argument of adapt() must be either an "
+                                "Adapter or a string")
 
         elif n == 2: # two arguments
             if not (isinstance(args[0], types.StringType) and
@@ -383,7 +382,6 @@ class Controller (Observer):
             # retrieves both property and widget, and creates an adapter
             prop_name, wid_name = args
             adapters = self.__create_adapters__(prop_name, wid_name, flavour)
-            pass
 
         elif n == 3:
             for arg in args:
@@ -398,7 +396,6 @@ class Controller (Observer):
                               signal='notify::%s' % gprop_name,
                               flavour=flavour)
             adapters = [ad]
-            pass
 
         else:
             raise TypeError(
@@ -408,17 +405,14 @@ class Controller (Observer):
             self.__adapters.append(ad)
             # remember properties added by the user
             if n > 0: self.__user_props.add(ad.get_property_name())
-            pass
-        
-        return
 
     def _find_widget_match(self, prop_name):
         """
-        Used to search ``self.view`` when :meth:`adapt` is not given a widget 
+        Used to search ``self.view`` when :meth:`adapt` is not given a widget
         name.
-        
+
         *prop_name* is the name of a property in the model.
-        
+
         Returns a string with the best match. Raises
         :class:`TooManyCandidatesError` or ``ValueError`` when nothing is
         found.
@@ -431,8 +425,8 @@ class Controller (Observer):
         for wid_name in self.view:
             # if widget names ends with given property name: we skip
             # any prefix in widget name
-            if wid_name.lower().endswith(prop_name.lower()): names.append(wid_name)
-            pass
+            if wid_name.lower().endswith(prop_name.lower()):
+                names.append(wid_name)
 
         if len(names) == 0:
             raise ValueError("No widget candidates match property '%s': %s" % \
@@ -441,10 +435,10 @@ class Controller (Observer):
         if len(names) > 1:
             raise TooManyCandidatesError("%d widget candidates match property '%s': %s" % \
                                              (len(names), prop_name, names))
-        
+
         return names[0]
 
-        
+
     # performs Controller's signals auto-connection:
     def __autoconnect_signals(self):
         """This is called during view registration, to autoconnect
@@ -455,20 +449,15 @@ class Controller (Observer):
             if (not callable(method)): continue
             assert(not dic.has_key(name)) # not already connected!
             dic[name] = method
-            pass
 
         # autoconnects glade in the view (if available any)
-        for xml in self.view.glade_xmlWidgets: xml.signal_autoconnect(dic)
+        for xml in self.view.glade_xmlWidgets:
+            xml.signal_autoconnect(dic)
 
         # autoconnects builder if available
         if self.view._builder is not None:
-            #It was: #self.view._builder.connect_signals(dic)
             self.view._builder_connect_signals(dic)
-            pass
-        
-        return
 
-    
     def __create_adapters__(self, prop_name, wid_name, flavour=None):
         """
         Private service that looks at property and widgets types,
@@ -481,7 +470,8 @@ class Controller (Observer):
         res = []
 
         wid = self.view[wid_name]
-        if wid is None: raise ValueError("Widget '%s' not found" % wid_name)
+        if wid is None:
+            raise ValueError("Widget '%s' not found" % wid_name)
 
         # Decides the type of adapters to be created.
         if isinstance(wid, gtk.Calendar):
@@ -528,9 +518,5 @@ class Controller (Observer):
                          spurious=self.accepts_spurious_change())
             ad.connect_widget(wid, flavour=flavour)
             res.append(ad)
-            pass
 
         return res
-
-
-    pass # end of class Controller

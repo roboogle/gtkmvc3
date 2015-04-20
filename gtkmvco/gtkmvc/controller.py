@@ -22,8 +22,7 @@
 #  Please report bugs to <roboogle@gmail.com>.
 
 
-import types
-import sys
+import collections
 
 from gi.repository import GLib
 from gi.repository import Gtk
@@ -64,7 +63,7 @@ def setup_column(widget, column=0, attribute=None, renderer=None,
                 break
     if not from_python:
         from_python = {
-            'text': unicode,
+            'text': str,
             'value': int,
             'active': bool,
             }.get(property)
@@ -272,7 +271,7 @@ class Controller (Observer):
 
         .. versionadded:: 1.99.2
         """
-        if isinstance(widget, types.StringType):
+        if isinstance(widget, str):
             widget = self.view[widget]
         if not model and isinstance(self.model, Gtk.TreeModel):
             model = self.model
@@ -346,7 +345,8 @@ class Controller (Observer):
             adapters = []
             props = self.model.get_properties()
             # matches all properties not previoulsy adapter by the user:
-            for prop_name in filter(lambda p: p not in self.__user_props, props):
+            for prop_name in (p for p in props
+                              if p not in self.__user_props):
                 try: wid_name = self._find_widget_match(prop_name)
                 except TooManyCandidatesError as e:
                     # multiple candidates, gives up
@@ -366,7 +366,7 @@ class Controller (Observer):
         elif n == 1: #one argument
             if isinstance(args[0], Adapter): adapters = (args[0],)
 
-            elif isinstance(args[0], types.StringType):
+            elif isinstance(args[0], str):
                 prop_name = args[0]
                 wid_name = self._find_widget_match(prop_name)
                 adapters = self.__create_adapters__(prop_name, wid_name, flavour)
@@ -376,8 +376,8 @@ class Controller (Observer):
                                 "Adapter or a string")
 
         elif n == 2: # two arguments
-            if not (isinstance(args[0], types.StringType) and
-                    isinstance(args[1], types.StringType)):
+            if not (isinstance(args[0], str) and
+                    isinstance(args[1], str)):
                 raise TypeError("Arguments of adapt() must be two strings")
 
             # retrieves both property and widget, and creates an adapter
@@ -447,8 +447,9 @@ class Controller (Observer):
         dic = {}
         for name in dir(self):
             method = getattr(self, name)
-            if (not callable(method)): continue
-            assert(not dic.has_key(name)) # not already connected!
+            if (not isinstance(method, collections.Callable)):
+                continue
+            assert(name not in dic) # not already connected!
             dic[name] = method
 
         # autoconnects glade in the view (if available any)

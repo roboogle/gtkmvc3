@@ -47,9 +47,10 @@ def count_leaves(x):
     Return the number of non-sequence items in a given recursive sequence.
     """
     if hasattr(x, 'keys'):
-        x = x.values()
+        x = list(x.values())
     if hasattr(x, '__getitem__'):
         return sum(map(count_leaves, x))
+
     return 1
 
 
@@ -557,7 +558,7 @@ class Model (Observer):
 
         def side_effect(seq):
             for meth, kw in reversed(seq):
-                if meth.im_self is observer:
+                if meth.__self__ is observer:
                     seq.remove((meth, kw))
                     yield meth
 
@@ -649,7 +650,7 @@ class Model (Observer):
 
         assert prop_name in self.__value_notifications
         for method, kw in self.__value_notifications[prop_name] :
-            obs = method.im_self
+            obs = method.__self__
             # spuriousness (ticket:38) is checked here
             if kw and "spurious" in kw:
                 spurious = kw['spurious']
@@ -720,7 +721,7 @@ class Model (Observer):
         """
         assert prop_name in self.__instance_notif_after
         for method, kw in self.__instance_notif_after[prop_name]:
-            obs = method.im_self
+            obs = method.__self__
             # notifies the change
             if kw is None:  # old style call without name
                 self.__notify_observer__(obs, method,
@@ -754,7 +755,7 @@ class Model (Observer):
         """
         assert prop_name in self.__signal_notif
         for method, kw in self.__signal_notif[prop_name]:
-            obs = method.im_self
+            obs = method.__self__
             # notifies the signal emit
             if kw is None:  # old style call, without name
                 self.__notify_observer__(obs, method,

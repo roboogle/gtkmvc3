@@ -30,7 +30,7 @@ from noconflict import get_noconflict_metaclass
 class ModelFactory (object):
     """This factory constructs classes for models. Use it to build
     the classes to derive your own models"""
-    
+
     __memoized = {}
 
     @staticmethod
@@ -58,7 +58,7 @@ class ModelFactory (object):
             __metaclass__ = get_noconflict_metaclass(tuple(fixed), (), ())
             def __init__(self, *args, **kwargs): pass
             pass
-        
+
         fixed.append(ModelFactoryWrap)
         fixed.sort()
         return tuple(fixed)
@@ -69,11 +69,11 @@ class ModelFactory (object):
         possibly derives from other classes. If have_mt is True,
         then returned class will take into account multi-threading
         issues when dealing with observable properties."""
-        
+
         good_bc = ModelFactory.__fix_bases(base_classes, have_mt)
         print "Base classes are:", good_bc
         key = "".join(map(str, good_bc))
-        if ModelFactory.__memoized.has_key(key):
+        if key in ModelFactory.__memoized:
             return ModelFactory.__memoized[key]
 
         cls = new.classobj('', good_bc, {'__module__': '__main__', '__doc__': None})

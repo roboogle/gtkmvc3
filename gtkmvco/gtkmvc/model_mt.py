@@ -42,7 +42,7 @@ class ModelMT (Model):
     main loop thread."""
 
     __metaclass__  = support.metaclasses.ObservablePropertyMetaMT
-    
+
     def __init__(self):
         Model.__init__(self)
         self.__observer_threads = {}
@@ -66,7 +66,7 @@ class ModelMT (Model):
         direct method call depending whether the caller's thread is
         different from the observer's thread"""
 
-        assert self.__observer_threads.has_key(observer)
+        assert observer in self.__observer_threads
         if _threading.currentThread() == self.__observer_threads[observer]:
             # standard call
             return Model.__notify_observer__(self, observer, method,
@@ -89,8 +89,8 @@ import gtk
 class TreeStoreModelMT (ModelMT, gtk.TreeStore):
     """Use this class as base class for your model derived by
     gtk.TreeStore"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT   
-    
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT
+
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
         gtk.TreeStore.__init__(self, column_type, *args)
@@ -102,21 +102,21 @@ class TreeStoreModelMT (ModelMT, gtk.TreeStore):
 class ListStoreModelMT (ModelMT, gtk.ListStore):
     """Use this class as base class for your model derived by
     gtk.ListStore"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT 
-    
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT
+
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
         gtk.ListStore.__init__(self, column_type, *args)
         return
     pass
-    
+
 
 # ----------------------------------------------------------------------
 class TextBufferModelMT (ModelMT, gtk.TextBuffer):
     """Use this class as base class for your model derived by
     gtk.TextBuffer"""
-    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT 
-    
+    __metaclass__  = support.metaclasses.ObservablePropertyGObjectMetaMT
+
     def __init__(self, table=None):
         ModelMT.__init__(self)
         gtk.TextBuffer.__init__(self, table)

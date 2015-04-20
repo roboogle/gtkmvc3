@@ -23,7 +23,6 @@
 
 import inspect
 import fnmatch
-import itertools
 import operator
 import types
 
@@ -386,7 +385,7 @@ class PropertyMeta (type):
         getter_name = "get_prop_%s" % prop_name
         setter_name = "set_prop_%s" % prop_name
 
-        members_names = cls.__dict__.keys()
+        members_names = frozenset(cls.__dict__.keys())
 
         # checks if accessors are already defined:
         if getter_name not in members_names:
@@ -701,7 +700,7 @@ class ObservablePropertyMeta (PropertyMeta):
             olds = self.__before_property_value_change__(prop_name) if \
                 self._has_observer() else ()
             self._notify_stack.extend(
-                            itertools.imap(operator.itemgetter(1), olds))
+                            map(operator.itemgetter(1), olds))
 
             # this is the unique place where the value is set:
             _inner_setter(self, new)

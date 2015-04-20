@@ -251,7 +251,7 @@ class View (object):
             # later gtk loop
             GLib.idle_add(self.__builder_connect_pending_signals)
 
-        for n, v in _dict.iteritems():
+        for n, v in _dict.items():
             if n not in self.builder_pending_callbacks:
                 _set = set()
                 self.builder_pending_callbacks[n] = _set

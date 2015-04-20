@@ -132,7 +132,7 @@ def search_adapter_info(wid, flavour=None):
     particular tuple.
     """
     t = (type(wid), flavour)
-    if __memoize__.has_key(t):
+    if t in __memoize__:
         return __memoize__[t]
 
     for w in __def_adapter:

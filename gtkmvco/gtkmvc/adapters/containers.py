@@ -28,7 +28,7 @@ import gtk
 
 from gtkmvc.adapters.basic import UserClassAdapter, Adapter
 
-from gtkmvc.adapters.default import * 
+from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc.support.wrappers import ObsMapWrapper
 
@@ -54,7 +54,7 @@ def _get_name(widget):
     except AttributeError:
         # Gtk is too old.
         pass
-    
+
     raise NotImplementedError("StaticContainerAdapter doesn't support "
                               "manually created widgets")
 
@@ -84,7 +84,7 @@ class StaticContainerAdapter (UserClassAdapter):
         UserClassAdapter.__init__(self, model, prop_name,
                                   lambda c,i: c.__getitem__(i),
                                   lambda c,v,i: c.__setitem__(i,v),
-                                  prop_read, prop_write, 
+                                  prop_read, prop_write,
                                   value_error, spurious)
 
         prop =  Adapter._get_property(self)
@@ -99,12 +99,12 @@ class StaticContainerAdapter (UserClassAdapter):
                             " is not a valid container")
 
 
-        self._prop_is_map = isinstance(prop, types.DictType) or \
+        self._prop_is_map = isinstance(prop, dict) or \
                             isinstance(prop, ObsMapWrapper)
         # contained widgets
         self._idx2wid = {}
         self._wid2idx = {}
-        
+
         self._widgets = None
         return
 
@@ -125,7 +125,7 @@ class StaticContainerAdapter (UserClassAdapter):
         """
 
         if isinstance(wid, gtk.Container): self._widgets = wid.get_children()
-        elif isinstance(wid, types.ListType) or isinstance(wid, types.TupleType): self._widgets = wid
+        elif isinstance(wid, list) or isinstance(wid, tuple): self._widgets = wid
         else: raise TypeError("widget must be either a gtk.Container or a list or tuple")
 
         # prepares the mappings:
@@ -170,7 +170,7 @@ class StaticContainerAdapter (UserClassAdapter):
             except ValueError: pass
             else: self._write_property(val, idx)
         return
-    
+
     def update_widget(self, idx=None):
         """Forces the widget at given index to be updated from the
         property value. If index is not given, all controlled
@@ -186,7 +186,7 @@ class StaticContainerAdapter (UserClassAdapter):
         return
 
     # ----------------------------------------------------------------------
-    # Private methods 
+    # Private methods
     # ----------------------------------------------------------------------
 
     def _get_idx_from_widget(self, wid):
@@ -206,7 +206,7 @@ class StaticContainerAdapter (UserClassAdapter):
         val = UserClassAdapter._read_widget(self)
         self._wid = sav
         return val
-        
+
     def _write_widget(self, val, idx):
         sav = self._wid
         self._wid = self._get_widget_from_idx(idx)
@@ -217,21 +217,21 @@ class StaticContainerAdapter (UserClassAdapter):
     # This is a private service to factorize code of connect_widget
     def __handle_par(self, name, par):
         if par is None or type(par) in (types.FunctionType,
-                                        types.MethodType, types.StringType):
+                                        types.MethodType, str):
             par = [par] * len(self._widgets)
             pass
 
-        elif isinstance(par, types.DictType):
+        elif isinstance(par, dict):
             val = []
             for w in self._widgets:
-                if par.has_key(w): val.append(par[w])
-                elif par.has_key(_get_name(w)): val.append(par[_get_name(w)])
+                if w in par: val.append(par[w])
+                elif _get_name(w) in par: val.append(par[_get_name(w)])
                 else: val.append(None)
                 pass
             par = val
             pass
 
-        elif isinstance(par, types.ListType) or isinstance(par, types.TupleType):
+        elif isinstance(par, list) or isinstance(par, tuple):
             par = list(par)
             par.extend([None]*(len(self._widgets)-len(par)))
             pass
@@ -247,12 +247,12 @@ class StaticContainerAdapter (UserClassAdapter):
         if self._itsme: return
         self.update_model(self._get_idx_from_widget(wid))
         return
-    
+
     def _on_prop_changed(self, instance, meth_name, res, args, kwargs):
         """Called by the observation code, we are interested in
         __setitem__"""
         if  not self._itsme and meth_name == "__setitem__": self.update_widget(args[0])
-        return    
+        return
 
     pass # end of class StaticContainerAdapter
 

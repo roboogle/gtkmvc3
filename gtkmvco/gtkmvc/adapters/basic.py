@@ -195,7 +195,7 @@ class Adapter (Observer):
 
         """
 
-        if self._wid_info.has_key(wid):
+        if wid in self._wid_info:
             raise ValueError("Widget " + str(wid) + " was already connected")
 
         wid_type = None

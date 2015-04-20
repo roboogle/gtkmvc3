@@ -54,18 +54,18 @@ __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
            "observable", "observer", "adapters", # packages
            ]
 
-__version = (1,99,2)
+__version = (1,0,0)
 
 # visible classes
 from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
 #from gtkmvc.model_mt import ModelMT
-#from gtkmvc.controller import Controller
+from gtkmvc.controller import Controller
 from gtkmvc.view import View
-#from gtkmvc.observer import Observer
-#from gtkmvc.observable import Observable, Signal
+from gtkmvc.observer import Observer
+from gtkmvc.observable import Observable, Signal
 
 # visible modules
-#from gtkmvc import observable, observer, adapters
+from gtkmvc import observable, observer, adapters
 
 def get_version():
     """

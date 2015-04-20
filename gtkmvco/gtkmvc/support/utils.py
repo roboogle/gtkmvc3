@@ -26,12 +26,12 @@ import os
 import types
 
 def getmembers(_object, _predicate):
-    """This is an implementation of inspect.getmembers, as in some versions 
-    of python it may be buggy. 
+    """This is an implementation of inspect.getmembers, as in some versions
+    of python it may be buggy.
     See issue at http://bugs.python.org/issue1785"""
     # This should be:
     #return inspect.getmembers(_object, _predicate)
-    
+
     # ... and it is re-implemented as:
     observers = []
     for key in dir(_object):
@@ -56,15 +56,14 @@ def cast_value(val, totype):
     """
     t = type(val)
     if issubclass(t, totype): return val
-    if issubclass(totype, types.StringType): return str(val)
-    if issubclass(totype, types.UnicodeType): return unicode(val)
+    if issubclass(totype, bytes): return bytes(val)
+    if issubclass(totype, str): return str(val)
 
-    if (issubclass(totype, (types.IntType, types.FloatType)) and 
-        issubclass(t, (types.StringType, types.UnicodeType, 
-                       types.IntType, types.FloatType))):
+    if (issubclass(totype, (int, float)) and
+        issubclass(t, (bytes, str, int, float))):
             if val: return totype(float(val))
             else: return totype(0)
-    
+
     raise TypeError("Not able to cast " + str(t) + " to " + str(totype))
 
 # ======================================================================
@@ -112,11 +111,11 @@ def __nt_relpath(path, start=os.curdir):
             break
         else: i += 1
         pass
-    
+
     rel_list = [os.pardir] * (len(start_list)-i) + path_list[i:]
     if not rel_list: return os.curdir
     return os.path.join(*rel_list)
-try: 
+try:
     import os.path.relpath
     relpath = os.path.relpath
 except ImportError:

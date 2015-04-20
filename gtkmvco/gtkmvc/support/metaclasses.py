@@ -21,11 +21,11 @@
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
-import types
 import inspect
 import fnmatch
 import itertools
 import operator
+import types
 
 import gtkmvc.support.wrappers as wrappers
 from gtkmvc.support.log import logger
@@ -36,7 +36,7 @@ OBS_TUPLE_NAME = "__observables__"
 
 # old name, supported only for backward compatilibity, do not use it
 # anymore in new code
-PROPS_MAP_NAME = "__properties__" 
+PROPS_MAP_NAME = "__properties__"
 
 # This keeps the names of all observable properties (old and new)
 ALL_OBS_SET = "__all_observables__"
@@ -109,17 +109,15 @@ class PropertyMeta (type):
         def __init__(self, fget, fset=None, deps=frozenset()):
             property.__init__(self, fget, fset)
             self.deps = deps
-            pass
-        pass  # end of class
 
     def __init__(cls, name, bases, _dict):
         """class constructor"""
         type.__init__(cls, name, bases, _dict)
-       
+
         # the set of all obs (it is calculated and stored below)
         obs = set()
 
-        # processes now all names in __observables__ 
+        # processes now all names in __observables__
         conc_props, log_props = type(cls).__get_observables_sets__(cls)
 
         # processes all concrete properties
@@ -127,14 +125,13 @@ class PropertyMeta (type):
             val = _dict[prop]  # must exist if concrete
             type(cls).__create_conc_prop_accessors__(cls, prop, val)
             obs.add(prop)
-            pass
 
         # processes all logical properties, and adds the actual log
         # properties to the list of all observables
         _getdict = getattr(cls, LOGICAL_GETTERS_MAP_NAME, dict())
         _setdict = getattr(cls, LOGICAL_SETTERS_MAP_NAME, dict())
 
-        real_log_props = type(cls).__create_log_props(cls, log_props, 
+        real_log_props = type(cls).__create_log_props(cls, log_props,
                                                       _getdict, _setdict)
         obs |= real_log_props
 
@@ -145,20 +142,19 @@ class PropertyMeta (type):
 
         # processes all names in __properties__ (deprecated,
         # overloaded by __observables__)
-        props = getattr(cls, PROPS_MAP_NAME, {})      
-        if len(props) > 0: 
+        props = getattr(cls, PROPS_MAP_NAME, {})
+        if len(props) > 0:
             import warnings
             warnings.warn("In class %s.%s the use of attribute '%s' in "
                           "models is deprecated."
                           " Use the tuple '%s' instead (see the manual)" \
-                              % (cls.__module__, cls.__name__,  
-                                 PROPS_MAP_NAME, OBS_TUPLE_NAME), 
+                              % (cls.__module__, cls.__name__,
+                                 PROPS_MAP_NAME, OBS_TUPLE_NAME),
                           DeprecationWarning)
-            pass
-        for prop in (x for x in props.iterkeys() if x not in obs):
+
+        for prop in (x for x in props if x not in obs):
             type(cls).__create_conc_prop_accessors__(cls, prop, props[prop])
             obs.add(prop)
-            pass
 
         # generates the list of _all_ properties available for this
         # class (also from bases)
@@ -184,33 +180,33 @@ class PropertyMeta (type):
 
         not_found = []
         names = cls.__dict__.get(OBS_TUPLE_NAME, tuple())
-        
-        if not isinstance(names, types.ListType) and \
-                not isinstance(names, types.TupleType):
+
+        if not isinstance(names, list) and \
+                not isinstance(names, tuple):
             raise TypeError("In class %s.%s attribute '%s' must "
                             "be a list or tuple" % \
                             (cls.__module__, cls.__name__, OBS_TUPLE_NAME))
 
         for name in names:
-            if type(name) != types.StringType:
+            if not isinstance(name, str):
                 raise TypeError("In class %s.%s attribute '%s' must contain"\
-                                    " only strings (found %s)" % 
+                                    " only strings (found %s)" %
                                 (cls.__module__, cls.__name__, OBS_TUPLE_NAME,
                                  type(name)))
-            if (name in cls.__dict__ and 
-                not isinstance(getattr(cls, name), types.MethodType)): 
+            if (name in cls.__dict__ and
+                not isinstance(getattr(cls, name), types.MethodType)):
                 conc_prop_set.add(name)
-            else: not_found.append(name)
-            pass
-                
+            else:
+                not_found.append(name)
+
         # now searches all possible matches for those that have not
         # been found, and collects all logical properties as well
         # (those which do not match, and do not contain patterns)
-        concrete_members = [x for x, v in cls.__dict__.iteritems()
+        concrete_members = [x for x, v in cls.__dict__.items()
                             if (not x.startswith("__") and
-                                not isinstance(v, types.FunctionType) and 
-                                not isinstance(v, types.MethodType) and 
-                                type(v) is not classmethod and 
+                                not isinstance(v, types.FunctionType) and
+                                not isinstance(v, types.MethodType) and
+                                not isinstance(v, classmethod) and
                                 x not in conc_prop_set)]
 
         for pat in not_found:
@@ -218,19 +214,16 @@ class PropertyMeta (type):
                 matches = fnmatch.filter(concrete_members, pat)
                 if 0 == len(matches):
                     logger.warning("In class %s.%s observable pattern '%s' " \
-                                    "did not match any existing attribute." % \
-                                     (cls.__module__, cls.__name__, pat))
+                                    "did not match any existing attribute",
+                                     cls.__module__, cls.__name__, pat)
                 else: conc_prop_set |= set(matches)
             else:  # here pat has to be a logical property
                 log_prop_set.add(pat)
-                pass
-            
-            pass        
-        
+
         return (frozenset(conc_prop_set), frozenset(log_prop_set))
 
     def __create_log_props(cls, log_props, _getdict, _setdict):  # @NoSelf
-        """Creates all the logical property. 
+        """Creates all the logical property.
 
         The list of names of properties to be created is passed
         with frozenset log_props. The getter/setter information is
@@ -243,17 +236,17 @@ class PropertyMeta (type):
         (as not log_props may be really created, e.g. when no
         getter is provided, and a warning is issued).
         """
-        
+
         real_log_props = set()
-        resolved_getdict = {} 
-        resolved_setdict = {} 
+        resolved_getdict = {}
+        resolved_setdict = {}
 
         for _dict_name, _dict, _resolved_dict in (
-                                      ("getter", _getdict, resolved_getdict), 
+                                      ("getter", _getdict, resolved_getdict),
                                       ("setter", _setdict, resolved_setdict)):
             # first resolve all wildcards
-            for pat, ai in ((pat, ai) 
-                            for pat, ai in _dict.iteritems()
+            for pat, ai in ((pat, ai)
+                            for pat, ai in _dict.items()
                             if frozenset(pat) & WILDCARDS):
                 matches = fnmatch.filter(log_props, pat)
                 for match in matches:
@@ -263,44 +256,40 @@ class PropertyMeta (type):
                                         " by patterns" % \
                             (cls.__module__, cls.__name__, _dict_name, match))
                     _resolved_dict[match] = ai
-                    pass
 
                 if not matches:
-                    logger.warning("In class %s.%s %s pattern '%s' " 
+                    logger.warning("In class %s.%s %s pattern '%s' "
                                    "did not match any existing "
-                                   "logical property." % \
-                             (cls.__module__, cls.__name__, _dict_name, pat))
-                    pass
-                pass
+                                   "logical property",
+                                   cls.__module__, cls.__name__, _dict_name, pat)
 
             # now adds the exact matches (no wilcards) which override
             # the pattern-matches
             _resolved_dict.update((name, ai)
-                                  for name, ai in _dict.iteritems()
+                                  for name, ai in _dict.items()
                                   if name in log_props)
 
             # checks that all getter/setter have a corresponding logical
             # property
-            not_found = [name for name in _resolved_dict 
+            not_found = [name for name in _resolved_dict
                          if name not in log_props]
 
             if not_found:
                 logger.warning("In class %s.%s logical %s were declared for "
-                               "non-existent observables: %s" % \
-                  (cls.__module__, cls.__name__, _dict_name, str(not_found)))
-                pass
-            pass
-        
+                               "non-existent observables: %s",
+                               cls.__module__, cls.__name__, _dict_name,
+                               str(not_found))
+
         # creates the properties
         for name in log_props:
             # finds the getter
             ai_get = resolved_getdict.get(name, None)
-            if ai_get: 
+            if ai_get:
                 # decorator-based
-                _getter = type(cls).get_getter(cls, name, ai_get.func, 
+                _getter = type(cls).get_getter(cls, name, ai_get.func,
                                                ai_get.has_args)
                 _deps = ai_get.deps
-            else: 
+            else:
                 # old style
                 _getter = type(cls).get_getter(cls, name)
                 if _getter is None:
@@ -308,51 +297,47 @@ class PropertyMeta (type):
                                        "logical observable '%s' "
                                         "has no getter method" % \
                                   (cls.__module__, cls.__name__, name))
-                _deps = type(cls)._get_old_style_getter_deps(cls, name, 
+                _deps = type(cls)._get_old_style_getter_deps(cls, name,
                                                              _getter)
-                pass
-            
+
             # finds the setter
             ai_set = resolved_setdict.get(name, None)
             if ai_set:
                 # decorator-based
                 if ai_get:
-                    _setter = type(cls).get_setter(cls, name, 
+                    _setter = type(cls).get_setter(cls, name,
                                                 ai_set.func, ai_set.has_args,
                                                 ai_get.func, ai_get.has_args)
                 else:
                     # the getter is old style. _getter is already
                     # resolved wrt the name it may take, so
                     # getter_takes_name is False
-                    _setter = type(cls).get_setter(cls, name, 
+                    _setter = type(cls).get_setter(cls, name,
                                                ai_set.func, ai_set.has_args,
                                                _getter, False)
-                    pass
             else:
                 # old style setter
-                if ai_get: 
-                    _setter = type(cls).get_setter(cls, name, 
+                if ai_get:
+                    _setter = type(cls).get_setter(cls, name,
                                                    None, None,
-                                                   ai_get.func, 
+                                                   ai_get.func,
                                                    ai_get.has_args)
-                else: _setter = type(cls).get_setter(cls, name)
-                pass
-            
-            # creates the logical property, here _setter can be None            
+                else:
+                    _setter = type(cls).get_setter(cls, name)
+
+            # creates the logical property, here _setter can be None
             prop = PropertyMeta.LogicalOP(_getter, _setter, frozenset(_deps))
             setattr(cls, name, prop)
-            real_log_props.add(name)                
-            pass
+            real_log_props.add(name)
 
         # checks that all setters have a getter
         setters_no_getters = (set(resolved_setdict) - real_log_props) & \
                                 log_props
         if setters_no_getters:
             logger.warning("In class %s.%s logical setters have no "
-                           "getters: %s" % \
-                               (cls.__module__, cls.__name__, 
-                                ", ".join(setters_no_getters)))
-            pass
+                           "getters: %s",
+                           cls.__module__, cls.__name__,
+                           ", ".join(setters_no_getters))
 
         return frozenset(real_log_props)
 
@@ -380,21 +365,17 @@ class PropertyMeta (type):
                                 "must be an iterable" % \
                                 (cls.__module__, cls.__name__,
                                  _getter.__name__, KWARG_NAME_DEPS))
-            
+
             for dep in _deps:
-                if not isinstance(dep, types.StringType): 
+                if not isinstance(dep, str):
                     raise TypeError("In logical OP getter %s.%s.%s "
                                     "values of argument '%s' "
                                     "must be strings" % \
                                     (cls.__module__, cls.__name__,
                                      _getter.__name__,
                                      KWARG_NAME_DEPS))
-                pass
-            pass
-        
         except ValueError:
             _deps = ()
-            pass
 
         return _deps
 
@@ -413,16 +394,14 @@ class PropertyMeta (type):
             setattr(cls, getter_name, _getter)
         else:
             logger.debug("Custom member '%s' overloads generated getter "
-                         "of property '%s'" % (getter_name, prop_name))
-            pass
+                         "of property '%s'", getter_name, prop_name)
 
         if setter_name not in members_names:
             _setter = type(cls).get_setter(cls, prop_name)
             setattr(cls, setter_name, _setter)
         else:
             logger.warning("Custom member '%s' overloads generated setter "
-                           "of property '%s'" % (setter_name, prop_name))
-            pass
+                           "of property '%s'", setter_name, prop_name)
 
         # creates the concrete property
         prop = PropertyMeta.ConcreteOP(getattr(cls, getter_name),
@@ -431,32 +410,30 @@ class PropertyMeta (type):
 
         # creates the underlaying variable if needed
         varname = PROP_NAME % {'prop_name' : prop_name}
-        if varname not in members_names: 
+        if varname not in members_names:
             setattr(cls, varname, cls.create_value(varname, default_val))
-            
-        else: logger.warning("In class %s.%s automatic property builder found"
-                             " a possible clashing with attribute '%s'" % \
-                             (cls.__module__, cls.__name__, varname))        
-        return
+
+        else:
+            logger.warning("In class %s.%s automatic property builder found"
+                           " a possible clashing with attribute '%s'",
+                           cls.__module__, cls.__name__, varname)
 
     def has_prop_attribute(cls, prop_name):  # @NoSelf
         """This methods returns True if there exists a class attribute
         for the given property. The attribute is searched locally
         only"""
-        _props = getattr(cls, PROPS_MAP_NAME, {})
+        return (prop_name in cls.__dict__ and
+                not isinstance(cls.__dict__[prop_name], types.FunctionType))
 
-        return (prop_name in cls.__dict__ and 
-                type(cls.__dict__[prop_name]) != types.FunctionType)
-    
     def check_value_change(cls, old, new):  # @NoSelf
         """Checks whether the value of the property changed in type
         or if the instance has been changed to a different instance.
         If true, a call to model._reset_property_notification should
         be called in order to re-register the new property instance
         or type"""
-        return  type(old) != type(new) or \
-               isinstance(old, wrappers.ObsWrapperBase) and (old != new)
-    
+        return (type(old) != type(new) or
+                isinstance(old, wrappers.ObsWrapperBase) and old != new)
+
     def create_value(cls, prop_name, val, model=None):  # @NoSelf
         """This is used to create a value to be assigned to a
         property. Depending on the type of the value, different values
@@ -471,51 +448,52 @@ class PropertyMeta (type):
             # (thanks to Tobias Weber for
             # providing a bug fix to avoid TypeError (in 1.99.1)
             if len(val) == 3:
-                try: 
+                try:
                     wrap_instance = isinstance(val[1], val[0]) and \
                         (isinstance(val[2], tuple) or
                          isinstance(val[2], list))
-                except TypeError: 
+                except TypeError:
                     pass  # not recognized, it must be another type of tuple
                 else:
                     if wrap_instance:
                         res = wrappers.ObsUserClassWrapper(val[1], val[2])
-                        if model: res.__add_model__(model, prop_name)
+                        if model:
+                            res.__add_model__(model, prop_name)
                         return res
-                    pass
-                pass
-            pass
-        
+
         elif isinstance(val, list):
             res = wrappers.ObsListWrapper(val)
-            if model: res.__add_model__(model, prop_name)
+            if model:
+                res.__add_model__(model, prop_name)
             return res
 
         elif isinstance(val, set):
             res = wrappers.ObsSetWrapper(val)
-            if model: res.__add_model__(model, prop_name)
+            if model:
+                res.__add_model__(model, prop_name)
             return res
 
         elif isinstance(val, dict):
             res = wrappers.ObsMapWrapper(val)
-            if model: res.__add_model__(model, prop_name)
+            if model:
+                res.__add_model__(model, prop_name)
             return res
 
         return val
 
     # ------------------------------------------------------------
-    #               Services    
+    #               Services
     # ------------------------------------------------------------
 
     # Override these:
     def get_getter(cls, prop_name,  # @NoSelf
-                   user_getter=None, getter_takes_name=False):  
+                   user_getter=None, getter_takes_name=False):
         """Returns a function wich is a getter for a property.
         prop_name is the name off the property.
 
         user_getter is an optional function doing the work. If
         specified, that function will be called instead of getting
-        the attribute whose name is in 'prop_name'. 
+        the attribute whose name is in 'prop_name'.
 
         If user_getter is specified with a False value for
         getter_takes_name (default), than the method is used to get
@@ -525,14 +503,15 @@ class PropertyMeta (type):
         method which receive the property name whose value has to
         be returned.)
         """
-        if user_getter: 
+        if user_getter:
             if getter_takes_name:  # wraps the property name
                 _deps = type(cls)._get_old_style_getter_deps(cls, prop_name,
                                                              user_getter)
-                
+
                 def _getter(self, deps=_deps):
-                    return user_getter(self, prop_name)                
-            else: _getter = user_getter
+                    return user_getter(self, prop_name)
+            else:
+                _getter = user_getter
             return _getter
 
         def _getter(self):  # @DuplicatedSignature
@@ -553,27 +532,25 @@ class PropertyMeta (type):
         if user_setter:
             if setter_takes_name:
                 # wraps the property name
-                def _setter(self, val): 
+                def _setter(self, val):
                     return user_setter(self, prop_name, val)
             else: _setter = user_setter
             return _setter
-        
+
         def _setter(self, val):  # @DuplicatedSignature
             setattr(self, PROP_NAME % {'prop_name' : prop_name}, val)
             return
         return _setter
 
-    pass  # end of class
+
 # ----------------------------------------------------------------------
-
-
 class ObservablePropertyMeta (PropertyMeta):
-    """Classes instantiated by this meta-class must provide a method named 
+    """Classes instantiated by this meta-class must provide a method named
     notify_property_change(self, prop_name, old, new)"""
-    
+
     def __init__(cls, name, bases, _dict):  # @NoSelf
         PropertyMeta.__init__(cls, name, bases, _dict)
-        return    
+        return
 
     def get_getter(cls, prop_name,  # @NoSelf
                    user_getter=None, getter_takes_name=False):
@@ -583,46 +560,46 @@ class ObservablePropertyMeta (PropertyMeta):
           getter is found, None is returned (i.e. the property cannot
           be created)"""
 
-        has_prop_variable = cls.has_prop_attribute(prop_name) 
+        has_prop_variable = cls.has_prop_attribute(prop_name)
 
         # WARNING! Deprecated
         has_specific_getter = hasattr(cls, GET_PROP_NAME % \
                                       {'prop_name' : prop_name})
         has_general_getter = hasattr(cls, GET_GENERIC_NAME)
 
-        if not (has_prop_variable or 
-                has_specific_getter or 
-                has_general_getter or 
+        if not (has_prop_variable or
+                has_specific_getter or
+                has_general_getter or
                 user_getter):
             return None
-      
+
         # when property variable is given, it overrides all the getters
-        if has_prop_variable:          
-            if has_specific_getter or user_getter: 
+        if has_prop_variable:
+            if has_specific_getter or user_getter:
                 logger.warning("In class %s.%s ignoring custom logical getter "
                                "for property '%s' as a corresponding "
                                "attribute exists" \
-                                  % (cls.__module__, cls.__name__, prop_name))              
-                pass
-          
+                                  % (cls.__module__, cls.__name__, prop_name))
+
             # user_getter is ignored here, so it has not to be passed up
             user_getter = None
             getter_takes_name = False
 
         else:
-    
+
             # uses logical getter. Sees if the getter needs to receive the
             # property name (i.e. if the getter is used for multiple
             # properties)
-            if user_getter: pass
+            if user_getter:
+                pass
             else:
                 if has_specific_getter:
                     _getter = getattr(cls, GET_PROP_NAME % \
                                       {'prop_name' : prop_name})
-                    _deps = type(cls)._get_old_style_getter_deps(cls, 
+                    _deps = type(cls)._get_old_style_getter_deps(cls,
                                                                  prop_name,
                                                                  _getter)
-                    
+
                     # this is done to delay getter call, to have
                     # bound methods to allow overloading of getter in
                     # derived classes
@@ -635,20 +612,17 @@ class ObservablePropertyMeta (PropertyMeta):
                 else:
                     assert has_general_getter
                     _getter = getattr(cls, GET_GENERIC_NAME)
-                    _deps = type(cls)._get_old_style_getter_deps(cls, 
+                    _deps = type(cls)._get_old_style_getter_deps(cls,
                                                                  prop_name,
                                                                  _getter)
-                    
+
                     def __getter(self, name, deps=_deps):
                         _getter = getattr(self, GET_GENERIC_NAME)
                         return _getter(name)
                     user_getter = __getter
                     getter_takes_name = True
-                    pass
-                pass
-            pass
-      
-        return PropertyMeta.get_getter(cls, prop_name, user_getter, 
+
+        return PropertyMeta.get_getter(cls, prop_name, user_getter,
                                        getter_takes_name)
 
     def get_setter(cls, prop_name,  # @NoSelf
@@ -664,10 +638,10 @@ class ObservablePropertyMeta (PropertyMeta):
         has_specific_setter = hasattr(cls, SET_PROP_NAME % \
                                       {'prop_name' : prop_name})
         has_general_setter = hasattr(cls, SET_GENERIC_NAME)
-      
-        if not (has_prop_variable or 
-                has_specific_setter or 
-                has_general_setter or 
+
+        if not (has_prop_variable or
+                has_specific_setter or
+                has_general_setter or
                 user_setter):
             return None
 
@@ -677,13 +651,14 @@ class ObservablePropertyMeta (PropertyMeta):
                                "setter for property '%s' as a "
                                "corresponding attribute exists" % \
                                (cls.__module__, cls.__name__, prop_name))
-                pass 
+
             user_setter = user_getter = None
             setter_takes_name = getter_takes_name = False
         else:
-            if user_setter: pass
+            if user_setter:
+                pass
             else:
-                if has_specific_setter: 
+                if has_specific_setter:
                     def __setter(self, val):
                         _setter = getattr(self, SET_PROP_NAME % \
                                           {'prop_name' : prop_name})
@@ -695,7 +670,7 @@ class ObservablePropertyMeta (PropertyMeta):
                     setter_takes_name = False
                 else:
                     assert has_general_setter
-                    
+
                     def __setter(self, name, val):
                         _setter = getattr(self, SET_GENERIC_NAME)
                         _setter(name, val)
@@ -703,26 +678,22 @@ class ObservablePropertyMeta (PropertyMeta):
                     user_setter = __setter
                     #user_setter = getattr(cls, SET_GENERIC_NAME)
                     setter_takes_name = True
-                    pass
-                pass
-            pass
-  
+
         # the final setter is a combination of a basic setter, and
         # the getter (see how inner_{getter,setter} are used in
         # _setter below)
-        _inner_setter = PropertyMeta.get_setter(cls, prop_name, 
+        _inner_setter = PropertyMeta.get_setter(cls, prop_name,
                                         user_setter, setter_takes_name,
-                                        user_getter, getter_takes_name)      
+                                        user_getter, getter_takes_name)
 
-        _inner_getter = type(cls).get_getter(cls, prop_name, 
-                                             user_getter, getter_takes_name) 
+        _inner_getter = type(cls).get_getter(cls, prop_name,
+                                             user_getter, getter_takes_name)
 
         def _setter(self, val):
             curr_frame = len(self._notify_stack)
             if prop_name not in self._notify_stack:
                 self._notify_stack.append(prop_name)
-                pass
-          
+
             old = _inner_getter(self)
             new = type(self).create_value(prop_name, val, self)
 
@@ -730,39 +701,35 @@ class ObservablePropertyMeta (PropertyMeta):
             olds = self.__before_property_value_change__(prop_name) if \
                 self._has_observer() else ()
             self._notify_stack.extend(
-                            itertools.imap(operator.itemgetter(1), olds))                                    
+                            itertools.imap(operator.itemgetter(1), olds))
 
             # this is the unique place where the value is set:
             _inner_setter(self, new)
-      
-            if type(self).check_value_change(old, new): 
+
+            if type(self).check_value_change(old, new):
                 self._reset_property_notification(prop_name, old)
-                pass
+
             self.notify_property_value_change(prop_name, old, val)
 
             # to notify dependencies
             self.__after_property_value_change__(prop_name, olds)
 
             del self._notify_stack[curr_frame:]
-            return
-        
         return _setter
-    
-    pass  # end of class
+
+
 # ----------------------------------------------------------------------
-
-
 class ObservablePropertyMetaMT (ObservablePropertyMeta):
     """This class provides multithreading support for accessing
        properties, through a locking mechanism. It is assumed a lock is
        owned by the class that uses it. A Lock object called _prop_lock
        is assumed to be a member of the using class. see for example class
        ModelMT"""
-    
+
     def __init__(cls, name, bases, _dict):  # @NoSelf
         ObservablePropertyMeta.__init__(cls, name, bases, _dict)
-        return 
-    
+        return
+
     def get_setter(cls, prop_name,  # @NoSelf
                    user_setter=None, setter_takes_name=False,
                    user_getter=None, getter_takes_name=False):
@@ -773,34 +740,30 @@ class ObservablePropertyMetaMT (ObservablePropertyMeta):
         _inner_setter = ObservablePropertyMeta.get_setter(cls, prop_name,
                                             user_setter, setter_takes_name,
                                             user_getter, getter_takes_name)
-        
+
         def _setter(self, val):
             self._prop_lock.acquire()
             _inner_setter(self, val)
             self._prop_lock.release()
-            return
         return _setter
-    
-    pass  # end of class
 
 
 try:
     from sqlobject import Col  # @UnresolvedImport
     from sqlobject.inheritance import InheritableSQLObject  # @UnresolvedImport
     from sqlobject.events import listen, RowUpdateSignal  # @UnresolvedImport
-  
+
     class ObservablePropertyMetaSQL (InheritableSQLObject.__metaclass__,
                                      ObservablePropertyMeta):
         """Classes instantiated by this meta-class must provide a method
         named notify_property_change(self, prop_name, old, new)"""
 
         def __init__(cls, name, bases, _dict):  # @NoSelf
-            InheritableSQLObject.__metaclass__.__init__(cls, name, bases, 
+            InheritableSQLObject.__metaclass__.__init__(cls, name, bases,
                                                         _dict)
             ObservablePropertyMeta.__init__(cls, name, bases, _dict)
 
             listen(cls.update_listener, cls, RowUpdateSignal)
-            return    
 
         def __create_conc_prop_accessors__(cls,  # @NoSelf
                                            prop_name, default_val):
@@ -808,12 +771,10 @@ try:
                 # this is not a SQLObject column (likely a normal concrete
                 # observable property)
                 ObservablePropertyMeta.__create_conc_prop_accessors__(
-                                                        cls, 
-                                                        prop_name, 
+                                                        cls,
+                                                        prop_name,
                                                         default_val)
-                pass
-            return
-      
+
         def update_listener(cls, instance, kwargs):  # @NoSelf
             conc_pnames, _ = type(cls).__get_observables_sets__(cls)
             for k in kwargs:
@@ -826,31 +787,24 @@ try:
                     # to notify the property observer
                     instance.notify_property_value_change(k, _old, _new)
                     # to notify dependencies
-                    instance.__after_property_value_change__(k, olds)          
-                    pass
-                pass
-            return
-    
-        pass  # end of class
-
-except: pass
-  
-try:
-    from gobject import GObjectMeta
-    
-    class ObservablePropertyGObjectMeta (ObservablePropertyMeta, GObjectMeta): 
-        pass
-    
-    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT, 
-                                           GObjectMeta): 
-        pass    
+                    instance.__after_property_value_change__(k, olds)
 
 except:
-    
-    class ObservablePropertyGObjectMeta (ObservablePropertyMeta): 
-        pass
-    
-    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT): 
-        pass
-    
     pass
+
+try:
+    from gi.types import GObjectMeta
+
+    class ObservablePropertyGObjectMeta (ObservablePropertyMeta, GObjectMeta):
+        pass
+
+    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT,
+                                           GObjectMeta):
+        pass
+
+except:
+    class ObservablePropertyGObjectMeta (ObservablePropertyMeta):
+        pass
+
+    class ObservablePropertyGObjectMetaMT (ObservablePropertyMetaMT):
+        pass

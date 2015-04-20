@@ -23,10 +23,10 @@
 
 
 import types
-import gobject
-import gtk
 import sys
 
+from gi.repository import GLib
+from gi.repository import Gtk
 
 from gtkmvc.observer import Observer
 from gtkmvc.support.log import logger
@@ -55,9 +55,9 @@ def setup_column(widget, column=0, attribute=None, renderer=None,
         renderer = widget.get_cell_renderers()[0]
     if not property:
         for cls, name in [
-            (gtk.CellRendererText, 'text'),
-            (gtk.CellRendererProgress, 'value'),
-            (gtk.CellRendererToggle, 'active'),
+            (Gtk.CellRendererText, 'text'),
+            (Gtk.CellRendererProgress, 'value'),
+            (Gtk.CellRendererToggle, 'active'),
             ]:
             if isinstance(renderer, cls):
                 property = name
@@ -94,9 +94,9 @@ def setup_column(widget, column=0, attribute=None, renderer=None,
             if old is not None:
                 new = cast_value(new, type(old))
         setattr(o, attribute, new)
-    if isinstance(renderer, gtk.CellRendererText):
+    if isinstance(renderer, Gtk.CellRendererText):
         return renderer.connect('edited', callback)
-    elif isinstance(renderer, gtk.CellRendererToggle):
+    elif isinstance(renderer, Gtk.CellRendererToggle):
         return renderer.connect('toggled', callback)
 
 class Controller (Observer):
@@ -147,7 +147,8 @@ class Controller (Observer):
         self.__user_props = set()
         self.__auto_adapt = auto_adapt
 
-        gobject.idle_add(self._idle_register_view, view, priority=gobject.PRIORITY_HIGH)
+        GLib.idle_add(self._idle_register_view, view,
+                      priority=GLib.PRIORITY_HIGH)
 
     def _idle_register_view(self, view):
         """Internal method that calls register_view"""
@@ -220,7 +221,7 @@ class Controller (Observer):
         """
         for name in self.view:
             w = self.view[name]
-            if isinstance(w, gtk.TreeView):
+            if isinstance(w, Gtk.TreeView):
                 m = w.get_model()
                 for c in w.get_columns():
                     self.setup_column(c, model=m)
@@ -273,7 +274,7 @@ class Controller (Observer):
         """
         if isinstance(widget, types.StringType):
             widget = self.view[widget]
-        if not model and isinstance(self.model, gtk.TreeModel):
+        if not model and isinstance(self.model, Gtk.TreeModel):
             model = self.model
         return setup_column(widget, column=column, attribute=attribute,
             renderer=renderer, property=property, from_python=from_python,
@@ -474,7 +475,7 @@ class Controller (Observer):
             raise ValueError("Widget '%s' not found" % wid_name)
 
         # Decides the type of adapters to be created.
-        if isinstance(wid, gtk.Calendar):
+        if isinstance(wid, Gtk.Calendar):
             # calendar creates three adapter for year, month and day
             ad = RoUserClassAdapter(self.model, prop_name,
                                     lambda d: d.year,

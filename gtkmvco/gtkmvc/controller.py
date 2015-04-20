@@ -347,10 +347,10 @@ class Controller (Observer):
             # matches all properties not previoulsy adapter by the user:
             for prop_name in filter(lambda p: p not in self.__user_props, props):
                 try: wid_name = self._find_widget_match(prop_name)
-                except TooManyCandidatesError, e:
+                except TooManyCandidatesError as e:
                     # multiple candidates, gives up
                     raise e
-                except ValueError, e:
+                except ValueError as e:
                     # no widgets found for given property, continue after emitting a warning
                     if e.args:
                         logger.warn(e[0])
@@ -512,7 +512,7 @@ class Controller (Observer):
             ad.connect_widget(wid, flavours=flavour)
             res.append(ad)
 
-        except TypeError, e:
+        except TypeError as e:
             # falls back to a simple adapter
             ad = Adapter(self.model, prop_name,
                          spurious=self.accepts_spurious_change())

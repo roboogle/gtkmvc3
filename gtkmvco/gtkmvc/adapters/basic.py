@@ -143,7 +143,6 @@ class Adapter (Observer):
         self._itsme = False
 
         self._connect_model(model)
-        return
 
     def get_property_name(self):
         """
@@ -203,29 +202,30 @@ class Adapter (Observer):
 
         if None in (getter, setter, signal):
             w = search_adapter_info(wid, flavour)
-            if getter is None: getter = w[GETTER]
+            if getter is None:
+                getter = w[GETTER]
             if setter is None:
                 setter = w[SETTER]
                 wid_type = w[WIDTYPE]
-                pass
 
-            if signal is None: signal = w[SIGNAL]
-            pass
+            if signal is None:
+                signal = w[SIGNAL]
 
         # saves information about the widget
         self._wid_info[wid] = (getter, setter, wid_type)
 
         # connects the widget
         if signal:
-            if arg: wid.connect(signal, self._on_wid_changed, arg)
-            else: wid.connect(signal, self._on_wid_changed)
-            pass
+            if arg:
+                wid.connect(signal, self._on_wid_changed, arg)
+            else:
+                wid.connect(signal, self._on_wid_changed)
 
         self._wid = wid
 
         # updates the widget:
-        if update: self.update_widget()
-        return
+        if update:
+            self.update_widget()
 
     def update_model(self):
         """
@@ -235,9 +235,10 @@ class Adapter (Observer):
         the right signal.
         """
         try: val = self._read_widget()
-        except ValueError: pass
-        else: self._write_property(val)
-        return
+        except ValueError:
+            pass
+        else:
+            self._write_property(val)
 
     def update_widget(self):
         """
@@ -247,7 +248,6 @@ class Adapter (Observer):
         doesn't catch.
         """
         self._write_widget(self._read_property())
-        return
 
 
     # ----------------------------------------------------------------------
@@ -269,7 +269,6 @@ class Adapter (Observer):
                     raise TypeError("Attribute '" + name +
                                     "' was expected to be a Model, but found: " +
                                     str(model))
-                pass
             prop = parts[-1]
         else: prop = parts[0]
 
@@ -283,7 +282,6 @@ class Adapter (Observer):
             # we need to create an observing method before registering
             meth = types.MethodType(self._get_observer_fun(prop), self)
             setattr(self, meth.__name__, meth)
-            pass
 
         self._prop = getattr(model, prop)
         self._prop_name = prop
@@ -291,14 +289,13 @@ class Adapter (Observer):
         # registration of model:
         self._model = model
         self.observe_model(model)
-        return
 
     def _get_observer_fun(self, prop_name):
         """This is the code for an value change observer"""
         def _observer_fun(self, model, old, new):
-            if self._itsme: return
+            if self._itsme:
+                return
             self._on_prop_changed()
-            return
 
         # doesn't affect stack traces
         _observer_fun.__name__ = "property_%s_value_change" % prop_name
@@ -308,7 +305,6 @@ class Adapter (Observer):
         """Private method that returns the value currently stored
         into the property"""
         return getattr(self._model, self._prop_name)
-        #return self._prop # bug fix reported by A. Dentella
 
     def _set_property(self, val):
         """Private method that sets the value currently of the property."""
@@ -322,7 +318,8 @@ class Adapter (Observer):
         *args* is just passed on to :meth:`_get_property`. This does nothing,
         but may be used in subclasses.
         """
-        if self._prop_read: return self._prop_read(self._get_property(*args))
+        if self._prop_read:
+            return self._prop_read(self._get_property(*args))
         return self._get_property(*args)
 
     def _write_property(self, val, *args):
@@ -372,14 +369,12 @@ class Adapter (Observer):
             setter = self._wid_info[self._wid][1]
             wtype = self._wid_info[self._wid][2]
             if setter:
-                if wtype is not None: setter(self._wid, self._cast_value(val, wtype))
-                else: setter(self._wid, val)
-                pass
+                if wtype is not None:
+                    setter(self._wid, self._cast_value(val, wtype))
+                else:
+                    setter(self._wid, val)
         finally:
             self._itsme = False
-            pass
-
-        return
 
     def _cast_value(self, val, totype):
         return cast_value(val, totype)
@@ -391,18 +386,15 @@ class Adapter (Observer):
 
     def _on_wid_changed(self, wid, *args):
         """Called when the widget is changed"""
-        if self._itsme: return
+        if self._itsme:
+            return
         self.update_model()
-        return
 
     def _on_prop_changed(self):
         """Called by the observation code, when the value in the
         observed property is changed"""
-        if self._wid and not self._itsme: self.update_widget()
-        return
-
-    pass # end of class Adapter
-
+        if self._wid and not self._itsme:
+            self.update_widget()
 
 
 #----------------------------------------------------------------------
@@ -428,7 +420,6 @@ class UserClassAdapter (Adapter):
 
         self._getter = self._resolve_to_func(getter)
         self._setter = self._resolve_to_func(setter)
-        return
 
     # ----------------------------------------------------------------------
     # Private methods
@@ -439,22 +430,23 @@ class UserClassAdapter (Adapter):
         bound or unbound method, a function, to make it a
         function. This makes internal handling of setter and getter
         uniform and easier."""
-        if isinstance(what, types.StringType):
+        if isinstance(what, str):
             what = getattr(Adapter._get_property(self), what)
-            pass
 
         # makes it an unbounded function if needed
-        if type(what) == types.MethodType: what = what.im_func
+        if type(what) == types.MethodType:
+            what = what.im_func
 
-        if not type(what) == types.FunctionType: raise TypeError("Expected a method name, a method or a function")
+        if not type(what) == types.FunctionType:
+            raise TypeError("Expected a method name, a method or a function")
         return what
 
 
     def _get_observer_fun(self, prop_name):
         def _observer_fun(self, model, instance, meth_name, res, args, kwargs):
-            if self._itsme: return
+            if self._itsme:
+                return
             self._on_prop_changed(instance, meth_name, res, args, kwargs)
-            return
 
         _observer_fun.__name__ = "property_%s_after_change" % prop_name
         return _observer_fun
@@ -463,23 +455,20 @@ class UserClassAdapter (Adapter):
         """Called by the observation code, when a modifying method
         is called"""
         Adapter._on_prop_changed(self)
-        return
 
     def _get_property(self, *args):
         """Private method that returns the value currently stored
         into the property"""
         val = self._getter(Adapter._get_property(self), *args)
-        if self._prop_read: return self._prop_read(val, *args)
+        if self._prop_read:
+            return self._prop_read(val, *args)
         return val
 
     def _set_property(self, val, *args):
         """Private method that sets the value currently of the property"""
-        if self._prop_write: val = self._prop_write(val)
+        if self._prop_write:
+            val = self._prop_write(val)
         return self._setter(Adapter._get_property(self), val, *args)
-
-    pass # end of class UserClassAdapter
-# ----------------------------------------------------------------------
-
 
 
 #----------------------------------------------------------------------
@@ -505,8 +494,6 @@ class RoUserClassAdapter (UserClassAdapter):
                                   prop_read, prop_write, value_error,
                                   spurious)
 
-        return
-
     # ----------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------
@@ -522,8 +509,6 @@ class RoUserClassAdapter (UserClassAdapter):
     def _set_property(self, val, *args):
         """Private method that sets the value currently of the property"""
         val = UserClassAdapter._set_property(self, val, *args)
-        if val: Adapter._set_property(self, val, *args)
+        if val:
+            Adapter._set_property(self, val, *args)
         return val
-
-    pass # end of class RoUserClassAdapter
-# ----------------------------------------------------------------------

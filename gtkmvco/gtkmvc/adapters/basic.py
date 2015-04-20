@@ -332,23 +332,26 @@ class Adapter (Observer):
         try:
             totype = type(self._get_property(*args))
 
-            if totype is not types.NoneType and (self._prop_cast or not self._prop_write):
+            if totype is not type(None) and (self._prop_cast or not self._prop_write):
                 val = self._cast_value(val, totype)
-            if self._prop_write: val = self._prop_write(val)
+            if self._prop_write:
+                val = self._prop_write(val)
 
             self._itsme = True
             self._set_property(val, *args)
 
         except ValueError:
             self._itsme = False
-            if self._value_error: self._value_error(self, self._prop_name, val_wid)
-            else: raise
-            pass
+            if self._value_error:
+                self._value_error(self, self._prop_name, val_wid)
+            else:
+                raise
 
-        except: self._itsme = False; raise
+        except:
+            self._itsme = False
+            raise
 
         self._itsme = False
-        return
 
     def _read_widget(self):
         """Returns the value currently stored into the widget, after

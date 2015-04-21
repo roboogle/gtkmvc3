@@ -58,7 +58,7 @@ __version = (3,0,0)
 
 # visible classes
 from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
-#from gtkmvc.model_mt import ModelMT
+from gtkmvc.model_mt import ModelMT
 from gtkmvc.controller import Controller
 from gtkmvc.view import View
 from gtkmvc.observer import Observer

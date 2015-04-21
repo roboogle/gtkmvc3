@@ -60,7 +60,7 @@ class Intermediate(Observer):
                 getattr(self.model, self.prop_name), self.path, self.adapter)
 
     def delete_next(self):
-        if self.next:
+        if self.__next__:
             self.next.delete()
             self.next = None
 
@@ -438,7 +438,7 @@ class UserClassAdapter (Adapter):
 
         # makes it an unbounded function if needed
         if type(what) == types.MethodType:
-            what = what.im_func
+            what = what.__func__
 
         if not type(what) == types.FunctionType:
             raise TypeError("Expected a method name, a method or a function")

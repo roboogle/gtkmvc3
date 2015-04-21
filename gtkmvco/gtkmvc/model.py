@@ -687,7 +687,7 @@ class Model (Observer):
         """
         assert prop_name in self.__instance_notif_before
         for method, kw in self.__instance_notif_before[prop_name]:
-            obs = method.im_self
+            obs = method.__self__
             # notifies the change
             if kw is None:  # old style call without name
                 self.__notify_observer__(obs, method,

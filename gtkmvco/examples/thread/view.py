@@ -23,21 +23,14 @@
 
 
 from gtkmvc import View
+
+
 class MyView (View):
-    GLADE = "thread.glade"
-    def __init__(self):
-        View.__init__(self, self.GLADE)
-        return
+    builder = "thread.ui"
 
     def set_label(self, text):
         self['label'].set_markup("<big><b>%s</b></big>" % text)
-        return
 
     def set_info(self, text):
-        text = text.replace("\n", " ")
         text = text.replace("  ", " ")
         self['label_info'].set_markup(text)
-        return
-
-
-    pass # end of class

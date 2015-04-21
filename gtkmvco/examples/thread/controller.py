@@ -22,35 +22,36 @@
 #  Please report bugs to <roboogle@gmail.com>.
 
 
+from gi.repository import Gtk
+
 from gtkmvc import Controller
+
+
 class MyController (Controller):
-    
     def register_view(self, view):
         readme = open("README","r").read()
         view.set_info(readme)
         view.set_label("Hello")
-        return
 
     # gtk signals
-    def on_button_clicked(self, button): self.model.run_test()
+    def on_button_clicked(self, button):
+        self.model.run_test()
 
     def on_window_delete_event(self, window, event):
-        import gtk
-        gtk.main_quit()
+        from gi.repository import Gtk
+        Gtk.main_quit()
         return True
-    
-    # observd properties
+
+    # observed properties
     @Controller.observe("counter", assign=True)
     def counter_change(self, model, prop_name, info):
         self.view.set_label("%d" % info.new)
-        return
 
     @Controller.observe("busy", assign=True)
     def busy_change(self, model, prop_name, info):
         if info.new != info.old:
             self.view['button'].set_sensitive(not info.new)
-            if not info.new: self.view['button'].grab_focus()
-        return
+            if not info.new:
+                self.view['button'].grab_focus()
 
     pass # end of class
-

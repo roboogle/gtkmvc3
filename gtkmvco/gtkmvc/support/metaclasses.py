@@ -193,7 +193,7 @@ class PropertyMeta (type):
                                 (cls.__module__, cls.__name__, OBS_TUPLE_NAME,
                                  type(name)))
             if (name in cls.__dict__ and
-                not isinstance(getattr(cls, name), types.MethodType)):
+                not isinstance(getattr(cls, name), (types.MethodType, types.FunctionType))):
                 conc_prop_set.add(name)
             else:
                 not_found.append(name)

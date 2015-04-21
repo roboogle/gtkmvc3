@@ -29,11 +29,11 @@ from gtkmvc.support.porting import with_metaclass, add_metaclass
 try: import threading as _threading
 except ImportError: import dummy_threading as _threading
 
-import gobject
-if hasattr(gobject, "threads_init"): gobject.threads_init()
-else:
-    import gtk
-    gtk.threads_init()
+from gi.repository import Gtk
+from gi.repository import GObject
+GObject.threads_init()
+
+from gi.repository import GLib
 
 
 @add_metaclass(metaclasses.ObservablePropertyMetaMT)
@@ -49,17 +49,14 @@ class ModelMT (Model):
         Model.__init__(self)
         self.__observer_threads = {}
         self._prop_lock = _threading.Lock()
-        return
 
     def register_observer(self, observer):
         Model.register_observer(self, observer)
         self.__observer_threads[observer] = _threading.currentThread()
-        return
 
     def unregister_observer(self, observer):
         Model.unregister_observer(self, observer)
         del self.__observer_threads[observer]
-        return
 
     # ---------- Notifiers:
 
@@ -75,55 +72,44 @@ class ModelMT (Model):
                                              *args, **kwargs)
 
         # multi-threading call
-        gobject.idle_add(self.__idle_callback, observer, method, args, kwargs)
-        return
+        GLib.idle_add(self.__idle_callback, observer, method, args, kwargs)
 
     def __idle_callback(self, observer, method, args, kwargs):
         method(*args, **kwargs)
         return False
 
 
-    pass # end of class
-
-
-import gtk
 # ----------------------------------------------------------------------
 class TreeStoreModelMT (with_metaclass(
-        support.metaclasses.ObservablePropertyGObjectMetaMT,
-        ModelMT, gtk.TreeStore)):
+        metaclasses.ObservablePropertyGObjectMetaMT,
+        ModelMT, Gtk.TreeStore)):
     """Use this class as base class for your model derived by
-    gtk.TreeStore"""
+    Gtk.TreeStore"""
 
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
-        gtk.TreeStore.__init__(self, column_type, *args)
-        return
-    pass
+        Gtk.TreeStore.__init__(self, column_type, *args)
 
 
 # ----------------------------------------------------------------------
 class ListStoreModelMT (with_metaclass(
-        support.metaclasses.ObservablePropertyGObjectMetaMT,
-        ModelMT, gtk.ListStore)):
+        metaclasses.ObservablePropertyGObjectMetaMT,
+        ModelMT, Gtk.ListStore)):
     """Use this class as base class for your model derived by
-    gtk.ListStore"""
+    Gtk.ListStore"""
 
     def __init__(self, column_type, *args):
         ModelMT.__init__(self)
-        gtk.ListStore.__init__(self, column_type, *args)
-        return
-    pass
+        Gtk.ListStore.__init__(self, column_type, *args)
 
 
 # ----------------------------------------------------------------------
 class TextBufferModelMT (with_metaclass(
-        support.metaclasses.ObservablePropertyGObjectMetaMT,
-        ModelMT, gtk.TextBuffer)):
+        metaclasses.ObservablePropertyGObjectMetaMT,
+        ModelMT, Gtk.TextBuffer)):
     """Use this class as base class for your model derived by
-    gtk.TextBuffer"""
+    Gtk.TextBuffer"""
 
     def __init__(self, table=None):
         ModelMT.__init__(self)
-        gtk.TextBuffer.__init__(self, table)
-        return
-    pass
+        Gtk.TextBuffer.__init__(self, table)

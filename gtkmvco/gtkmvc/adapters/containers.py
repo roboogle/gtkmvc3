@@ -24,7 +24,7 @@
 
 import types
 import weakref
-import gtk
+from gi.repository import Gtk
 
 from gtkmvc.adapters.basic import UserClassAdapter, Adapter
 
@@ -32,25 +32,12 @@ from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc.support.wrappers import ObsMapWrapper
 
-# Just importing gtk only works for Builder, not glade.
-try: import gtk.glade
-except ImportError: pass
-
 # this tries solving the issue in gtk about Builder not setting name
 # correctly. See https://bugzilla.gnome.org/show_bug.cgi?id=591085
 def _get_name(widget):
     try:
-        name = gtk.glade.get_widget_name(widget)
-        if name is not None:
-            # Widget was loaded from XML.
-            return name
-    except AttributeError:
-        # Library wasn't successfully imported.
-        pass
-
-    try:
         # Will be kind instead of name if it wasn't loaded from XML :(
-        return gtk.Buildable.get_name(widget)
+        return Gtk.Buildable.get_name(widget)
     except AttributeError:
         # Gtk is too old.
         pass
@@ -124,9 +111,12 @@ class StaticContainerAdapter (UserClassAdapter):
         will be connected.
         """
 
-        if isinstance(wid, gtk.Container): self._widgets = wid.get_children()
-        elif isinstance(wid, list) or isinstance(wid, tuple): self._widgets = wid
-        else: raise TypeError("widget must be either a gtk.Container or a list or tuple")
+        if isinstance(wid, Gtk.Container):
+            self._widgets = wid.get_children()
+        elif isinstance(wid, (list, tuple)):
+            self._widgets = wid
+        else:
+            raise TypeError("widget must be either a Gtk.Container or a list or tuple")
 
         # prepares the mappings:
         for idx, w in enumerate(self._widgets):
@@ -262,7 +252,7 @@ class watch_items_in_tree(Observer):
         Observe models stored in a list for assignment to their observable
         properties, and notify the container that the row has changed.
 
-        *tree* is a :class:`gtk.TreeModel` instance.
+        *tree* is a :class:`Gtk.TreeModel` instance.
 
         *column* is an integer adressing the column of *tree* that contains
         :class:`gtkmvc.Model` instances.
@@ -276,7 +266,7 @@ class watch_items_in_tree(Observer):
     def on_changed(self, tree, path, iter):
         item = tree.get_value(iter, self.column)
         if item:
-            self.rows[item] = gtk.TreeRowReference(tree, path)
+            self.rows[item] = Gtk.TreeRowReference.new(model=tree, path=path)
             item.register_observer(self)
         return False
 

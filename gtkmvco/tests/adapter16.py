@@ -9,7 +9,7 @@ observing.
 import random
 import re
 
-import gtk
+from gi.repository import Gtk
 
 import _importer
 import gtkmvc
@@ -51,7 +51,7 @@ class AddressBook(gtkmvc.Model):
 
     def __init__(self):
         gtkmvc.Model.__init__(self)
-        self.tree_model = gtk.ListStore(object)
+        self.tree_model = Gtk.ListStore(object)
 
     def add(self, person):
         person.register_observer(self)
@@ -70,14 +70,14 @@ class View(gtkmvc.View):
     def __init__(self):
         gtkmvc.View.__init__(self)
 
-        w = self['window'] = gtk.Window()
-        b = self['touch'] = gtk.Button("Doodle")
-        t = self['tree'] = gtk.TreeView()
-        e = self['name'] = gtk.Entry()
-        v = gtk.VBox()
-        v.pack_start(b)
-        v.pack_start(t)
-        v.pack_start(e)
+        w = self['window'] = Gtk.Window()
+        b = self['touch'] = Gtk.Button("Doodle")
+        t = self['tree'] = Gtk.TreeView()
+        e = self['name'] = Gtk.Entry()
+        v = Gtk.VBox()
+        v.add(b)
+        v.add(t)
+        v.add(e)
         w.add(v)
         w.set_title("Inspect")
         w.set_default_size(200, 100)
@@ -101,16 +101,16 @@ class Controller(gtkmvc.Controller):
         t = self.view['tree']
         t.set_model(self.model.tree_model)
 
-        r = gtk.CellRendererText()
-        c = gtk.TreeViewColumn('Name', r)
+        r = Gtk.CellRendererText()
+        c = Gtk.TreeViewColumn('Name', r)
         c.set_cell_data_func(r, self.render)
         t.append_column(c)
-    
-    def render(self, column, cell, model, iter):
+
+    def render(self, column, cell, model, iter, data=None):
         cell.set_property("text", model[iter][0].name)
 
     def on_window_delete_event(self, window, event):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def on_button_clicked(self, button):
         self.model.doodle()
@@ -122,4 +122,4 @@ m.add(Person("Aron"))
 v = View()
 c = Controller(m, v)
 
-gtk.main()
+Gtk.main()

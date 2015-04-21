@@ -14,7 +14,7 @@ class MyOb (Observer):
         return
 
     @observes("p1")
-    def assign_(self, model, name, old, new): 
+    def assign_(self, model, name, old, new):
         self.notifications.insert(0, (model, name, old, new))
         return
 
@@ -25,15 +25,15 @@ class MyOb (Observer):
     def after_(self, model, name, instance, mname, res, args, kwargs): return
 
     @observes("p4")
-    def signal_(self, model, name, arg): 
+    def signal_(self, model, name, arg):
         self.notifications.insert(0, (model, name, arg))
         return
 
-    
+
     # combination
     @observes("p1")
     @observes("p2", "p3", "p4")
-    def assign_comb(self, model, name, old, new): 
+    def assign_comb(self, model, name, old, new):
         self.notifications.insert(0, (model, name, old, new))
         return
 
@@ -51,23 +51,23 @@ class MyOb (Observer):
 class MyMod (Model):
     p1 = 10
     p4 = Signal()
-    __observables__ = ('p1','p4')   
+    __observables__ = ('p1','p4')
     pass
 
 
 class DeprecatedObservesTest (unittest.TestCase):
-    
+
     def setUp(self):
         self.m = MyMod()
         self.o = MyOb(self.m)
         return
-    
+
     def test_defined(self):
-        for p, s in { 'p1' : set((self.o.assign_, self.o.assign_comb)), 
-                      'p2' : set((self.o.before_, self.o.assign_comb)), 
+        for p, s in { 'p1' : set((self.o.assign_, self.o.assign_comb)),
+                      'p2' : set((self.o.before_, self.o.assign_comb)),
                       'p3' : set((self.o.after_, self.o.assign_comb)),
                       'p4' : set((self.o.signal_, self.o.assign_comb)),
-                      }.iteritems():
+                      }.items():
             os = self.o.get_observing_methods(p)
             self.assertEqual(os, s)
             pass
@@ -114,7 +114,7 @@ class DeprecatedObservesTest (unittest.TestCase):
         self.m.p4.emit("ciao")
         self.assertEqual(self.o.notifications[0], (self.m, 'p4', "ciao"))
         return
-        
+
 
     pass # end of class
 
@@ -122,7 +122,3 @@ class DeprecatedObservesTest (unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-            
-            
-    
-    

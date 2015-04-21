@@ -1,6 +1,6 @@
 import unittest
 
-import gtk
+from gi.repository import Gtk
 
 from _importer import refresh_gui
 
@@ -12,7 +12,7 @@ class Model(gtkmvc.Model):
 
 class Controller(gtkmvc.Controller):
     def register_view(self, view):
-        view['window'] = gtk.Window()
+        view['window'] = Gtk.Window()
 
     def register_adapters(self):
         self.adapt('title', 'window', 'title')

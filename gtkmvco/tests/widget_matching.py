@@ -1,6 +1,6 @@
 import unittest
 
-import gtk
+from gi.repository import Gtk
 
 from _importer import refresh_gui
 
@@ -38,7 +38,7 @@ class T(unittest.TestCase):
     def setUp(self):
         m = Model()
         self.v = View()
-        self.v["wid"] = gtk.Entry()
+        self.v["wid"] = Gtk.Entry()
         self.c = Foo(m, self.v)
         refresh_gui()
 

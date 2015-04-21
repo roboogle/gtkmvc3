@@ -1,5 +1,5 @@
 """
-Test for getter and setter decorators, used in models to define 
+Test for getter and setter decorators, used in models to define
 logical properties
 """
 
@@ -10,20 +10,21 @@ from gtkmvc import Model
 
 import unittest
 
+
 class MyModel (Model):
 
     prop1 = 1 # concrete
-    __observables__ = "prop1 prop2 prop3 prop4 prop5 prop6 "\
-        "prop7 prop8 prop9 prop10 prop11".split()    
-        
+    __observables__ = "prop1 prop2 prop3 prop4 prop5 prop6 " \
+        "prop7 prop8 prop9 prop10 prop11".split()
+
     _prop2 = 2
     # pure old style
     def get_prop2_value(self): return self._prop2
     def set_prop2_value(self, val): self._prop2 = val
-    
+
     # old-style read only
     def get_prop3_value(self): return 3
-    
+
     _prop4 = 4
     # mixed old-style and new style
     def get_prop4_value(self): return self._prop4
@@ -47,7 +48,7 @@ class MyModel (Model):
     # mixed old/new style with names
     def set_prop7_value(self, val): self._prop7 = val
     @Model.getter("prop7")
-    def prop7_named(self, name): 
+    def prop7_named(self, name):
         assert "prop7" == name
         return self._prop7
 
@@ -55,25 +56,25 @@ class MyModel (Model):
     # like before, but inverted
     def get_prop8_value(self): return self._prop8
     @Model.setter("prop8")
-    def prop8_named(self, name, val): 
+    def prop8_named(self, name, val):
         assert "prop8" == name
         self._prop8 = val
         return
-    
+
     _prop9 = 9
     _prop10 = 10
     # pure, named
     @Model.getter("prop9", "prop10")
-    def get_prop9_10_named(self, name): 
+    def get_prop9_10_named(self, name):
         return {"prop9" : self._prop9, "prop10" : self._prop10}[name]
 
     @Model.setter("prop9", "prop10")
-    def set_prop9_10_named(self, name, val): 
+    def set_prop9_10_named(self, name, val):
         if "prop9" == name: self._prop9 = val
         elif "prop10" == name: self._prop10 = val
         else: assert False, name
         return
-    
+
     _prop11 = 11
     # generic old style
     def get__value(self, name):
@@ -81,7 +82,7 @@ class MyModel (Model):
     def set_prop11_value(self, val):
         self._prop11 = val
         return
-        
+
 
     pass # end of class
 # ----------------------------------------------------------------------
@@ -90,10 +91,10 @@ class MyModel (Model):
 class MyModelDerEmpty (MyModel): pass
 
 class MyModelDerOverload (MyModelDerEmpty):
-    def get_prop2_value(self): 
+    def get_prop2_value(self):
         return MyModelDerEmpty.get_prop2_value(self) * 4
 
-    def set_prop2_value(self, val): 
+    def set_prop2_value(self, val):
         MyModelDerEmpty.set_prop2_value(self, val/2)
         return
 
@@ -115,21 +116,21 @@ class MyModelDerOverwrite(MyModelDerOverload):
     def prop3(self): return self._prop3
     @Model.setter
     def prop3(self, val): self._prop3 = val
-        
+
     @Model.getter
     def prop11(self): return 300
     @Model.setter("prop11")
-    def prop11(self, name, val): 
+    def prop11(self, name, val):
         assert "prop11" == name
         pass
     pass # end of class
 
-    
+
 
 class LogicalProps(unittest.TestCase):
-    def setUp(self): 
+    def setUp(self):
         return
-        
+
     # checks that metaclass creates all properties
     def test_base_class_properties_have_been_created(self):
         for name in MyModel.__observables__:
@@ -145,8 +146,6 @@ class LogicalProps(unittest.TestCase):
         m = MyModel()
         for idx, name in enumerate(m.__observables__):
             self.assertEqual(getattr(m, name), idx+1)
-            pass
-        return
 
     # checks that all properties (but readonly) can be written
     def test_base_instance_properties_can_be_written(self):

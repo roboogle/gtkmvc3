@@ -18,4 +18,4 @@ runner = unittest.TextTestRunner()
 runner.run(suite)
 
 # Detect if some unittest.main quit Python.
-print "All done, bye-bye"
+print("All done, bye-bye")

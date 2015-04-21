@@ -1,19 +1,18 @@
 import unittest
 
-import gtk
+from gi.repository import Gtk
 
 import time
-import gtk
 
 # http://unpythonic.blogspot.com/2007/03/unit-testing-pygtk.html
 def refresh_gui(delay=0):
-    while gtk.events_pending():
-        gtk.main_iteration_do(block=False)
+    while Gtk.events_pending():
+        Gtk.main_iteration_do(blocking=False)
     time.sleep(delay)
 
 import _importer
-
 import gtkmvc
+
 
 class M(gtkmvc.Model):
     store = 2.0
@@ -25,6 +24,7 @@ class C(gtkmvc.Controller):
 
     def property_store_value_change(self, model, old, new):
         self.store = (old, new)
+
 
 class T(unittest.TestCase):
     def setUp(self):
@@ -45,7 +45,7 @@ class T(unittest.TestCase):
 
     def testInput(self):
         c = self.testOutput()
-        self.v["spinner"].spin(gtk.SPIN_STEP_FORWARD)
+        self.v["spinner"].spin(Gtk.SpinType.STEP_FORWARD, 1)
         self.assertEqual(3.0, self.m.store)
         self.assertEqual((2.0, 3.0), c.store)
 

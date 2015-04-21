@@ -19,7 +19,7 @@ class UserClass (observable.Observable):
             raise ValueError("x cannot be greater than %d" % self.max_val)
         self.x=v
         return
-        
+
     def get_x(self): return self.x
     pass
 
@@ -39,7 +39,7 @@ class Controller(gtkmvc.Controller):
 class User(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window2")
+        self.v = gtkmvc.View(builder="adapters.ui", top="window2")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 

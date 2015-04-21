@@ -33,7 +33,7 @@ class MyObserver (Observer):
         return
 
     pass # end of class
-    
+
 # ----------------------------------------------------------------------
 
 class MyObserverForced (MyObserver):
@@ -49,9 +49,9 @@ class MyObserverForced (MyObserver):
         self.notif.append(name)
         return
     pass # end of class
-    
+
 # ----------------------------------------------------------------------
-    
+
 
 class SpuriousnessTest(unittest.TestCase):
     def setUp(self):
@@ -66,7 +66,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 0,
                      "prop2" : 0
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -78,7 +78,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 1,
                      "prop2" : 1
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -90,7 +90,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 1,
                      "prop2" : 0
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -102,7 +102,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 2,
                      "prop2" : 3
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -112,13 +112,13 @@ class SpuriousnessTest(unittest.TestCase):
         o = MyObserver(spurious=False)
         o.observe(o.dynamic_notify, "prop?", assign=True)
         o.observe_model(self.m)
-        
+
         self.m.prop1 += 0
         self.m.prop2 += 0
 
         for n,v in { "prop1" : 0,
                      "prop2" : 0
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -133,7 +133,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 2,
                      "prop2" : 2
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -149,7 +149,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 2,
                      "prop2" : 0
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -166,7 +166,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 2,
                      "prop2" : 0
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -183,7 +183,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 3,
                      "prop2" : 3
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return
@@ -200,7 +200,7 @@ class SpuriousnessTest(unittest.TestCase):
 
         for n,v in { "prop1" : 3,
                      "prop2" : 3
-                     }.iteritems():
+                     }.items():
             self.assertEqual(o.count(n), v)
             pass
         return

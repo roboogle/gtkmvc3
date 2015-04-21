@@ -1,7 +1,7 @@
-import gtk
+from gi.repository import Gtk
 
 F = "adapter20.ui"
-b = gtk.Builder()
+b = Gtk.Builder()
 
 # String instead of sequence argument silently fails
 assert 1 == b.add_objects_from_file(F, "store")

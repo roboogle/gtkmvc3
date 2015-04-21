@@ -1,7 +1,5 @@
 import unittest
 
-import gtk
-
 from _importer import refresh_gui
 
 import gtkmvc
@@ -12,13 +10,15 @@ class Model(gtkmvc.Model):
     __observables__ = ["en1"]
 
 class Controller(gtkmvc.Controller):
+
     def on_button1_clicked(self, button):
         self.model.en1 += 1
+
 
 class TwoForOne(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window1")
+        self.v = gtkmvc.View(builder="adapter1.ui", top="window1")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
@@ -43,13 +43,6 @@ class TwoForOne(unittest.TestCase):
         self.assertEqual("5.0", self.v["entry1"].get_text())
         self.assertEqual("10.00", self.v["label1"].get_text())
 
-        # This fails on RHEL because the old gtk.Entry cannot go directly from
-        # one string to another. It will first empty itself and emit a signal
-        # for that. At this point prop_write raises and the entry is reset. It
-        # then "types" the 1 so we end up with 15.
-        # https://bugzilla.gnome.org/show_bug.cgi?id=64998
-        if gtk.gtk_version == (2, 10, 4):
-            return
         self.v["entry1"].set_text("1")
         self.assertEqual("2.00", self.v["label1"].get_text())
 

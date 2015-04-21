@@ -8,8 +8,8 @@ from _importer import refresh_gui
 import gtkmvc
 
 class View(gtkmvc.View):
-    glade = "adapters.glade"
-    top = "window7"
+    builder = "adapters.ui"
+    top = "window6"
 
 class Ctrl(gtkmvc.Controller):
 
@@ -25,7 +25,7 @@ class Ctrl(gtkmvc.Controller):
 
     def on_button7_clicked(self, button):
         pass
-    
+
 class TwoForOne(unittest.TestCase):
     def setUp(self):
         self.m = gtkmvc.Model()

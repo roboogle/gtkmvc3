@@ -5,36 +5,31 @@ Test shows a button and an arrow. Pressing the button should rotate the arrow
 import _importer
 from gtkmvc import Model, Controller, View
 
-import gtk
+from gi.repository import Gtk
 
 
 class MyView (View):
-    glade = "adapters.glade"
+    builder = "adapter9.ui"
     top = "window8"
 
 
 class MyModel (Model):
-    dir = gtk.ARROW_UP
+    dir = Gtk.ArrowType.UP
     __observables__ = ("dir",)
-
-    def __init__(self):
-        Model.__init__(self)
-        return
-    pass
 
 
 class MyCtrl (Controller):
 
+    def register_view(self, view):
+        view.get_top_widget().connect('delete-event', Gtk.main_quit)
+
     def register_adapters(self):
         self.adapt("dir")
-        return
 
     def on_button5_clicked(self, button):
-        vals = [gtk.ARROW_UP, gtk.ARROW_RIGHT, gtk.ARROW_DOWN, gtk.ARROW_LEFT]
+        vals = [Gtk.ArrowType.UP, Gtk.ArrowType.RIGHT,
+                Gtk.ArrowType.DOWN, Gtk.ArrowType.LEFT]
         self.model.dir = vals[(vals.index(self.model.dir)+1) % len(vals)]
-        return
-    
-    pass
 
 # ----------------------------------------------------------------------
 
@@ -42,7 +37,4 @@ m = MyModel()
 v = MyView()
 c = MyCtrl(m, v)
 
-gtk.main()
-
-
-
+Gtk.main()

@@ -23,7 +23,7 @@ class LinearSingleLevel (Model):
 class DerivedModel (LinearSingleLevel):
     # to check that derivation works
     __observables__ = ("log3",)
-    
+
     @Model.getter(deps=["log2"])
     def log3(self): return self.log2+1
     pass
@@ -38,7 +38,7 @@ class DerivedModelWithOverriding (LinearSingleLevel):
 
     @Model.setter
     def log1(self, val): return # dummy
-    
+
     @Model.getter(deps=["log2"])
     def log3(self): return self.log2+1
     pass
@@ -54,7 +54,7 @@ class LinearSingleLevelPattern (Model):
     def log12_get(self, name): return self.conc+1
 
 class LinearMultiLevel (Model):
-    # more complex linear dependency    
+    # more complex linear dependency
     conc = 0
 
     __observables__ = "conc log1 log2 log3".split()
@@ -71,7 +71,7 @@ class LinearMultiLevel (Model):
     @Model.setter("log2", "log1")
     def _setter(self, name, val):
         return # dummy
-    
+
     pass
 
 class LinearMultiLevelWithSetter (Model):
@@ -82,7 +82,7 @@ class LinearMultiLevelWithSetter (Model):
     # chain of notifications is added (conc, log1, and again log2 and
     # log3). The second notifications for log2 and log3 are not sent
     # as they were sent already.
-    
+
     conc = 0
 
     __observables__ = "conc log1 log2".split()
@@ -100,7 +100,7 @@ class LinearMultiLevelWithSetter (Model):
     def _setter(self, name, val):
         self.conc = val - {"log1" : 1,
                            "log2" : 2,}[name]
-        return    
+        return
     pass
 
 
@@ -110,7 +110,7 @@ class BranchSingleLevel (Model):
     conc2 = 1
 
     __observables__ = "conc? log1 log2 log3".split()
-    
+
     @Model.getter(deps=["conc1"])
     def log1(self): return self.conc1+1
 
@@ -141,7 +141,7 @@ class BranchMultiLevel (Model):
     conc2 = 1
 
     __observables__ = "conc? log1 log2 log3".split()
-    
+
     @Model.getter(deps=["conc1"])
     def log1(self): return self.conc1+1
 
@@ -150,7 +150,7 @@ class BranchMultiLevel (Model):
     def log2(self): return self.conc1+self.conc2+self.log1
 
     @Model.getter(deps=["log2"])
-    def log3(self): return self.log2    
+    def log3(self): return self.log2
     pass
 
 
@@ -187,7 +187,7 @@ class InvalidLoop (Model):
 class NonExisting (Model):
     # should raise ValueError, as deps refers to non-existant property
     __observables__ = ("log1",)
-    
+
     @Model.getter(deps=["non-existing"])
     def log1(self): return 0
     pass
@@ -252,7 +252,7 @@ class MyObserver (Observer):
         Observer.__init__(self, spurious=spurious)
         self.rec = []
         return
-    
+
     @Observer.observe("conc", assign=True)
     @Observer.observe("conc1", assign=True)
     @Observer.observe("conc2", assign=True)
@@ -262,7 +262,7 @@ class MyObserver (Observer):
     def notify(self, model, name, info):
         self.rec.append(name)
         return
-    pass 
+    pass
 # ----------------------------------------------------------------------
 
 
@@ -278,14 +278,14 @@ class LogicalPropsDeps (unittest.TestCase):
         m = model_class()
         for o in (self.o1, self.o2): o.observe_model(m)
         return m
-    
+
     # --------------------  TESTS --------------------
     def test_single_linear(self):
         m = self.__model_factory(LinearSingleLevel)
         m.conc += 1
 
         for o in (self.o1, self.o2):
-            for p in m.get_properties():                
+            for p in m.get_properties():
                 self.assertEqual(o.rec.count(p), 1)
                 pass
             pass
@@ -296,7 +296,7 @@ class LogicalPropsDeps (unittest.TestCase):
         m.conc += 1
 
         for o in (self.o1, self.o2):
-            for p in m.get_properties():                
+            for p in m.get_properties():
                 self.assertEqual(o.rec.count(p), 1)
                 pass
             pass
@@ -306,7 +306,7 @@ class LogicalPropsDeps (unittest.TestCase):
         m = self.__model_factory(LinearMultiLevel)
         m.log2 += 1
 
-        for o in (self.o1, self.o2):            
+        for o in (self.o1, self.o2):
             for p in m.get_properties():
                 self.assertEqual(o.rec.count(p),
                                  {'conc' : 0,
@@ -322,7 +322,7 @@ class LogicalPropsDeps (unittest.TestCase):
         m = self.__model_factory(LinearMultiLevelWithSetter)
         m.log2 += 1
 
-        for o in (self.o1, self.o2):            
+        for o in (self.o1, self.o2):
             for p in m.get_properties():
                 self.assertEqual(o.rec.count(p), 1)
                 pass
@@ -338,10 +338,10 @@ class LogicalPropsDeps (unittest.TestCase):
                          "conc2" : 0,
                          "log1" : 1,
                          "log2" : 1,
-                         "log3" : 1}.iteritems():
+                         "log3" : 1}.items():
                 self.assertEqual(o.rec.count(p), v)
                 pass
-            pass        
+            pass
         return
 
     def test_single_branch_from_conc2(self):
@@ -353,12 +353,12 @@ class LogicalPropsDeps (unittest.TestCase):
                          "conc2" : 1,
                          "log1" : 0,
                          "log2" : 0,
-                         "log3" : 1}.iteritems():
+                         "log3" : 1}.items():
                 self.assertEqual(o.rec.count(p), v)
                 pass
-            pass        
+            pass
         return
-    
+
     def test_multi_branch_from_conc1(self):
         m = self.__model_factory(BranchMultiLevel)
         m.conc1 += 1
@@ -368,7 +368,7 @@ class LogicalPropsDeps (unittest.TestCase):
                          "conc2" : 0,
                          "log1" : 1, # *
                          "log2" : 1, # *
-                         "log3" : 1}.iteritems():
+                         "log3" : 1}.items():
                 self.assertEqual(o.rec.count(p), v)
                 pass
             pass
@@ -415,7 +415,7 @@ class LogicalPropsDeps (unittest.TestCase):
                                   'log3' : 0
                                   }[p])
                 pass
-            pass        
+            pass
         return
 
     def test_derivation3(self):
@@ -431,7 +431,7 @@ class LogicalPropsDeps (unittest.TestCase):
                                   'log3' : int(o.accepts_spurious_change()),
                                   }[p])
                 pass
-            pass        
+            pass
         return
 
     def test_pattern(self):
@@ -442,7 +442,7 @@ class LogicalPropsDeps (unittest.TestCase):
             for p in "conc log1 log2".split():
                 self.assertEqual(o.rec.count(p), 1)
                 pass
-            pass     
+            pass
         return
 
     def test_single_linear_old_style(self):
@@ -450,7 +450,7 @@ class LogicalPropsDeps (unittest.TestCase):
         m.conc += 1
 
         for o in (self.o1, self.o2):
-            for p in m.get_properties():                
+            for p in m.get_properties():
                 self.assertEqual(o.rec.count(p), 1)
                 pass
             pass
@@ -463,12 +463,10 @@ class LogicalPropsDeps (unittest.TestCase):
     def test_erroneous_old_style_type2(self):
         self.assertRaises(TypeError, make_ErroneousTypeElementOldStyle)
         return
-        
-    
+
+
     pass # end of class
 
 
 if __name__ == "__main__":
     unittest.main()
-
-

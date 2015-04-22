@@ -16,7 +16,7 @@ mechanism can be used also to decouple (isolate) models and other
 entities in the application logics. For example, models can be
 observed by other models.
 
-In *gtkmvc* Models' state has been extended with a mechanism called
+In *gtkmvc3* Models' state has been extended with a mechanism called
 *Observable Properties*. An observable property is a part of the
 Model state which is also externally observable via an
 *Observer*. Every time an observable property changes, any

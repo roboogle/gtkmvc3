@@ -27,7 +27,7 @@
 from yomanlib.utils import _importer
 from yomanlib.utils import globals
 
-from gtkmvc import View
+from gtkmvc3 import View
 import gtk, gobject
 import os
 

@@ -12,14 +12,14 @@ import re
 from gi.repository import Gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Selection(gtkmvc.adapters.basic.Adapter):
+class Selection(gtkmvc3.adapters.basic.Adapter):
     def __init__(self, model, prop_name, empty):
         if not getattr(model, prop_name):
             setattr(model, prop_name, empty)
         self.empty_model = empty
-        gtkmvc.adapters.basic.Adapter.__init__(self, model, prop_name)
+        gtkmvc3.adapters.basic.Adapter.__init__(self, model, prop_name)
 
     def connect_widget(self, treeview):
         sel = treeview.get_selection()
@@ -31,26 +31,26 @@ class Selection(gtkmvc.adapters.basic.Adapter):
                 return self.empty_model
         def setter(s, v):
             pass
-        gtkmvc.adapters.basic.Adapter.connect_widget(self, sel,
+        gtkmvc3.adapters.basic.Adapter.connect_widget(self, sel,
             getter, setter, "changed")
 
-class Person(gtkmvc.Model):
+class Person(gtkmvc3.Model):
     name = None
     __observables__ = ("name",)
 
     def __init__(self, name):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.name = name
 
     def lengthen(self):
         self.name = re.sub(r'(?i)([aeiou])', r'\1\1', self.name, 1).capitalize()
 
-class AddressBook(gtkmvc.Model):
+class AddressBook(gtkmvc3.Model):
     selected = None
     __observables__ = ("selected",)
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.tree_model = Gtk.ListStore(object)
 
     def add(self, person):
@@ -66,9 +66,9 @@ class AddressBook(gtkmvc.Model):
         r = random.choice(self.tree_model)
         r[0].lengthen()
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     def __init__(self):
-        gtkmvc.View.__init__(self)
+        gtkmvc3.View.__init__(self)
 
         w = self['window'] = Gtk.Window()
         b = self['touch'] = Gtk.Button("Doodle")
@@ -83,7 +83,7 @@ class View(gtkmvc.View):
         w.set_default_size(200, 100)
         w.show_all()
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view['window'].connect('delete-event', self.on_window_delete_event)
         view['touch'].connect('clicked', self.on_button_clicked)

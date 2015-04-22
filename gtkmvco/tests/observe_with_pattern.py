@@ -4,7 +4,7 @@ Test for Observer.observe() with patterns in property name
 """
 
 import _importer
-from gtkmvc import Model, Observer
+from gtkmvc3 import Model, Observer
 
 import operator
 import unittest

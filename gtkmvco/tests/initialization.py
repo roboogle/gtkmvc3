@@ -8,7 +8,7 @@ import unittest
 
 import _importer
 
-from gtkmvc import Model
+from gtkmvc3 import Model
 
 class M(Model):
     concrete = None

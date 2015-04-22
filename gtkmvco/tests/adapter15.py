@@ -7,20 +7,20 @@ import time
 from gi.repository import Gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     next = None
     __observables__ = ("next",)
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.next = time.time()
 
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     def __init__(self):
-        gtkmvc.View.__init__(self)
+        gtkmvc3.View.__init__(self)
 
         w = self['window'] = Gtk.Window()
         l = self['time'] = Gtk.Label()
@@ -36,7 +36,7 @@ class View(gtkmvc.View):
         w.show_all()
 
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view['window'].connect('delete-event', self.on_window_delete_event)
         for i in range(3):

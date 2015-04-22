@@ -18,7 +18,7 @@
 
 from functools import partial as UndoOperation
 
-import gtkmvc
+import gtkmvc3
 
 class UndoGroup(list):
     name = ""
@@ -27,7 +27,7 @@ class UndoGroup(list):
         for operation in reversed(self):
             operation()
 
-class UndoModel(gtkmvc.Model):
+class UndoModel(gtkmvc3.Model):
     """
     An action by the user may result in multiple operations.
 
@@ -40,7 +40,7 @@ class UndoModel(gtkmvc.Model):
     __observables__ = ["??do*"]
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
 
         self._undo = []
         self._redo = []
@@ -56,7 +56,7 @@ class UndoModel(gtkmvc.Model):
         self.undo_label = ("Undo %s" % self.undo_action_name()).rstrip()
         self.redo_label = ("Redo %s" % self.redo_action_name()).rstrip()
 
-    @gtkmvc.Observer.observe('*', assign=True)
+    @gtkmvc3.Observer.observe('*', assign=True)
     def on_assign(self, item, prop_name, info):
         self.begin_grouping()
         self.register(setattr, item, prop_name, info.old)

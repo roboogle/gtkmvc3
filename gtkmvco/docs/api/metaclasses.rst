@@ -6,7 +6,7 @@ This page contains the Support Package documentation.
 The :mod:`metaclasses` Module
 -----------------------------
 
-.. module:: gtkmvc.support.metaclasses
+.. module:: gtkmvc3.support.metaclasses
 
 .. autoclass:: PropertyMeta
     :members:
@@ -41,7 +41,7 @@ The :mod:`metaclasses` Module
 The :mod:`decorators` Module
 ----------------------------
 
-.. automodule:: gtkmvc.support.decorators
+.. automodule:: gtkmvc3.support.decorators
     :members:
     :undoc-members:
     :show-inheritance:

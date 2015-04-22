@@ -3,12 +3,12 @@
 #
 #  Copyright (C) 2006 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -18,13 +18,13 @@
 #  51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.ridge, MA 02139, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author <roboogle@gmail.com>.
 #  -------------------------------------------------------------------------
 
 
-from gtkmvc.support import decorators, log
-from gtkmvc.support.wrappers import ObsWrapperBase
+from gtkmvc3.support import decorators, log
+from gtkmvc3.support.wrappers import ObsWrapperBase
 
 
 class Observable (ObsWrapperBase):

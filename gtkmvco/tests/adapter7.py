@@ -4,7 +4,7 @@ the other button should increment the entry by one. The label should show the
 same value.
 """
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc3 import Model, Controller, View
 
 from gi.repository import Gtk
 

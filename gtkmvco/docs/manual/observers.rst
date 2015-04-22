@@ -8,10 +8,10 @@ If OPs live into ``Models``, ``Observers`` are the objects which are
 interested in being notified when an OP gets changed. An Observer
 observes one or more Models.
 
-A typical observer is an instance of class :ref:`gtkmvc.Controller<CONTROLLERS>` which
-derive from :class:`gtkmvc.Observer`.
+A typical observer is an instance of class :ref:`gtkmvc3.Controller<CONTROLLERS>` which
+derive from :class:`gtkmvc3.Observer`.
 
-Also :ref:`gtkmvc.Model<MODELS>` derives from :class:`gtkmvc.Observer`, as
+Also :ref:`gtkmvc3.Model<MODELS>` derives from :class:`gtkmvc3.Observer`, as
 in hierarchies of models parents sometimes observe children.
 
 .. Important::
@@ -102,7 +102,7 @@ an OP? It is possible to declare notification methods *statically* or
 
 1. **Statically** with decorator ``@Observer.observe``. For example::
 
-    from gtkmvc import Observer
+    from gtkmvc3 import Observer
     class MyObserver (Observer):
 
       @Observer.observe('prop1', assign=True)
@@ -125,7 +125,7 @@ an OP? It is possible to declare notification methods *statically* or
 
 2. **Dynamically** with method ``Observer.observe``. For example::
 
-    from gtkmvc import Observer
+    from gtkmvc3 import Observer
     class MyObserver (Observer):
 
       def __init__(self):
@@ -200,7 +200,7 @@ With patterns it is possible to declare notification methods which are
 called for properties whose names match a syntactical rule. For
 example::
 
-   from gtkmvc import Observer
+   from gtkmvc3 import Observer
    class MyObserver (Observer):
 
       @Observer.observe('prop[1234]', assign=True, signal=True)
@@ -238,7 +238,7 @@ notifications at runtime::
    (for decorators), or when `Observer.observe` is called (for dynamic
    declarations). For example this is **not** allowed::
 
-    from gtkmvc import Observer
+    from gtkmvc3 import Observer
     class MyObserver (Observer):
 
       # ERROR
@@ -356,7 +356,7 @@ Common to all types
        The model instance containing the OP which     
        has been changed.                                   
                                                       
-       :type: `gtkmvc.Model`                          
+       :type: `gtkmvc3.Model`                          
                                                       
     .. attribute:: prop_name                          
                                                       
@@ -506,7 +506,7 @@ untouched in derived classes.
 
 For example::
 
- from gtkmvc import Observer, Model, Signal
+ from gtkmvc3 import Observer, Model, Signal
 
  class MyModel (Model):
      prop1 = Signal()
@@ -537,8 +537,8 @@ The execution of this code will output::
  { 'model': <__main__.MyModel object ...>,
    'prop_name': 'prop1', 
    'assign': True, 
-   'old': <gtkmvc.observable.Signal object at 0x12a6110>, 
-   'new': <gtkmvc.observable.Signal object at 0x12a64d0>, 
+   'old': <gtkmvc3.observable.Signal object at 0x12a6110>, 
+   'new': <gtkmvc3.observable.Signal object at 0x12a64d0>, 
    'user_data': 'my-data-in-BaseObs' }
 
 As you see the actually called method is
@@ -554,7 +554,7 @@ declaration in derived class. It is important to notice here that when
 notifications in derived classes are redefined, notifications in base
 classes are hidden. For example::
 
- from gtkmvc import Observer, Model, Signal
+ from gtkmvc3 import Observer, Model, Signal
 
  class MyModel (Model):
      prop1 = Signal()
@@ -616,8 +616,8 @@ The execution produces two notifications as expected::
  { 'model': <__main__.MyModel object ...>, 
    'prop_name': 'prop1', 
    'assign': True, 
-   'old': <gtkmvc.observable.Signal object at 0x7fc5098ab110>, 
-   'new': <gtkmvc.observable.Signal object at 0x7fc5098ab4d0>, 
+   'old': <gtkmvc3.observable.Signal object at 0x7fc5098ab110>, 
+   'new': <gtkmvc3.observable.Signal object at 0x7fc5098ab4d0>, 
    'user_data': 'my-data-in-DerObs',    
    'other_data': 'other-data-in-DerObs' }
 

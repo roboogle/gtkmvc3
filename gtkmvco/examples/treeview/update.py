@@ -19,22 +19,22 @@
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Person(gtkmvc.Model):
+class Person(gtkmvc3.Model):
     name = ''
     __observables__ = ('name',)
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_adapters(self):
-        gtkmvc.adapters.containers.watch_items_in_tree(self.view['liststore1'])
+        gtkmvc3.adapters.containers.watch_items_in_tree(self.view['liststore1'])
         self.setup_columns()
 
     def on_add_clicked(self, button):
         t = self.view['liststore1']
         m = Person()
-        v = gtkmvc.View(builder='single.ui')
-        c = gtkmvc.Controller(m, v, auto_adapt=True)
+        v = gtkmvc3.View(builder='single.ui')
+        c = gtkmvc3.Controller(m, v, auto_adapt=True)
         t.append([m])
 
     def on_remove_clicked(self, button):
@@ -42,8 +42,8 @@ class Controller(gtkmvc.Controller):
         t, i = self.view['treeview1'].get_selection().get_selected()
         t.remove(i)
 
-m = gtkmvc.Model()
-v = gtkmvc.View(builder='update.ui')
+m = gtkmvc3.Model()
+v = gtkmvc3.View(builder='update.ui')
 c = Controller(m, v)
 
 gtk.main()

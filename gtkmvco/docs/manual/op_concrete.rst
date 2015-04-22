@@ -12,7 +12,7 @@ from outside (e.g. from a database).
 *names* are declared in a special class member
 ``__observables__``. ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto"
@@ -49,7 +49,7 @@ starting with a double underscore ``__`` will be not matched.
    This is an example of usage of deprecated ``__properties__``,
    but you will not find another in this manual: ::
 
-    from gtkmvc import Model
+    from gtkmvc3 import Model
     class MyModelDeprecated (Model):
           __properties__ = { 
           'name' : 'Rob',
@@ -58,7 +58,7 @@ starting with a double underscore ``__`` will be not matched.
 
 This is another example showing the usage of wildcards in names: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto"
@@ -96,7 +96,7 @@ Oriented rules:
 
 For example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
 
  class Base (Model):
     prop1 = 1

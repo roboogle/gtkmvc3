@@ -2,7 +2,7 @@ import time
 
 from gi.repository import Gtk
 
-# https://sourceforge.net/apps/trac/pygtkmvc/ticket/46
+# https://sourceforge.net/apps/trac/pygtkmvc3/ticket/46
 def RadioAction__notify_current_value(widget, handler, *args):
     """
     With GTK 2.22.1 the first time a group of RadioButton changes neither
@@ -31,7 +31,7 @@ def RadioAction__notify_current_value(widget, handler, *args):
     if len(active) == 1:
         handler(widget, None, *args)
 
-# https://sourceforge.net/apps/trac/pygtkmvc/ticket/50
+# https://sourceforge.net/apps/trac/pygtkmvc3/ticket/50
 def connect(widget, signal, handler, *args):
     """
     Use this instead of *widget*.connect if you want GTKMVC to

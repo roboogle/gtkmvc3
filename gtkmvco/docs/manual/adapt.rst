@@ -88,9 +88,9 @@ We have a hand-made View containing a button and a text
 entry. Notice that the name of the text entry is
 ``entry_text``. ::
 
- class MyView (gtkmvc.View):
+ class MyView (gtkmvc3.View):
      def __init__(self):
-         gtkmvc.View.__init__(self)
+         gtkmvc3.View.__init__(self)
  
          w = gtk.Window(); e = gtk.Entry(); b = gtk.Button("Press")
          h = gtk.VBox(); h.add(e); h.add(b); w.add(h)
@@ -105,7 +105,7 @@ entry. Notice that the name of the text entry is
 The model contains an observable property that should always 
 reflect the content of the text entry ``entry_text``. ::
 
- class MyModel (gtkmvc.Model):
+ class MyModel (gtkmvc3.Model):
      text : "Ciao"
      __observables__ = ("test",)
  
@@ -114,7 +114,7 @@ reflect the content of the text entry ``entry_text``. ::
 As usual, the controller is the most complex part, but by exploiting
 an adapter it gets pretty much simplified. ::
 
- class MyCtrl (gtkmvc.Controller):
+ class MyCtrl (gtkmvc3.Controller):
      def register_adapters(self):
          self.adapt("text")
          return

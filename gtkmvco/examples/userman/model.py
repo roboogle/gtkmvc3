@@ -1,5 +1,5 @@
-import _importer # this is an helper to import gtkmvc
-from gtkmvc import Model
+import _importer # this is an helper to import gtkmvc3
+from gtkmvc3 import Model
 
 class ExampleModel (Model):
     """The model contains a set of messages

@@ -2,7 +2,7 @@
 ## Copyright (C) 2009 Roberto Cavada
 
 import _importer
-from gtkmvc import Model, Observer
+from gtkmvc3 import Model, Observer
 
 class MyModel(Model):
     seq = []

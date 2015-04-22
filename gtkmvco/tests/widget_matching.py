@@ -4,13 +4,13 @@ from gi.repository import Gtk
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     prop = None
     __observables__ = ("prop",)
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     def __contains__(self, key):
         """
         If __contains__ isn't implemented the `key in view` operator uses
@@ -22,7 +22,7 @@ class View(gtkmvc.View):
         except KeyError:
             return False
 
-class Foo(gtkmvc.Controller):
+class Foo(gtkmvc3.Controller):
     def _find_widget_match(self, prop_name):
         """
         Don't try matching widgets because it doesn't work for some types.

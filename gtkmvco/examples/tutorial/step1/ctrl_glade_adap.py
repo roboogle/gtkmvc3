@@ -14,7 +14,7 @@
 
 # This is file ctrl_glade_adapt.py
 import _importer
-from gtkmvc import Controller
+from gtkmvc3 import Controller
 import gtk
 
 class MyControllerAdap (Controller):
@@ -34,7 +34,7 @@ class MyControllerAdap (Controller):
         #self.adapt("counter", "label")
 
         # This is for a custom adapter
-        from gtkmvc import adapters
+        from gtkmvc3 import adapters
         a = adapters.Adapter(self.model, "counter")
         a.connect_widget(self.view['label'], 
                          setter=lambda w,v: 

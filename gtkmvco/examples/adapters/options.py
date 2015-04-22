@@ -3,7 +3,7 @@
 import _importer
 
 import gtk
-from gtkmvc import View
+from gtkmvc3 import View
 class MyView (View):
     glade = "options.glade"
     top = "window1"
@@ -15,7 +15,7 @@ class MyView (View):
 	  
     pass # end of class
 
-from gtkmvc import Model
+from gtkmvc3 import Model
 class MyModel(Model):
     use_rb1 = True
     option1 = 5
@@ -31,7 +31,7 @@ class MyModel(Model):
     pass # end of class
 
 
-from gtkmvc import Controller
+from gtkmvc3 import Controller
 class MyController(Controller):
 
     def register_view(self, view):

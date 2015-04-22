@@ -4,7 +4,7 @@ Model Classes
 There are several possible ways to derive your model. All look the same
 to a :class:`Controller`.
 
-.. module:: gtkmvc.model
+.. module:: gtkmvc3.model
 
 .. autoclass:: Model
     :members:
@@ -40,7 +40,7 @@ Specific widgets
 Threading
 ---------
 
-.. module:: gtkmvc.model_mt
+.. module:: gtkmvc3.model_mt
 
 .. autoclass:: ModelMT
 

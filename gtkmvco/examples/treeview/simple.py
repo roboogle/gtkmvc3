@@ -19,15 +19,15 @@
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Person(gtkmvc.Model):
+class Person(gtkmvc3.Model):
     name = ''
     age = 0
     license = False
     __observables__ = ('name', 'age')
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         m = view['liststore1']
 
@@ -45,8 +45,8 @@ class Controller(gtkmvc.Controller):
     def register_adapters(self):
         self.setup_columns()
 
-m = gtkmvc.Model()
-v = gtkmvc.View(builder='simple.ui')
+m = gtkmvc3.Model()
+v = gtkmvc3.View(builder='simple.ui')
 c = Controller(m, v)
 
 gtk.main()

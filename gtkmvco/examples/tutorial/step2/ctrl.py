@@ -11,8 +11,8 @@
 # Lesser General Public License for more details.
 
 import _importer
-from gtkmvc import Controller
-from gtkmvc.adapters import Adapter
+from gtkmvc3 import Controller
+from gtkmvc3.adapters import Adapter
 import gtk
 
 

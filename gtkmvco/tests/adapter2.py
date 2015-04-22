@@ -2,9 +2,9 @@ import unittest
 
 from _importer import refresh_gui
 
-import gtkmvc
-from gtkmvc.adapters.basic import UserClassAdapter
-from gtkmvc import observable
+import gtkmvc3
+from gtkmvc3.adapters.basic import UserClassAdapter
+from gtkmvc3 import observable
 
 class UserClass (observable.Observable):
     def __init__(self, max_val):
@@ -23,11 +23,11 @@ class UserClass (observable.Observable):
     def get_x(self): return self.x
     pass
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     x = UserClass(10)
     __observables__ = ["x"]
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     caught = False
 
     def on_button2_clicked(self, button):
@@ -39,7 +39,7 @@ class Controller(gtkmvc.Controller):
 class User(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="adapters.ui", top="window2")
+        self.v = gtkmvc3.View(builder="adapters.ui", top="window2")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 

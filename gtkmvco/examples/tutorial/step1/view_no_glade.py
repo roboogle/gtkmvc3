@@ -11,7 +11,7 @@
 # Lesser General Public License for more details.
 
 import _importer
-from gtkmvc import View
+from gtkmvc3 import View
 import gtk
 
 # ----------------------------------------------------------------------

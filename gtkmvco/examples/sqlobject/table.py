@@ -27,7 +27,7 @@ import gtk
 import sqlobject
 from sqlobject import events
 
-import gtkmvc
+import gtkmvc3
 
 class TableStore(gtk.ListStore):
     def __init__(self, cls):
@@ -67,7 +67,7 @@ class TableStore(gtk.ListStore):
 class Person(sqlobject.SQLObject):
     name = sqlobject.UnicodeCol()
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     handlers='class'
 
     def register_view(self, view):
@@ -94,5 +94,5 @@ if __name__ == '__main__':
 
     Person(name="John")
 
-    Controller(gtkmvc.Model(), gtkmvc.View(builder='table.ui'))
+    Controller(gtkmvc3.Model(), gtkmvc3.View(builder='table.ui'))
     gtk.main()

@@ -1,7 +1,7 @@
 Observers
 =========
 
-.. module:: gtkmvc.observer
+.. module:: gtkmvc3.observer
 
 .. autofunction:: observes(*args)
 

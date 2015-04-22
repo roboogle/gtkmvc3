@@ -1,6 +1,6 @@
 import _importer
 
-from gtkmvc import Model, Observer
+from gtkmvc3 import Model, Observer
 
 class Adder(Model):
     # With None the sum getter would raise on getting the "old" value for

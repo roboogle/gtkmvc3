@@ -2,18 +2,18 @@ import unittest
 
 from _importer import refresh_gui
 
-import gtkmvc
-from gtkmvc.adapters.containers import StaticContainerAdapter
+import gtkmvc3
+from gtkmvc3.adapters.containers import StaticContainerAdapter
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     box = None
     __observables__ = ["box"]
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.box = [0, 1, 2]
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     index = 0
 
     def on_button3_clicked(self, button):
@@ -24,7 +24,7 @@ class Controller(gtkmvc.Controller):
 class ConnectTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="adapters.ui", top="window3")
+        self.v = gtkmvc3.View(builder="adapters.ui", top="window3")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
@@ -55,7 +55,7 @@ class ConnectTest(unittest.TestCase):
 class SetterTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="adapters.ui", top="window4")
+        self.v = gtkmvc3.View(builder="adapters.ui", top="window4")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
@@ -82,7 +82,7 @@ class SetterTest(unittest.TestCase):
 class DictTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="adapters.ui", top="window4")
+        self.v = gtkmvc3.View(builder="adapters.ui", top="window4")
         self.c = Controller(self.m, self.v)
         refresh_gui()
         self.m.box = dict(en4=0, lbl4=1, sb4=2)

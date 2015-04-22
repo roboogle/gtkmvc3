@@ -1,9 +1,9 @@
 The View
 ========
 
-.. module:: gtkmvc.view
+.. module:: gtkmvc3.view
 
-.. autoclass:: gtkmvc.view.View
+.. autoclass:: gtkmvc3.view.View
     :members:
 
     .. automethod:: __getitem__

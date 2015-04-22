@@ -36,7 +36,7 @@ model communicates indirectly with the presentation side through the
 observer pattern.
 
 
-*gtkmvc* is a framework that implements both the MVC and Observer
+*gtkmvc3* is a framework that implements both the MVC and Observer
 patterns to be used to produce middle/large applications in Python and
 *PyGTK*.
 

@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
@@ -28,10 +28,10 @@ import datetime
 import shutil
 from string import Template
 
-from gtkmvc import Model
-from gtkmvc.progen import templates
+from gtkmvc3 import Model
+from gtkmvc3.progen import templates
 # relpath is taken from utils here for portability
-from gtkmvc.support.utils import relpath
+from gtkmvc3.support.utils import relpath
 
 # ----------------------------------------------------------------------
 # Logging stuff
@@ -75,12 +75,12 @@ class ProgenModel (Model):
     src_name      = "src"
     res_name      = "resources"
     top_widget    = "window_appl"
-    dist_gtkmvc = True
+    dist_gtkmvc3 = True
 
     __observables__ = ("name", "builder", "builder_fn", "author",
                        "email", "copyright", "destdir", "complex",
                        "src_header", "other_comment", "src_name",
-                       "res_name", "top_widget", "dist_gtkmvc",
+                       "res_name", "top_widget", "dist_gtkmvc3",
                        )
 
 
@@ -133,7 +133,7 @@ class ProgenModel (Model):
         if self.builder:
             res = self.__generate_builder(resources) or res
 
-        if self.dist_gtkmvc: res = self.__copy_framework(os.path.join(resources, "external")) or res
+        if self.dist_gtkmvc3: res = self.__copy_framework(os.path.join(resources, "external")) or res
 
         if not res: _log("No actions were taken")
         else: _log("Done")
@@ -193,15 +193,15 @@ class ProgenModel (Model):
                                                    })
 
     def __copy_framework(self, destdir):
-        # copies gtkmvc packages, creating a zip package
+        # copies gtkmvc3 packages, creating a zip package
         if not os.path.isdir(destdir): return False
 
-        from gtkmvc.progen.globals import GTKMVC_DIR
+        from gtkmvc3.progen.globals import GTKMVC_DIR
         if GTKMVC_DIR is None:
-            _log("Warning: the gtkmvc framework was not found")
+            _log("Warning: the gtkmvc3 framework was not found")
             return False
 
-        _log("The gtkmvc framework was found in '%s'" % GTKMVC_DIR)
+        _log("The gtkmvc3 framework was found in '%s'" % GTKMVC_DIR)
 
         # creates destdir
         if not os.path.isdir(destdir):
@@ -210,12 +210,12 @@ class ProgenModel (Model):
             pass
 
         # copies the source files
-        gtkmvc_parent = os.path.dirname(GTKMVC_DIR)
+        gtkmvc3_parent = os.path.dirname(GTKMVC_DIR)
         for root, dirs, files in os.walk(GTKMVC_DIR):
             if ".svn" in dirs: dirs.remove(".svn")
             if "progen" in dirs: dirs.remove("progen")
 
-            relroot = relpath(root, gtkmvc_parent)
+            relroot = relpath(root, gtkmvc3_parent)
             pyfiles = glob.glob(os.path.join(root, "*.py"))
             if pyfiles:
                 _dest = os.path.join(destdir, relroot)
@@ -235,7 +235,7 @@ class ProgenModel (Model):
             pass
 
         # copies non-source files
-        for relsrc, reldest in (("gtkmvc/progen/README.txt", "gtkmvc/README.txt"),):
+        for relsrc, reldest in (("gtkmvc3/progen/README.txt", "gtkmvc3/README.txt"),):
             _dest = os.path.join(destdir, reldest)
             _dest_dir = os.path.dirname(_dest)
 
@@ -245,13 +245,13 @@ class ProgenModel (Model):
                 pass
 
             if not os.path.isfile(_dest):
-                _src = os.path.join(gtkmvc_parent, relsrc)
+                _src = os.path.join(gtkmvc3_parent, relsrc)
                 _log("Copying file '%s' into '%s'" % (_src, _dest))
                 shutil.copy(_src, _dest)
                 pass
             pass
 
-        _log("Copied the gtkmvc framework into %s" % destdir)
+        _log("Copied the gtkmvc3 framework into %s" % destdir)
         return True
 
 

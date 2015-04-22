@@ -1,23 +1,23 @@
 import gtk
 
-import _importer # this is an helper to import gtkmvc
+import _importer # this is an helper to import gtkmvc3
 
 from model import ExampleModel
 from ctrl import ExampleController
 from view import ExampleView
 
-import gtkmvc
+import gtkmvc3
 
 def check_requirements():
-    gtkmvc.require("1.99.1")
+    gtkmvc3.require("1.99.1")
     return
 
 def setup_env(development_state=False):
-    # This is how developers should set gtkmvc logging level (by
+    # This is how developers should set gtkmvc3 logging level (by
     # default debugging info is not shown):
     if development_state:
         import logging
-        logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
+        logging.getLogger("gtkmvc3").setLevel(logging.DEBUG)
         pass
     return
 

@@ -11,7 +11,7 @@
 # Lesser General Public License for more details.
 
 import _importer
-from gtkmvc import Controller
+from gtkmvc3 import Controller
 import gtk
 
 class MyController (Controller):

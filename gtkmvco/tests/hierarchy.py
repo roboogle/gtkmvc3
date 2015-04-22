@@ -9,9 +9,9 @@ days changed from 17 to 22
 """
 # MyModel.py
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class MyModelBase (gtkmvc.Model):
+class MyModelBase (gtkmvc3.Model):
     name = "Roberto"
     age = 0
     __observables__ = ["name", "age" ] 
@@ -37,7 +37,7 @@ class MyModelDer2 (MyModelDer1):
     pass # end of class
 
 
-class MyObserver (gtkmvc.Observer):
+class MyObserver (gtkmvc3.Observer):
     def property_name_value_change(self, model, old, new):
         print "name changed from %s to %s" % (old, new)
         return

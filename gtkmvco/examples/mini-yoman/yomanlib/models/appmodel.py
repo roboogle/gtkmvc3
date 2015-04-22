@@ -26,7 +26,7 @@
 from yomanlib.utils import _importer
 from yomanlib.utils.misc import get_buf_text
 
-from gtkmvc import Model, TreeStoreModel, TextBufferModel
+from gtkmvc3 import Model, TreeStoreModel, TextBufferModel
 
 import gtk
 import gobject

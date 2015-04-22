@@ -3,8 +3,8 @@ Test shows a variety of widgets with at least two per model property. Changing
 any should affect others.
 """
 import _importer
-from gtkmvc import Model, Controller, View
-from gtkmvc.adapters.basic import Adapter
+from gtkmvc3 import Model, Controller, View
+from gtkmvc3.adapters.basic import Adapter
 
 from gi.repository import Gtk, Gdk
 

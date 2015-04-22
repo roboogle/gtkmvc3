@@ -23,7 +23,7 @@ import random
 
 import gtk
 
-import gtkmvc
+import gtkmvc3
 
 from undo_manager import UndoModel
 
@@ -34,13 +34,13 @@ def iternames():
     for i in range(2, 8) + [1]:
         yield locale.nl_langinfo(getattr(locale, 'DAY_%i' % i))
 
-class Day(gtkmvc.Model):
+class Day(gtkmvc3.Model):
     name = ''
     hours = 0
     __observables__ = ('name', 'hours')
 
 def adapt_availability(model, name, widget):
-    a = gtkmvc.adapters.Adapter(model, name)
+    a = gtkmvc3.adapters.Adapter(model, name)
     a.connect_widget(widget,
         getter=gtk.Widget.get_sensitive,
         setter=gtk.Widget.set_sensitive,
@@ -48,14 +48,14 @@ def adapt_availability(model, name, widget):
     return a
 
 def adapt_label(model, name, widget):
-    a = gtkmvc.adapters.Adapter(model, name)
+    a = gtkmvc3.adapters.Adapter(model, name)
     a.connect_widget(widget,
         getter=gtk.Button.get_label,
         setter=gtk.Button.set_label,
         signal='notify::label')
     return a
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         self.undo = UndoModel()
         self.undo.register_observer(self)
@@ -69,7 +69,7 @@ class Controller(gtkmvc.Controller):
             self.undo.observe_model(day)
 
         view['treeview1'].set_model(self.list)
-        gtkmvc.adapters.containers.watch_items_in_tree(self.list)
+        gtkmvc3.adapters.containers.watch_items_in_tree(self.list)
 
     def on_button1__clicked(self, widget):
         self.undo.undo()
@@ -95,6 +95,6 @@ class Controller(gtkmvc.Controller):
         adapt_label(self.undo, 'undo_label', self.view['button1'])
         adapt_label(self.undo, 'redo_label', self.view['button2'])
 
-Controller(gtkmvc.Model(), gtkmvc.View(builder='undo.ui'), handlers='class')
+Controller(gtkmvc3.Model(), gtkmvc3.View(builder='undo.ui'), handlers='class')
 
 gtk.main()

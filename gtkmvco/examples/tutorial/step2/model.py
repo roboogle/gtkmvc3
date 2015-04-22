@@ -11,7 +11,7 @@
 # Lesser General Public License for more details.
 
 import _importer
-from gtkmvc import Model
+from gtkmvc3 import Model
 import random
 
 class MyModel (Model):

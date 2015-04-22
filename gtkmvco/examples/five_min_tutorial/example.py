@@ -2,9 +2,9 @@
 
 import _importer
 
-from gtkmvc import Model
-from gtkmvc import View
-from gtkmvc import Controller
+from gtkmvc3 import Model
+from gtkmvc3 import View
+from gtkmvc3 import Controller
 
 import gtk
 

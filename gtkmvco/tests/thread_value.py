@@ -3,7 +3,7 @@ Test should print:
 Changed  <id 1> 0 10
 """
 import _importer
-from gtkmvc import ModelMT, Observer
+from gtkmvc3 import ModelMT, Observer
 
 class MyModel (ModelMT):
 

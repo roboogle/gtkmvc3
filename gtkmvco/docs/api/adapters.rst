@@ -1,7 +1,7 @@
 Adapters
 ========
 
-.. module:: gtkmvc.adapters
+.. module:: gtkmvc3.adapters
 
 .. class:: Adapter
    :noindex:
@@ -17,7 +17,7 @@ Adapters
 Overwriting properties
 ----------------------
 
-.. module:: gtkmvc.adapters.basic
+.. module:: gtkmvc3.adapters.basic
 
 .. autoclass:: Adapter
     :members:
@@ -43,7 +43,7 @@ Modifying immutable properties
 Single Adapter, multiple widgets
 --------------------------------
 
-.. module:: gtkmvc.adapters.containers
+.. module:: gtkmvc3.adapters.containers
 
 .. autoclass:: StaticContainerAdapter
     :members:
@@ -55,7 +55,7 @@ Single Adapter, multiple widgets
 Connecting automatically
 ------------------------
 
-.. automodule:: gtkmvc.adapters.default
+.. automodule:: gtkmvc3.adapters.default
     :members:
     :undoc-members:
     :show-inheritance:

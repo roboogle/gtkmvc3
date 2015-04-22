@@ -23,9 +23,9 @@ Start typing to jump to a row.
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Row(gtkmvc.Model):
+class Row(gtkmvc3.Model):
     name = ''
     __observables__ = ['name']
 
@@ -42,7 +42,7 @@ def search_equal_func(model, column, key, iter, data):
     # Case-sensitive.
     return key not in value
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view['treeview'].set_model(NameStore())
         view.show()
@@ -55,7 +55,7 @@ class Controller(gtkmvc.Controller):
         gtk.main_quit()
 
 Controller(
-    gtkmvc.Model(),
-    gtkmvc.View(builder='search.ui', top='window'),
+    gtkmvc3.Model(),
+    gtkmvc3.View(builder='search.ui', top='window'),
     handlers='class')
 gtk.main()

@@ -10,5 +10,5 @@
 .. |obs| replace:: *Observer* pattern
 
 .. |gui| replace:: *GUI*
-.. |pygtkmvc| replace:: *pygtkmvc*
+.. |pygtkmvc3| replace:: *pygtkmvc3*
 .. |vc| replace:: *V&C*

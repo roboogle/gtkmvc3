@@ -219,7 +219,7 @@ Line 10
 
 Lines 15-21 
      In `MyCtrl.register_adapters` which is called when it is time to
-     create all the adapters. Here `gtkmvc.Controller.adapt` is used
+     create all the adapters. Here `gtkmvc3.Controller.adapt` is used
      to adapt OPs in the model and some widgets in the view.
 
      .. Note::
@@ -244,10 +244,10 @@ Lines 15-21
            found, the corresponding radio button will get toggled on.
 
 Lines 24-28
-     In previous lines we exploited `gtkmvc.Controller.adapt` which
+     In previous lines we exploited `gtkmvc3.Controller.adapt` which
      when called in that manner internally makes some magic to
      simplify our life. In particular it automatically creates a
-     `gtkmvc.adpaters.Adapter` which actually makes the work of
+     `gtkmvc3.adpaters.Adapter` which actually makes the work of
      adapting an OP and a widget.
 
      However, to adapt the OP `counter_select` and the label

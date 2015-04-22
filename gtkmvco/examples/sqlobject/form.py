@@ -23,10 +23,10 @@ typed but only when necessary. Useful to minimize database traffic.
 
 import _importer
 
-import gtkmvc
-from gtkmvc.support.utils import cast_value
+import gtkmvc3
+from gtkmvc3.support.utils import cast_value
 
-class EntryController(gtkmvc.Observer):
+class EntryController(gtkmvc3.Observer):
     def __init__(self, widget, property, model=None):
         """
         *widget* a `gtk.Entry` instance.
@@ -35,7 +35,7 @@ class EntryController(gtkmvc.Observer):
 
         *model* optionally call `set_model` with this.
         """
-        gtkmvc.Observer.__init__(self)
+        gtkmvc3.Observer.__init__(self)
 
         self.busy = False
 
@@ -91,15 +91,15 @@ class EntryController(gtkmvc.Observer):
             self.set_widget(None)
         self.widget.set_sensitive(bool(self.model))
 
-from gtkmvc.adapters import Adapter
+from gtkmvc3.adapters import Adapter
 
 import gtk
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     __observables__ = ['text']
     text = ''
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_adapters(self):
         self.a = Model()
         self.b = Model()
@@ -121,6 +121,6 @@ class Controller(gtkmvc.Controller):
         gtk.main_quit()
 
 if __name__ == '__main__':
-    c = Controller(gtkmvc.Model(), gtkmvc.View(builder="form.ui"),
+    c = Controller(gtkmvc3.Model(), gtkmvc3.View(builder="form.ui"),
         handlers='class')
     gtk.main()

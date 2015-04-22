@@ -4,12 +4,12 @@
 #  Copyright (c) 2005 by Roberto Cavada
 #  Copyright (c) 2007 by Guillaume Libersat
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -19,13 +19,13 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
 import itertools
 
-from gtkmvc.support.exceptions import ViewError
+from gtkmvc3.support.exceptions import ViewError
 
 from gi.repository import Gtk
 from gi.repository import GLib

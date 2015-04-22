@@ -21,9 +21,9 @@ from gi.repository import Gtk
 
 import _importer
 
-import gtkmvc
+import gtkmvc3
 
-class Row(gtkmvc.Model):
+class Row(gtkmvc3.Model):
     value = 0
     __observables__ = ('value',)
 
@@ -33,7 +33,7 @@ class DefaultColumn(unittest.TestCase):
         self.store.append([Row(), 0])
 
     def testWatch(self):
-        gtkmvc.adapters.containers.watch_items_in_tree(self.store)
+        gtkmvc3.adapters.containers.watch_items_in_tree(self.store)
 
 class CustomColumn(unittest.TestCase):
     def setUp(self):
@@ -41,7 +41,7 @@ class CustomColumn(unittest.TestCase):
         self.store.append([1, Row()])
 
     def testWatch(self):
-        gtkmvc.adapters.containers.watch_items_in_tree(self.store, 1)
+        gtkmvc3.adapters.containers.watch_items_in_tree(self.store, 1)
 
 if __name__ == "__main__":
     unittest.main()

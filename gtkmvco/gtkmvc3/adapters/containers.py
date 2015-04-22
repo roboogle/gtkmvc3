@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
@@ -26,11 +26,11 @@ import types
 import weakref
 from gi.repository import Gtk
 
-from gtkmvc.adapters.basic import UserClassAdapter, Adapter
+from gtkmvc3.adapters.basic import UserClassAdapter, Adapter
 
-from gtkmvc.adapters.default import *
-from gtkmvc.observer import Observer
-from gtkmvc.support.wrappers import ObsMapWrapper
+from gtkmvc3.adapters.default import *
+from gtkmvc3.observer import Observer
+from gtkmvc3.support.wrappers import ObsMapWrapper
 
 # this tries solving the issue in gtk about Builder not setting name
 # correctly. See https://bugzilla.gnome.org/show_bug.cgi?id=591085
@@ -255,7 +255,7 @@ class watch_items_in_tree(Observer):
         *tree* is a :class:`Gtk.TreeModel` instance.
 
         *column* is an integer adressing the column of *tree* that contains
-        :class:`gtkmvc.Model` instances.
+        :class:`gtkmvc3.Model` instances.
         """
         Observer.__init__(self)
         self.column = column

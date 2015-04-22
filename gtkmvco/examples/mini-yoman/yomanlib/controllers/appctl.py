@@ -26,7 +26,7 @@
 from yomanlib.utils import _importer
 from yomanlib.utils.misc import get_buf_text
 
-from gtkmvc import Controller
+from gtkmvc3 import Controller
 import gtk
 import gobject
 

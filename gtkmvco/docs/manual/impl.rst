@@ -79,14 +79,14 @@ related to any view of those data) will live in the model class.
 There exist several model classes that users can derive their own
 classes:
 
-gtkmvc.Model
+gtkmvc3.Model
    Standard model class. The derived class does not
    multiple-derive from gobject classes, and there are not methods in
    the class that run from threads different from the *PyGTK* main loop
    thread. This is the base model class most likely users will derive
    their own models.
  
-gtkmvc.ModelMT
+gtkmvc3.ModelMT
    Multi-threading model used as the previous
    class Model, but to be used in all cases when the *PyGTK* main loop
    runs in a thread that is different from the thread running the
@@ -97,27 +97,27 @@ gtkmvc.ModelMT
    observable property, corresponding notifications will be
    transparently delivered to the observers through their own thread.
  
-gtkmvc.TreeStoreModel
+gtkmvc3.TreeStoreModel
    To be used as a base model class that
    derives both from ``Model`` and ``gtk.TreeStore``.
  
-gtkmvc.TreeStoreModelMT
+gtkmvc3.TreeStoreModelMT
    To be used as a base model class that
    derives both from ``ModelMT`` and ``gtk.TreeStore``.
  
-gtkmvc.ListStoreModel
+gtkmvc3.ListStoreModel
    To be used as a base model class that
    derives both from ``Model`` and ``gtk.ListStore``.
  
-gtkmvc.ListStoreModelMT
+gtkmvc3.ListStoreModelMT
    To be used as a base model class that
    derives both from ``ModelMT`` and ``gtk.ListStore``. 
  
-gtkmvc.TextBufferModel
+gtkmvc3.TextBufferModel
    To be used as a base model class that
    derives both from ``Model`` and ``gtk.TextBuffer``.
  
-gtkmvc.TextBufferModelMT
+gtkmvc3.TextBufferModelMT
    To be used as a base model class that
    derives both from ``ModelMT`` and ``gtk.TextBuffer``.
 
@@ -174,7 +174,7 @@ mechanism may be exploited effectively.
 Views
 -----
 
-User's views derive from base class ``gtkmvc.View``, that is
+User's views derive from base class ``gtkmvc3.View``, that is
 the only part specific for the *PyGTK* graphic toolkit.
 
 A View is associated to a set of widgets. In general, this set
@@ -243,7 +243,7 @@ file ``test.xml`` contains a Button that you called
 ``start_button`` from within *Glade*, you can create the view and
 use it as follows: ::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  
  class MyView (View):
    builder = 'test.glade'
@@ -268,7 +268,7 @@ The creation on the fly of new widgets should be performed within
 the derived view constructor: ::
 
 
- from gtkmvc import View
+ from gtkmvc3 import View
  
  class MyView (View):
    def __init__(self, ):
@@ -341,7 +341,7 @@ In the example, the ``TreeView`` has been called
 ``tv_main``, and after View creation the widget will be
 available with that name. ::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  
  class MyView (View):
    def __init__(self):
@@ -354,11 +354,11 @@ available with that name. ::
 The ``ListStore`` is of course not contained in the view, but
 it is created and stored in the Model. If the model had to be also a
 ``ListStore`` (i.e.  derived from it) ``MyModel`` had to
-derive from ``gtkmvc.ListStoreModel`` instead of
+derive from ``gtkmvc3.ListStoreModel`` instead of
 ``Model``. To keep things easier, Has--A relationship is
 chosen. ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  import gtk
  import gobject
  
@@ -376,7 +376,7 @@ columns and renderers as well. Construction must occur after View has
 been created. More precisely, the ideal time is during
 view-registration. ::
 
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  import gtk
 
  class MyCtrl (Controller):

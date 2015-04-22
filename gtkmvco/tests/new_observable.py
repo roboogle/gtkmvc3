@@ -5,18 +5,18 @@ notification. Closing the window should exit the program.
 
 from gi.repository import Gtk
 import _importer
-import gtkmvc
+import gtkmvc3
 
 
 # MyModel.py
-class MyModel (gtkmvc.Model):
+class MyModel (gtkmvc3.Model):
     name = "Roberto"
     age = 0
     __observables__ = ["name", "age" ]
 
 
 # MyCtrl.py
-class MyCtrl (gtkmvc.Controller):
+class MyCtrl (gtkmvc3.Controller):
 
     def register_adapters(self):
         # good time to create adapters
@@ -24,12 +24,12 @@ class MyCtrl (gtkmvc.Controller):
         self.adapt("age")
 
     def register_view(self, view):
-        gtkmvc.Controller.register_view(self, view)
+        gtkmvc3.Controller.register_view(self, view)
         view['window'].connect('delete-event', Gtk.main_quit)
 
 
 # MyView.py
-class MyView (gtkmvc.View):
+class MyView (gtkmvc3.View):
     def __init__(self):
         super(MyView, self).__init__()
         self.__create_manual_widgets()
@@ -54,7 +54,7 @@ class MyView (gtkmvc.View):
         self['window'].show_all()
 
 
-class MyObserver (gtkmvc.Observer):
+class MyObserver (gtkmvc3.Observer):
     def property_age_value_change(self, model, old, new):
         print("age changed from %d to %d" % (old, new))
 

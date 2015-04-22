@@ -3,7 +3,7 @@ Test shows a button and an arrow. Pressing the button should rotate the arrow
 90 degrees clockwise.
 """
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc3 import Model, Controller, View
 
 from gi.repository import Gtk
 

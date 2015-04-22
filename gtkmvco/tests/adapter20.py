@@ -11,14 +11,14 @@ def refresh_gui(delay=0):
     time.sleep(delay)
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 
-class M(gtkmvc.Model):
+class M(gtkmvc3.Model):
     store = 2.0
     __observables__ = ("store",)
 
-class C(gtkmvc.Controller):
+class C(gtkmvc3.Controller):
     def register_adapters(self):
         self.adapt()
 
@@ -29,7 +29,7 @@ class C(gtkmvc.Controller):
 class T(unittest.TestCase):
     def setUp(self):
         self.m = M()
-        self.v = gtkmvc.View(builder="adapter20.ui")
+        self.v = gtkmvc3.View(builder="adapter20.ui")
 
     def testBuilder(self):
         # https://bugzilla.gnome.org/show_bug.cgi?id=629640

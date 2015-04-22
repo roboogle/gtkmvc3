@@ -1,36 +1,36 @@
-.. pygtkmvc documentation master file, created by sphinx-quickstart on Mon Mar 23 18:58:19 2009.
+.. pygtkmvc3 documentation master file, created by sphinx-quickstart on Mon Mar 23 18:58:19 2009.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 ====================
-gtkmvc in 45 minutes
+gtkmvc3 in 45 minutes
 ====================
 
-This document presents gtkmvc for those who are in hurry, or for
-curious people who want to have a quick overview of gtkmvc features
+This document presents gtkmvc3 for those who are in hurry, or for
+curious people who want to have a quick overview of gtkmvc3 features
 and capabilities.
 
 
 .. warning:: 
  This document is not exhaustive, as many important details are not
  described. For a complete information refer to the User Manual and to
- the Tutorial, both coming along with gtkmvc.
+ the Tutorial, both coming along with gtkmvc3.
 
  It is assumed you already know *Python*, *pygtk* and have some
  experience with *design issues*. 
  However, here you will find a short introduction
  presenting the main actors that are going to play a role into an
- GUI application based on gtkmvc. 
+ GUI application based on gtkmvc3. 
 
 
 ------------
 Introduction
 ------------
 
-What is gtkmvc, and what it does
+What is gtkmvc3, and what it does
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-gtkmvc is a thin framework for developing GUI applications with
+gtkmvc3 is a thin framework for developing GUI applications with
 Python and the pygtk toolkit.
 
 1. It helps you to organize the source code of your application.
@@ -109,7 +109,7 @@ separate. And in the end, it is easy to get spaghetti code
 especially in the control flow part of the GUI.
 
 In the picture you can see how a middle/large GUI application can be
-organized and decomposed with gtkmvc.
+organized and decomposed with gtkmvc3.
 
 .. image:: images/diagram.png
    :scale: 60
@@ -153,7 +153,7 @@ Views
 A view is a class that is intended to be a container for widgets. ::
 
  import gtk
- from gtkmvc import View
+ from gtkmvc3 import View
 
  class MyView (View):
     builder = "gtk_builder_file.glade"
@@ -177,7 +177,7 @@ A view is a class that is intended to be a container for widgets. ::
 
     pass # end of class
 
-Your view is derived from base class ``gtkmvc.View`` that offers
+Your view is derived from base class ``gtkmvc3.View`` that offers
 several services:
 
 1. Attribute ``builder`` that is used to tell the view which
@@ -191,7 +191,7 @@ several services:
 Views can be decomposed into a hierarchy of views. For example::
 
  import gtk
- from gtkmvc import View
+ from gtkmvc3 import View
 
  class MySuperView (View):
     builder = "view1.glade" 
@@ -228,7 +228,7 @@ As you can see:
 For simple cases (views offering no services, and only based on a
 glade file) it is not mandatory to derive our own class::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  v = View(builder="myview.glade", top="mytop_widget)
 
 ------
@@ -239,7 +239,7 @@ A model is a class that is intended to contain the application's
 logic. A model contains data and methods, and a subset of the data can be
 declared to be *observable*. ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = 10
     data2 = "a string"
@@ -249,7 +249,7 @@ declared to be *observable*. ::
 
     pass # end of class
 
-A model must derive from ``gtkmvc.Model`` [#fn1]_ which derives from
+A model must derive from ``gtkmvc3.Model`` [#fn1]_ which derives from
 ``Observer`` as models may be interested in observing themselves and
 other models (see *Observers* below).
 
@@ -276,7 +276,7 @@ the details.
 *Value Properties* are intended to hold values which when are
 *re-assigned* observers are notified. ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = 5
     data2 = [1,2,3]
@@ -305,7 +305,7 @@ out of other properties.  In these cases it is possible to declare
 observable properties that do not correspond to any class attribute,
 but that correspond each to a pair of methods (getter/setter)::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = 5
     __observables__ = ("data1", "data_external")
@@ -329,7 +329,7 @@ It is also possible to define getters and/or setters that takes also
 the name of the property, making possible to define multi-properties
 getter/setter pairs::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = 5 # this is a concrete property
     __observables__ = ("data1", "data2", "data3", "data4")
@@ -367,7 +367,7 @@ getter/setter pairs::
 It is possible to define **dependencies** among logical and concrete
 properties. For example::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     celsius = 0
     __observables__ = ("celsius", "fahrenheit")
@@ -406,7 +406,7 @@ Of course it is needed to declare method
 ``SomeOtherClass.some_method_changing_the_instance`` to be
 observable. For example::
 
- from gtkmvc.model import Model, Observable
+ from gtkmvc3.model import Model, Observable
  class SomeOtherClass (Observable):
     """This is a class that is thought to be integrated into the
     observer pattern. It is declared to be 'observable' and the
@@ -425,10 +425,10 @@ that change the content of the instance can be declared by using the
 ``Observable.observed`` decorator like in the example. 
 
 Ok, but what if my class is already existing? It is less natural, but
-gtkmvc supports observable properties of already existing classes'
+gtkmvc3 supports observable properties of already existing classes'
 instances::
 
- from gtkmvc import Model, Observer
+ from gtkmvc3 import Model, Observer
 
  class ExistingClass (object):
     """This is an already existing class whose code is not intended to
@@ -457,7 +457,7 @@ list naming the methods whose calls can be observed by observers.
 Sometimes the models want to communicate to observers that *events*
 occurred. For this ``Signal`` can be used as property value::
 
- from gtkmvc import Model, Signal
+ from gtkmvc3 import Model, Signal
  class MyModel (Model):
     sgn = Signal()
     __observables__ = ("sgn",)
@@ -491,7 +491,7 @@ different types of notifications:
 In the example you find assign, before call, after call and signal
 notifications, presented in the static flavours::
 
- from gtkmvc import Observer
+ from gtkmvc3 import Observer
 
  class MyObserver (Observer):
 
@@ -565,11 +565,11 @@ into::
 
 Now let's try to modify the assigned value to a property::
  
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = 10
     data2 = "a string"
-    data3 = "gtkmvc makes your life easier".split()
+    data3 = "gtkmvc3 makes your life easier".split()
     __observables__ = ("data?", )
     pass # end of class
 
@@ -592,14 +592,14 @@ The execution of this example produces the following output::
  another_assign_notification: data1 10 11
  >>> Here m.data is 11
  assign_notification: data2 a string Another string
- before_call_notification: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
- before_after_call_notification: BEFORE: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier'] append
- before_after_call_notification: AFTER: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] append None
- before_call_notification: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
- before_after_call_notification: BEFORE: data3 ['gtkmvc', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
+ before_call_notification: data3 ['gtkmvc3', 'makes', 'your', 'life', 'easier'] append
+ before_after_call_notification: BEFORE: data3 ['gtkmvc3', 'makes', 'your', 'life', 'easier'] append
+ before_after_call_notification: AFTER: data3 ['gtkmvc3', 'makes', 'your', 'life', 'easier', 'and fun'] append None
+ before_call_notification: data3 ['gtkmvc3', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
+ before_after_call_notification: BEFORE: data3 ['gtkmvc3', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__
  before_after_call_notification: AFTER: data3 ['music', 'makes', 'your', 'life', 'easier', 'and fun'] __setitem__ None
  signal_notification: SIGNAL: sgn Hello world!
- signal_notification: ASSIGN: sgn <gtkmvc.observable.Signal object at 0x7f88957f5fd0> <gtkmvc.observable.Signal object at 0x7f8895801ad0>
+ signal_notification: ASSIGN: sgn <gtkmvc3.observable.Signal object at 0x7f88957f5fd0> <gtkmvc3.observable.Signal object at 0x7f8895801ad0>
 
 Of course an observer is not limited to observe one model::
 
@@ -635,7 +635,7 @@ Controllers are the most complex structures that are intended to:
 
 This is the typical structure of a controller::
 
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  
  class MyController (Controller):
  
@@ -694,7 +694,7 @@ there are sub controllers *c1*, *c2* and *c3* respectively controlling
 just *m1*, *m2* and *m3*. ::
 
  # file model.py
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class ApplModel (Model):
    # observable properties...
 
@@ -729,7 +729,7 @@ Here only class ``MyModel1`` is reported::
 The controllers have a similar structure::
 
  # file ctrl.py
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  class ApplCtrl (Controller):
 
    def __init__(self, appl_model, appl_view):
@@ -763,7 +763,7 @@ into pieces which can harmoniously live together.
 are the ``TextView``, the ``TreeView`` and all those widgets that are
 based on the ``TreeModel`` class.
 
-How does *gtkmvc* click on this architecture?
+How does *gtkmvc3* click on this architecture?
 
 1. Widgets like ``TreeView``, ``TextView``, etc. live into the view side.
 2. Model side of those widgets like ``TextBuffer``, ``ListStore``,
@@ -780,7 +780,7 @@ This is the full code for this example::
  import gtk
 
  # ----------------------------------------------------------------------
- from gtkmvc import View
+ from gtkmvc3 import View
  class MyView(View):
     builder = "mvc.glade"
     pass # end of class
@@ -788,7 +788,7 @@ This is the full code for this example::
 
 
  # ----------------------------------------------------------------------
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     # ...
     text_buf = gtk.TextBuffer()
@@ -796,7 +796,7 @@ This is the full code for this example::
     # ...
     def __init__(self):
         Model.__init__(self)
-        text = """gtkmvc is a thin framework for
+        text = """gtkmvc3 is a thin framework for
  developing GUI applications with
  Python and the pygtk toolkit."""
         # fills in some data
@@ -811,7 +811,7 @@ This is the full code for this example::
 
 
  # ----------------------------------------------------------------------
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  class MyCtrl (Controller):
     # ...
 
@@ -860,7 +860,7 @@ shown data to data stored into the model.
 Class ``Controller`` offers method ``register_adapters`` that is the
 ideal place when setting up adapters. ::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  class MyView (View):
     builder = "example.glade"
     pass # end of class
@@ -872,7 +872,7 @@ Glade file ``example.glade`` is shown here in ``glade-3``.
 There are four widgets we want to keep aligned to the corresponding
 values stored into the model. ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
     data1 = "Some descriptive message"
     data2 = "Some textual data"
@@ -887,8 +887,8 @@ Now to connect the view and the model, we need a controller. Here an
 adapter is built to adapt label ``label_data1`` to the observable
 property ``data1``. ::
 
- from gtkmvc import Controller
- from gtkmvc.adapters import Adapter
+ from gtkmvc3 import Controller
+ from gtkmvc3.adapters import Adapter
  import gtk
 
  class MyCtrl (Controller):
@@ -933,7 +933,7 @@ a widget and a corresponding property in the model.
 
 In the example we connect all the widgets very easily::
 
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  import gtk
 
  class MyCtrl (Controller):
@@ -965,7 +965,7 @@ Where do you go now?
 --------------------
 
 Good reading so far? If you are interested, you can download and
-install **gtkmvc**, see the examples provided along with it, read the
+install **gtkmvc3**, see the examples provided along with it, read the
 User Manual, read the Tutorial, subscribe to the project mailing list,
 send feedback to the user, and - most of all - *start using it*!
 
@@ -973,7 +973,7 @@ send feedback to the user, and - most of all - *start using it*!
 
 .. rubric:: Footnotes
 
-.. [#fn1] Or any class derived from ``gtkmvc.Model``, see the User Manual
+.. [#fn1] Or any class derived from ``gtkmvc3.Model``, see the User Manual
 .. [#fn2] See Python module 
    `fnmatch <http://docs.python.org/library/fnmatch.html>`_ 
    for information about accepted wildcards

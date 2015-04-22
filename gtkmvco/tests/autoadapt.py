@@ -6,9 +6,9 @@ values.
 from gi.repository import Gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class MyModel (gtkmvc.Model):
+class MyModel (gtkmvc3.Model):
     name = "Roberto"
     age = 0
     __observables__ = ( "name", "age" )
@@ -18,10 +18,10 @@ class MyModel (gtkmvc.Model):
 
 # MyView.py
 
-class MyView (gtkmvc.View):
+class MyView (gtkmvc3.View):
 
     def __init__(self):
-        gtkmvc.View.__init__(self)
+        gtkmvc3.View.__init__(self)
         self.setup_widgets()
         return
 
@@ -53,7 +53,7 @@ class MyView (gtkmvc.View):
     pass # end of class
 
 # MyCtrl.py
-class MyCtrl (gtkmvc.Controller):
+class MyCtrl (gtkmvc3.Controller):
     def register_view(self, view):
         super(MyCtrl, self).register_view(view)
         view['window'].connect('delete-event', self.on_window_delete_event)

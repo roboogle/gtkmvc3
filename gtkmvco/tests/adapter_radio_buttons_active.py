@@ -1,7 +1,7 @@
 import unittest
 
 from _importer import refresh_gui
-from gtkmvc import Model, View, Controller
+from gtkmvc3 import Model, View, Controller
 from gi.repository import Gtk
 
 # Shows how a group of radio actions can be adapted to a

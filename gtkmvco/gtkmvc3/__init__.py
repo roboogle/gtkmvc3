@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2005 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
@@ -57,15 +57,15 @@ __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
 __version = (3,0,0)
 
 # visible classes
-from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
-from gtkmvc.model_mt import ModelMT
-from gtkmvc.controller import Controller
-from gtkmvc.view import View
-from gtkmvc.observer import Observer
-from gtkmvc.observable import Observable, Signal
+from gtkmvc3.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
+from gtkmvc3.model_mt import ModelMT
+from gtkmvc3.controller import Controller
+from gtkmvc3.view import View
+from gtkmvc3.observer import Observer
+from gtkmvc3.observable import Observable, Signal
 
 # visible modules
-from gtkmvc import observable, observer, adapters
+from gtkmvc3 import observable, observer, adapters
 
 def get_version():
     """
@@ -75,7 +75,7 @@ def get_version():
 
 def require(request):
     """
-    Raise :exc:`AssertionError` if gtkmvc version is not compatible.
+    Raise :exc:`AssertionError` if gtkmvc3 version is not compatible.
 
     *request* a dotted string or iterable of string or integers representing the
     minimum version you need. ::
@@ -99,5 +99,5 @@ def require(request):
     provide = list(__version)
 
     if request > provide:
-        raise AssertionError("gtkmvc required version %s, found %s" % (
+        raise AssertionError("gtkmvc3 required version %s, found %s" % (
             request, provide))

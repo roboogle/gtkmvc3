@@ -199,7 +199,7 @@ in the forthcoming releases toward version 2.0.0.
   7. Views have attributes 'glade' and 'top' to simplify their
      construction.
 
-  8. gtkmvc has now its own logging system that users can set when
+  8. gtkmvc3 has now its own logging system that users can set when
      required. Previous naive prints have been removed. 
 
 * Documentation
@@ -261,10 +261,10 @@ Released version 1.2.0
     the model and a widget in a transparent and still customizable
     way.
 
-  - Added script gtkmvc-progen that aids developers in generating
-    gtkmvc-based projects from scratch. gtkmvc-progen can be run in
+  - Added script gtkmvc3-progen that aids developers in generating
+    gtkmvc3-based projects from scratch. gtkmvc3-progen can be run in
     both batch and GUI modalities. For example:
-    $> gtkmvc-progen name=myproj author="Wil Shakespeare" gui=no
+    $> gtkmvc3-progen name=myproj author="Wil Shakespeare" gui=no
 
     ... generates project "myproj" in batch mode. See the user
     manual for a full list of available options.

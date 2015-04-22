@@ -6,7 +6,7 @@ Observing your own classes
 
 Properties whose value doesn't change.
 
-.. module:: gtkmvc.observable
+.. module:: gtkmvc3.observable
 
 .. autoclass:: Observable
     :members:
@@ -29,7 +29,7 @@ Wrapping values
 Properties whose value doesn't change
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. module:: gtkmvc.support.wrappers
+.. module:: gtkmvc3.support.wrappers
 
 .. autoclass:: ObsWrapperBase
     :show-inheritance:

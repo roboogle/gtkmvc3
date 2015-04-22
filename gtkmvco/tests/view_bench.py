@@ -5,10 +5,10 @@ Shows that memoization makes sense.
 import timeit
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-glade = gtkmvc.View(glade='adapter7.glade')
-build = gtkmvc.View(builder='adapter19.ui')
+glade = gtkmvc3.View(glade='adapter7.glade')
+build = gtkmvc3.View(builder='adapter19.ui')
 
 # Cause auto widget extraction.
 names = tuple(glade)

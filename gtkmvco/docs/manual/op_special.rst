@@ -44,7 +44,7 @@ explained here for the sake of completeness.
    ``get_prop_<property_name>``.  This does not return
    anything, and gets self and the value to be assigned to the
    property. The default auto-generated code also calls method
-   ``gtkmvc.Model.notify_property_change`` to notify the
+   ``gtkmvc3.Model.notify_property_change`` to notify the
    change to all registered observers.
  
 

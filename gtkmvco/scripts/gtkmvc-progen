@@ -5,12 +5,12 @@
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -20,26 +20,26 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 # ----------------------------------------------------------------------
 
 
-# checks for gtkmvc
+# checks for gtkmvc3
 try:
-    import gtkmvc
+    import gtkmvc3
 except:
     # use the local installation
     import os.path; import sys
     top_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     sys.path = [top_dir] + sys.path
-    import gtkmvc
+    import gtkmvc3
 
-gtkmvc.require("1.99.0")
+gtkmvc3.require("1.99.0")
 
-from gtkmvc.progen.model import ProgenModel, set_gui_log, set_shell_log
-from gtkmvc.progen.templates import VERSION
+from gtkmvc3.progen.model import ProgenModel, set_gui_log, set_shell_log
+from gtkmvc3.progen.templates import VERSION
 import sys
 # --------------------
 
@@ -80,7 +80,7 @@ def fix_options(m): # fixes missing options
 
 
 def print_banner():
-    print("This is the gtkmvc Project Generator version %s" % ".".join(VERSION))
+    print("This is the gtkmvc3 Project Generator version %s" % ".".join(VERSION))
 
 
 def print_help():
@@ -106,8 +106,8 @@ def print_help():
 
 def run_gui(model):
     from gi.repository import Gtk
-    from gtkmvc.progen.ctrl import ProgenCtrl
-    from gtkmvc.progen.view import ProgenView
+    from gtkmvc3.progen.ctrl import ProgenCtrl
+    from gtkmvc3.progen.view import ProgenView
 
     v = ProgenView()
     c = ProgenCtrl(model, v)

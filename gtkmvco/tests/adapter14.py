@@ -9,10 +9,10 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 
-class Even(gtkmvc.adapters.basic.Adapter):
+class Even(gtkmvc3.adapters.basic.Adapter):
     """
     We have to subclass to access _wid.
     We may get called before connect_widget, so _wid may be None.
@@ -38,7 +38,7 @@ class Even(gtkmvc.adapters.basic.Adapter):
             if self._wid:
                 self._wid.set_name("Entry_fail")
 
-        gtkmvc.adapters.basic.Adapter.__init__(self, model, prop_name,
+        gtkmvc3.adapters.basic.Adapter.__init__(self, model, prop_name,
                                                prop_read, prop_write,
                                                value_error)
 
@@ -63,14 +63,14 @@ class Even(gtkmvc.adapters.basic.Adapter):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
 
-class Animal(gtkmvc.Model):
+class Animal(gtkmvc3.Model):
     legs = 2
     __observables__ = ("legs",)
 
 
-class Laboratory(gtkmvc.View):
+class Laboratory(gtkmvc3.View):
     def __init__(self):
-        gtkmvc.View.__init__(self)
+        gtkmvc3.View.__init__(self)
 
         w = self['window'] = Gtk.Window()
         e = self['entry_legs'] = Gtk.Entry()
@@ -84,7 +84,7 @@ class Laboratory(gtkmvc.View):
         w.show_all()
 
 
-class Scientist(gtkmvc.Controller):
+class Scientist(gtkmvc3.Controller):
     def register_view(self, view):
         view['window'].connect('delete-event', self.on_window_delete_event)
 

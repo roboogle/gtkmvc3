@@ -1,5 +1,5 @@
 import _importer
-from gtkmvc import Model, View, Controller
+from gtkmvc3 import Model, View, Controller
 from gi.repository import Gtk
 
 # Shows how a group of radio buttons or actions can be adapted to a

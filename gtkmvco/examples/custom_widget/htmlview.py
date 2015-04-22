@@ -9,7 +9,7 @@ import webbrowser
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 # We have to import it manually to make the gtype known, or Builder will raise.
 # This is taken unchanged from http://people.gnome.org/~gjc/htmltextview.py
 import htmltextview
@@ -20,10 +20,10 @@ def setter(w, v):
     w.set_buffer(gtk.TextBuffer())
     w.display_html(v)
 
-gtkmvc.adapters.default.add_adapter(htmltextview.HtmlTextView,
+gtkmvc3.adapters.default.add_adapter(htmltextview.HtmlTextView,
     None, None, setter, str)
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     markup = """
         <body xmlns='http://www.w3.org/1999/xhtml'>
           <p style='text-align:center'>Hey, are you licensed to <a href='http://www.jabber.org/'>Jabber</a>?</p>
@@ -36,14 +36,14 @@ class Model(gtkmvc.Model):
         """
     __observables__ = ("markup",)
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     # Notice the following line in that file:
-    # <!-- interface-requires pygtkmvc -->
+    # <!-- interface-requires pygtkmvc3 -->
     # To edit it export GLADE_CATALOG_PATH=examples/custom_widget
     builder = "htmlview.ui"
     top = "window"
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view.get_top_widget().connect("delete-event", gtk.main_quit)
         view["htmlview"].connect("url-clicked", self.navigate)

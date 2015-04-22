@@ -6,7 +6,7 @@ logical properties
 # THIS IS ON_GOING WORK
 
 import _importer
-from gtkmvc import Model
+from gtkmvc3 import Model
 
 import unittest
 

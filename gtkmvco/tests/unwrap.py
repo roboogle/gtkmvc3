@@ -1,14 +1,14 @@
 import unittest
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     mutable = None
     __observables__ = ("mutable",)
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.mutable = []
         self.called = False
         self.register_observer(self)

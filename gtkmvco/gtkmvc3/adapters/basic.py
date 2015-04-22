@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
@@ -25,10 +25,10 @@
 import types
 import time
 
-from gtkmvc.support.utils import cast_value
-from gtkmvc.adapters.default import *
-from gtkmvc.observer import Observer
-from gtkmvc import Model
+from gtkmvc3.support.utils import cast_value
+from gtkmvc3.adapters.default import *
+from gtkmvc3.observer import Observer
+from gtkmvc3 import Model
 
 class Intermediate(Observer):
     def __init__(self, model, path, adapter):
@@ -178,7 +178,7 @@ class Adapter (Observer):
 
         *getter*, *setter* and *signal* are optional. Missing values are
         guessed from *wid* using
-        :meth:`gtkmvc.adapters.default.search_adapter_info`. If nothing is
+        :meth:`gtkmvc3.adapters.default.search_adapter_info`. If nothing is
         found this raises :exc:`TypeError`.
 
         *arg* is an optional value passed to the handler for *signal*. This

@@ -4,21 +4,21 @@ from gi.repository import Gtk
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     label1 = 0
     label2 = 0
     __observables__ = ['label[12]']
 
-class First(gtkmvc.Controller):
+class First(gtkmvc3.Controller):
     def register_adapters(self):
         self.adapt('label1')
 
     def on_button1_clicked(self, widget):
         self.model.label1 += 1
 
-class Second(gtkmvc.Controller):
+class Second(gtkmvc3.Controller):
     def register_adapters(self):
         self.adapt('label2')
         self.event = False
@@ -32,7 +32,7 @@ class Second(gtkmvc.Controller):
 class ConcurrentControllers(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="test_builder.glade", top="window1")
+        self.v = gtkmvc3.View(builder="test_builder.glade", top="window1")
         self.c = First(self.m, self.v)
         self.d = Second(self.m, self.v)
         refresh_gui()

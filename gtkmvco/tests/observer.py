@@ -1,22 +1,22 @@
 import unittest
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
-    signal = gtkmvc.observable.Signal()
-    iduna = gtkmvc.observable.Signal()
+class Model(gtkmvc3.Model):
+    signal = gtkmvc3.observable.Signal()
+    iduna = gtkmvc3.observable.Signal()
     value = 1
     before = None
     after = None
     __observables__ = "signal iduna value before after".split()
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.before = []
         self.after = []
 
-class Implicit(gtkmvc.Observer):
+class Implicit(gtkmvc3.Observer):
     def property_signal_signal_emit(self, model, arg):
         self.signal = arg
 
@@ -31,7 +31,7 @@ class Implicit(gtkmvc.Observer):
         args, kwargs):
         self.after = name, args
 
-class ImplicitVar(gtkmvc.Observer):
+class ImplicitVar(gtkmvc3.Observer):
     def property_signal_signal_emit(self, *args):
         self.signal = args[1]
 
@@ -44,85 +44,85 @@ class ImplicitVar(gtkmvc.Observer):
     def property_after_after_change(self, *args):
         self.after = args[2], args[4]
 
-class Explicit(gtkmvc.Observer):
-    @gtkmvc.Observer.observe("signal", signal=True)
+class Explicit(gtkmvc3.Observer):
+    @gtkmvc3.Observer.observe("signal", signal=True)
     def notify_signal(self, model, name, info):
         self.signal = info.arg
 
-    @gtkmvc.Observer.observe("value", assign=True)
+    @gtkmvc3.Observer.observe("value", assign=True)
     def notify_value(self, model, name, info):
         self.value = info.old, info.new
 
-    @gtkmvc.Observer.observe("before", before=True)
+    @gtkmvc3.Observer.observe("before", before=True)
     def notify_before(self, model, name, info):
         self.before = info.method_name, info.args
 
-    @gtkmvc.Observer.observe("after", after=True)
+    @gtkmvc3.Observer.observe("after", after=True)
     def notify_after(self, model, name, info):
         self.after = info.method_name, info.args
 
-class ImplicitExplicit(gtkmvc.Observer):
+class ImplicitExplicit(gtkmvc3.Observer):
     def __init__(self, *arg, **kwargs):
         self.calls = []
-        gtkmvc.Observer.__init__(self, *arg, **kwargs)
+        gtkmvc3.Observer.__init__(self, *arg, **kwargs)
 
-    @gtkmvc.Observer.observe("signal", signal=True)
+    @gtkmvc3.Observer.observe("signal", signal=True)
     def property_signal_signal_emit(self, *args):
         self.calls.append(args)
 
-class WithNameModule(gtkmvc.Observer):
-    @gtkmvc.Observer.observe("signal", signal=True, old_style_call=True)
-    @gtkmvc.Observer.observe("iduna", signal=True, old_style_call=True)
+class WithNameModule(gtkmvc3.Observer):
+    @gtkmvc3.Observer.observe("signal", signal=True, old_style_call=True)
+    @gtkmvc3.Observer.observe("iduna", signal=True, old_style_call=True)
     def a(self, model, prop_name, arg):
         if prop_name == "signal":
             self.signal = arg
 
-    @gtkmvc.Observer.observe("value", assign=True)
-    @gtkmvc.Observer.observe("before", assign=True)
+    @gtkmvc3.Observer.observe("value", assign=True)
+    @gtkmvc3.Observer.observe("before", assign=True)
     def b(self, model, prop_name, info):
         if prop_name == "value":
             self.value = info.old, info.new
 
-    @gtkmvc.Observer.observe("before", before=True)
-    @gtkmvc.Observer.observe("after", after=True)
+    @gtkmvc3.Observer.observe("before", before=True)
+    @gtkmvc3.Observer.observe("after", after=True)
     def c(self, model, prop_name, info):
         if prop_name == "before":
             self.before = info.method_name, info.args
 
-    @gtkmvc.Observer.observe("before", before=True)
-    @gtkmvc.Observer.observe("after", after=True)
+    @gtkmvc3.Observer.observe("before", before=True)
+    @gtkmvc3.Observer.observe("after", after=True)
     def d(self, model, prop_name, info):
         if prop_name == "after":
             self.after = info.method_name, info.args
 
-class WithName(gtkmvc.Observer):
-    @gtkmvc.Observer.observe("signal", signal=True)
-    @gtkmvc.Observer.observe("iduna", signal=True)
+class WithName(gtkmvc3.Observer):
+    @gtkmvc3.Observer.observe("signal", signal=True)
+    @gtkmvc3.Observer.observe("iduna", signal=True)
     def a(self, model, prop_name, info):
         if prop_name == "signal":
             self.signal = info.arg
 
-    @gtkmvc.Observer.observe("value", assign=True)
-    @gtkmvc.Observer.observe("before", assign=True)
+    @gtkmvc3.Observer.observe("value", assign=True)
+    @gtkmvc3.Observer.observe("before", assign=True)
     def b(self, model, prop_name, info):
         if prop_name == "value":
             self.value = info.old, info.new
 
-    @gtkmvc.Observer.observe("before", before=True)
-    @gtkmvc.Observer.observe("after", after=True)
+    @gtkmvc3.Observer.observe("before", before=True)
+    @gtkmvc3.Observer.observe("after", after=True)
     def c(self, model, prop_name, info):
         if prop_name == "before":
             self.before = info.method_name, info.args
 
-    @gtkmvc.Observer.observe("before", before=True)
-    @gtkmvc.Observer.observe("after", after=True)
+    @gtkmvc3.Observer.observe("before", before=True)
+    @gtkmvc3.Observer.observe("after", after=True)
     def d(self, model, prop_name, info):
         if prop_name == "after":
             self.after = info.method_name, info.args
 
-class DynamicWithName(gtkmvc.Observer):
+class DynamicWithName(gtkmvc3.Observer):
     def __init__(self, model):
-        gtkmvc.Observer.__init__(self)
+        gtkmvc3.Observer.__init__(self)
 
         for name in ("signal", "iduna"): 
             self.observe(self.a, name, signal=True)
@@ -155,10 +155,10 @@ class DynamicWithName(gtkmvc.Observer):
         if prop_name == "after":
             self.after = info.method_name, info.args
 
-class Trigger(gtkmvc.Observer):
+class Trigger(gtkmvc3.Observer):
     def __init__(self, model):
         self.changes = {}
-        gtkmvc.Observer.__init__(self)
+        gtkmvc3.Observer.__init__(self)
 
         for name in ("signal", "iduna"):
             self.observe(self.a, name, signal=True)
@@ -236,7 +236,7 @@ class DoubleTest(unittest.TestCase):
         # Should this be 1?
         self.assertEqual(2, len(c.calls))
 
-class Dynamic(gtkmvc.Observer):
+class Dynamic(gtkmvc3.Observer):
     def a(self, model, prop_name, info):
         self.signal = info.arg
 
@@ -270,9 +270,9 @@ class DynamicTest(unittest.TestCase):
         self.m.signal.emit(4)
         self.assertFalse(hasattr(self.c, "signal"))
 
-class DynamicMultiple(gtkmvc.Observer):
+class DynamicMultiple(gtkmvc3.Observer):
     def __init__(self, model):
-        gtkmvc.Observer.__init__(self)
+        gtkmvc3.Observer.__init__(self)
         self.changes = []
         for name in model.get_properties():
             self.observe(self.change, name,

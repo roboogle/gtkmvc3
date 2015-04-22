@@ -2,13 +2,13 @@ import unittest
 
 import _importer
 
-import gtkmvc
+import gtkmvc3
 
-class Generic(gtkmvc.Model):
+class Generic(gtkmvc3.Model):
     __observables__ = ["one", "two"]
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.real = {}
 
     def get__value(self, key):
@@ -17,9 +17,9 @@ class Generic(gtkmvc.Model):
     def set__value(self, key, value):
         self.real[key] = value
 
-class Trigger(gtkmvc.Observer):
+class Trigger(gtkmvc3.Observer):
     def __init__(self, m):
-        gtkmvc.Observer.__init__(self, m)
+        gtkmvc3.Observer.__init__(self, m)
 
         for name in m.get_properties():
             self.observe(self.property_value_change, name, assign=True,

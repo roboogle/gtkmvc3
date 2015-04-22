@@ -2,14 +2,14 @@ import unittest
 
 from _importer import refresh_gui
 
-import gtkmvc
-from gtkmvc.adapters.basic import Adapter
+import gtkmvc3
+from gtkmvc3.adapters.basic import Adapter
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     en1 = 10.0
     __observables__ = ["en1"]
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
 
     def on_button1_clicked(self, button):
         self.model.en1 += 1
@@ -18,7 +18,7 @@ class Controller(gtkmvc.Controller):
 class TwoForOne(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(builder="adapter1.ui", top="window1")
+        self.v = gtkmvc3.View(builder="adapter1.ui", top="window1")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 

@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2006 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,13 +17,13 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
 
-import _importer, gtkmvc
-class MyModel (gtkmvc.Model):
+import _importer, gtkmvc3
+class MyModel (gtkmvc3.Model):
     name = "Roberto"
     age = 0
     __observables__ = ( "name", "age" )
@@ -32,9 +32,9 @@ class MyModel (gtkmvc.Model):
     pass # end of class
 
 # MyView.py
-import gtkmvc
+import gtkmvc3
 import gtk
-class MyView (gtkmvc.View):
+class MyView (gtkmvc3.View):
 
     def __init__(self):
         super(MyView, self).__init__()
@@ -65,9 +65,9 @@ class MyView (gtkmvc.View):
     pass # end of class
 
 # MyCtrl.py
-import gtkmvc
+import gtkmvc3
 import gtk
-class MyCtrl (gtkmvc.Controller):
+class MyCtrl (gtkmvc3.Controller):
     def register_view(self, view):
         view['window'].connect('delete-event', self.on_window_delete_event)
         view['button'].connect('clicked', self.on_button_clicked)

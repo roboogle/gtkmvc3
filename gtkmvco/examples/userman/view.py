@@ -1,6 +1,6 @@
 import os.path
-import _importer # this is an helper to import gtkmvc
-from gtkmvc import View
+import _importer # this is an helper to import gtkmvc3
+from gtkmvc3 import View
 
 GLADE_PATH = "./"
 

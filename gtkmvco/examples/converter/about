@@ -1,11 +1,11 @@
-<big><b>A non-trivial example of gtkmvc</b></big>
+<big><b>A non-trivial example of gtkmvc3</b></big>
 
 <i>Copyright (C) 2006 by Roberto Cavada 
 roboogle@gmail.com</i>
 
 This example shows how the design 
 and the development of a simple currency
-converter can be done with <i>gtkmvc</i>. 
+converter can be done with <i>gtkmvc3</i>. 
 
 The idea is to split the logics and the 
 presentation (<i>GUI</i>)layers of 
@@ -16,12 +16,12 @@ in both interactive and batch mode
 
 The tutorial has been designed with 
 an exaggerately complex structure,
-as the goal is to show how <i>gtkmvc</i>
+as the goal is to show how <i>gtkmvc3</i>
 can be effectively used to design
 and develop middle and large 
 applications.
 
 <b>Hope you'll enjoy working with 
-<i>gtkmvc</i>!</b>
+<i>gtkmvc3</i>!</b>
 
 <i>Roberto Cavada</i>

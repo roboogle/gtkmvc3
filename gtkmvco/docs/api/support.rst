@@ -6,12 +6,12 @@ This page contains the Support Package documentation.
 The :mod:`log` Module
 ---------------------
 
-.. automodule:: gtkmvc.support.log
+.. automodule:: gtkmvc3.support.log
 
 The :mod:`utils` Module
 -----------------------
 
-.. automodule:: gtkmvc.support.utils
+.. automodule:: gtkmvc3.support.utils
     :members:
     :undoc-members:
     :show-inheritance:

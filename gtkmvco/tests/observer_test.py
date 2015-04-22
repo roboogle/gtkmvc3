@@ -1,32 +1,32 @@
 import unittest
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 # Despite the name this superclass does not work directly with Observer but
 # only in a Model property.
-class Custom(gtkmvc.Observable):
+class Custom(gtkmvc3.Observable):
     x = 0
 
-    @gtkmvc.Observable.observed
+    @gtkmvc3.Observable.observed
     def touch(self):
         self.x += 1
 
     def reset(self):
         self.x = 5
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     y = None
     __observables__ = ["y"]
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
 
         self.y = Custom()
 
-class Observer(gtkmvc.Observer):
+class Observer(gtkmvc3.Observer):
     def __init__(self, model):
-        gtkmvc.Observer.__init__(self, model)
+        gtkmvc3.Observer.__init__(self, model)
 
         self.notified = []
 

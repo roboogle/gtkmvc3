@@ -13,7 +13,7 @@ class, and the object would change internally?
 
 For example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
 
  class MyModel (Model):
      prop1 = [1,2,3]
@@ -51,7 +51,7 @@ Mutable containers
 The framework *MVC-O* provides a full support for python mutable
 containers like *lists*, *sets*, and *maps*. For example: ::
 
- from gtkmvc import Model, Observer
+ from gtkmvc3 import Model, Observer
  
  # ----------------------------------------------------------------------
  class MyModel (Model): 
@@ -88,7 +88,7 @@ instance? Two mechanism are provided by the framework:
 
 Examples for new classes: ::
 
- from gtkmvc import Model, Observable
+ from gtkmvc3 import Model, Observable
 
  # ----------------------------------------------------------------------
  class AdHocClass (Observable):
@@ -113,13 +113,13 @@ Examples for new classes: ::
      pass # end of class
  
 As you can see, declaring a class as *observable* is as simple as
-deriving from ``gtkmvc.Observable`` and decorating
+deriving from ``gtkmvc3.Observable`` and decorating
 those class methods that must be observed with the decorator 
-``gtkmvc.Observable.observed`` (decorators are supported by
+``gtkmvc3.Observable.observed`` (decorators are supported by
 Python version 2.4 and later only). 
 
 However, sometimes we want to reuse existing classes and it is not
-possible to derive them from ``gtkmvc.Observable``. In this case
+possible to derive them from ``gtkmvc3.Observable``. In this case
 declaration of the methods to be observed can be done at time of
 declaration of the corresponding *OP*. In this case the *value* to be
 assigned to the *OP* must be a triple ``(class, instance,
@@ -137,7 +137,7 @@ method_names
 
 For example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  #----------------------------------------------------------------------
  # This is a class the used cannot/don't want to change
  class HolyClass (object):    
@@ -161,13 +161,13 @@ Finally, *OP* can hold special values that are *signals* that can be
 used to notify observers that certain *events* occurred. 
 
 To declare an *OP* as a signal, the value of the *OP* must be an
-instance of class ``gtkmvc.Signal``. To notify an event,
+instance of class ``gtkmvc3.Signal``. To notify an event,
 the model can then invoke method ``emit`` of the *OP*. Emitting a
 signal can carry an optional argument.
 
 For example: ::
 
- from gtkmvc import Model, Signal
+ from gtkmvc3 import Model, Signal
  
  # ----------------------------------------------------------------------
  class MyModel (Model):
@@ -194,7 +194,7 @@ Class vs Instance members as OPs
 
 So far in our examples, all OPs were class members: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
 
  class MyModel (Model):
      prop1 = 10

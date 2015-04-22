@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2007 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -18,8 +18,8 @@
 #  Boston, MA 02110, USA.
 #  02111-1307 USA.
 #
-#  For more information on pygtkmvc see
-#  <http://pygtkmvc.sourceforge.net> or email to the author Roberto
+#  For more information on pygtkmvc3 see
+#  <http://pygtkmvc3.sourceforge.net> or email to the author Roberto
 #  Cavada <roboogle@gmail.com>.  Please report bugs to
 #  <roboogle@gmail.com>.
 
@@ -32,11 +32,11 @@
 
 import _importer
 
-import gtkmvc
+import gtkmvc3
 import gtk
 
 # hand-made view simply containing a text entry and a button
-class MyView (gtkmvc.View):
+class MyView (gtkmvc3.View):
     def __init__(self):
         super(MyView,self).__init__()
 
@@ -55,7 +55,7 @@ class MyView (gtkmvc.View):
  #-----------------------------------------------------------
 
 # The controller. Boring code now is handled by adapters!
-class MyCtrl (gtkmvc.Controller):
+class MyCtrl (gtkmvc3.Controller):
 
     def register_adapters(self):
         # good time to create adapters
@@ -76,7 +76,7 @@ class MyCtrl (gtkmvc.Controller):
     pass # end of class
  #-----------------------------------------------------------
 
-class MyModel (gtkmvc.Model):
+class MyModel (gtkmvc3.Model):
     text = "Ciao"
     __observables__ = ("text",)
     pass # end of class

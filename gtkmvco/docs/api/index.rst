@@ -26,10 +26,10 @@ Installation
 Please refer to the User Manual for any detail.
 
 
-The :mod:`gtkmvc` Module
+The :mod:`gtkmvc3` Module
 ------------------------
 
-.. automodule:: gtkmvc
+.. automodule:: gtkmvc3
 
 .. autofunction:: get_version()
 

@@ -31,7 +31,7 @@ import xml.etree.cElementTree as ElementTree
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 import editor
 import filtering
@@ -85,9 +85,9 @@ def Editor():
 
     return editor.Editor(Field)
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     def __init__(self):
-        gtkmvc.View.__init__(self, builder="log.ui", top="window")
+        gtkmvc3.View.__init__(self, builder="log.ui", top="window")
 
         t = self['treeview']
         # Make GtkTreeSelection available to signal connection via method
@@ -116,14 +116,14 @@ class View(gtkmvc.View):
         self['vbox'].pack_start(e)
         self['vbox'].reorder_child(e, 0)
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view.show()
 
     def register_adapters(self):
         self.setup_columns()
         # Overwrite one to improve formatting.
-        gtkmvc.controller.setup_column(
+        gtkmvc3.controller.setup_column(
             self.view['date'], attribute='date',
             from_python=lambda d: d.strftime('%Y.%m.%d %H:%M'))
 
@@ -152,5 +152,5 @@ class Controller(gtkmvc.Controller):
         else:
             self.view['buffer'].set_text('')
 
-c = Controller(gtkmvc.Model(), View(), handlers='class')
+c = Controller(gtkmvc3.Model(), View(), handlers='class')
 gtk.main()

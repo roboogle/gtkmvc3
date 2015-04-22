@@ -78,7 +78,7 @@ observable property. A couple of methods are supplied in order to
 access the state. ::
 
  # file model.py
- from gtkmvc import Model
+ from gtkmvc3 import Model
 
  class ExampleModel (Model):
     """The model contains a set of messages
@@ -133,7 +133,7 @@ In the example, the View is implemented inside the class
 
  # file view.py
  import os.path
- from gtkmvc import View
+ from gtkmvc3 import View
 
  GLADE_PATH = "./"
 
@@ -168,7 +168,7 @@ pressed. ::
 
  # file ctrl.py
  from gtk import main_quit
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
 
  class ExampleController(Controller):
     """The only one controller. Handles the button clicked signal, and
@@ -218,18 +218,18 @@ The :func:`main` code creates a `(m,v,c)` triple and launches
  from model import ExampleModel
  from ctrl import ExampleController
  from view import ExampleView
- import gtkmvc
+ import gtkmvc3
 
  def check_requirements():
-    gtkmvc.require("1.99.1")
+    gtkmvc3.require("1.99.1")
     return
 
  def setup_env(development_state=False):
-    # This is how developers should set gtkmvc logging level (by
+    # This is how developers should set gtkmvc3 logging level (by
     # default debugging info is not shown):
     if development_state:
         import logging
-        logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
+        logging.getLogger("gtkmvc3").setLevel(logging.DEBUG)
         pass
     return
 

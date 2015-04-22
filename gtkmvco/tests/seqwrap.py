@@ -2,7 +2,7 @@
 # Adapted by RC to use unittest
 
 import _importer
-from gtkmvc import Model, Observer
+from gtkmvc3 import Model, Observer
 import unittest
 
 class MyModel (Model):

@@ -1,11 +1,11 @@
 import _importer
 
-import gtkmvc
+import gtkmvc3
 
-class Person(gtkmvc.Model):
+class Person(gtkmvc3.Model):
     __observables__ = ('name', 'age')
 
-    @gtkmvc.Model.getter('*')
+    @gtkmvc3.Model.getter('*')
     def calculate(self, name):
         return 0
 

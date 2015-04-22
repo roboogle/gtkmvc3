@@ -2,14 +2,14 @@ import unittest
 
 import _importer
 
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     __observables__ = ['old', 'new', 'generic']
 
     def __init__(self, pre=None, post=None):
         self.calls1 = []
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.calls2 = []
 
         self.calls1.append('init')
@@ -20,7 +20,7 @@ class Model(gtkmvc.Model):
         self.calls2.append('old')
         return 1
 
-    @gtkmvc.Model.getter
+    @gtkmvc3.Model.getter
     def new(self):
         self.calls1.append('new')
         self.calls2.append('new')

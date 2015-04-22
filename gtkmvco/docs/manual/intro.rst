@@ -11,9 +11,9 @@ new applications based on it.
 
 Section :doc:`install` gives information about the required
 dependencies, the installation, the distribution and the license of
-*gtkmvc*.
+*gtkmvc3*.
 
-Section :doc:`motiv` tries to motivate the usage of *gtkmvc*, by
+Section :doc:`motiv` tries to motivate the usage of *gtkmvc3*, by
 discussing the context which the framework is thought to operate, and
 its main goals.
 

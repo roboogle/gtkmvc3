@@ -1,9 +1,9 @@
 import unittest
 
 import _importer
-from gtkmvc.observer import observes
-from gtkmvc.observable import Signal
-from gtkmvc import Model, Observer
+from gtkmvc3.observer import observes
+from gtkmvc3.observable import Signal
+from gtkmvc3 import Model, Observer
 
 
 class MyOb (Observer):

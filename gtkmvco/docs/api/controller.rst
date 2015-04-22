@@ -1,7 +1,7 @@
 The Controller
 ==============
 
-.. module:: gtkmvc.controller
+.. module:: gtkmvc3.controller
 
 .. autoclass:: Controller
     :members:

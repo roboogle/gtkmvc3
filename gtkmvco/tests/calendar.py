@@ -5,9 +5,9 @@ from gi.repository import Gtk
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     date = datetime.date(2011, 12, 24)
     time = datetime.datetime(2011, 12, 24, 18)
     __observables__ = ('date', 'time')
@@ -15,12 +15,12 @@ class Model(gtkmvc.Model):
 class Date(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = v = gtkmvc.View()
+        self.v = v = gtkmvc3.View()
         v['window'] = w = Gtk.Window()
         v['calendar'] = c = Gtk.Calendar()
         w.add(c)
         w.show_all()
-        self.c = gtkmvc.Controller(self.m, self.v)
+        self.c = gtkmvc3.Controller(self.m, self.v)
         refresh_gui()
         self.adapt()
         refresh_gui()
@@ -54,7 +54,7 @@ class DateLessCode(Date):
         old model value to copy the time. Still, datetime may occur in the
         wild, adapted to a Calendar and two or three SpinButton.
         """
-        a = gtkmvc.adapters.Adapter(self.m, 'date')
+        a = gtkmvc3.adapters.Adapter(self.m, 'date')
         def setter(c, d):
             # TODO test if this flickers, maybe add "if new != old"
             c.select_month(d.month - 1, d.year)

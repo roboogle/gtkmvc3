@@ -2,12 +2,12 @@
 #
 #  Copyright (c) 2005 by Roberto Cavada
 #
-#  pygtkmvc is free software; you can redistribute it and/or
+#  pygtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
 #  License as published by the Free Software Foundation; either
 #  version 2 of the License, or (at your option) any later version.
 #
-#  pygtkmvc is distributed in the hope that it will be useful,
+#  pygtkmvc3 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #  Lesser General Public License for more details.
@@ -17,7 +17,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110, USA.
 #
-#  For more information on pygtkmvc see <http://pygtkmvc.sourceforge.net>
+#  For more information on pygtkmvc3 see <http://pygtkmvc3.sourceforge.net>
 #  or email to the author Roberto Cavada <roboogle@gmail.com>.
 #  Please report bugs to <roboogle@gmail.com>.
 
@@ -27,12 +27,12 @@ import collections
 from gi.repository import GLib
 from gi.repository import Gtk
 
-from gtkmvc.observer import Observer
-from gtkmvc.support.log import logger
-from gtkmvc.support.utils import cast_value
-from gtkmvc.support.exceptions import TooManyCandidatesError
-from gtkmvc.adapters.basic import Adapter, RoUserClassAdapter
-from gtkmvc.adapters.containers import StaticContainerAdapter
+from gtkmvc3.observer import Observer
+from gtkmvc3.support.log import logger
+from gtkmvc3.support.utils import cast_value
+from gtkmvc3.support.exceptions import TooManyCandidatesError
+from gtkmvc3.adapters.basic import Adapter, RoUserClassAdapter
+from gtkmvc3.adapters.containers import StaticContainerAdapter
 
 
 def partition(string, sep):
@@ -290,7 +290,7 @@ class Controller (Observer):
            called, match them to the view by name, and create adapters fitting
            for the respective widget type.
 
-           That information comes from :mod:`gtkmvc.adapters.default`.
+           That information comes from :mod:`gtkmvc3.adapters.default`.
            See :meth:`_find_widget_match` for name patterns.
 
            .. versionchanged:: 1.99.1
@@ -333,7 +333,7 @@ class Controller (Observer):
 
         In all cases, optional keyword argument ``flavour=value``
         can be used to specify a particular flavour from those
-        available in :mod:`gtkmvc.adapters.default` adapters.
+        available in :mod:`gtkmvc3.adapters.default` adapters.
         """
 
         # checks arguments

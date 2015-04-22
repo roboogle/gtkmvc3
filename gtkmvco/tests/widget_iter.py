@@ -5,13 +5,13 @@ import unittest
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
-class View(gtkmvc.View):
+class View(gtkmvc3.View):
     builder = "adapters.ui"
     top = "window6"
 
-class Ctrl(gtkmvc.Controller):
+class Ctrl(gtkmvc3.Controller):
 
     def register_view(self, view):
         iter1 = iter(view)
@@ -28,7 +28,7 @@ class Ctrl(gtkmvc.Controller):
 
 class TwoForOne(unittest.TestCase):
     def setUp(self):
-        self.m = gtkmvc.Model()
+        self.m = gtkmvc3.Model()
         self.v = View()
         self.c = Ctrl(self.m, self.v)
 

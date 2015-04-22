@@ -4,13 +4,13 @@ from gi.repository import Gtk
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     title = ''
     __observables__ = ['title']
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         view['window'] = Gtk.Window()
 
@@ -20,7 +20,7 @@ class Controller(gtkmvc.Controller):
 class PropertyAdapter(unittest.TestCase):
     def testConnection(self):
         m = Model()
-        v = gtkmvc.View()
+        v = gtkmvc3.View()
         c = Controller(m, v)
         refresh_gui()
         self.assertEqual(m.title, v['window'].get_title())

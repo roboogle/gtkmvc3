@@ -3,7 +3,7 @@ A simple currency converter.
 This is the most complex example presented here among the available
 examples. The code is even much more complex than what it would be
 actually required, as the idea is to present a sort of template which
-a middle and large application based on gtkmvc may follow.
+a middle and large application based on gtkmvc3 may follow.
 
 ----------------------------------------------------------------------
   HOW THE EXAMPLE CAN BE RUN 

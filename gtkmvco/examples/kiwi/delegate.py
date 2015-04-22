@@ -1,6 +1,6 @@
 import _importer
 
-from gtkmvc import Model, View, Controller
+from gtkmvc3 import Model, View, Controller
 import gtk, logging
 
 
@@ -49,7 +49,7 @@ delegate.show()
 gtk.main()
 """
 
-# This is the same example written with gtkmvc (requires 1.99.2)
+# This is the same example written with gtkmvc3 (requires 1.99.2)
 class MyModel (Model):
     temperature = 0.0
     __observables__ = ("temperature", "celsius", "fahrenheit")

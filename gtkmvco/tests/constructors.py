@@ -7,15 +7,15 @@ import unittest
 
 from _importer import refresh_gui
 
-import gtkmvc
+import gtkmvc3
 
 RUNTIME = (TypeError, NotImplementedError)
 
 class Constructors(unittest.TestCase):
     def setUp(self):
-        self.m = gtkmvc.Model()
-        self.v = gtkmvc.View()
-        self.c = gtkmvc.Controller(self.m, self.v)
+        self.m = gtkmvc3.Model()
+        self.v = gtkmvc3.View()
+        self.c = gtkmvc3.Controller(self.m, self.v)
         refresh_gui()
 
     def test1991(self):
@@ -35,7 +35,7 @@ class Constructors(unittest.TestCase):
                      controller=None):
         def __init__(self, model, view=None, spurious=False, auto_adapt=False):
         """
-        self.assertRaises(TypeError, lambda: gtkmvc.Controller(
+        self.assertRaises(TypeError, lambda: gtkmvc3.Controller(
             self.m))
 
     def test122(self):
@@ -44,11 +44,11 @@ class Constructors(unittest.TestCase):
             glade_top_widget_name=None, parent_view=None, register=True):
         def __init__(self, model, spurious=False):
         """
-        gtkmvc.require("1.2.0")
+        gtkmvc3.require("1.2.0")
 
-        self.assertRaises(TypeError, lambda: gtkmvc.Controller(
+        self.assertRaises(TypeError, lambda: gtkmvc3.Controller(
             self.m))
-        self.assertRaises(NotImplementedError, lambda: gtkmvc.Controller(
+        self.assertRaises(NotImplementedError, lambda: gtkmvc3.Controller(
             self.m, False))
 
 if __name__ == "__main__":

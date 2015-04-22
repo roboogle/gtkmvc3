@@ -19,7 +19,7 @@ base class ``Model``.
 Here a quick example is shown here, later all details are
 presented. ::
 
- from gtkmvc import Model, Observer 
+ from gtkmvc3 import Model, Observer 
  # ----------------------------
  class MyModel (Model):
     name = "Roberto"

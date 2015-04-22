@@ -22,7 +22,7 @@ attributes have to appear in the class. Their name have to appear
 only within the special member ``__observables__``. 
 For example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto" 
@@ -63,7 +63,7 @@ decorator.
 
 E.g. for logical OP ``happiness`` in the previous example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto" 
@@ -85,7 +85,7 @@ It is possible to define getter/setter methods which serve multiple
 logical OPs.
 For example: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto" 
@@ -115,7 +115,7 @@ logical OPs not exactly matched by other decorators. It is an error
 condition if multiple matches are found when matching logical OPs
 specified with wildcards. For example this is perfectly legal: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto" 
@@ -146,7 +146,7 @@ specified with wildcards. For example this is perfectly legal: ::
 
 However, this example is not legal: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     
@@ -194,7 +194,7 @@ receive the name of the property.
 Generic getter/setter will not be called for OPs which have
 specific getter/setter defined. For example: ::
  
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     __observables__ = ("energy", "entropy", "enology")
@@ -213,7 +213,7 @@ specific getter/setter defined. For example: ::
 The first example we presented for decorators could be rewritten
 as: ::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  # ----------------------------
  class MyModel (Model):
     name = "Roberto" 
@@ -259,7 +259,7 @@ representing the temperature expressed in "celsius" and "fahrenheit",
 whose value can be calculated out of the absolute temperature in
 kelvin::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class TemperatureModel (Model):
    kelvin = 273.15
    
@@ -311,7 +311,7 @@ depicted in the figure.
 
 The model may be::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel (Model):
    C1 = 1
    C2 = 2

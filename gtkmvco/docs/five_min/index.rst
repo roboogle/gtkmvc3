@@ -9,18 +9,18 @@
 .. |mvc| replace:: *MVC* pattern
 .. |obs| replace:: *Observer* pattern
 .. |gui| replace:: *GUI*
-.. |pygtkmvc| replace:: *pygtkmvc*
+.. |pygtkmvc3| replace:: *pygtkmvc3*
 .. |vc| replace:: *V&C*
 
 
 ###################
-gtkmvc in 5 minutes
+gtkmvc3 in 5 minutes
 ###################
 
 The goal of this example is not to provide an explanation of *how*
-gtkmvc works (see the rest of the documentation), but to present a quick example
+gtkmvc3 works (see the rest of the documentation), but to present a quick example
 about how complexity and dependencies of an application can be reduced by
-using gtkmvc.
+using gtkmvc3.
 
 
 The example in details
@@ -48,7 +48,7 @@ View
 The glade file can be loaded into a *view*::
 
  import gtk
- from gtkmvc import View
+ from gtkmvc3 import View
  class MyView (View):
      builder = "example.glade"
      top = "window1"
@@ -68,7 +68,7 @@ Model
 
 The application's logic is contained into the *model*::
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  class MyModel(Model):
      use_rb1 = True
      option1 = 5
@@ -89,7 +89,7 @@ Controller
 
 The *controller* couples the *model* and the *view*::
 
-    from gtkmvc import Controller
+    from gtkmvc3 import Controller
     class MyController(Controller):
 
         def register_adapters(self):

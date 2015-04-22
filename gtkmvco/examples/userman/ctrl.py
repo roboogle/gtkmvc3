@@ -1,6 +1,6 @@
-import _importer # this is an helper to import gtkmvc
+import _importer # this is an helper to import gtkmvc3
 from gtk import main_quit
-from gtkmvc import Controller
+from gtkmvc3 import Controller
 
 class ExampleController(Controller):
     """The only one controller. Handles the button clicked signal, and

@@ -6,8 +6,8 @@ try:
     from sqlobject import *
 
     import _importer
-    from gtkmvc.model import SQLObjectModel
-    from gtkmvc import Observer
+    from gtkmvc3.model import SQLObjectModel
+    from gtkmvc3 import Observer
 
     class Person(SQLObjectModel):
         aaa = 1

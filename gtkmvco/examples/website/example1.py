@@ -1,11 +1,11 @@
-import _importer, gtkmvc, gtk
-class MyModel (gtkmvc.Model):
+import _importer, gtkmvc3, gtk
+class MyModel (gtkmvc3.Model):
     name = "Roberto"
     age = 0
     __observables__ = ( "name", "age" ) 
     def show(self): print "MyModel: name=", self.name, "age=", self.age
 
-class MyCtrl (gtkmvc.Controller):    
+class MyCtrl (gtkmvc3.Controller):    
     def on_button_clicked(self, button):
         self.model.show()
         return
@@ -15,7 +15,7 @@ class MyCtrl (gtkmvc.Controller):
         return True
 
 m = MyModel()
-v = gtkmvc.View(glade="example1.glade")
+v = gtkmvc3.View(glade="example1.glade")
 c = MyCtrl(m, v, auto_adapt=True)
 gtk.main() # run the application
 

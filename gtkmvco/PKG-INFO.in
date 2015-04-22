@@ -1,8 +1,8 @@
 Metadata-Version: 1.0
-Name: python-gtkmvc
+Name: python-gtkmvc3
 Version: $version
 Summary: $description
-Home-page: http://pygtkmvc.sourceforge.net/
+Home-page: http://pygtkmvc3.sourceforge.net/
 Author: Roberto Cavada
 Author-email: roboogle@gmail.com
 License: LGPL

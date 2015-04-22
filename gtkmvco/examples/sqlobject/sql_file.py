@@ -26,8 +26,8 @@ import _importer
 
 from sqlobject import *
 
-from gtkmvc.model import SQLObjectModel
-from gtkmvc import Observer
+from gtkmvc3.model import SQLObjectModel
+from gtkmvc3 import Observer
 
 # WARNING we overwrite existing files and don't clean up afterwards.
 c1 = connectionForURI('sqlite:///tmp/doc1')

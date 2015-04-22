@@ -1,26 +1,26 @@
-.. pygtkmvc documentation master file, created by
+.. pygtkmvc3 documentation master file, created by
    sphinx-quickstart on Fri Mar 11 12:35:33 2011.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. |gtkmvc| replace:: *gtkmvc*
+.. |gtkmvc3| replace:: *gtkmvc3*
 
 
-Welcome to pygtkmvc
+Welcome to pygtkmvc3
 ====================================
 
-|gtkmvc| is a thin framework for supporting GUI programming with Python and PyGTK. Its major features are:
+|gtkmvc3| is a thin framework for supporting GUI programming with Python and PyGTK. Its major features are:
 
    #. A practical implementation of a Model-View-Controller pattern dialect.
    #. A transparent implementation of the Observer pattern.
    #. Guides the design and the structure to your application, still being behind the scene.
-   #. |gtkmvc| is small: you can distribute it along with your application, with no bad effects on its dependencies list.
+   #. |gtkmvc3| is small: you can distribute it along with your application, with no bad effects on its dependencies list.
    #. A good set of documentation. 
 
 For a quick example, see :doc:`five_min/index`.
 
-|gtkmvc| is often compared to the great project Kiwi.
-However, the two projects are different, as Kiwi focuses more on the presentation side while |gtkmvc| is more focused on the logic side of the application, and does not provide any extension to what the toolkit PyGTK provides.
+|gtkmvc3| is often compared to the great project Kiwi.
+However, the two projects are different, as Kiwi focuses more on the presentation side while |gtkmvc3| is more focused on the logic side of the application, and does not provide any extension to what the toolkit PyGTK provides.
 
 
 Table of Contents:
@@ -44,7 +44,7 @@ If GUI programming is not exactly rocket science, it can become even a pain in t
 
 If there are no barriers among the logic and presentation layers, the well-known laziness of programmers wins the day. The ending result is a spaghetti code which is later very hard to get relieved of.
 
-gtkmvc plays a rule to help designers to correctly structure their applications, and to provide them with a easy, light, non-invasive and still high-level framework which in the end makes GUI programming an easier task. 
+gtkmvc3 plays a rule to help designers to correctly structure their applications, and to provide them with a easy, light, non-invasive and still high-level framework which in the end makes GUI programming an easier task. 
 
 
 Indices and tables

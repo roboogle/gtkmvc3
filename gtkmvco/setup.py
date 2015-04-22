@@ -12,20 +12,20 @@ except:
     from distutils.core import setup
     pass
 
-from gtkmvc import get_version
+from gtkmvc3 import get_version
 
 
-setup(name="python-gtkmvc",
+setup(name="python-gtkmvc3",
       version=".".join(map(str, get_version())), 
       description="Model-View-Controller and Observer patterns "\
                   "for developing pygtk-based applications",
       author="Roberto Cavada",
       author_email="roboogle@gmail.com",
       license="LGPL",
-      url="http://pygtkmvc.sourceforge.net/",
-      packages=['gtkmvc', 'gtkmvc.support', 'gtkmvc.adapters', 'gtkmvc.progen'],
-      package_data={'gtkmvc.progen': ['progen.glade']},
-      scripts=['scripts/gtkmvc-progen'],
+      url="http://pygtkmvc3.sourceforge.net/",
+      packages=['gtkmvc3', 'gtkmvc3.support', 'gtkmvc3.adapters', 'gtkmvc3.progen'],
+      package_data={'gtkmvc3.progen': ['progen.glade']},
+      scripts=['scripts/gtkmvc3-progen'],
 
       classifiers=[
           'Development Status :: 4 - Beta',

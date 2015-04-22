@@ -1,19 +1,19 @@
 import unittest
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 class Custom(list):
     def __len__(self): return 1
 
-class Model(gtkmvc.Model):
+class Model(gtkmvc3.Model):
     standard = None
     custom = None
     # Order matters.
     __observables__ = ("standard", "custom")
 
     def __init__(self):
-        gtkmvc.Model.__init__(self)
+        gtkmvc3.Model.__init__(self)
         self.standard = []
         self.custom = Custom()
         return

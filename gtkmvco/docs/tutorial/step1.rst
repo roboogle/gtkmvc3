@@ -25,7 +25,7 @@ button, which increments the counter by one every time it is pressed.
 
 Since this tutorial must fit into few pages, the example is extremely
 simple. Moreover, a more convoluted example would not help to better
-understand what |pygtkmvc| can be used for.
+understand what |pygtkmvc3| can be used for.
 
 
 The framework
@@ -42,14 +42,14 @@ adopt the former most of the times, or even more often a mixture of
 them, where many parts come from one or more glade files, and some
 others are built manually.
 
-The use of glade files is also the reason why the |pygtkmvc| framework
+The use of glade files is also the reason why the |pygtkmvc3| framework
 is split into three distinct parts. It is a matter of fact that in
 practice the Model-View-Controller pattern will almost always collapse
 to a two-level framework, where the View and the Controller are
 represented by a unique monolithic entity (let's call it |vc|),
 and the Model is still separated by the rest.
 
-The |pygtkmvc| framework provides three well-distinguishable levels, to
+The |pygtkmvc3| framework provides three well-distinguishable levels, to
 allow the pure-glade parts to go into the View side (in a direct and
 very natural way), and all the remaining parts that would be put in
 the |vc| part, to go either in the Controller part, or in the View
@@ -80,7 +80,7 @@ are interested in monitoring and show any change of this counter, we
 declare it as an *observable property*. ::
 
 
- from gtkmvc import Model
+ from gtkmvc3 import Model
  
  class MyModel (Model):
      # observable properties:
@@ -117,10 +117,10 @@ associated with a function called ``on_button_clicked``.
    Glade at work
 
 
-The result is saved in file ``pygtkmvc-example.glade``.
+The result is saved in file ``pygtkmvc3-example.glade``.
 
 The view is represented by class ``MyView``, that derives from
-class ``View`` provided by |pygtkmvc|. The class ``View``
+class ``View`` provided by |pygtkmvc3|. The class ``View``
 can be thought as a container that holds a set of widgets, and may
 associate each widget with a string name. When a glade file is used to
 build the view, each widget will be associated automatically inside
@@ -131,10 +131,10 @@ corresponding ``Controller``, and when built from a glade file,
 methods inside the ``Controller`` will be scanned to try to
 connect automatically all signals declared in the glade file. ::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  class MyView (View):
     def __init__(self):
-       View.__init__(self, builder="pygtkmvc-example.glade")
+       View.__init__(self, builder="pygtkmvc3-example.glade")
        return
 
     def set_text(self, text):
@@ -154,9 +154,9 @@ derive from ``View`` and simply call View's constructor by passing
 glade filename and possibly name of top-level widget. In this
 situation, it is possible to use a much compact declaration for views::
 
- from gtkmvc import View
+ from gtkmvc3 import View
  class MyView2 (View):
-    builder = "pygtkmvc-example.glade"
+    builder = "pygtkmvc3-example.glade"
 
     def set_text(self, text):
         self['label'].set_text(text)
@@ -167,7 +167,7 @@ Attributes `builder`, `glade` and `top` can be overridden by using the
 corresponding keyword arguments when calling the constructor::
 
     ...
-    v = MyView2(builder='a-different-pygtkmvc-example.glade')
+    v = MyView2(builder='a-different-pygtkmvc3-example.glade')
 
 
 The controller
@@ -178,7 +178,7 @@ view instances which it is linked to. These are accessible via members
 ``self.model`` and ``self.view`` respectively. ::
   
  # This is file ctrl_glade.py
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  import gtk
  
  class MyController (Controller):
@@ -292,11 +292,11 @@ exactly the same as for the implementation glade-based.
 The view
 --------
 Using manually constructed views is slightly less intuitive that using
-glade-based views, since the architecture of the view-side |pygtkmvc|
+glade-based views, since the architecture of the view-side |pygtkmvc3|
 is mainly designed to be used with glade files. ::
 
  # This is file view_no_glade.py
- from gtkmvc.view import View
+ from gtkmvc3.view import View
  import gtk
  
  class MyViewNoGlade (View):
@@ -423,7 +423,7 @@ We want to have an adapter to handle coordination between property
 unchanged. It is the Controller that can be simplified as follows: ::
 
  # This is file ctrl_glade_adap.py
- from gtkmvc import Controller
+ from gtkmvc3 import Controller
  import gtk
  
  class MyControllerAdap (Controller):
@@ -456,7 +456,7 @@ Now suppose you want to apply some customization to the way the
 label shows the property's value. Method
 ``register_adapters`` might be: ::
 
-    from gtkmvc import adapters
+    from gtkmvc3 import adapters
     def register_adapters(self):
         a = adapters.Adapter(self.model, "counter")
         a.connect_widget(self.view['label'], 

@@ -1,7 +1,7 @@
 Implementation of the MVC pattern
 =================================
 
-The implementation of the *MVC* pattern provided by *gtkmvc* is a dialect
+The implementation of the *MVC* pattern provided by *gtkmvc3* is a dialect
 version of the "official" pattern generally described by Software
 Engineering Theory [#theory]_.
 
@@ -16,8 +16,8 @@ Engineering Theory [#theory]_.
 The implementation is different as the view side cannot see the model
 part. The reasons behind this difference will be explained later, but
 we can anticipate here that this is due to the relationship between
-the view and the controller, that is stronger in *gtkmvc* than in the
-classic *MVC* pattern. To a certin extend, in *gtkmvc* the view and the
+the view and the controller, that is stronger in *gtkmvc3* than in the
+classic *MVC* pattern. To a certin extend, in *gtkmvc3* the view and the
 controller parts are separate but could be considered as a unique
 entity. However, a view can have multiple controllers (or a single
 controller decomposed into many sub-controllers for the sake of

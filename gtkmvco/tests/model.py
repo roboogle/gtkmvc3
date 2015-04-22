@@ -1,12 +1,12 @@
 """
-Real unit tests for functions in gtkmvc/model.py
+Real unit tests for functions in gtkmvc3/model.py
 """
 
 import unittest
 
 import _importer
 
-from gtkmvc.model import count_leaves
+from gtkmvc3.model import count_leaves
 
 class CountLeaves(unittest.TestCase):
     def testList(self):

@@ -5,7 +5,7 @@
   <object class="GtkTextBuffer" id="textbuffer1">
     <property name="text" translatable="yes"># Type here your own source file header
 # This is a template, and a bunch of variables will be expanded when instantiating it.
-# The complete set of variables can be found in module gtkmvc.progen.templates</property>
+# The complete set of variables can be found in module gtkmvc3.progen.templates</property>
   </object>
   <object class="GtkWindow" id="window_appl">
     <property name="visible">True</property>
@@ -185,8 +185,8 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="cb_gtkmvc">
-                        <property name="label" translatable="yes">Include the package gtkmvc</property>
+                      <object class="GtkCheckButton" id="cb_gtkmvc3">
+                        <property name="label" translatable="yes">Include the package gtkmvc3</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -340,7 +340,7 @@
                     <child>
                       <object class="GtkCheckButton" id="cb_std_header">
                         <property name="label" translatable="yes">Headers with default template
-(See gtkmvc.progen.templates)</property>
+(See gtkmvc3.progen.templates)</property>
                         <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>

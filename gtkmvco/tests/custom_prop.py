@@ -10,7 +10,7 @@ Pressing the button should increment the entry and print.
 """
 
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc3 import Model, Controller, View
 
 # ------------------------------------------------
 class MyModel (Model):

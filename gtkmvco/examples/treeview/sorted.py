@@ -19,16 +19,16 @@
 import gtk
 
 import _importer
-import gtkmvc
+import gtkmvc3
 
 from sorting import *
 
-class Person(gtkmvc.Model):
+class Person(gtkmvc3.Model):
     name = ''
     age = 0
     __observables__ = ('name', 'age')
 
-class Controller(gtkmvc.Controller):
+class Controller(gtkmvc3.Controller):
     def register_view(self, view):
         def add(name, age):
             p = Person()
@@ -70,12 +70,12 @@ class Simple(Controller):
         for n in ('label1', 'frame', 'button'):
             self.view[n].set_visible(False)
 
-m = gtkmvc.Model()
-v = gtkmvc.View(builder='sorted.ui')
+m = gtkmvc3.Model()
+v = gtkmvc3.View(builder='sorted.ui')
 c = Controller(m, v, handlers='class')
 
-m = gtkmvc.Model()
-v = gtkmvc.View(builder='sorted.ui')
+m = gtkmvc3.Model()
+v = gtkmvc3.View(builder='sorted.ui')
 c = Simple(m, v, handlers='class')
 
 gtk.main()

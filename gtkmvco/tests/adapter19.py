@@ -2,7 +2,7 @@
 Like adapter7.py but using GtkBuilder.
 """
 import _importer
-from gtkmvc import Model, Controller, View
+from gtkmvc3 import Model, Controller, View
 
 from gi.repository import Gtk
 

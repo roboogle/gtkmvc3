@@ -27,14 +27,15 @@
 
 
 # checks for gtkmvc
-try: import gtkmvc
+try:
+    import gtkmvc
 except:
     # use the local installation
     import os.path; import sys
     top_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     sys.path = [top_dir] + sys.path
     import gtkmvc
-    pass
+
 gtkmvc.require("1.99.0")
 
 from gtkmvc.progen.model import ProgenModel, set_gui_log, set_shell_log
@@ -44,86 +45,92 @@ import sys
 
 req_options = ("name",)
 def process_options(args):
-    m={}
+    m = {}
     if len(args) == 0:
         raise ValueError("No options given: run with option 'help'")
     for a in args:
         kv = a.split("=")
-        if len(kv) > 2: raise ValueError("Invalid option: %s" % a)
-        if len(kv) == 1: k,v = (kv[0], "yes")
-        else: k,v = kv
-        if v.lower() == "no": v = False
-        elif v.lower() == "yes": v = True
+        if len(kv) > 2:
+            raise ValueError("Invalid option: %s" % a)
+        if len(kv) == 1:
+            k, v = (kv[0], "yes")
+        else: k, v = kv
+        if v.lower() == "no":
+            v = False
+        elif v.lower() == "yes":
+            v = True
         m[k] = v
-        pass
+
     return m
 
 
 def check_options(m):
-    if m.has_key("gui"): return
+    if "gui" in m:
+        return
     for o in req_options:
-        if not m.has_key(o): raise ValueError("Required option '%s' has not been specified" % o)
-        pass
+        if o not in m:
+            raise ValueError("Required option '%s' has not been specified" % o)
 
-    return
 
 def fix_options(m): # fixes missing options
-    if not m.has_key("gui"): m['gui'] = "win32" in sys.platform.lower() 
-    if not (m.has_key("gui") or m.has_key('author')): m['author'] = "Bug Producer"
-    return
+    if "gui" not in m:
+        m['gui'] = "win32" in sys.platform.lower()
+    if not ("gui" in m or "author" in m):
+        m['author'] = "Bug Producer"
+
 
 def print_banner():
-    print "This is the gtkmvc Project Generator version %s" % ".".join(VERSION)
-    return
+    print("This is the gtkmvc Project Generator version %s" % ".".join(VERSION))
+
 
 def print_help():
-    print "Attributes can be specified in the form: attr=value"
-    print 'For example: author="Roberto Cavada"'
-    print "Boolean attributes can be specified in the form attr[=yes|no]"
-    print "For example: gui"
-    print "Attributes and their default values are:"
+    print("Attributes can be specified in the form: attr=value")
+    print('For example: author="Roberto Cavada"')
+    print("Boolean attributes can be specified in the form attr[=yes|no]")
+    print("For example: gui")
+    print("Attributes and their default values are:")
 
     m = ProgenModel()
-    
+
+    _vals = {None: "",
+             True: "yes",
+             False: "no", }
     for a, v in ((a, getattr(m,a)) for a in m.get_properties()):
-        if v is None: v=""
-        elif v is True: v="yes"
-        elif v is False: v="no"        
-        print '\t%s"%s"' % (a.ljust(20),v)
-        pass
-    
-    print "\nBoolean option 'gui' has a default value that depends on the hosting platform"
-    print "Required attributes are:"
-    print "\t", " ".join(req_options)    
-    print
-    return
+        print('\t%s"%s"' % (a.ljust(20), _vals.get(v, "")))
+
+    print("\nBoolean option 'gui' has a default value that depends on the hosting platform")
+    print("Required attributes are:")
+    print("\t", " ".join(req_options))
+    print()
 
 
 def run_gui(model):
-    import gtk
+    from gi.repository import Gtk
     from gtkmvc.progen.ctrl import ProgenCtrl
     from gtkmvc.progen.view import ProgenView
 
     v = ProgenView()
-    c = ProgenCtrl(model,v)
+    c = ProgenCtrl(model, v)
 
     set_gui_log(v['tv_res'].get_buffer())
-    gtk.main()
-    return
+    Gtk.main()
+
 
 def run_shell(model):
     set_shell_log()
     model.generate_project()
-    return
+
 
 def main(attributes):
     pm = ProgenModel()
 
-    for k in attributes: setattr(pm, k, attributes[k])
+    for k in attributes:
+        setattr(pm, k, attributes[k])
 
-    if attributes['gui']: run_gui(pm)
-    else: run_shell(pm)
-    return
+    if attributes['gui']:
+        run_gui(pm)
+    else:
+        run_shell(pm)
 
 
 if __name__ == "__main__":
@@ -132,9 +139,12 @@ if __name__ == "__main__":
         attr = process_options(sys.argv[1:])
         fix_options(attr)
         check_options(attr)
-    except Exception,e : print e; sys.exit(1)
-    if attr.has_key("help"): print_help(); sys.exit(1)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+    if "help" in attr:
+        print_help()
+        sys.exit(1)
 
     main(attr)
-    pass
-    

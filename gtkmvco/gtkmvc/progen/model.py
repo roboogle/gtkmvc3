@@ -39,12 +39,10 @@ _log = None
 __gui_buf = None
 
 def __shell_log(msg):
-    print msg
-    return
+    print(msg)
 
 def __gui_log(msg):
     __gui_buf.insert(__gui_buf.get_end_iter(), msg+"\n")
-    return
 
 def set_gui_log(buf):
     global __gui_buf, _log
@@ -53,22 +51,20 @@ def set_gui_log(buf):
     __gui_buf = buf
     _log = __gui_log
     buf.set_text("")
-    return
 
 def set_shell_log():
     global __gui_buf, _log
 
     __gui_buf = None
     _log = __shell_log
-    return
 # ----------------------------------------------------------------------
 
 
 class ProgenModel (Model):
     """The application model"""
-    name  = "" 
-    glade = True
-    glade_fn = "application.glade"
+    name  = ""
+    builder = True
+    builder_fn = "application.ui"
     author = ""
     email     = ""
     copyright = ""
@@ -79,11 +75,11 @@ class ProgenModel (Model):
     src_name      = "src"
     res_name      = "resources"
     top_widget    = "window_appl"
-    dist_gtkmvc = True 
+    dist_gtkmvc = True
 
-    __observables__ = ("name", "glade", "glade_fn", "author", 
-                       "email", "copyright", "destdir", "complex", 
-                       "src_header", "other_comment", "src_name", 
+    __observables__ = ("name", "builder", "builder_fn", "author",
+                       "email", "copyright", "destdir", "complex",
+                       "src_header", "other_comment", "src_name",
                        "res_name", "top_widget", "dist_gtkmvc",
                        )
 
@@ -96,7 +92,6 @@ class ProgenModel (Model):
         self.templ = templates.DEFAULT_MAP.copy()
 
         self.register_observer(self)
-        return
 
     def generate_project(self):
         """
@@ -109,17 +104,17 @@ class ProgenModel (Model):
 
         _log("Generating project '%s'" % self.name)
         _log("Destination directory is: '%s'" % self.destdir)
-        
+
         top = os.path.join(self.destdir, self.name)
         src = os.path.join(top, self.src_name)
         resources = os.path.join(top, self.res_name)
         utils = os.path.join(src, "utils")
-        
+
         if self.complex:
             models = os.path.join(src, "models")
             ctrls = os.path.join(src, "ctrls")
-            views = os.path.join(src, "views")            
-        else: models = ctrls = views = src 
+            views = os.path.join(src, "views")
+        else: models = ctrls = views = src
 
         res = self.__generate_tree(top, src, resources, models, ctrls, views, utils)
         res = self.__generate_classes(models, ctrls, views) or res
@@ -130,27 +125,28 @@ class ProgenModel (Model):
                                             'view_import' : "from views.application import ApplView"})
         else: self.templ.update({'model_import' : "from ApplModel import ApplModel",
                                  'ctrl_import' : "from ApplCtrl import ApplCtrl",
-                                 'view_import' : "from ApplView import ApplView"})            
-        
+                                 'view_import' : "from ApplView import ApplView"})
+
         res = self.__mksrc(os.path.join(top, "%s.py" % self.name), templates.main) or res
 
-        # glade file
-        if self.glade: res = self.__generate_glade(resources) or res
+        # builder file
+        if self.builder:
+            res = self.__generate_builder(resources) or res
 
         if self.dist_gtkmvc: res = self.__copy_framework(os.path.join(resources, "external")) or res
 
         if not res: _log("No actions were taken")
         else: _log("Done")
         return res
-    
+
 
     def __generate_tree(self, top, src, resources, models, ctrls, views, utils):
         """Creates directories and packages"""
         res = self.__mkdir(top)
         for fn in (src, models, ctrls, views, utils): res = self.__mkpkg(fn) or res
         res = self.__mkdir(resources) or res
-        res = self.__mkdir(os.path.join(resources, "glade")) or res
-        res = self.__mkdir(os.path.join(resources, "styles")) or res
+        res = self.__mkdir(os.path.join(resources, "ui", "builder")) or res
+        res = self.__mkdir(os.path.join(resources, "ui", "styles")) or res
         res = self.__mkdir(os.path.join(resources, "external")) or res
         return res
 
@@ -166,24 +162,27 @@ class ProgenModel (Model):
         if self.complex: name = "application.py"
         else: name = "ApplCtrl.py"
         res = self.__mksrc(os.path.join(ctrls, name), src) or res
-        
+
         # view
-        if self.glade: src = self.__generate_class_template("View", "ApplView", templates.view_glade)
-        else: src = self.__generate_class_template("View", "ApplView", templates.view_noglade)
+        if self.builder:
+            src = self.__generate_class_template("View", "ApplView", templates.view_builder)
+        else:
+            src = self.__generate_class_template("View", "ApplView", templates.view_nobuilder)
 
         if self.complex: name = "application.py"
         else: name = "ApplView.py"
         res = self.__mksrc(os.path.join(views, name), src) or res
         return res
 
-    def __generate_glade(self, resources):
-        fn = os.path.join(os.path.join(os.path.join(resources, "glade"),
-                                       self.glade_fn))
-        if os.path.isfile(fn): return False
-        
-        _log("Creating glade file %s" % fn)
+    def __generate_builder(self, resources):
+        fn = os.path.join(os.path.join(os.path.join(resources, "ui", "builder"),
+                                       self.builder_fn))
+        if os.path.isfile(fn):
+            return False
+
+        _log("Creating builder file %s" % fn)
         f = open(fn, "w")
-        f.write(Template(templates.glade_file).safe_substitute(self.templ))
+        f.write(Template(templates.builder_file).safe_substitute(self.templ))
         f.close()
         return True
 
@@ -209,7 +208,7 @@ class ProgenModel (Model):
             _log("Creating directory '%s'" % destdir)
             os.makedirs(destdir)
             pass
-        
+
         # copies the source files
         gtkmvc_parent = os.path.dirname(GTKMVC_DIR)
         for root, dirs, files in os.walk(GTKMVC_DIR):
@@ -234,7 +233,7 @@ class ProgenModel (Model):
                     pass
                 pass
             pass
-        
+
         # copies non-source files
         for relsrc, reldest in (("gtkmvc/progen/README.txt", "gtkmvc/README.txt"),):
             _dest = os.path.join(destdir, reldest)
@@ -244,25 +243,25 @@ class ProgenModel (Model):
                 _log("Creating directory '%s'" % _dest_dir)
                 os.makedirs(_dest_dir)
                 pass
-            
+
             if not os.path.isfile(_dest):
                 _src = os.path.join(gtkmvc_parent, relsrc)
                 _log("Copying file '%s' into '%s'" % (_src, _dest))
                 shutil.copy(_src, _dest)
                 pass
             pass
-        
+
         _log("Copied the gtkmvc framework into %s" % destdir)
         return True
-    
-        
+
+
     # Services
     def __mkdir(self, path):
         if os.path.isdir(path): return False
         _log("Creating directory '%s'" % path)
         os.makedirs(path)
         return True
-                             
+
     def __mkpkg(self, path):
         res = self.__mkdir(path)
         res = self.__mksrc(os.path.join(path, "__init__.py")) or res
@@ -277,7 +276,7 @@ class ProgenModel (Model):
 
         for k in self.__observables__: m[k] = getattr(self, k)
         self.templ.update(m)
-        
+
         if self.src_header is None: header = templates.DEFAULT_HEADER + template
         else: header = self.src_header + "\n\n$comment\n" + template
         return Template(header).safe_substitute(self.templ)
@@ -285,12 +284,12 @@ class ProgenModel (Model):
     def __mksrc(self, path, template=""):
         if os.path.isfile(path): return False
         _log("Creating source file '%s'" % path)
-        
+
         f = open(path, "w")
         f.write(self.__get_source(path, template))
         f.close()
         return True
-        
+
     # some code to generate a default string for copyright
     @Model.observe("author", assign=True)
     def author_change(self, model, pname, info):
@@ -311,5 +310,5 @@ class ProgenModel (Model):
         self.__own_copyright = info.new in ("",None)
         return
 
-    
+
     pass # end of class

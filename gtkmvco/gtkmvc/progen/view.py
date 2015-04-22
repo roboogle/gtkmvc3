@@ -24,27 +24,27 @@
 from gtkmvc import View
 from gtkmvc.progen.globals import PROGEN_DIR
 assert PROGEN_DIR # Must be found!
-import gtk
 import os
 
 class ProgenView (View):
-    glade = os.path.join(PROGEN_DIR, "progen.glade")
+    builder = os.path.join(PROGEN_DIR, "progen.ui")
 
     def __init__(self):
         super(ProgenView, self).__init__()
         self.setup_widgets()
-        return
 
     def setup_widgets(self):
         self['notebook_appl'].set_show_tabs(False)
         nb = self['notebook']
         nb.set_show_tabs(False)
         self['button_prev'].set_sensitive(False)
-        return
 
-    def next_page(self): self.__inc_page(1)
-    def prev_page(self): self.__inc_page(-1)
-    
+    def next_page(self):
+        self.__inc_page(1)
+
+    def prev_page(self):
+        self.__inc_page(-1)
+
     def __inc_page(self, inc):
         nb = self['notebook']
         page = nb.get_current_page()
@@ -54,9 +54,5 @@ class ProgenView (View):
         self['button_prev'].set_sensitive(npage > 0)
         if npage >= 0:
             self['button_next'].set_sensitive(npage < pages-1)
-            if npage < pages: nb.set_current_page(npage)
-            pass
-        
-        return
-    
-    pass # end of class
+            if npage < pages:
+                nb.set_current_page(npage)

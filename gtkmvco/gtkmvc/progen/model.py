@@ -100,7 +100,7 @@ class ProgenModel (Model):
         # checks needed properties
         if not self.name or not self.destdir or \
                not os.path.isdir(self.destdir):
-            raise ValueError("Empty or invalid property values")
+            raise ValueError("Empty or invalid property values: run with 'help' command")
 
         _log("Generating project '%s'" % self.name)
         _log("Destination directory is: '%s'" % self.destdir)

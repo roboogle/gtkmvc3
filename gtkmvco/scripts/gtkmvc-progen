@@ -118,7 +118,10 @@ def run_gui(model):
 
 def run_shell(model):
     set_shell_log()
-    model.generate_project()
+    try:
+        model.generate_project()
+    except ValueError as e:
+        print("Error:" + str(e))
 
 
 def main(attributes):
@@ -143,7 +146,7 @@ if __name__ == "__main__":
         print(e)
         sys.exit(1)
 
-    if "help" in attr:
+    if any(a in attr for a in "help -h --help".split()):
         print_help()
         sys.exit(1)
 

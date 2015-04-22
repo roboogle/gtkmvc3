@@ -9,18 +9,18 @@
 .. |mvc| replace:: *MVC* pattern
 .. |obs| replace:: *Observer* pattern
 .. |gui| replace:: *GUI*
-.. |gtkmvc3| replace:: *gtkmvc3*
+.. |gtkmvc| replace:: *gtkmvc3*
 .. |vc| replace:: *V&C*
 
 
-###################
-gtkmvc3 in 5 minutes
-###################
+#####################
+|gtkmvc| in 5 minutes
+#####################
 
 The goal of this example is not to provide an explanation of *how*
-gtkmvc3 works (see the rest of the documentation), but to present a quick example
-about how complexity and dependencies of an application can be reduced by
-using gtkmvc3.
+|gtkmvc| works (see the rest of the documentation), but to present a
+quick example about how complexity and dependencies of an application
+can be reduced by using |gtkmvc|.
 
 
 The example in details
@@ -36,7 +36,7 @@ is selected.
 
 In the glade file, ``button_action`` has signal ``clicked`` associated to
 function ``on_button_action_clicked``, and signal ``delete`` of ``window1``
-is associated with ``on_window1_delete_event``. 
+is associated with ``on_window1_delete_event``.
 
 
 The Source Code
@@ -47,21 +47,17 @@ View
 
 The glade file can be loaded into a *view*::
 
- import gtk
  from gtkmvc3 import View
  class MyView (View):
-     builder = "example.glade"
+     builder = "example.ui"
      top = "window1"
 
      def enable_rb2(self, flag):
          """enables/disables all widgets regarding rb2"""
          self['table1'].set_sensitive(flag)
-         return
-       
-     pass # end of class
 
-For the glade file the format ``gtk.Builder`` should be used, ``Libglade`` is
-deprecated since version 1.9.2.
+Glade file ``example.ui`` can be made with Glade, in ``gtk.Builder`` format.
+
 
 Model
 -----
@@ -73,22 +69,19 @@ The application's logic is contained into the *model*::
      use_rb1 = True
      option1 = 5
      option2 = "text for option2"
-       
+
      __observables__ = ("use_rb1", "option1", "option2")
 
      def do_action(self):
-         print "model performs action:", \
-             self.use_rb1, self.option1, self.option2
-         return
-
-     pass # end of class
-
+         print("model performs action:",
+               self.use_rb1, self.option1, self.option2)
 
 Controller
 ----------
 
 The *controller* couples the *model* and the *view*::
 
+    from gi.repostiory import Gtk
     from gtkmvc3 import Controller
     class MyController(Controller):
 
@@ -96,43 +89,41 @@ The *controller* couples the *model* and the *view*::
             self.adapt("use_rb1", "rb1")
             self.adapt("option1")
             self.adapt("option2")
-            return
-          
+
         # signals handling
         def on_button_action_clicked(self, button):
             self.model.do_action()
-            return
 
         def on_window1_delete_event(self, w, e):
-            gtk.main_quit()
+            Gtk.main_quit()
             return False
-        
+
         # observable assignment notifications
         @Controller.observe("use_rb1", assign=True)
         def use_rb1_change(self, model, prop_name, info):
             self.view.enable_rb2(not info.new)
-            return
-          
-        pass # end of class
 
-* Controllers react on ``signals`` (like ``on_button_action_clicked()``) from the
-  view.
+
+* Controllers react to ``signals`` callbacks (like
+  ``on_button_action_clicked``) from the view.
 * They observe properties of the *model* (like ``use_rb1_change()``).
 * Special entities called *Adapters* take care of keeping aligned
   automatically the logic in the model and the values shown in the view.
 
 
-MVC Triplet
------------
+The Application
+---------------
 
-Now it is needed to instantiate the MVC triplet and run the gtk main
+Now it is needed to instantiate the MVC triplet and run the Gtk main
 loop::
 
     if "__main__" == __name__:
-        m = MyModel() 
-        v = MyView()  
+        from gi.repostiory import Gtk
+
+        m = MyModel()
+        v = MyView()
         c = MyController(m, v)
-        gtk.main()
+        Gtk.main()
 
 .. image:: images/example1.png
 .. image:: images/example2.png
@@ -170,4 +161,6 @@ any of the involved parts know about the existence of the others.
 
 If communication is split into *unidirectional* with no return,
 crossing or branching flows, the application gets a more robust
-structure, with high locality and low dependencies. 
+structure, with high locality and low dependencies.
+
+This is what |gtkmvc| helps you to obtain.

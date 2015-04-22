@@ -7,7 +7,7 @@
 .. include:: common.rst 
 
 #################################################
-A short tutorial for |pygtkmvc3| 
+A short tutorial for |gtkmvc3| 
 #################################################
 
 .. toctree::

@@ -264,7 +264,7 @@ This is a demo from gtkmvc3 Project Generator</property>
 Hope you will enjoy designing and developing with gtkmvc3!
 
 For further information take a tour at
-&lt;u&gt;http://sourceforge.net/apps/trac/pygtkmvc3/wiki&lt;/u&gt;</property>
+&lt;u&gt;http://sourceforge.net/apps/trac/gtkmvc3/wiki&lt;/u&gt;</property>
             <property name="use_markup">True</property>
           </object>
           <packing>

@@ -1,4 +1,4 @@
-.. pygtkmvc3 documentation master file, created by
+.. gtkmvc3 documentation master file, created by
    sphinx-quickstart on Fri Mar 11 12:35:33 2011.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -6,7 +6,7 @@
 .. |gtkmvc3| replace:: *gtkmvc3*
 
 
-Welcome to pygtkmvc3
+Welcome to gtkmvc3
 ====================================
 
 |gtkmvc3| is a thin framework for supporting GUI programming with Python and PyGTK. Its major features are:

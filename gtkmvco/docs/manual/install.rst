@@ -28,7 +28,7 @@ Meerkat*::
 
   $> apt-cache search gtkmvc3
   python-gtkmvc3 - model-view-controller (MVC) implementation for pygtk
-  python-gtkmvc3-doc - pygtkmvc3 documentation, tutorial and examples
+  python-gtkmvc3-doc - gtkmvc3 documentation, tutorial and examples
 
 However, make sure that you are using the latest available version. 
 

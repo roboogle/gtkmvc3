@@ -2,9 +2,9 @@ Metadata-Version: 1.0
 Name: python-gtkmvc3
 Version: $version
 Summary: $description
-Home-page: http://pygtkmvc3.sourceforge.net/
+Home-page: https://github.com/roboogle/gtkmvc3/
 Author: Roberto Cavada
 Author-email: roboogle@gmail.com
 License: LGPL
-Description: UNKNOWN
+Description: A pure python framework to support development of GTK3 applications
 Platform: UNKNOWN

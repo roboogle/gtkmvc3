@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pygtkmvc3 documentation build configuration file, created by
+# gtkmvc3 documentation build configuration file, created by
 # sphinx-quickstart on Fri Mar 18 18:50:24 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pygtkmvc3'
+project = u'gtkmvc3'
 copyright = u'2011, Roberto Cavada'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -178,7 +178,7 @@ html_static_path = []
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pygtkmvc3doc'
+htmlhelp_basename = 'gtkmvc3doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -231,6 +231,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('bla', 'pygtkmvc3', u'pygtkmvc3 Documentation',
+    ('bla', 'gtkmvc3', u'gtkmvc3 Documentation',
      [u'Roberto Cavada'], 1)
 ]

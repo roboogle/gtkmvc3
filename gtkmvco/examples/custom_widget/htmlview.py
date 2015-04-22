@@ -38,7 +38,7 @@ class Model(gtkmvc3.Model):
 
 class View(gtkmvc3.View):
     # Notice the following line in that file:
-    # <!-- interface-requires pygtkmvc3 -->
+    # <!-- interface-requires gtkmvc3 -->
     # To edit it export GLADE_CATALOG_PATH=examples/custom_widget
     builder = "htmlview.ui"
     top = "window"

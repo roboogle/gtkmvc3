@@ -8,7 +8,7 @@ Copyright (C) 2005-2015 by Roberto Cavada <roboogle AT gmail.com>
 New Versions
 ============
 New versions of this package can be found at:
- <http://pygtkmvc3.sourceforge.net>
+ <https://github.com/roboogle/gtkmvc3>
 
 
 License
@@ -26,7 +26,7 @@ Contacting the Authors
 ======================
 If you have any enhancements implemented or still in mind, or bug
 reports, please see contact information at the URL:
-http://sourceforge.net/apps/trac/pygtkmvc3
+http://sourceforge.net/apps/trac/gtkmvc3
 
 
 Many thanks to

@@ -5,7 +5,7 @@ Generating a standard project from scratch
 
 Since version 1.2.0 a little application called *gtkmvc3-progen*
 is available to help setting up from scratch a new application based
-on |pygtkmvc3|. *gtkmvc3-progen* is available both as a command-line
+on |gtkmvc3|. *gtkmvc3-progen* is available both as a command-line
 program and as a GUI application. 
 
 .. figure:: images/progen.png
@@ -19,14 +19,14 @@ carries out all the work, and a controller/view pair provides the
 GUI if needed.
 
 *gtkmvc3-progen* can be executed either locally from the script
-directory, or can be executed as any other program if |pygtkmvc3| has
+directory, or can be executed as any other program if |gtkmvc3| has
 been officially installed on the hosting system.
 
 From the local script directory: ::
 
  $> python gtkmvc3-progen name=hello author="Roberto Cavada" gui=no
  
-If |pygtkmvc3| was installed: ::
+If |gtkmvc3| was installed: ::
 
  $> gtkmvc3-progen name=hello author="Roberto Cavada" gui=no
 

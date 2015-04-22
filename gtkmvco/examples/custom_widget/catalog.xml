@@ -1,4 +1,4 @@
-<glade-catalog name="pygtkmvc3" depends="gtk+">
+<glade-catalog name="gtkmvc3" depends="gtk+">
   <glade-widget-classes>
     <glade-widget-class name="HtmlTextView" parent="GtkTextView"/>
   </glade-widget-classes>

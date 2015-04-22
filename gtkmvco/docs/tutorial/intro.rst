@@ -2,9 +2,9 @@
 
 What is this?
 =============
-|pygtkmvc3| is a practical implementation of |mvc| and |obs|. The goal of
+|gtkmvc3| is a practical implementation of |mvc| and |obs|. The goal of
 this tutorial is to provide readers with sufficient awareness about
-what |pygtkmvc3| is and what it can do, in order to allow them to
+what |gtkmvc3| is and what it can do, in order to allow them to
 quickly decide whether it might be useful or not for their needs.
 
 The tutorial is thought to be minimal, meaning that many of provided

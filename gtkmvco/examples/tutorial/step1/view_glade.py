@@ -23,7 +23,7 @@ class MyView (View):
        model. Of course the controller wil provide the
        connection. Every time the button is pressed, the counter
        will be incremented."""
-    glade = "pygtkmvc3-example.glade"
+    glade = "gtkmvc3-example.glade"
 
     def set_text(self, text):
         self['label'].set_text(text)

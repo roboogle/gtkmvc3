@@ -1,6 +1,6 @@
 import time
 
-import gtk
+from gi.repository import Gtk
 
 # https://sourceforge.net/apps/trac/pygtkmvc/ticket/46
 def RadioAction__notify_current_value(widget, handler, *args):
@@ -37,7 +37,7 @@ def connect(widget, signal, handler, *args):
     Use this instead of *widget*.connect if you want GTKMVC to
     automatically work around some known GTK bugs.
     """
-    if (isinstance(widget, gtk.RadioAction) and
+    if (isinstance(widget, Gtk.RadioAction) and
         signal == "notify::current-value"):
         widget.connect(
             "toggled", RadioAction__notify_current_value, handler, *args)
@@ -45,9 +45,9 @@ def connect(widget, signal, handler, *args):
         widget.connect(signal, handler, *args)
 
 def debug(gobject, property_spec, user_param):
-    print time.time(), user_param, gobject.get_property("current-value")
+    print(time.time(), user_param, gobject.get_property("current-value"))
 
-builder = gtk.Builder()
+builder = Gtk.Builder()
 builder.add_from_file("radio.ui")
 
 for name in ('radioaction1', 'radioaction2'):
@@ -55,4 +55,4 @@ for name in ('radioaction1', 'radioaction2'):
     connect(builder.get_object(name), "notify::current-value", debug, "fix")
 
 builder.get_object('window1').show_all()
-gtk.main()
+Gtk.main()

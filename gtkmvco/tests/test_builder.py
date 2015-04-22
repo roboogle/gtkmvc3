@@ -1,6 +1,6 @@
 import unittest
 
-import gtk
+from gi.repository import Gtk
 
 from _importer import refresh_gui
 

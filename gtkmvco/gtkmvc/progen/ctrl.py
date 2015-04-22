@@ -25,7 +25,7 @@ from gtkmvc import Controller
 from gtkmvc.adapters import Adapter
 
 import os
-import gtk
+from gi.repository import Gtk
 
 
 class ProgenCtrl (Controller):
@@ -43,19 +43,19 @@ class ProgenCtrl (Controller):
         self.adapt("complex")
         self.adapt("dist_gtkmvc", "cb_gtkmvc")
         self.adapt("copyright")
-        self.adapt("glade")
-        
+        self.adapt("builder")
+
 
         a = Adapter(self.model, "destdir")
         a.connect_widget(self.view['filechooserbutton'],
-                         gtk.FileChooser.get_current_folder,
-                         lambda w,p: w.set_current_folder(os.path.abspath(p)), 
+                         Gtk.FileChooser.get_current_folder,
+                         lambda w,p: w.set_current_folder(os.path.abspath(p)),
                          "current-folder-changed")
         self.adapt(a)
         return
 
     # signals
-    def on_window_delete(self, w, e): gtk.main_quit(); return True
+    def on_window_delete(self, w, e): Gtk.main_quit(); return True
 
     def on_button_next_clicked(self, b):
         self.view.next_page()
@@ -69,14 +69,16 @@ class ProgenCtrl (Controller):
         # sets some more properties:
         if not self.view['cb_std_header'].get_active():
             buf = self.view['tv_header'].get_buffer()
-            self.model.src_header = buf.get_text(*buf.get_bounds())
+            self.model.src_header = buf.get_text(*buf.get_bounds(),
+                                                 include_hidden_chars=False)
             pass
-        
+
         buf = self.view['tv_comment'].get_buffer()
-        self.model.other_comment = buf.get_text(*buf.get_bounds())
+        self.model.other_comment = buf.get_text(*buf.get_bounds(),
+                                                include_hidden_chars=False)
 
         try: res = self.model.generate_project()
-        except Exception, e:
+        except Exception as e:
             msg = "An error occured dring project generation"
             self.log(str(e))
             pass
@@ -112,5 +114,5 @@ class ProgenCtrl (Controller):
         self.view['button_generate'].set_sensitive(enable)
         self.view['button_next'].set_sensitive(enable)
         return
-    
+
     pass # end of class

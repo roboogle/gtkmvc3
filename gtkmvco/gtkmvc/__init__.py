@@ -47,25 +47,25 @@ The following two functions are not exported by default, you have to prefix
 identifiers with the module name:
 """
 
-__all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel", 
+__all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
            "ModelMT",
            "Controller", "View", "Observer",
            "Observable",
            "observable", "observer", "adapters", # packages
            ]
 
-__version = (1,99,2)
+__version = (3,0,0)
 
 # visible classes
-from model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
-from model_mt import ModelMT
-from controller import Controller
-from view import View
-from observer import Observer
-from observable import Observable, Signal
+from gtkmvc.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel
+from gtkmvc.model_mt import ModelMT
+from gtkmvc.controller import Controller
+from gtkmvc.view import View
+from gtkmvc.observer import Observer
+from gtkmvc.observable import Observable, Signal
 
 # visible modules
-import observable, observer, adapters
+from gtkmvc import observable, observer, adapters
 
 def get_version():
     """
@@ -76,10 +76,10 @@ def get_version():
 def require(request):
     """
     Raise :exc:`AssertionError` if gtkmvc version is not compatible.
-    
+
     *request* a dotted string or iterable of string or integers representing the
     minimum version you need. ::
-    
+
      require("1.0")
      require(("1", "2", "2"))
      require([1,99,0])
@@ -94,14 +94,10 @@ def require(request):
         request = request.split(".")
     except AttributeError:
         pass
-    request = map(int, request)
+    request = [int(x) for x in request]
 
     provide = list(__version)
 
     if request > provide:
         raise AssertionError("gtkmvc required version %s, found %s" % (
             request, provide))
-        pass
-    return
-
-

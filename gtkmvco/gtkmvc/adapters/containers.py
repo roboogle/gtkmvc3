@@ -24,37 +24,24 @@
 
 import types
 import weakref
-import gtk
+from gi.repository import Gtk
 
 from gtkmvc.adapters.basic import UserClassAdapter, Adapter
 
-from gtkmvc.adapters.default import * 
+from gtkmvc.adapters.default import *
 from gtkmvc.observer import Observer
 from gtkmvc.support.wrappers import ObsMapWrapper
-
-# Just importing gtk only works for Builder, not glade.
-try: import gtk.glade
-except ImportError: pass
 
 # this tries solving the issue in gtk about Builder not setting name
 # correctly. See https://bugzilla.gnome.org/show_bug.cgi?id=591085
 def _get_name(widget):
     try:
-        name = gtk.glade.get_widget_name(widget)
-        if name is not None:
-            # Widget was loaded from XML.
-            return name
-    except AttributeError:
-        # Library wasn't successfully imported.
-        pass
-
-    try:
         # Will be kind instead of name if it wasn't loaded from XML :(
-        return gtk.Buildable.get_name(widget)
+        return Gtk.Buildable.get_name(widget)
     except AttributeError:
         # Gtk is too old.
         pass
-    
+
     raise NotImplementedError("StaticContainerAdapter doesn't support "
                               "manually created widgets")
 
@@ -84,7 +71,7 @@ class StaticContainerAdapter (UserClassAdapter):
         UserClassAdapter.__init__(self, model, prop_name,
                                   lambda c,i: c.__getitem__(i),
                                   lambda c,v,i: c.__setitem__(i,v),
-                                  prop_read, prop_write, 
+                                  prop_read, prop_write,
                                   value_error, spurious)
 
         prop =  Adapter._get_property(self)
@@ -99,12 +86,12 @@ class StaticContainerAdapter (UserClassAdapter):
                             " is not a valid container")
 
 
-        self._prop_is_map = isinstance(prop, types.DictType) or \
+        self._prop_is_map = isinstance(prop, dict) or \
                             isinstance(prop, ObsMapWrapper)
         # contained widgets
         self._idx2wid = {}
         self._wid2idx = {}
-        
+
         self._widgets = None
         return
 
@@ -124,9 +111,12 @@ class StaticContainerAdapter (UserClassAdapter):
         will be connected.
         """
 
-        if isinstance(wid, gtk.Container): self._widgets = wid.get_children()
-        elif isinstance(wid, types.ListType) or isinstance(wid, types.TupleType): self._widgets = wid
-        else: raise TypeError("widget must be either a gtk.Container or a list or tuple")
+        if isinstance(wid, Gtk.Container):
+            self._widgets = wid.get_children()
+        elif isinstance(wid, (list, tuple)):
+            self._widgets = wid
+        else:
+            raise TypeError("widget must be either a Gtk.Container or a list or tuple")
 
         # prepares the mappings:
         for idx, w in enumerate(self._widgets):
@@ -170,7 +160,7 @@ class StaticContainerAdapter (UserClassAdapter):
             except ValueError: pass
             else: self._write_property(val, idx)
         return
-    
+
     def update_widget(self, idx=None):
         """Forces the widget at given index to be updated from the
         property value. If index is not given, all controlled
@@ -186,7 +176,7 @@ class StaticContainerAdapter (UserClassAdapter):
         return
 
     # ----------------------------------------------------------------------
-    # Private methods 
+    # Private methods
     # ----------------------------------------------------------------------
 
     def _get_idx_from_widget(self, wid):
@@ -206,7 +196,7 @@ class StaticContainerAdapter (UserClassAdapter):
         val = UserClassAdapter._read_widget(self)
         self._wid = sav
         return val
-        
+
     def _write_widget(self, val, idx):
         sav = self._wid
         self._wid = self._get_widget_from_idx(idx)
@@ -217,21 +207,21 @@ class StaticContainerAdapter (UserClassAdapter):
     # This is a private service to factorize code of connect_widget
     def __handle_par(self, name, par):
         if par is None or type(par) in (types.FunctionType,
-                                        types.MethodType, types.StringType):
+                                        types.MethodType, str):
             par = [par] * len(self._widgets)
             pass
 
-        elif isinstance(par, types.DictType):
+        elif isinstance(par, dict):
             val = []
             for w in self._widgets:
-                if par.has_key(w): val.append(par[w])
-                elif par.has_key(_get_name(w)): val.append(par[_get_name(w)])
+                if w in par: val.append(par[w])
+                elif _get_name(w) in par: val.append(par[_get_name(w)])
                 else: val.append(None)
                 pass
             par = val
             pass
 
-        elif isinstance(par, types.ListType) or isinstance(par, types.TupleType):
+        elif isinstance(par, list) or isinstance(par, tuple):
             par = list(par)
             par.extend([None]*(len(self._widgets)-len(par)))
             pass
@@ -247,12 +237,12 @@ class StaticContainerAdapter (UserClassAdapter):
         if self._itsme: return
         self.update_model(self._get_idx_from_widget(wid))
         return
-    
+
     def _on_prop_changed(self, instance, meth_name, res, args, kwargs):
         """Called by the observation code, we are interested in
         __setitem__"""
         if  not self._itsme and meth_name == "__setitem__": self.update_widget(args[0])
-        return    
+        return
 
     pass # end of class StaticContainerAdapter
 
@@ -262,7 +252,7 @@ class watch_items_in_tree(Observer):
         Observe models stored in a list for assignment to their observable
         properties, and notify the container that the row has changed.
 
-        *tree* is a :class:`gtk.TreeModel` instance.
+        *tree* is a :class:`Gtk.TreeModel` instance.
 
         *column* is an integer adressing the column of *tree* that contains
         :class:`gtkmvc.Model` instances.
@@ -276,7 +266,7 @@ class watch_items_in_tree(Observer):
     def on_changed(self, tree, path, iter):
         item = tree.get_value(iter, self.column)
         if item:
-            self.rows[item] = gtk.TreeRowReference(tree, path)
+            self.rows[item] = Gtk.TreeRowReference.new(model=tree, path=path)
             item.register_observer(self)
         return False
 

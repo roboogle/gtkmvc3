@@ -15,7 +15,7 @@ from gtkmvc import Model, Controller, View
 # ------------------------------------------------
 class MyModel (Model):
     data_source = 10
-    
+
     __observables__ = ("external",)
 
     # Old style getter
@@ -24,18 +24,18 @@ class MyModel (Model):
         # gets the data from the external source
         return self.data_source
 
-    # this is for testing shadowing warnings 
+    # this is for testing shadowing warnings
     @Model.getter
     def external(self):
         # gets the data from the external source
         return self.data_source
-    
+
     # Old style getter (have to emit a warning)
     #@Model.setter
     #def external(self, value):
     def set_external_value(self, value):
         # sends the data to the external source
-        self.data_source = value        
+        self.data_source = value
         return
 
     def change_data_source_value(self):
@@ -53,20 +53,20 @@ class MyModel (Model):
         # though:
         self.external = self.data_source # here the property got in sync
         return
-    
+
     pass # end of class
 
-import gtk
+from gi.repository import Gtk
 # ------------------------------------------------
-class MyView (View):    
+class MyView (View):
     def __init__(self):
         View.__init__(self)
-        self['win_top'] = gtk.Window()
-        self['entry_external'] = gtk.Entry()
-        self['button'] = gtk.Button("Click me to change the data source")
-        box = gtk.VBox()
+        self['win_top'] = Gtk.Window()
+        self['entry_external'] = Gtk.Entry()
+        self['button'] = Gtk.Button("Click me to change the data source")
+        box = Gtk.VBox()
         for n in ('entry_external', 'button'): box.add(self[n])
-        
+
         self['win_top'].add(box)
         self['win_top'].show_all()
     pass # end of class
@@ -77,18 +77,18 @@ class MyCtrl (Controller):
 
     def register_view(self, view):
         view['button'].connect('clicked', self.on_button_clicked)
-        view['win_top'].connect('delete-event', gtk.main_quit)
+        view['win_top'].connect('delete-event', Gtk.main_quit)
         return
-    
+
     def register_adapters(self):
         self.adapt("external")
         return
 
     # properties
     def property_external_value_change(self, model, old, new):
-        print "Changed from ", old, "to", new
+        print("Changed from ", old, "to", new)
         return
-    
+
     # signals
     def on_button_clicked(self, button): self.model.change_data_source_value()
     pass # end of class
@@ -103,6 +103,6 @@ v = MyView()
 
 # Spuriousness acceptance is required if notify_property_value_change
 # is not used in the model:
-c = MyCtrl(m, v, spurious=True) 
+c = MyCtrl(m, v, spurious=True)
 
-gtk.main()
+Gtk.main()

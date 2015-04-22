@@ -27,12 +27,12 @@
 
 import time
 
-import gtk
+from gi.repository import Gtk
 
 # http://unpythonic.blogspot.com/2007/03/unit-testing-pygtk.html
 def refresh_gui(delay=0):
-    while gtk.events_pending():
-        gtk.main_iteration_do(block=False)
+    while Gtk.events_pending():
+        Gtk.main_iteration_do(blocking=False)
     time.sleep(delay)
 
 if __name__ != "__main__":
@@ -47,5 +47,3 @@ if __name__ != "__main__":
     import logging
     logging.getLogger("gtkmvc").setLevel(logging.DEBUG)
     pass
-
-

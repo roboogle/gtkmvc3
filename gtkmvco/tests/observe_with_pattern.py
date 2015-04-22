@@ -14,7 +14,7 @@ class MyModel (Model):
     conc1 = 0
     conc2 = 0
     conc3 = 0
-    __observables__ = ("conc?",)    
+    __observables__ = ("conc?",)
 # ----------------------------------------------------------------------
 
 # internal service for notifications
@@ -28,7 +28,7 @@ class MyObserverAbstract (Observer):
             self.notif.append(info)
             meth(self, model, name, info)
             return
-        return _notify    
+        return _notify
 
     def __init__(self, model=None):
         Observer.__init__(self, model)
@@ -37,8 +37,9 @@ class MyObserverAbstract (Observer):
 
     def count(self, prop_name):
         # returns the number of times prop_name has been notified
-        return map(operator.attrgetter("prop_name"), self.notif).count(prop_name)
-    
+        _list = list(map(operator.attrgetter("prop_name"), self.notif))
+        return _list.count(prop_name)
+
     pass # end of class
 # ----------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ class MyObserverBase (MyObserverAbstract):
     @Observer.observe("conc[13]", assign=True)
     @MyObserverAbstract._tracked
     def notify_conc1(self, model, name, info): return
-        
+
     @Observer.observe("conc[23]", assign=True)
     @MyObserverAbstract._tracked
     def notify_conc2(self, model, name, info): return
@@ -97,7 +98,7 @@ class MyObserverErr3 (MyObserverDer):
 # ----------------------------------------------------------------------
 
 class ObserveWithPatterns (unittest.TestCase):
-    
+
     def setUp(self):
         self.m = MyModel()
         return
@@ -107,7 +108,7 @@ class ObserveWithPatterns (unittest.TestCase):
         self.m.conc3 += 1
         for n,c in { "conc1" : 0,
                      "conc2" : 0,
-                     "conc3" : 2 }.iteritems():
+                     "conc3" : 2 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -119,7 +120,7 @@ class ObserveWithPatterns (unittest.TestCase):
         self.m.conc3 += 1
         for n,c in { "conc1" : 1,
                      "conc2" : 1,
-                     "conc3" : 2 }.iteritems():
+                     "conc3" : 2 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -129,7 +130,7 @@ class ObserveWithPatterns (unittest.TestCase):
         self.m.conc3 += 1
         for n,c in { "conc1" : 0,
                      "conc2" : 0,
-                     "conc3" : 3 }.iteritems():
+                     "conc3" : 3 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -141,7 +142,7 @@ class ObserveWithPatterns (unittest.TestCase):
         self.m.conc3 += 1
         for n,c in { "conc1" : 2,
                      "conc2" : 2,
-                     "conc3" : 3 }.iteritems():
+                     "conc3" : 3 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -170,13 +171,13 @@ class ObserveWithPatterns (unittest.TestCase):
         o = MyObserverDerDyn()
         o.observe(o.notify_dyn, "conc3", assign=True)
         o.observe_model(self.m)
-        
+
         self.m.conc1 += 1
         self.m.conc2 += 1
         self.m.conc3 += 1
         for n,c in { "conc1" : 2,
                      "conc2" : 2,
-                     "conc3" : 4 }.iteritems():
+                     "conc3" : 4 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -185,13 +186,13 @@ class ObserveWithPatterns (unittest.TestCase):
         o = MyObserverDerDyn()
         o.observe(o.notify_dyn, "conc[2345]", assign=True)
         o.observe_model(self.m)
-        
+
         self.m.conc1 += 1
         self.m.conc2 += 1
         self.m.conc3 += 1
         for n,c in { "conc1" : 2,
                      "conc2" : 3,
-                     "conc3" : 4 }.iteritems():
+                     "conc3" : 4 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -201,13 +202,13 @@ class ObserveWithPatterns (unittest.TestCase):
         o.observe(o.notify_dyn, "conc[12345]", assign=True)
         o.remove_observing_method(("conc2", "conc3"), o.notify_dyn)
         o.observe_model(self.m)
-        
+
         self.m.conc1 += 1
         self.m.conc2 += 1
         self.m.conc3 += 1
         for n,c in { "conc1" : 1,
                      "conc2" : 0,
-                     "conc3" : 0 }.iteritems():
+                     "conc3" : 0 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
@@ -217,17 +218,17 @@ class ObserveWithPatterns (unittest.TestCase):
         o.observe(o.notify_dyn, "conc[12345]", assign=True)
         o.remove_observing_method(("conc2", "conc3"), o.notify_dyn)
         o.observe_model(self.m)
-        
+
         self.m.conc1 += 1
         self.m.conc2 += 1
         self.m.conc3 += 1
         for n,c in { "conc1" : 2,
                      "conc2" : 2,
-                     "conc3" : 3 }.iteritems():
+                     "conc3" : 3 }.items():
             self.assertEqual(o.count(n), c)
             pass
         return
-    
+
     def test_errors(self):
         # syntax errors about patterns are found
         for klass in (MyObserverErr1, MyObserverErr2, MyObserverErr3):
@@ -239,4 +240,3 @@ class ObserveWithPatterns (unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

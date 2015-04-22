@@ -39,7 +39,7 @@ class CurrencyView (View):
         w.grab_focus()
         if select: w.select_region(0, -1)
         return
-    
+
     def set_name(self, name): self['entry_name'].set_text(name)
     def set_rate(self, rate): self['sb_rate'].set_value(rate)
     def set_notes(self, notes): self['tv_notes'].get_buffer().set_text(notes)
@@ -48,7 +48,7 @@ class CurrencyView (View):
     def get_rate(self): return self['sb_rate'].get_value()
     def get_notes(self):
         buf = self['tv_notes'].get_buffer()
-        return buf.get_text(*buf.get_bounds())
-    
+        return buf.get_text(*buf.get_bounds(), include_hidden_chars=False)
+
     pass # end of class
 # ----------------------------------------------------------------------

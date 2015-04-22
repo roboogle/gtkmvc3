@@ -24,8 +24,8 @@ class MyObserver(Observer):
 
 # tests begin
 import unittest
-class TestSeq(unittest.TestCase):   
-    seq = range(5)
+class TestSeq(unittest.TestCase):
+    seq = list(range(5))
     dic = dict(zip(map(str, seq), seq))
     def setUp(self):
         self.m = MyModel()
@@ -36,7 +36,7 @@ class TestSeq(unittest.TestCase):
             self.m.seq.append(i)
             self.m.dic[str(i)] = i
         return
-    
+
     def testcmp(self):
         # checks comparison
         self.assert_(self.m.seq < list(self.seq) + [1])
@@ -59,12 +59,12 @@ class TestSeq(unittest.TestCase):
         self.assertEqual(len(self.m.seq), len(self.seq))
         self.assertEqual(len(self.m.dic), len(self.dic))
         return
-    
+
     def testiteration(self):
         for i,j in zip(self.seq, self.m.seq): self.assertEqual(i, j)
         for i,j in zip(self.dic, self.m.dic): self.assertEqual(i, j)
         return
-        
+
     def testcontains(self):
         for i in self.seq: self.assert_(i in self.m.seq)
         for i in self.dic: self.assert_(i in self.m.dic)
@@ -77,7 +77,7 @@ class TestSeq(unittest.TestCase):
         self.assertEqual(len(self.m.seq * 5), len(self.m.seq) * 5)
         self.assertEqual(len(5 * self.m.seq), len(self.m.seq) * 5)
         return
-    
+
     def testaugmented(self):
         self.m.seq += [10]
         self.assert_(10 in self.m.seq)
@@ -101,8 +101,7 @@ class TestSeq(unittest.TestCase):
     def testreversed(self):
         self.assertEqual(list(reversed(self.m.seq)), list(reversed(self.seq)))
         return
-    
-    
+
+
 if __name__ == "__main__":
     unittest.main()
-

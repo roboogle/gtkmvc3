@@ -1,6 +1,6 @@
 import unittest
 
-import gtk
+from gi.repository import Gtk, Gdk
 
 from _importer import refresh_gui
 import gtkmvc
@@ -10,8 +10,8 @@ class Super(gtkmvc.Controller):
         self.calls = []
 
         v = gtkmvc.View()
-        v['main_window'] = w = gtk.Window()
-        v['button'] = b = gtk.Button()
+        v['main_window'] = w = Gtk.Window()
+        v['button'] = b = Gtk.Button()
         w.add(b)
 
         gtkmvc.Controller.__init__(self, gtkmvc.Model(), v, **kwargs)
@@ -49,7 +49,7 @@ class AutoConnect(unittest.TestCase):
         c = Controller()
         w = c.view['main_window']
         # Didn't find a better way.
-        w.emit('delete-event', gtk.gdk.Event(gtk.gdk.DELETE))
+        w.emit('delete-event', Gdk.Event())
         self.assertEqual([w], c.calls)
 
 if __name__ == "__main__":

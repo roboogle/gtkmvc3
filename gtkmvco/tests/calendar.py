@@ -1,7 +1,7 @@
 import datetime
 import unittest
 
-import gtk
+from gi.repository import Gtk
 
 from _importer import refresh_gui
 
@@ -16,8 +16,8 @@ class Date(unittest.TestCase):
     def setUp(self):
         self.m = Model()
         self.v = v = gtkmvc.View()
-        v['window'] = w = gtk.Window()
-        v['calendar'] = c = gtk.Calendar()
+        v['window'] = w = Gtk.Window()
+        v['calendar'] = c = Gtk.Calendar()
         w.add(c)
         w.show_all()
         self.c = gtkmvc.Controller(self.m, self.v)
@@ -66,7 +66,7 @@ class DateLessCode(Date):
 
 class Time(Date):
     def adapt(self):
-        self.c.adapt('time', 'calendar')        
+        self.c.adapt('time', 'calendar')
 
 if __name__ == "__main__":
     unittest.main()

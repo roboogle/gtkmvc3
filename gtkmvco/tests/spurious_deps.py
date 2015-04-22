@@ -15,7 +15,7 @@ class Adder(Model):
 class Display(Observer):
     @Observer.observe('sum', assign=True)
     def notify(self, model, name, info):
-        print self.prompt, info.new
+        print(self.prompt, info.new)
 
 # TODO unittest
 

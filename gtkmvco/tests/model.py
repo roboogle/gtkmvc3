@@ -27,7 +27,7 @@ def has_item(x):  # Faster than count_leaves as it aborts early
     Return whether any non-sequence occurs in a given recursive sequence.
     """
     if hasattr(x, 'keys'):
-        x = x.values()
+        x = list(x.values())
     if hasattr(x, '__getitem__'):
         for i in x:
             if has_item(i):

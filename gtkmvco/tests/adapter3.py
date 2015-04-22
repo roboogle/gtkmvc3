@@ -24,7 +24,7 @@ class Controller(gtkmvc.Controller):
 class ConnectTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window3")
+        self.v = gtkmvc.View(builder="adapters.ui", top="window3")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
@@ -55,15 +55,15 @@ class ConnectTest(unittest.TestCase):
 class SetterTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window4")
+        self.v = gtkmvc.View(builder="adapters.ui", top="window4")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
     def testStatic(self):
         a = StaticContainerAdapter(self.m, "box")
-        a.connect_widget(map(lambda x: self.v[x], "en4 lbl4 sb4".split()),
-            setters = dict(lbl4=lambda w, v: w.set_markup(
-                "<big>Val: <b>%d</b></big>" % v)))
+        a.connect_widget(list(map(lambda x: self.v[x], "en4 lbl4 sb4".split())),
+                         setters = dict(lbl4=lambda w, v: w.set_markup(
+                             "<big>Val: <b>%d</b></big>" % v)))
 
         self.assertEqual("0", self.v["en4"].get_text())
         self.assertEqual("Val: 1", self.v["lbl4"].get_text())
@@ -82,7 +82,7 @@ class SetterTest(unittest.TestCase):
 class DictTest(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window4")
+        self.v = gtkmvc.View(builder="adapters.ui", top="window4")
         self.c = Controller(self.m, self.v)
         refresh_gui()
         self.m.box = dict(en4=0, lbl4=1, sb4=2)
@@ -90,9 +90,9 @@ class DictTest(unittest.TestCase):
 
     def testStatic(self):
         a = StaticContainerAdapter(self.m, "box")
-        a.connect_widget(map(lambda x: self.v[x], "en4 lbl4 sb4".split()),
-            setters = dict(lbl4=lambda w, v: w.set_markup(
-                "<big>Val: <b>%d</b></big>" % v)))
+        a.connect_widget(list(map(lambda x: self.v[x], "en4 lbl4 sb4".split())),
+                         setters = dict(lbl4=lambda w, v: w.set_markup(
+                             "<big>Val: <b>%d</b></big>" % v)))
 
         self.assertEqual("0", self.v["en4"].get_text())
         self.assertEqual("Val: 1", self.v["lbl4"].get_text())

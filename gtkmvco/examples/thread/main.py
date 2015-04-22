@@ -32,5 +32,5 @@ v = MyView()
 c = MyController(m, v)
 
 
-import gtk
-gtk.main()
+from gi.repository import Gtk
+Gtk.main()

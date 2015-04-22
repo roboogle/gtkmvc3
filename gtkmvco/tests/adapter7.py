@@ -6,12 +6,11 @@ same value.
 import _importer
 from gtkmvc import Model, Controller, View
 
-import gtk
-
+from gi.repository import Gtk
 
 
 class MyView (View):
-    glade = "adapters.glade"
+    builder = "adapter7.ui"
     top = "window7"
 
 
@@ -21,31 +20,25 @@ class MyModel (Model):
 
     def __init__(self):
         Model.__init__(self)
-        return
-    pass
 
 
 class MyCtrl (Controller):
 
+    def register_view(self, view):
+        view.get_top_widget().connect('delete-event', Gtk.main_quit)
+
     def register_adapters(self):
-        self.adapt('en1', 'label7')        
-        self.adapt('en1')        
-        return
-    
+        self.adapt('en1', 'label7')
+        self.adapt('en1')
+
     def on_button7_clicked(self, button):
         self.model.en1 += 1
-        return
-    
-    pass
 
 # ----------------------------------------------------------------------
 
-    
+
 m = MyModel()
 v = MyView()
 c = MyCtrl(m, v)
 
-gtk.main()
-
-
-
+Gtk.main()

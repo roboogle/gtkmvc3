@@ -23,21 +23,17 @@
 
 
 import _importer
-
 from gtkmvc import View
+
 
 class MyView (View):
     """This handles only the graphical representation of the
     application. The widgets set is loaded from glade file"""
-    
-    glade = "basic.glade"
+
+    builder = "basic.ui"
 
     def set_counter_value(self, val):
         self['label_val'].set_markup("<big><b>%d</b></big>" % val)
-        return
 
     def set_reset_value(self, val):
         self['sb_reset'].set_value(val)
-        return
-
-    pass # end of class

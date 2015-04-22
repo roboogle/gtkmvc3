@@ -27,11 +27,10 @@ if __name__ == "__main__":
     from model import MyModel
     from controller import MyCtrl
     from view import MyView
-    
+
     m = MyModel()
     v = MyView()
     c = MyCtrl(m,v)
 
-    import gtk
-    gtk.main()
-    pass
+    from gi.repository import Gtk
+    Gtk.main()

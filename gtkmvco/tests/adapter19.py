@@ -4,7 +4,7 @@ Like adapter7.py but using GtkBuilder.
 import _importer
 from gtkmvc import Model, Controller, View
 
-import gtk
+from gi.repository import Gtk
 
 class MyView(View):
     builder = "adapter19.ui"
@@ -16,15 +16,18 @@ class MyModel(Model):
 
 class MyCtrl (Controller):
 
+    def register_view(self, view):
+        view.get_top_widget().connect('delete-event', Gtk.main_quit)
+
     def register_adapters(self):
         self.adapt()
-        self.adapt('en1', 'label7')        
-    
+        self.adapt('en1', 'label7')
+
     def on_button7_clicked(self, button):
         self.model.en1 += 1
-    
+
 m = MyModel()
 v = MyView()
 c = MyCtrl(m, v)
 
-gtk.main()
+Gtk.main()

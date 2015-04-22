@@ -6,35 +6,33 @@ import _importer
 from gtkmvc import Model, Controller, View
 from gtkmvc.adapters.basic import Adapter
 
-import gtk
+from gi.repository import Gtk, Gdk
 
 
 class MyView (View):
-    glade = "adapters.glade"
+    builder = "adapter11.ui"
     top = "window9"
+
 
 class MyModel (Model):
     expan = True
     toggle = True
-    color = gtk.gdk.color_parse("black")
+    color = Gdk.color_parse("black")
     url = "http://www.google.com"
     spin = 5.0
     __observables__ = ("expan", "toggle", "color", "url", "spin")
 
-    def __init__(self):
-        Model.__init__(self)
-        return
-    pass
-
 
 class MyCtrl (Controller):
+    def register_view(self, view):
+        view.get_top_widget().connect('delete-event', Gtk.main_quit)
 
     def register_adapters(self):
-        
+
         # labels
 
         self.adapt("expan", "label10")
-        
+
         ad = Adapter(self.model, "toggle")
         ad.connect_widget(self.view["label_t1"], setter=lambda w,v: \
                             w.set_markup("<big><b>%i</b></big>" % v))
@@ -47,7 +45,7 @@ class MyCtrl (Controller):
         self.adapt("spin", "label_t5")
 
         # controls
-        self.adapt("expan", "expander1")        
+        self.adapt("expan", "expander1")
         self.adapt("toggle", "togglebutton1")
         self.adapt("toggle", "checkbutton1")
         self.adapt("color", "colorbutton1")
@@ -56,15 +54,10 @@ class MyCtrl (Controller):
 
         return
 
-    pass
-
 # ----------------------------------------------------------------------
 
 m = MyModel()
 v = MyView()
 c = MyCtrl(m, v)
 
-gtk.main()
-
-
-
+Gtk.main()

@@ -3,8 +3,6 @@ Like adapter1.py but inside controller.
 """
 import unittest
 
-import gtk
-
 from _importer import refresh_gui
 
 import gtkmvc
@@ -40,7 +38,7 @@ class Controller(gtkmvc.Controller):
 class TwoForOne(unittest.TestCase):
     def setUp(self):
         self.m = Model()
-        self.v = gtkmvc.View(glade="adapters.glade", top="window1")
+        self.v = gtkmvc.View(builder="adapters.ui", top="window1")
         self.c = Controller(self.m, self.v)
         refresh_gui()
 
@@ -48,9 +46,6 @@ class TwoForOne(unittest.TestCase):
         self.assertEqual("5.0", self.v["entry1"].get_text())
         self.assertEqual("10.00", self.v["label1"].get_text())
 
-        # See comment in adapter1.py
-        if gtk.gtk_version == (2, 10, 4):
-            return
         self.v["entry1"].set_text("1")
         self.assertEqual("2.00", self.v["label1"].get_text())
 

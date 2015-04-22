@@ -3,7 +3,7 @@ import unittest
 import _importer
 import gtkmvc
 
-TYPES = [int, float, str, unicode]
+TYPES = [int, float, str]
 VALUES = [t(1) for t in TYPES]
 
 class AdaptTypes(unittest.TestCase):

@@ -1,6 +1,6 @@
 import _importer
 from gtkmvc import Model, View, Controller
-import gtk
+from gi.repository import Gtk
 
 # Shows how a group of radio buttons or actions can be adapted to a
 # unique OP. The string value of the OP is the label of the
@@ -34,7 +34,7 @@ class MyViewActions (View):
 class MyCtrl (Controller):
 
     def register_view(self, view):
-        view['window1'].connect("delete-event", lambda x,e: gtk.main_quit())
+        view['window1'].connect("delete-event", lambda x,e: Gtk.main_quit())
         return
 
     def register_adapters(self):
@@ -46,7 +46,7 @@ class MyCtrl (Controller):
 
     @Controller.observe("val", assign=True)
     def val_notify(self, model, name, info):
-        print "Notify change", name, model, model.val, type(model.val)
+        print("Notify change", name, model, model.val, type(model.val))
         return
 
     pass # end of class
@@ -55,12 +55,11 @@ class MyCtrl (Controller):
 m = MyModel()
 
 # enable these to use radio buttons:
-v1 = MyViewButtons() 
+v1 = MyViewButtons()
 c1 = MyCtrl(m, v1)
 
 # enable these to use radio actions:
-v2 = MyViewActions() 
+v2 = MyViewActions()
 c2 = MyCtrl(m, v2)
 
-gtk.main()
-
+Gtk.main()

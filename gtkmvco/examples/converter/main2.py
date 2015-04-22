@@ -19,7 +19,8 @@
 #
 #  For more information on gtkmvc3 see <https://github.com/roboogle/gtkmvc3>
 #  or email to the author <roboogle@gmail.com>.
-#  Please report bugs to <roboogle@gmail.com>.
+#  Please report bugs to <https://github.com/roboogle/gtkmvc3/issues>
+#  or to <roboogle@gmail.com>.
 
 
 def setup_path():

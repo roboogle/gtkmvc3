@@ -8,7 +8,5 @@ This project aims to:
      - `View` composition
      - GObject binding
      - Utilities to easy development
-  
-Current deveopment stage is _alpha_
 
-
+Current development stage is _alpha_

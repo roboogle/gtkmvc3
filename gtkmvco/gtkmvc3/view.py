@@ -1,7 +1,7 @@
 #  Author: Roberto Cavada <roboogle@gmail.com>
 #  Modified by: Guillaume Libersat <glibersat AT linux62.org>
 #
-#  Copyright (c) 2005 by Roberto Cavada
+#  Copyright (C) 2005-2015 by Roberto Cavada
 #  Copyright (c) 2007 by Guillaume Libersat
 #
 #  gtkmvc3 is free software; you can redistribute it and/or

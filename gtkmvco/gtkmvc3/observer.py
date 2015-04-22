@@ -1,7 +1,7 @@
 #  -------------------------------------------------------------------------
 #  Author: Roberto Cavada <roboogle@gmail.com>
 #
-#  Copyright (C) 2006 by Roberto Cavada
+#  Copyright (C) 2006-2015 by Roberto Cavada
 #
 #  gtkmvc3 is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public

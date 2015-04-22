@@ -1,4 +1,4 @@
-Copyright (C) 2010 by Roberto Cavada <roboogle@gmail.com>
+Copyright (C) 2010-2015 by Roberto Cavada <roboogle@gmail.com>
 
 This the runtime Python package of library gtkmvc3, a thin framework
 for writing GUI applications with Python and GTK3

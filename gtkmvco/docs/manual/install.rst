@@ -91,4 +91,4 @@ any file of *gtkmvc3*, you will have to distribute the source files of
 your modified version of *gtkmvc3*. For any detail refer to the LGPL
 License Terms.
 
-Copyright (C) 2010 by Roberto Cavada <roboogle AT gmail.com>.
+Copyright (C) 2010-2015 by Roberto Cavada <roboogle AT gmail.com>.

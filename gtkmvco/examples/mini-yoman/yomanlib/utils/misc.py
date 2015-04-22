@@ -25,5 +25,5 @@
 
 
 def get_buf_text(textbuf):
-	return textbuf.get_text(textbuf.get_start_iter(), textbuf.get_end_iter())
-
+	return textbuf.get_text(textbuf.get_start_iter(),
+                                textbuf.get_end_iter(), False)

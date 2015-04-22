@@ -4,7 +4,7 @@ include *.in
 global-include README COPYING INSTALL AUTHORS NEWS PKG-INFO
 
 # examples
-recursive-include examples README *.py *.glade
+recursive-include examples README *.py *.glade *.ui
 include examples/converter/about examples/converter/currencies
 include examples/mini-yoman/yoman examples/mini-yoman/LICENSE
 include examples/adapters
@@ -23,13 +23,11 @@ recursive-include docs/api *.rst *.py *.png *.dia
 # tutorial
 recursive-include docs/tutorial *.rst *.py *.png *.dia
 
-# glade
-include gtkmvc3/progen/progen.glade
+# builder
+include gtkmvc3/progen/progen.ui
 
 prune dist
 prune docs/manual/_build
 prune docs/quickstart/_build
 prune docs/tutorial/_build
 prune docs/api/_build
-
-

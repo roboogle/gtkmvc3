@@ -1,15 +1,16 @@
+.. |gtkmvc| replace:: *gtkmvc3*
+
+
 Getting Started
 ===============
 
-On Ubuntu/Debian you can install gtkmvc3 with::
-
-  sudo aptitude install python-gtkmvc3 python-gtkmvc3-doc
-
-
-You can download more recent versions of gtkmvc3 from the `project page <https://github.com/roboogle/gtkmvc3>`_.
+At the moment there are no packages for linux distributions.
+Pre-existing project `gtkmvc` is instended to be used with GTK2 and
+pygtk, and not to this new project.
 
 
-Or download the source code with examples and documentation with::
+You can download the source code of |gtkmvc| with examples and
+documentation with::
 
   git clone https://github.com/roboogle/gtkmvc3.git
 
@@ -36,5 +37,5 @@ tracker <https://github.com/roboogle/gtkmvc3/issues>`_.
 License
 ---------
 
-gtkmvc3 is Free Software, covered by the GNU Lesser General Public
+|gtkmvc| is Free Software, covered by the GNU Lesser General Public
 License (LGPL)

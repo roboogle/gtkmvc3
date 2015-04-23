@@ -44,7 +44,7 @@ class Constructors(unittest.TestCase):
             glade_top_widget_name=None, parent_view=None, register=True):
         def __init__(self, model, spurious=False):
         """
-        gtkmvc3.require("1.2.0")
+        gtkmvc3.require("1.0.0")
 
         self.assertRaises(TypeError, lambda: gtkmvc3.Controller(
             self.m))

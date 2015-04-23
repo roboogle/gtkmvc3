@@ -32,7 +32,7 @@ if __name__ != "__main__":
         sys.path = [top_dir] + sys.path
     import gtkmvc3
 
-    gtkmvc3.require("1.99.2")
+    gtkmvc3.require("1.0.0")
     import logging
     logging.getLogger("gtkmvc3").setLevel(logging.DEBUG)    
 pass

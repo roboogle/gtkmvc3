@@ -332,9 +332,10 @@ class Adapter (Observer):
         # 'finally' would be better here, but not supported in 2.4 :(
         try:
             totype = type(self._get_property(*args))
-
-            if totype is not type(None) and (self._prop_cast or not self._prop_write):
+            if (totype is not type(None) and
+                   (self._prop_cast or not self._prop_write)):
                 val = self._cast_value(val, totype)
+
             if self._prop_write:
                 val = self._prop_write(val)
 

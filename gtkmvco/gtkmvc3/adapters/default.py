@@ -10,16 +10,19 @@ def __radio_setter_label(radio, value):
     if radio.get_label() == value:
         radio.set_active(True)
 
+
 def __radio_getter_label(radio):
     # this is used to control RadioButton and RadioAction
     if radio.get_active():
         return radio.get_label()
     raise ValueError("Radio not active")
 
+
 def __radio_action_setter_value(ra, value):
     if value == ra.get_property("value"):
         ra.set_active(True)
     return
+
 
 def __radio_action_getter_value(ra):
     if ra.get_active():
@@ -31,7 +34,7 @@ def __radio_action_getter_value(ra):
 # This list defines a default behavior for widgets.
 # If no particular behaviour has been specified, adapters will
 # use information contained into this list to create themself.
-# This list is ordered: the earlier a widget occurs, the better it
+# This list is ordered: the earlier a widget occurs, the sooner it
 # will be matched by the search function.
 # ----------------------------------------------------------------------
 __def_adapter = [ # class, default signal, getter, setter, value type, flavour

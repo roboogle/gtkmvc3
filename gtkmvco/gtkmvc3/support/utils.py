@@ -56,16 +56,34 @@ def cast_value(val, totype):
        Casting the empty string to a numeric type returns zero.
     """
     t = type(val)
-    if issubclass(t, totype): return val
-    if issubclass(totype, bytes): return bytes(val)
-    if issubclass(totype, str): return str(val)
+    if issubclass(t, totype):
+        return val  # no cast needed
+    if issubclass(totype, bytes):
+        return bytes(val)
+    if issubclass(totype, str):
+        return str(val)
+    if issubclass(totype, bool):
+        if issubclass(t, str):
+            _v = val.lower()
+            if _v in ("true", "yes", "y"):
+                return True
+            if _v in ("false", "no", "n"):
+                return False
+            raise TypeError("Not able to cast value: " + str(val) +
+                            " with " + str(t) +
+                            " to " + str(totype))
 
     if (issubclass(totype, (int, float)) and
         issubclass(t, (bytes, str, int, float))):
-            if val: return totype(float(val))
-            else: return totype(0)
+        if val:
+            return totype(float(val))
+        else:
+            return totype(0)
 
-    raise TypeError("Not able to cast " + str(t) + " to " + str(totype))
+    raise TypeError("Not able to cast value:" + str(val) +
+                    " with " + str(t) +
+                    " to " + str(totype))
+
 
 # ======================================================================
 # This is taken from python 2.6 (os.path.relpath is supported in 2.6)

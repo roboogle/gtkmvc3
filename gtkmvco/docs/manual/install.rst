@@ -6,47 +6,35 @@ Dependencies
 
 The required dependencies are:
 
- * Python 2.4.3
- * GTK+ 2.10.4
- * PyGTK 2.10.1
+ * Python 2.6+ or Python 3.1 or later
+ * GTK+ 3
+ * gobject-introspection
 
-or newer.
+See `The Python GTK+ 3 Tutorial
+<https://python-gtk-3-tutorial.readthedocs.org/en/latest/install.html>`_
+for more information
 
-
-Installation
-------------
-
-You can install *gtkmvc3* from source files, with the provided standard
-:file:`setup.py` based on :mod:`distutils`::
-
- $> python setup.py install
-
-Alternatively, Windows users may use the binary installer, and
-GNU/Linux users may check if their distribution offers packages for an
-easy installation. For example under `Ubuntu Linux 10.10` *Maverick
-Meerkat*::
-
-  $> apt-cache search gtkmvc3
-  python-gtkmvc3 - model-view-controller (MVC) implementation for pygtk
-  python-gtkmvc3-doc - gtkmvc3 documentation, tutorial and examples
-
-However, make sure that you are using the latest available version. 
+To use it, you can either use locally without installing it
+(preferable), or install it.
 
 
 Use without installing
 ----------------------
 
-*gtkmvc3* is designed to work also without being installed, so it is
-possible to keep it locally. A typical directory tree of an
-application based on *gtkmvc3* may be::
+*gtkmvc3* is designed to work without being installed, so it is
+possible to keep it locally. This is indeed the preferable solution,
+as it avoid adding an addition dependency of your application, and
+allows to use the latest available version of *gtkmvc3*.
+
+A typical directory tree of an application based on *gtkmvc3* may be::
 
   top-level
      |
      |-------- main.py, setup.py, ...
-     | 
+     |
      |-------- resources
-     |             |------ bin 
-     |             |------ glade
+     |             |------ bin
+     |             |------ ui
      |             |------ images
      |             |------ ...
      |             +------ external         <---- sys.path contains this
@@ -67,6 +55,24 @@ Section :doc:`progen` presents a little utility to build a project
 based on *gtkmvc3* from scratch. `progen` generates a structure similar
 to this, if you decide to distribute *gtkmvc3* along with your
 application.
+
+
+Installation
+------------
+
+You can install *gtkmvc3* from source files, with the provided standard
+:file:`setup.py` based on :mod:`distutils`::
+
+ $> python setup.py install
+
+Alternatively, Windows users may use the binary installer, and
+GNU/Linux users may check if their distribution offers packages for an
+easy installation (`python-gtkmvc3`).
+
+However, make sure that you are using the latest available version.
+
+.. attention:: Package `python-gtkmvc` is the old version of gtkmvc3,
+   as it supports GTK2 and pygtk.
 
 
 Distribution of your application

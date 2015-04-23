@@ -37,7 +37,7 @@ except:
     sys.path = [top_dir] + sys.path
     import gtkmvc3
 
-gtkmvc3.require("1.99.0")
+gtkmvc3.require("1.0.0")
 
 from gtkmvc3.progen.model import ProgenModel, set_gui_log, set_shell_log
 from gtkmvc3.progen.templates import VERSION

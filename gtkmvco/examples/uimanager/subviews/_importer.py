@@ -33,6 +33,6 @@ if __name__ != "__main__":
         sys.path = [top_dir] + sys.path
     import gtkmvc3
 
-    gtkmvc3.require("1.99.0")
+    gtkmvc3.require("1.0.0")
 pass
 

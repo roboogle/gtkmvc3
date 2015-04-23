@@ -9,7 +9,7 @@ from view import ExampleView
 import gtkmvc3
 
 def check_requirements():
-    gtkmvc3.require("1.99.1")
+    gtkmvc3.require("1.0.0")
     return
 
 def setup_env(development_state=False):

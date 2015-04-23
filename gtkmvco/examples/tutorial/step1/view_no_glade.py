@@ -1,18 +1,18 @@
 # Author: Roberto Cavada, Copyright 2004
 #
-# This is free software; you can redistribute it and/or 
-# modify it under the terms of the GNU Lesser General Public 
-# License as published by the Free Software Foundation; either 
+# This is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
 # version 2 of the License, or (at your option) any later version.
 #
-# These examples are distributed in the hope that they will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+# These examples are distributed in the hope that they will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # Lesser General Public License for more details.
 
 import _importer
 from gtkmvc3 import View
-import gtk
+from gi.repository import Gtk
 
 # ----------------------------------------------------------------------
 class MyViewNoGlade (View):
@@ -27,14 +27,14 @@ class MyViewNoGlade (View):
 
         # The view here is not constructed from a glade file.
         View.__init__(self)
-    
+
         # The set of widgets:
-        w = gtk.Window()
-        h = gtk.VBox()
-        l = gtk.Label()
-        b = gtk.Button("Press")
-        h.pack_start(l)
-        h.pack_end(b)
+        w = Gtk.Window()
+        h = Gtk.VBox()
+        l = Gtk.Label()
+        b = Gtk.Button("Press")
+        h.add(b)
+        h.add(l)
         w.add(h)
         w.show_all()
 
@@ -45,12 +45,6 @@ class MyViewNoGlade (View):
         self['main_window'] = w
         self['label'] = l
         self['button'] = b
-        
-        return
 
     def set_text(self, text):
         self['label'].set_text(text)
-        return
-
-    pass # end of class
-# ----------------------------------------------------------------------

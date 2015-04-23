@@ -124,18 +124,14 @@ members ``self.model`` and ``self.view`` respectively. ::
 
  class MyController (Controller):
      def register_view(self, view):
-         """This method is called by the view, that calls it when it is
-         ready to register itself. Here we connect the 'pressed' signal
-         of the button with a controller's method. Signal 'destroy'
-         for the main window is handled as well."""
-
-         # connects some signals manually:
-         self.view['main_window'].connect('destroy', Gtk.main_quit)
-
          # initializes the text of label:
          self.view.set_text("%d" % self.model.counter)
 
      # signals:
+     def on_main_window_delete_event(self, w, e):
+         Gtk.main_quit()
+         return False
+
      def on_button_clicked(self, button):
          self.model.counter += 1  # changes the model
 
@@ -151,19 +147,12 @@ instantiated.
 
 Method ``register_view`` is called by the framework to to connect
 signals and initialize the |gui| side that depends on the application
-logic. In the example, signal ``"destroy"`` of the main window is
-connected to ``Gtk.main_quit`` to close the application when the user
-closes the window. Notice here the use of member ``self.view`` and how
-a class ``View`` can be used as a map to retrieve widgets from their
-names.
+logic. In the example, the text label is initialized to the initial
+value of the counter.
 
-Also, the text label is initialized to the initial value of the
-counter.
-
-Method ``on_button_clicked`` is called as a callback every
-time the user clicks the button. The corresponding signal is
-automatically connected to this method when class ``MyView``
-registers itself within the controller.
+Method ``on_button_clicked`` is called when the user clicks the
+button. The corresponding signal is automatically connected to this
+method when class ``MyView`` registers itself within the controller.
 
 A ``gtkmvc3.Controller`` is also a ``gtkmvc3.Observer``, and decorator
 `@Controller.observe` makes method ``counter_change`` being called
@@ -215,30 +204,31 @@ is mainly designed to be used with glade files. ::
 
  class MyViewNoGlade (View):
 
-     def __init__(self):
-         # The view here is not constructed from a glade file.
-         View.__init__(self)
+    def __init__(self):
 
-         # The set of widgets:
-         w = Gtk.Window()
-         h = Gtk.VBox()
-         l = Gtk.Label()
-         b = Gtk.Button("Press")
-         h.pack_start(l)
-         h.pack_end(b)
-         w.add(h)
-         w.show_all()
+        # The view here is not constructed from a glade file.
+        View.__init__(self)
 
-         # We add all widgets we are interested in retrieving later in
-         # the view, by giving them a name. Suppose you need access
-         # only to the main window, label and button.  Widgets are
-         # added like in a map:
-         self['main_window'] = w
-         self['label'] = l
-         self['button'] = b
+        # The set of widgets:
+        w = Gtk.Window()
+        h = Gtk.VBox()
+        l = Gtk.Label()
+        b = Gtk.Button("Press")
+        h.add(b)
+        h.add(l)
+        w.add(h)
+        w.show_all()
 
-     def set_text(self, text):
-         self['label'].set_text(text)
+        # We add all widgets we are interested in retrieving later in
+        # the view, by giving them a name. Suppose you need access
+        # only to the main window, label and button.  Widgets are
+        # added like in a map:
+        self['main_window'] = w
+        self['label'] = l
+        self['button'] = b
+
+    def set_text(self, text):
+        self['label'].set_text(text)
 
 The entire work is carried out by the View's constructor which can
 be exploited to manually construct all the widgets set.
@@ -247,9 +237,10 @@ Following lines are used to build the widgets set, and to associate a
 few of them with string names (only those that will have to accessed
 later).
 
-Notice that here |glade| file has not been used at all. Nevertheless, a
-mixed solution where |glade| file(s) and manually constructed widgets
-sets is fully supported.
+Notice that here |glade| file has not been used at all. Nevertheless,
+a mixed solution where |glade| file(s) and manually constructed
+widgets sets is fully supported, and indeed it is frequent to be used
+in real world.
 
 
 The controller
@@ -265,10 +256,12 @@ connect the button "``clicked``" event to class method
  from ctrl_glade import MyController
 
  class MyControllerNoGlade (MyController):
+    def register_view(self, view):
+        MyController.register_view(self, view)
 
-     def register_view(self, view):
-         # connects the signals:
-         self.view['button'].connect('clicked', self.on_button_clicked)
+        # connects manually the signals:
+        self.view['button'].connect('clicked', self.on_button_clicked)
+        self.view['main_window'].connect('delete-event', self.on_main_window_delete_event)
 
 
 The main code
@@ -334,16 +327,17 @@ Controller that can be simplified as follows: ::
  from gi.repository import Gtk
 
  class MyControllerAdap (Controller):
-     def register_view(self, view):
-         # connects the signals:
-         self.view['main_window'].connect('destroy', Gtk.main_quit)
 
-     def register_adapters(self):
-         self.adapt("counter", "label")  # that's it
+    def register_adapters(self):
+        self.adapt("counter", "label")
 
-     # signals:
-     def on_button_clicked(self, button):
-         self.model.counter += 1  # changes the model
+    # signals:
+    def on_main_window_delete_event(self, w, e):
+        Gtk.main_quit()
+        return False
+
+    def on_button_clicked(self, button):
+        self.model.counter += 1  # changes the model
 
 Controller method ``register_adapters`` is called by the
 framework when adapters can be instantiated. The controller is no
@@ -354,6 +348,10 @@ transparently carried out by the adapter.
 Notice that if editable widget like a text entry were used instead
 of a label, the adapter would also have taken care about changes of
 the text entry reporting them to the property.
+
+
+Advanced use of Adapters
+------------------------
 
 Now suppose you wanted to apply some customization to the way the
 label shows the property's value. Method ``register_adapters`` might
@@ -368,17 +366,17 @@ had been: ::
         self.adapt(a)
 
 .. figure:: images/adap.png
-   :width: 6cm
+   :width: 4cm
 
-   Adapter at work
+   Customized adapter at work
 
-Here an adapter is created explicitly, and parameter
-``setter`` is used to custom the functional block that is in
-charge of writing to the widget.
+Here an adapter is created explicitly, and parameter ``setter`` is
+used to custom the functional block that is in charge of writing to
+the widget.
 
-There are several types of adapters that can be used, depending on
-the property type and the widget type they adapt. Adapters offer a
-very straight and simple default support, but they can be largely
+There are several types of adapters that can be used, depending on the
+property type and the widget type they adapt. Adapters offer a very
+straight and simple default support, but they can be largely
 customized when needs get more advanced. See the user manual for
 further information.
 

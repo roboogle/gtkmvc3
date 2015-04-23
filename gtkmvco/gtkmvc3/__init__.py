@@ -55,7 +55,7 @@ __all__ = ["Model", "TreeStoreModel", "ListStoreModel", "TextBufferModel",
            "observable", "observer", "adapters", # packages
            ]
 
-__version = (3,0,0)
+__version = (1,0,0)
 
 # visible classes
 from gtkmvc3.model import Model, TreeStoreModel, ListStoreModel, TextBufferModel

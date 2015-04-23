@@ -2,7 +2,6 @@
 
 .. |glade| replace:: *Glade*
 
-.. |pygtk| replace:: *PyGTK*
 .. |python| replace:: *Python*
 
 .. |mvco| replace:: *MVC--O*
@@ -86,7 +85,7 @@ The *controller* couples the *model* and the *view*::
     class MyController(Controller):
 
         def register_adapters(self):
-            self.adapt("use_rb1", "rb1")
+            self.adapt("use_rb1", "rb1", flavour="active")
             self.adapt("option1")
             self.adapt("option2")
 
@@ -98,15 +97,15 @@ The *controller* couples the *model* and the *view*::
             Gtk.main_quit()
             return False
 
-        # observable assignment notifications
+        # observable properties notifications
         @Controller.observe("use_rb1", assign=True)
-        def use_rb1_change(self, model, prop_name, info):
+        def use_rb1_changed(self, model, prop_name, info):
             self.view.enable_rb2(not info.new)
 
 
 * Controllers react to ``signals`` callbacks (like
   ``on_button_action_clicked``) from the view.
-* They observe properties of the *model* (like ``use_rb1_change()``).
+* They can observe properties of the *model* (like ``use_rb1_change()``).
 * Special entities called *Adapters* take care of keeping aligned
   automatically the logic in the model and the values shown in the view.
 
@@ -135,21 +134,20 @@ under in the *example* folder of the source code.
 Why this example is interesting
 ===============================
 
-The *key* to understand the example, is in the fact that there is no
-code binding the user action of enabling option ``rb1`` with the result
-of having sub-options of ``rb2`` grayed out. Instead, when the user
-selects ``rb1``, property ``use_rb1`` in the model gets assigned to value
-``True``. That's it for this control flow, there is no return of
-information, and no assumptions about semantics of other options.
+There is no code binding the user action of enabling option ``rb1``
+with the result of having sub-options of ``rb2`` grayed out. Instead,
+when the user selects ``rb1``, property ``use_rb1`` in the model gets
+assigned to value ``True``. That's it for this control flow, there is
+no return of information, and no assumptions about semantics of other
+options.
 
 Having the value of the options stored into the model is correct, as
 options are used by the model's action which is part of the
 application logic.
 
-What happens then? Since the controller is an observer of property
-``use_rb1`` in the model, when the value gets changed, the controller is
-notified and it can then take the right actions accordingly to the new
-value.
+Since the controller is an observer of property ``use_rb1`` in the
+model, when the value gets changed, the controller is notified and it
+can then take the right actions accordingly to the new value.
 
 In the end ''the sub-options get gray-out not because the user
 selected ``rb1``, but because the *logic* of the application says

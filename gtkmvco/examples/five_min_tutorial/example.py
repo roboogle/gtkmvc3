@@ -1,4 +1,4 @@
-## Copyright (C) 2009 Roberto Cavada
+## Copyright (C) 2009-2015 by Roberto Cavada
 
 from gi.repository import Gtk
 
@@ -33,7 +33,7 @@ class MyModel(Model):
 class MyController(Controller):
 
     def register_adapters(self):
-        self.adapt("use_rb1", "rb1")
+        self.adapt("use_rb1", "rb1", flavour="active")
         self.adapt("option1")
         self.adapt("option2")
 
@@ -46,8 +46,10 @@ class MyController(Controller):
         return False
 
     # observable properties notifications
-    def property_use_rb1_value_change(self, model, old, new):
-        self.view.enable_rb2(not new)
+    @Controller.observe("use_rb1", assign=True)
+    def use_rb1_changed(self, model, prop_name, info):
+        self.view.enable_rb2(not info.new)
+
 
 if "__main__" == __name__:
     m = MyModel()
